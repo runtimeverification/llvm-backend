@@ -53,11 +53,11 @@ public:
 
   virtual void codegen(decision *d) = 0;
   virtual void preprocess(std::unordered_set<leaf_node *> &) = 0;
-  bool beginNode(decision *d, std::string const &name);
+  bool begin_node(decision *d, std::string const &name);
 
-  void setCompleted() { completed_ = true; }
-  [[nodiscard]] bool isCompleted() const { return completed_; }
-  [[nodiscard]] uint64_t getChoiceDepth() const { return choice_depth_; }
+  void set_completed() { completed_ = true; }
+  [[nodiscard]] bool is_completed() const { return completed_; }
+  [[nodiscard]] uint64_t get_choice_depth() const { return choice_depth_; }
 
 private:
   bool preprocessed_ = false, containsfail_node_ = false;
@@ -113,15 +113,15 @@ public:
       , literal_(std::move(std::move(literal)))
       , child_(child) { }
 
-  [[nodiscard]] kore_symbol *getConstructor() const { return constructor_; }
-  [[nodiscard]] std::vector<var_type> const &getBindings() const {
+  [[nodiscard]] kore_symbol *get_constructor() const { return constructor_; }
+  [[nodiscard]] std::vector<var_type> const &get_bindings() const {
     return bindings_;
   }
-  void addBinding(std::string const &name, value_type type, llvm::Module *mod) {
+  void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
     bindings_.emplace_back(name, getParamType(type, mod));
   }
-  llvm::APInt getLiteral() const { return literal_; }
-  [[nodiscard]] decision_node *getChild() const { return child_; }
+  llvm::APInt get_literal() const { return literal_; }
+  [[nodiscard]] decision_node *get_child() const { return child_; }
 };
 
 class switch_node : public decision_node {
@@ -141,16 +141,16 @@ private:
 
 public:
   ~switch_node() override = default;
-  void addCase(decision_case const &c) { cases_.push_back(c); }
+  void add_case(decision_case const &c) { cases_.push_back(c); }
 
   static switch_node *
-  Create(std::string const &name, llvm::Type *type, bool is_check_null) {
+  create(std::string const &name, llvm::Type *type, bool is_check_null) {
     return new switch_node(name, type, is_check_null);
   }
 
-  [[nodiscard]] std::string getName() const { return name_; }
-  [[nodiscard]] llvm::Type *getType() const { return type_; }
-  [[nodiscard]] std::vector<decision_case> const &getCases() const {
+  [[nodiscard]] std::string get_name() const { return name_; }
+  [[nodiscard]] llvm::Type *get_type() const { return type_; }
+  [[nodiscard]] std::vector<decision_case> const &get_cases() const {
     return cases_;
   }
 
@@ -161,11 +161,11 @@ public:
     }
     bool hasDefault = false;
     for (auto const &_case : cases_) {
-      _case.getChild()->preprocess(leaves);
+      _case.get_child()->preprocess(leaves);
       containsfail_node_
-          = containsfail_node_ || _case.getChild()->containsfail_node_;
-      hasDefault = hasDefault || _case.getConstructor() == nullptr;
-      choice_depth_ = std::max(choice_depth_, _case.getChild()->choice_depth_);
+          = containsfail_node_ || _case.get_child()->containsfail_node_;
+      hasDefault = hasDefault || _case.get_constructor() == nullptr;
+      choice_depth_ = std::max(choice_depth_, _case.get_child()->choice_depth_);
     }
     if (!hasDefault) {
       containsfail_node_ = true;
@@ -193,7 +193,7 @@ private:
 
 public:
   ~make_pattern_node() override = default;
-  static make_pattern_node *Create(
+  static make_pattern_node *create(
       std::string const &name, llvm::Type *type, kore_pattern *pattern,
       std::vector<var_type> &uses, decision_node *child) {
     return new make_pattern_node(name, type, pattern, uses, child);
@@ -235,17 +235,17 @@ private:
 
 public:
   ~function_node() override = default;
-  static function_node *Create(
+  static function_node *create(
       std::string const &name, std::string const &function,
       decision_node *child, value_type cat, llvm::Type *type) {
     return new function_node(name, function, child, cat, type);
   }
 
   [[nodiscard]] std::vector<std::pair<var_type, value_type>> const &
-  getBindings() const {
+  get_bindings() const {
     return bindings_;
   }
-  void addBinding(std::string const &name, value_type type, llvm::Module *mod) {
+  void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
     bindings_.push_back({{name, getParamType(type, mod)}, type});
   }
 
@@ -277,17 +277,17 @@ private:
 
 public:
   ~leaf_node() override = default;
-  static leaf_node *Create(std::string const &name) {
+  static leaf_node *create(std::string const &name) {
     return new leaf_node(name);
   }
 
-  [[nodiscard]] std::vector<var_type> const &getBindings() const {
+  [[nodiscard]] std::vector<var_type> const &get_bindings() const {
     return bindings_;
   }
-  void addBinding(std::string const &name, value_type type, llvm::Module *mod) {
+  void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
     bindings_.emplace_back(name, getParamType(type, mod));
   }
-  void setChild(decision_node *child) { this->child_ = child; }
+  void set_child(decision_node *child) { this->child_ = child; }
 
   void codegen(decision *d) override;
   void preprocess(std::unordered_set<leaf_node *> &leaves) override {
@@ -327,7 +327,7 @@ private:
 
 public:
   ~make_iterator_node() override = default;
-  static make_iterator_node *Create(
+  static make_iterator_node *create(
       std::string const &collection, llvm::Type *collection_type,
       std::string const &name, llvm::Type *type, std::string const &hook_name,
       decision_node *child) {
@@ -368,7 +368,7 @@ private:
 
 public:
   ~iter_next_node() override = default;
-  static iter_next_node *Create(
+  static iter_next_node *create(
       std::string const &iterator, llvm::Type *iterator_type,
       std::string const &binding, llvm::Type *binding_type,
       std::string const &hook_name, decision_node *child) {
@@ -405,12 +405,12 @@ private:
 
   std::map<var_type, llvm::AllocaInst *> symbols_{};
 
-  llvm::Value *getTag(llvm::Value *);
+  llvm::Value *get_tag(llvm::Value *);
 
   llvm::AllocaInst *decl(var_type const &name);
 
-  llvm::Constant *stringLiteral(std::string const &str);
-  llvm::Value *ptrTerm(llvm::Value *val);
+  llvm::Constant *string_literal(std::string const &str);
+  llvm::Value *ptr_term(llvm::Value *val);
 
 public:
   decision(

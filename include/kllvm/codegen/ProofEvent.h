@@ -30,7 +30,7 @@ private:
    * behaviour.
    */
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
-  proofBranch(std::string const &label, llvm::BasicBlock *insert_at_end);
+  proof_branch(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
    * Set up a standard event prelude by creating a pair of basic blocks for the
@@ -41,14 +41,14 @@ private:
    * `emitGetOutputFileName`.
    */
   std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
-  eventPrelude(std::string const &label, llvm::BasicBlock *insert_at_end);
+  event_prelude(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `term` to the specified `outputFile` as
    * binary KORE. This function can be called on any term, but the sort of that
    * term must be known.
    */
-  llvm::CallInst *emitSerializeTerm(
+  llvm::CallInst *emit_serialize_term(
       kore_composite_sort &sort, llvm::Value *output_file, llvm::Value *term,
       llvm::BasicBlock *insert_at_end);
 
@@ -57,20 +57,20 @@ private:
    * binary KORE. This function does not require a sort, but the configuration
    * passed must be a top-level configuration.
    */
-  llvm::CallInst *emitSerializeConfiguration(
+  llvm::CallInst *emit_serialize_configuration(
       llvm::Value *output_file, llvm::Value *config,
       llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `value` to the specified `outputFile`.
    */
-  llvm::CallInst *emitWriteUInt64(
+  llvm::CallInst *emit_write_u_int64(
       llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `str` to the specified `outputFile`.
    */
-  llvm::CallInst *emitWriteString(
+  llvm::CallInst *emit_write_string(
       llvm::Value *output_file, std::string const &str,
       llvm::BasicBlock *insert_at_end);
 
@@ -83,49 +83,49 @@ private:
    * branch is created. If the MergeBlock has no instructions, this has resulted
    * in a segfault when printing the IR. Adding an effective no-op prevents this.
    */
-  llvm::BinaryOperator *emitNoOp(llvm::BasicBlock *insert_at_end);
+  llvm::BinaryOperator *emit_no_op(llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit instructions to load the path of the interpreter's current output
    * file; used here for binary proof trace data.
    */
-  llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insert_at_end);
+  llvm::LoadInst *emit_get_output_file_name(llvm::BasicBlock *insert_at_end);
 
 public:
-  [[nodiscard]] llvm::BasicBlock *hookEvent_pre(
+  [[nodiscard]] llvm::BasicBlock *hook_event_pre(
       std::string const &name, llvm::BasicBlock *current_block,
       std::string const &location_stack);
 
-  [[nodiscard]] llvm::BasicBlock *hookEvent_post(
+  [[nodiscard]] llvm::BasicBlock *hook_event_post(
       llvm::Value *val, kore_composite_sort *sort,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *hookArg(
+  [[nodiscard]] llvm::BasicBlock *hook_arg(
       llvm::Value *val, kore_composite_sort *sort,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *rewriteEvent_pre(
+  [[nodiscard]] llvm::BasicBlock *rewrite_event_pre(
       kore_axiom_declaration *axiom, uint64_t arity,
       std::map<std::string, kore_variable_pattern *> vars,
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *rewriteEvent_post(
+  [[nodiscard]] llvm::BasicBlock *rewrite_event_post(
       kore_axiom_declaration *axiom, llvm::Value *return_value,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *functionEvent_pre(
+  [[nodiscard]] llvm::BasicBlock *function_event_pre(
       llvm::BasicBlock *current_block, kore_composite_pattern *pattern,
       std::string const &location_stack);
 
   [[nodiscard]] llvm::BasicBlock *
-  functionEvent_post(llvm::BasicBlock *current_block);
+  function_event_post(llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *sideConditionEvent_pre(
+  [[nodiscard]] llvm::BasicBlock *side_condition_event_pre(
       kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *sideConditionEvent_post(
+  [[nodiscard]] llvm::BasicBlock *side_condition_event_post(
       kore_axiom_declaration *axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 

@@ -192,7 +192,7 @@ struct kore_handler : BaseReaderHandler<UTF8<>, kore_handler> {
 
 template <typename Stream>
 struct kore_writer : Writer<Stream> {
-  bool RawNumber(
+  bool raw_number(
       typename Writer<Stream>::Ch const *str, rapidjson::SizeType length,
       bool copy = false) {
     (void)copy;
@@ -216,11 +216,11 @@ static bool write_json(kore_writer<Stream> &writer, block *data) {
     } else if (tag_hdr(data->h.hdr) == tag_hdr(intHdr().hdr)) {
       zinj *inj = (zinj *)data;
       string *str = hook_STRING_int2string(inj->data);
-      writer.RawNumber(str->data, len(str), false);
+      writer.raw_number(str->data, len(str), false);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(floatHdr().hdr)) {
       auto *inj = (floatinj *)data;
       std::string str = floatToString(inj->data, "");
-      writer.RawNumber(str.c_str(), str.length(), false);
+      writer.raw_number(str.c_str(), str.length(), false);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(strHdr().hdr)) {
       auto *inj = (stringinj *)data;
       writer.String(inj->data->data, len(inj->data), false);

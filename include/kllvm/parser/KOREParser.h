@@ -40,7 +40,7 @@ private:
   void attributes(Node *node);
 
   template <typename Node>
-  void attributesNE(Node *node);
+  void attributes_ne(Node *node);
 
   void modules(kore_definition *node);
   ptr<kore_module> module();
@@ -48,24 +48,25 @@ private:
   void sentences(kore_module *node);
   ptr<kore_declaration> sentence();
 
-  void sortVariables(kore_declaration *node);
-  void sortVariablesNE(kore_declaration *node);
+  void sort_variables(kore_declaration *node);
+  void sort_variables_ne(kore_declaration *node);
 
   template <typename Node>
   void sorts(Node *node);
   template <typename Node>
-  void sortsNE(Node *node);
+  void sorts_ne(Node *node);
 
-  sptr<kore_pattern> _pattern();
+  sptr<kore_pattern> pattern_internal();
   void patterns(kore_composite_pattern *node);
-  void patternsNE(kore_composite_pattern *node);
+  void patterns_ne(kore_composite_pattern *node);
   void patterns(std::vector<sptr<kore_pattern>> &node);
-  void patternsNE(std::vector<sptr<kore_pattern>> &node);
+  void patterns_ne(std::vector<sptr<kore_pattern>> &node);
 
-  sptr<kore_pattern> applicationPattern();
-  sptr<kore_pattern> applicationPattern(std::string const &name);
-  ptr<kore_composite_pattern> _applicationPattern();
-  ptr<kore_composite_pattern> _applicationPattern(std::string const &name);
+  sptr<kore_pattern> application_pattern();
+  sptr<kore_pattern> application_pattern(std::string const &name);
+  ptr<kore_composite_pattern> application_pattern_internal();
+  ptr<kore_composite_pattern>
+  application_pattern_internal(std::string const &name);
 
   struct {
     std::string data;

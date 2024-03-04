@@ -26,8 +26,8 @@ int main(int argc, char **argv) {
   kore_parser parser(argv[1] + std::string("/syntaxDefinition.kore"));
   ptr<kore_definition> def = parser.definition();
 
-  auto subsorts = def->getSubsorts();
-  auto overloads = def->getOverloads();
+  auto subsorts = def->get_subsorts();
+  auto overloads = def->get_overloads();
 
   kore_parser parser2(argv[1] + std::string("/macros.kore"));
   std::vector<ptr<kore_declaration>> axioms = parser2.declarations();
@@ -45,23 +45,23 @@ int main(int argc, char **argv) {
 
   auto config = kore_pattern::load(argv[2]);
   std::map<std::string, std::vector<kore_symbol *>> symbols;
-  config->markSymbols(symbols);
+  config->mark_symbols(symbols);
   for (auto &decl : axioms) {
     auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get());
-    axiom->getPattern()->markSymbols(symbols);
+    axiom->get_pattern()->mark_symbols(symbols);
   }
 
   for (auto &entry : symbols) {
     for (auto *symbol : entry.second) {
-      auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-      symbol->instantiateSymbol(decl);
+      auto *decl = def->get_symbol_declarations().at(symbol->get_name());
+      symbol->instantiate_symbol(decl);
     }
   }
 
   auto expanded
       = axioms.empty()
             ? config
-            : config->expandMacros(subsorts, overloads, axioms, false);
+            : config->expand_macros(subsorts, overloads, axioms, false);
 
   expanded->print(std::cout);
   std::cout << std::endl;

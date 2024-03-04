@@ -198,9 +198,9 @@ llvm::StructType *getBlockType(
   llvm::SmallVector<llvm::Type *, 4> Types;
   Types.push_back(BlockHeaderType);
   Types.push_back(EmptyArrayType);
-  for (auto const &arg : symbol->getArguments()) {
+  for (auto const &arg : symbol->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
-    llvm::Type *type = getvalue_type(sort->getCategory(definition), module);
+    llvm::Type *type = getvalue_type(sort->get_category(definition), module);
     Types.push_back(type);
   }
   return llvm::StructType::get(module->getContext(), Types);
@@ -208,11 +208,11 @@ llvm::StructType *getBlockType(
 
 uint64_t getBlockHeaderVal(
     llvm::Module *module, kore_symbol const *symbol, llvm::Type *block_type) {
-  uint64_t headerVal = symbol->getTag();
+  uint64_t headerVal = symbol->get_tag();
   uint64_t sizeInBytes = llvm::DataLayout(module).getTypeAllocSize(block_type);
   assert(sizeInBytes % 8 == 0);
   headerVal |= (sizeInBytes / 8) << 32;
-  headerVal |= (uint64_t)symbol->getLayout() << LAYOUT_OFFSET;
+  headerVal |= (uint64_t)symbol->get_layout() << LAYOUT_OFFSET;
   return headerVal;
 }
 
@@ -258,18 +258,18 @@ value_type termType(
     kore_pattern *pattern, llvm::StringMap<value_type> &substitution,
     kore_definition *definition) {
   if (auto *variable = dynamic_cast<kore_variable_pattern *>(pattern)) {
-    return substitution.lookup(variable->getName());
+    return substitution.lookup(variable->get_name());
   }
   if (auto *constructor = dynamic_cast<kore_composite_pattern *>(pattern)) {
-    kore_symbol *symbol = constructor->getConstructor();
-    assert(symbol->isConcrete() && "not supported yet: sort variables");
-    if (symbol->getName() == "\\dv") {
+    kore_symbol *symbol = constructor->get_constructor();
+    assert(symbol->is_concrete() && "not supported yet: sort variables");
+    if (symbol->get_name() == "\\dv") {
       auto *sort = dynamic_cast<kore_composite_sort *>(
-          symbol->getFormalArguments()[0].get());
-      return sort->getCategory(definition);
+          symbol->get_formal_arguments()[0].get());
+      return sort->get_category(definition);
     }
-    auto *sort = dynamic_cast<kore_composite_sort *>(symbol->getSort().get());
-    return sort->getCategory(definition);
+    auto *sort = dynamic_cast<kore_composite_sort *>(symbol->get_sort().get());
+    return sort->get_category(definition);
   }
   assert(false && "not supported yet: meta level");
   abort();
@@ -277,15 +277,15 @@ value_type termType(
 
 sptr<kore_sort> termSort(kore_pattern *pattern) {
   if (auto *variable = dynamic_cast<kore_variable_pattern *>(pattern)) {
-    return variable->getSort();
+    return variable->get_sort();
   }
   if (auto *constructor = dynamic_cast<kore_composite_pattern *>(pattern)) {
-    kore_symbol *symbol = constructor->getConstructor();
-    assert(symbol->isConcrete() && "not supported yet: sort variables");
-    if (symbol->getName() == "\\dv") {
-      return symbol->getFormalArguments()[0];
+    kore_symbol *symbol = constructor->get_constructor();
+    assert(symbol->is_concrete() && "not supported yet: sort variables");
+    if (symbol->get_name() == "\\dv") {
+      return symbol->get_formal_arguments()[0];
     }
-    return symbol->getSort();
+    return symbol->get_sort();
   }
   assert(false && "not supported yet: meta level");
   abort();
@@ -294,15 +294,15 @@ sptr<kore_sort> termSort(kore_pattern *pattern) {
 llvm::Value *create_term::alloc_arg(
     kore_composite_pattern *pattern, int idx,
     std::string const &location_stack) {
-  kore_pattern *p = pattern->getArguments()[idx].get();
+  kore_pattern *p = pattern->get_arguments()[idx].get();
   std::string newLocation = fmt::format("{}:{}", location_stack, idx);
-  if (isInjectionSymbol(p, definition_->getInjSymbol())) {
+  if (isInjectionSymbol(p, definition_->get_inj_symbol())) {
     newLocation = location_stack;
   }
-  llvm::Value *ret = createAllocation(p, newLocation).first;
-  auto *sort = dynamic_cast<kore_composite_sort *>(p->getSort().get());
+  llvm::Value *ret = create_allocation(p, newLocation).first;
+  auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
   proof_event e(definition_, module_);
-  current_block_ = e.hookArg(ret, sort, current_block_);
+  current_block_ = e.hook_arg(ret, sort, current_block_);
   return ret;
 }
 
@@ -317,15 +317,15 @@ std::string escape(std::string const &str) {
 }
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-llvm::Value *create_term::createHook(
+llvm::Value *create_term::create_hook(
     kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
     std::string const &locationStack) {
-  assert(hook_att->getArguments().size() == 1);
+  assert(hook_att->get_arguments().size() == 1);
   auto *strPattern
-      = dynamic_cast<kore_string_pattern *>(hook_att->getArguments()[0].get());
-  std::string name = strPattern->getContents();
+      = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
+  std::string name = strPattern->get_contents();
   if (name == "BOOL.and" || name == "BOOL.andThen") {
-    assert(pattern->getArguments().size() == 2);
+    assert(pattern->get_arguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *CondBlock = current_block_;
     llvm::BasicBlock *TrueBlock
@@ -344,7 +344,7 @@ llvm::Value *create_term::createHook(
     return Phi;
   }
   if (name == "BOOL.or" || name == "BOOL.orElse") {
-    assert(pattern->getArguments().size() == 2);
+    assert(pattern->get_arguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *CondBlock = current_block_;
     llvm::BasicBlock *FalseBlock
@@ -363,7 +363,7 @@ llvm::Value *create_term::createHook(
     return Phi;
   }
   if (name == "BOOL.not") {
-    assert(pattern->getArguments().size() == 1);
+    assert(pattern->get_arguments().size() == 1);
     llvm::Value *arg = alloc_arg(pattern, 0, locationStack);
     llvm::BinaryOperator *Not = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, arg,
@@ -372,7 +372,7 @@ llvm::Value *create_term::createHook(
     return Not;
   }
   if (name == "BOOL.implies") {
-    assert(pattern->getArguments().size() == 2);
+    assert(pattern->get_arguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *CondBlock = current_block_;
     llvm::BasicBlock *TrueBlock
@@ -392,7 +392,7 @@ llvm::Value *create_term::createHook(
     return Phi;
   }
   if (name == "BOOL.ne" || name == "BOOL.xor") {
-    assert(pattern->getArguments().size() == 2);
+    assert(pattern->get_arguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     llvm::BinaryOperator *Xor = llvm::BinaryOperator::Create(
@@ -401,7 +401,7 @@ llvm::Value *create_term::createHook(
     return Xor;
   }
   if (name == "BOOL.eq") {
-    assert(pattern->getArguments().size() == 2);
+    assert(pattern->get_arguments().size() == 2);
     llvm::Value *firstArg = alloc_arg(pattern, 0, locationStack);
     llvm::Value *secondArg = alloc_arg(pattern, 1, locationStack);
     auto *Eq = new llvm::ICmpInst(
@@ -410,7 +410,7 @@ llvm::Value *create_term::createHook(
     return Eq;
   }
   if (name == "KEQUAL.ite") {
-    assert(pattern->getArguments().size() == 3);
+    assert(pattern->get_arguments().size() == 3);
     llvm::Value *cond = alloc_arg(pattern, 0, locationStack);
     llvm::BasicBlock *TrueBlock
         = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
@@ -450,13 +450,13 @@ llvm::Value *create_term::createHook(
   if (name == "MINT.uvalue") {
     llvm::Value *mint = alloc_arg(pattern, 0, locationStack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
-                         pattern->getConstructor()->getArguments()[0].get())
-                         ->getCategory(definition_);
+                         pattern->get_constructor()->get_arguments()[0].get())
+                         ->get_category(definition_);
     auto *Type = getvalue_type(cat, module_);
     size_t nwords = (cat.bits + 63) / 64;
     if (nwords == 0) {
       auto *staticTerm = new create_static_term(definition_, module_);
-      return staticTerm->createToken({SortCategory::Int, 0}, "0");
+      return staticTerm->create_token({SortCategory::Int, 0}, "0");
     }
     auto *Ptr = allocateTerm(
         llvm::Type::getInt64Ty(ctx_),
@@ -502,13 +502,13 @@ llvm::Value *create_term::createHook(
   if (name == "MINT.svalue") {
     llvm::Value *mint = alloc_arg(pattern, 0, locationStack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
-                         pattern->getConstructor()->getArguments()[0].get())
-                         ->getCategory(definition_);
+                         pattern->get_constructor()->get_arguments()[0].get())
+                         ->get_category(definition_);
     auto *Type = getvalue_type(cat, module_);
     size_t nwords = (cat.bits + 63) / 64;
     if (nwords == 0) {
       auto *staticTerm = new create_static_term(definition_, module_);
-      return staticTerm->createToken({SortCategory::Int, 0}, "0");
+      return staticTerm->create_token({SortCategory::Int, 0}, "0");
     }
     auto *Ptr = allocateTerm(
         llvm::Type::getInt64Ty(ctx_),
@@ -554,8 +554,8 @@ llvm::Value *create_term::createHook(
   if (name == "MINT.integer") {
     llvm::Value *mpz = alloc_arg(pattern, 0, locationStack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
-                         pattern->getConstructor()->getSort().get())
-                         ->getCategory(definition_);
+                         pattern->get_constructor()->get_sort().get())
+                         ->get_category(definition_);
     auto *Type = getvalue_type(cat, module_);
     llvm::Instruction *Ptr = llvm::CallInst::Create(
         getOrInsertFunction(
@@ -652,30 +652,30 @@ llvm::Value *create_term::createHook(
   }
   std::string hookName = "hook_" + name.substr(0, name.find('.')) + "_"
                          + name.substr(name.find('.') + 1);
-  return createFunctionCall(hookName, pattern, true, false, locationStack);
+  return create_function_call(hookName, pattern, true, false, locationStack);
 }
 
 // We use tailcc calling convention for apply_rule_* and eval_* functions to
 // make these K functions tail recursive when their K definitions are tail
 // recursive.
-llvm::Value *create_term::createFunctionCall(
+llvm::Value *create_term::create_function_call(
     std::string const &name, kore_composite_pattern *pattern, bool sret,
     bool tailcc, std::string const &location_stack) {
   auto event = proof_event(definition_, module_);
 
   current_block_
-      = event.functionEvent_pre(current_block_, pattern, location_stack);
+      = event.function_event_pre(current_block_, pattern, location_stack);
 
   std::vector<llvm::Value *> args;
   auto *returnSort = dynamic_cast<kore_composite_sort *>(
-      pattern->getConstructor()->getSort().get());
-  auto returnCat = returnSort->getCategory(definition_);
+      pattern->get_constructor()->get_sort().get());
+  auto returnCat = returnSort->get_category(definition_);
   int i = 0;
-  for (auto const &sort : pattern->getConstructor()->getArguments()) {
+  for (auto const &sort : pattern->get_constructor()->get_arguments()) {
     auto *concreteSort = dynamic_cast<kore_composite_sort *>(sort.get());
     llvm::Value *arg = alloc_arg(pattern, i, location_stack);
     i++;
-    switch (concreteSort->getCategory(definition_).cat) {
+    switch (concreteSort->get_category(definition_).cat) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
     case SortCategory::List:
@@ -694,13 +694,13 @@ llvm::Value *create_term::createFunctionCall(
     }
   }
 
-  current_block_ = event.functionEvent_post(current_block_);
+  current_block_ = event.function_event_post(current_block_);
 
-  return createFunctionCall(
+  return create_function_call(
       name, returnCat, args, sret, tailcc, location_stack);
 }
 
-llvm::Value *create_term::createFunctionCall(
+llvm::Value *create_term::create_function_call(
     std::string const &name, value_type return_cat,
     std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
     std::string const &location_stack) {
@@ -754,31 +754,31 @@ llvm::Value *create_term::createFunctionCall(
 
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
-llvm::Value *create_term::notInjectionCase(
+llvm::Value *create_term::not_injection_case(
     kore_composite_pattern *constructor, llvm::Value *val,
     std::string const &location_stack) {
-  kore_symbol const *symbol = constructor->getConstructor();
+  kore_symbol const *symbol = constructor->get_constructor();
   kore_symbol_declaration *symbolDecl
-      = definition_->getSymbolDeclarations().at(symbol->getName());
+      = definition_->get_symbol_declarations().at(symbol->get_name());
   llvm::StructType *BlockType = getBlockType(module_, definition_, symbol);
   llvm::Value *BlockHeader
       = getBlockHeader(module_, definition_, symbol, BlockType);
   int idx = 2;
   std::vector<llvm::Value *> children;
-  for (auto const &child : constructor->getArguments()) {
+  for (auto const &child : constructor->get_arguments()) {
     llvm::Value *ChildValue = nullptr;
     if (idx == 2 && val != nullptr) {
       ChildValue = val;
     } else {
       std::string newLocation = fmt::format("{}:{}", location_stack, idx - 2);
-      if (isInjectionSymbol(child.get(), definition_->getInjSymbol())) {
+      if (isInjectionSymbol(child.get(), definition_->get_inj_symbol())) {
         newLocation = location_stack;
       }
-      ChildValue = createAllocation(child.get(), newLocation).first;
+      ChildValue = create_allocation(child.get(), newLocation).first;
     }
 
-    auto *sort = dynamic_cast<kore_composite_sort *>(child->getSort().get());
-    if (sort && isCollectionSort(sort->getCategory(definition_))) {
+    auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
+    if (sort && isCollectionSort(sort->get_category(definition_))) {
       ChildValue = new llvm::LoadInst(
           BlockType->elements()[idx], ChildValue, "", current_block_);
     }
@@ -790,7 +790,7 @@ llvm::Value *create_term::notInjectionCase(
       BlockType, Block,
       {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0),
        llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx_), 0)},
-      symbol->getName(), current_block_);
+      symbol->get_name(), current_block_);
   new llvm::StoreInst(BlockHeader, BlockHeaderPtr, current_block_);
   idx = 2;
   for (auto &ChildValue : children) {
@@ -818,30 +818,30 @@ llvm::Value *create_term::notInjectionCase(
 // returns a value and a boolean indicating whether that value could be an
 // injection
 std::pair<llvm::Value *, bool> create_term::operator()(kore_pattern *pattern) {
-  populateStaticSet(pattern);
+  populate_static_set(pattern);
 
-  return createAllocation(pattern);
+  return create_allocation(pattern);
 }
 
-bool create_term::populateStaticSet(kore_pattern *pattern) {
+bool create_term::populate_static_set(kore_pattern *pattern) {
   bool can_be_static = true;
 
   if (auto *variable = dynamic_cast<kore_variable_pattern *>(pattern)) {
     can_be_static = false;
   } else if (
       auto *constructor = dynamic_cast<kore_composite_pattern *>(pattern)) {
-    kore_symbol const *symbol = constructor->getConstructor();
-    if (symbol->getName() != "\\dv") {
+    kore_symbol const *symbol = constructor->get_constructor();
+    if (symbol->get_name() != "\\dv") {
       kore_symbol_declaration *symbolDecl
-          = definition_->getSymbolDeclarations().at(symbol->getName());
+          = definition_->get_symbol_declarations().at(symbol->get_name());
       if (symbolDecl->attributes().contains(attribute_set::key::function)
           || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
               && !is_anywhere_owise_)) {
         can_be_static = false;
       }
-      for (auto const &sptr_nextPattern : constructor->getArguments()) {
+      for (auto const &sptr_nextPattern : constructor->get_arguments()) {
         kore_pattern *nextPattern = sptr_nextPattern.get();
-        can_be_static &= populateStaticSet(nextPattern);
+        can_be_static &= populate_static_set(nextPattern);
       }
     }
   }
@@ -853,7 +853,7 @@ bool create_term::populateStaticSet(kore_pattern *pattern) {
   return can_be_static;
 }
 
-std::pair<llvm::Value *, bool> create_term::createAllocation(
+std::pair<llvm::Value *, bool> create_term::create_allocation(
     kore_pattern *pattern, std::string const &location_stack) {
   if (static_terms_.contains(pattern)) {
     auto *staticTerm = new create_static_term(definition_, module_);
@@ -861,53 +861,53 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
   }
 
   if (auto *variable = dynamic_cast<kore_variable_pattern *>(pattern)) {
-    auto *val = substitution_.lookup(variable->getName());
+    auto *val = substitution_.lookup(variable->get_name());
     if (!val) {
-      std::cerr << variable->getName() << std::endl;
+      std::cerr << variable->get_name() << std::endl;
       abort();
     }
     return std::make_pair(val, true);
   }
   if (auto *constructor = dynamic_cast<kore_composite_pattern *>(pattern)) {
-    kore_symbol const *symbol = constructor->getConstructor();
-    assert(symbol->isConcrete() && "not supported yet: sort variables");
+    kore_symbol const *symbol = constructor->get_constructor();
+    assert(symbol->is_concrete() && "not supported yet: sort variables");
     kore_symbol_declaration *symbolDecl
-        = definition_->getSymbolDeclarations().at(symbol->getName());
+        = definition_->get_symbol_declarations().at(symbol->get_name());
     if (symbolDecl->attributes().contains(attribute_set::key::function)
         || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
             && !is_anywhere_owise_)) {
       if (symbolDecl->attributes().contains(attribute_set::key::hook)) {
         auto *sort
-            = dynamic_cast<kore_composite_sort *>(constructor->getSort().get());
+            = dynamic_cast<kore_composite_sort *>(constructor->get_sort().get());
         auto *strPattern = dynamic_cast<kore_string_pattern *>(
             symbolDecl->attributes()
                 .get(attribute_set::key::hook)
-                ->getArguments()[0]
+                ->get_arguments()[0]
                 .get());
-        std::string name = strPattern->getContents();
+        std::string name = strPattern->get_contents();
 
         proof_event p(definition_, module_);
-        current_block_ = p.hookEvent_pre(name, current_block_, location_stack);
-        llvm::Value *val = createHook(
+        current_block_ = p.hook_event_pre(name, current_block_, location_stack);
+        llvm::Value *val = create_hook(
             symbolDecl->attributes().get(attribute_set::key::hook).get(),
             constructor, location_stack);
-        current_block_ = p.hookEvent_post(val, sort, current_block_);
+        current_block_ = p.hook_event_post(val, sort, current_block_);
 
         return std::make_pair(val, true);
       }
       auto fn_name = fmt::format("eval_{}", ast_to_string(*symbol, 0, false));
       return std::make_pair(
-          createFunctionCall(fn_name, constructor, false, true, location_stack),
+          create_function_call(fn_name, constructor, false, true, location_stack),
           true);
     }
     if (auto cat
-        = dynamic_cast<kore_composite_sort *>(symbol->getArguments()[0].get())
-              ->getCategory(definition_)
+        = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get())
+              ->get_category(definition_)
               .cat;
         symbolDecl->attributes().contains(attribute_set::key::sort_injection)
         && (cat == SortCategory::Symbol)) {
-      std::pair<llvm::Value *, bool> val = createAllocation(
-          constructor->getArguments()[0].get(), location_stack);
+      std::pair<llvm::Value *, bool> val = create_allocation(
+          constructor->get_arguments()[0].get(), location_stack);
       if (val.second) {
         llvm::Instruction *Tag = llvm::CallInst::Create(
             getOrInsertFunction(
@@ -915,7 +915,7 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
                 getvalue_type({SortCategory::Symbol, 0}, module_)),
             val.first, "tag", current_block_);
         setDebugLoc(Tag);
-        auto *inj = definition_->getInjSymbol();
+        auto *inj = definition_->get_inj_symbol();
         auto *NotStringBlock = llvm::BasicBlock::Create(
             ctx_, "notString", current_block_->getParent());
         auto *GeBlock = llvm::BasicBlock::Create(
@@ -934,18 +934,18 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
         cmp = new llvm::ICmpInst(
             *current_block_, llvm::CmpInst::ICMP_UGE, Tag,
             llvm::ConstantInt::get(
-                llvm::Type::getInt32Ty(ctx_), inj->getFirstTag()));
+                llvm::Type::getInt32Ty(ctx_), inj->get_first_tag()));
         llvm::BranchInst::Create(GeBlock, FalseBlock, cmp, current_block_);
 
         current_block_ = GeBlock;
         cmp = new llvm::ICmpInst(
             *current_block_, llvm::CmpInst::ICMP_ULE, Tag,
             llvm::ConstantInt::get(
-                llvm::Type::getInt32Ty(ctx_), inj->getLastTag()));
+                llvm::Type::getInt32Ty(ctx_), inj->get_last_tag()));
         llvm::BranchInst::Create(TrueBlock, FalseBlock, cmp, current_block_);
 
         current_block_ = FalseBlock;
-        auto *Cast = notInjectionCase(constructor, val.first, location_stack);
+        auto *Cast = not_injection_case(constructor, val.first, location_stack);
         llvm::BranchInst::Create(TrueBlock, current_block_);
 
         current_block_ = TrueBlock;
@@ -956,10 +956,10 @@ std::pair<llvm::Value *, bool> create_term::createAllocation(
         return std::make_pair(Phi, true);
       }
       return std::make_pair(
-          notInjectionCase(constructor, val.first, location_stack), true);
+          not_injection_case(constructor, val.first, location_stack), true);
     }
     return std::make_pair(
-        notInjectionCase(constructor, nullptr, location_stack), false);
+        not_injection_case(constructor, nullptr, location_stack), false);
   }
   assert(false && "not supported yet: meta level");
   abort();
@@ -980,23 +980,23 @@ bool makeFunction(
     kore_axiom_declaration *axiom, std::string const &postfix) {
   std::map<std::string, kore_variable_pattern *> vars;
   if (apply) {
-    for (kore_pattern *lhs : axiom->getLeftHandSide()) {
-      lhs->markVariables(vars);
+    for (kore_pattern *lhs : axiom->get_left_hand_side()) {
+      lhs->mark_variables(vars);
     }
   }
-  pattern->markVariables(vars);
+  pattern->mark_variables(vars);
   llvm::StringMap<value_type> params;
   std::vector<llvm::Type *> paramTypes;
   std::vector<std::string> paramNames;
   std::vector<llvm::Metadata *> debugArgs;
   for (auto &entry : vars) {
     auto *sort
-        = dynamic_cast<kore_composite_sort *>(entry.second->getSort().get());
+        = dynamic_cast<kore_composite_sort *>(entry.second->get_sort().get());
     if (!sort) {
       // TODO: sort variables
       return false;
     }
-    auto cat = sort->getCategory(definition);
+    auto cat = sort->get_category(definition);
     llvm::Type *paramType = getvalue_type(cat, module);
     debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
@@ -1058,10 +1058,10 @@ bool makeFunction(
   create_term creator = create_term(subst, definition, block, module, false);
   llvm::Value *retval = creator(pattern).first;
 
-  auto *current_block_ = creator.getCurrentBlock();
+  auto *current_block_ = creator.get_current_block();
   if (apply && big_step) {
     current_block_ = proof_event(definition, module)
-                         .rewriteEvent_post(axiom, retval, current_block_);
+                         .rewrite_event_post(axiom, retval, current_block_);
   }
 
   if (big_step) {
@@ -1083,8 +1083,8 @@ bool makeFunction(
 void makeApplyRuleFunction(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module, bool big_step) {
-  kore_pattern *pattern = axiom->getRightHandSide();
-  std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
+  kore_pattern *pattern = axiom->get_right_hand_side();
+  std::string name = "apply_rule_" + std::to_string(axiom->get_ordinal());
   makeFunction(
       name, pattern, definition, module, true, big_step, true, axiom, ".rhs");
   if (big_step) {
@@ -1099,10 +1099,10 @@ std::string makeApplyRuleFunction(
     llvm::Module *module, std::vector<residual> const &residuals) {
   std::map<std::string, kore_variable_pattern *> vars;
   for (auto residual : residuals) {
-    residual.pattern->markVariables(vars);
+    residual.pattern->mark_variables(vars);
   }
-  for (kore_pattern *lhs : axiom->getLeftHandSide()) {
-    lhs->markVariables(vars);
+  for (kore_pattern *lhs : axiom->get_left_hand_side()) {
+    lhs->mark_variables(vars);
   }
   llvm::StringMap<value_type> params;
   std::vector<llvm::Type *> paramTypes;
@@ -1110,12 +1110,12 @@ std::string makeApplyRuleFunction(
   std::vector<llvm::Metadata *> debugArgs;
   for (auto &entry : vars) {
     auto *sort
-        = dynamic_cast<kore_composite_sort *>(entry.second->getSort().get());
+        = dynamic_cast<kore_composite_sort *>(entry.second->get_sort().get());
     if (!sort) {
       // TODO: sort variables
       return "";
     }
-    auto cat = sort->getCategory(definition);
+    auto cat = sort->get_category(definition);
     llvm::Type *paramType = getvalue_type(cat, module);
     debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
@@ -1134,10 +1134,10 @@ std::string makeApplyRuleFunction(
   }
   llvm::FunctionType *funcType = llvm::FunctionType::get(
       getvalue_type({SortCategory::Symbol, 0}, module), paramTypes, false);
-  std::string name = "apply_rule_" + std::to_string(axiom->getOrdinal());
+  std::string name = "apply_rule_" + std::to_string(axiom->get_ordinal());
 
   makeFunction(
-      name + "_search", axiom->getRightHandSide(), definition, module, true,
+      name + "_search", axiom->get_right_hand_side(), definition, module, true,
       false, true, axiom, ".rhs");
 
   llvm::Function *applyRule = getOrInsertFunction(module, name, funcType);
@@ -1168,8 +1168,8 @@ std::string makeApplyRuleFunction(
   for (auto const &residual : residuals) {
     llvm::Value *arg = creator(residual.pattern).first;
     auto *sort = dynamic_cast<kore_composite_sort *>(
-        residual.pattern->getSort().get());
-    auto cat = sort->getCategory(definition);
+        residual.pattern->get_sort().get());
+    auto cat = sort->get_category(definition);
     switch (cat.cat) {
     case SortCategory::Map:
     case SortCategory::RangeMap:
@@ -1177,8 +1177,8 @@ std::string makeApplyRuleFunction(
     case SortCategory::Set:
       if (!arg->getType()->isPointerTy()) {
         auto *ptr = allocateTerm(
-            arg->getType(), creator.getCurrentBlock(), "koreAllocAlwaysGC");
-        new llvm::StoreInst(arg, ptr, creator.getCurrentBlock());
+            arg->getType(), creator.get_current_block(), "koreAllocAlwaysGC");
+        new llvm::StoreInst(arg, ptr, creator.get_current_block());
         arg = ptr;
       }
       break;
@@ -1189,26 +1189,26 @@ std::string makeApplyRuleFunction(
   }
   llvm::Type *blockType = getvalue_type({SortCategory::Symbol, 0}, module);
   llvm::Function *step = getOrInsertFunction(
-      module, "step_" + std::to_string(axiom->getOrdinal()),
+      module, "step_" + std::to_string(axiom->get_ordinal()),
       llvm::FunctionType::get(blockType, types, false));
   auto *retval
-      = llvm::CallInst::Create(step, args, "", creator.getCurrentBlock());
+      = llvm::CallInst::Create(step, args, "", creator.get_current_block());
   setDebugLoc(retval);
   retval->setCallingConv(llvm::CallingConv::Tail);
   llvm::ReturnInst::Create(
-      module->getContext(), retval, creator.getCurrentBlock());
+      module->getContext(), retval, creator.get_current_block());
   return name;
 }
 
 std::string makeSideConditionFunction(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module) {
-  kore_pattern *pattern = axiom->getRequires();
+  kore_pattern *pattern = axiom->get_requires();
 
   if (!pattern) {
     return "";
   }
-  std::string name = "side_condition_" + std::to_string(axiom->getOrdinal());
+  std::string name = "side_condition_" + std::to_string(axiom->get_ordinal());
   if (makeFunction(
           name, pattern, definition, module, false, false, false, axiom,
           ".sc")) {
@@ -1257,8 +1257,8 @@ bool isCollectionSort(value_type cat) {
 
 bool isInjectionSymbol(kore_pattern *p, kore_symbol *sym) {
   if (auto *constructor = dynamic_cast<kore_composite_pattern *>(p)) {
-    kore_symbol const *symbol = constructor->getConstructor();
-    if (symbol->getName() == sym->getName()) {
+    kore_symbol const *symbol = constructor->get_constructor();
+    if (symbol->get_name() == sym->get_name()) {
       return true;
     }
   }

@@ -110,35 +110,35 @@ extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
           *std::get_if<kore_pattern const *>(&current));
       assert(constructor && "Pattern in worklist is not composite");
 
-      kore_symbol const *symbol = constructor->getConstructor();
+      kore_symbol const *symbol = constructor->get_constructor();
       assert(
-          symbol->isConcrete()
+          symbol->is_concrete()
           && "found sort variable in initial configuration");
-      if (symbol->getName() == "\\dv") {
+      if (symbol->get_name() == "\\dv") {
         auto *const sort = dynamic_cast<kore_composite_sort *>(
-            symbol->getFormalArguments()[0].get());
+            symbol->get_formal_arguments()[0].get());
         auto *const strPattern = dynamic_cast<kore_string_pattern *>(
-            constructor->getArguments()[0].get());
-        std::string contents = strPattern->getContents();
+            constructor->get_arguments()[0].get());
+        std::string contents = strPattern->get_contents();
         output.push_back(getToken(
-            sort->getName().c_str(), contents.size(), contents.c_str()));
+            sort->get_name().c_str(), contents.size(), contents.c_str()));
         continue;
       }
 
       uint32_t tag = getTagForSymbol(*symbol);
 
-      if (isSymbolAFunction(tag) && constructor->getArguments().empty()) {
+      if (isSymbolAFunction(tag) && constructor->get_arguments().empty()) {
         output.push_back(evaluateFunctionSymbol(tag, nullptr));
         continue;
       }
-      if (constructor->getArguments().empty()) {
+      if (constructor->get_arguments().empty()) {
         output.push_back(leaf_block(tag));
         continue;
       }
 
-      construction term{tag, constructor->getArguments().size()};
+      construction term{tag, constructor->get_arguments().size()};
       workList.emplace_back(term);
-      for (auto const &child : constructor->getArguments()) {
+      for (auto const &child : constructor->get_arguments()) {
         workList.emplace_back(child.get());
       }
     } else {
@@ -180,17 +180,17 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
 
       assert(symbol && "No symbol set when reaching composite pattern");
       assert(
-          symbol->isConcrete()
+          symbol->is_concrete()
           && "found sort variable in initial configuration");
 
-      if (symbol->getName() == "\\dv") {
+      if (symbol->get_name() == "\\dv") {
         auto *sort = dynamic_cast<kore_composite_sort *>(
-            symbol->getFormalArguments()[0].get());
+            symbol->get_formal_arguments()[0].get());
         assert(sort && "Not a composite sort");
         auto const &token = token_stack.back();
 
         output.push_back(
-            getToken(sort->getName().c_str(), token.size(), token.c_str()));
+            getToken(sort->get_name().c_str(), token.size(), token.c_str()));
 
         token_stack.pop_back();
         break;
@@ -235,7 +235,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
     case header_byte<kore_sort_variable>: {
       ++ptr;
       sort_stack.push_back(
-          kore_sort_variable::Create(read_string(ptr, end, version)));
+          kore_sort_variable::create(read_string(ptr, end, version)));
       break;
     }
 

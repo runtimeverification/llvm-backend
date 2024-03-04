@@ -107,20 +107,20 @@ void initDebugAxiom(attribute_set const &att) {
     return;
   }
   kore_composite_pattern *sourceAtt = att.get(attribute_set::key::source).get();
-  assert(sourceAtt->getArguments().size() == 1);
+  assert(sourceAtt->get_arguments().size() == 1);
   auto *strPattern
-      = dynamic_cast<kore_string_pattern *>(sourceAtt->getArguments()[0].get());
-  std::string source = strPattern->getContents();
+      = dynamic_cast<kore_string_pattern *>(sourceAtt->get_arguments()[0].get());
+  std::string source = strPattern->get_contents();
   if (!att.contains(attribute_set::key::location)) {
     resetDebugLoc();
     return;
   }
   kore_composite_pattern *locationAtt
       = att.get(attribute_set::key::location).get();
-  assert(locationAtt->getArguments().size() == 1);
+  assert(locationAtt->get_arguments().size() == 1);
   auto *strPattern2
-      = dynamic_cast<kore_string_pattern *>(locationAtt->getArguments()[0].get());
-  std::string location = strPattern2->getContents();
+      = dynamic_cast<kore_string_pattern *>(locationAtt->get_arguments()[0].get());
+  std::string location = strPattern2->get_contents();
   source = source.substr(7, source.length() - 8);
   size_t first_comma = location.find_first_of(',');
   dbg_line = std::stoi(location.substr(9, first_comma - 9));

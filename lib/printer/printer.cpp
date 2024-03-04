@@ -253,10 +253,10 @@ preprocessed_print_data getPrintData(
   std::map<std::string, std::string> hooks;
   std::map<std::string, std::vector<std::string>> colors;
 
-  auto subsorts = def->getSubsorts();
-  auto overloads = def->getOverloads();
+  auto subsorts = def->get_subsorts();
+  auto overloads = def->get_overloads();
 
-  for (auto const &entry : def->getSymbolDeclarations()) {
+  for (auto const &entry : def->get_symbol_declarations()) {
     std::string name = entry.first;
 
     if (entry.second->attributes().contains(attribute_set::key::format)) {
@@ -291,8 +291,8 @@ preprocessed_print_data getPrintData(
       }
 
       if (entry.second->attributes().contains(attribute_set::key::bracket)) {
-        brackets[entry.second->getSymbol()->getSort().get()].push_back(
-            entry.second->getSymbol());
+        brackets[entry.second->get_symbol()->get_sort().get()].push_back(
+            entry.second->get_symbol());
       }
 
       readMultimap(name, entry.second, leftAssoc, attribute_set::key::left);
@@ -302,7 +302,7 @@ preprocessed_print_data getPrintData(
     }
   }
 
-  for (auto const &entry : def->getSortDeclarations()) {
+  for (auto const &entry : def->get_sort_declarations()) {
     std::string name = entry.first;
     if (entry.second->attributes().contains(attribute_set::key::hook)) {
       hooks[name]
@@ -340,41 +340,41 @@ std::ostream &printKORE(
   };
 
   auto config = kore_pattern::load(pattern_path);
-  config = config->unflattenAndOr();
+  config = config->unflatten_and_or();
   std::map<std::string, std::vector<kore_symbol *>> symbols;
-  config->markSymbols(symbols);
+  config->mark_symbols(symbols);
 
   for (auto const &decl : axioms) {
     auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get());
-    axiom->getPattern()->markSymbols(symbols);
+    axiom->get_pattern()->mark_symbols(symbols);
   }
 
   for (auto &entry : symbols) {
     for (auto *symbol : entry.second) {
-      auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-      symbol->instantiateSymbol(decl);
+      auto *decl = def->get_symbol_declarations().at(symbol->get_name());
+      symbol->instantiate_symbol(decl);
     }
   }
 
   auto [data, overloads] = getPrintDataOrCached();
 
   sptr<kore_pattern> expanded
-      = config->expandMacros(data.subsorts, overloads, axioms, true);
-  sptr<kore_pattern> sorted = expanded->sortCollections(data);
+      = config->expand_macros(data.subsorts, overloads, axioms, true);
+  sptr<kore_pattern> sorted = expanded->sort_collections(data);
   sptr<kore_pattern> filtered;
 
   if (filter_subst) {
-    std::set<std::string> vars = sorted->gatherSingletonVars();
-    filtered = sorted->filterSubstitution(data, vars);
-    filtered = filtered->dedupeDisjuncts();
-    filtered = filtered->sortCollections(data);
+    std::set<std::string> vars = sorted->gather_singleton_vars();
+    filtered = sorted->filter_substitution(data, vars);
+    filtered = filtered->dedupe_disjuncts();
+    filtered = filtered->sort_collections(data);
   } else {
     filtered = sorted;
   }
 
   sptr<kore_pattern> withBrackets = addBrackets(filtered, data);
   if (pretty) {
-    withBrackets->prettyPrint(os, data);
+    withBrackets->pretty_print(os, data);
   } else {
     withBrackets->print(os);
   }

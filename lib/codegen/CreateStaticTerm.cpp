@@ -29,9 +29,9 @@ namespace kllvm {
 
 /* create a term, given the assumption that the created term will not be a
  * triangle injection pair */
-llvm::Constant *create_static_term::notInjectionCase(
+llvm::Constant *create_static_term::not_injection_case(
     kore_composite_pattern *constructor, llvm::Constant *val) {
-  kore_symbol const *symbol = constructor->getConstructor();
+  kore_symbol const *symbol = constructor->get_constructor();
   llvm::StructType *BlockType = getBlockType(module_, definition_, symbol);
 
   std::stringstream koreString;
@@ -59,7 +59,7 @@ llvm::Constant *create_static_term::notInjectionCase(
         EmptyArrayType, llvm::ArrayRef<llvm::Constant *>()));
 
     int idx = 2;
-    for (auto const &child : constructor->getArguments()) {
+    for (auto const &child : constructor->get_arguments()) {
       llvm::Constant *ChildValue = nullptr;
       if (idx++ == 2 && val != nullptr) {
         ChildValue = val;
@@ -84,48 +84,48 @@ llvm::Constant *create_static_term::notInjectionCase(
 std::pair<llvm::Constant *, bool>
 create_static_term::operator()(kore_pattern *pattern) {
   if (auto *constructor = dynamic_cast<kore_composite_pattern *>(pattern)) {
-    kore_symbol const *symbol = constructor->getConstructor();
-    assert(symbol->isConcrete() && "not supported yet: sort variables");
-    if (symbol->getName() == "\\dv") {
+    kore_symbol const *symbol = constructor->get_constructor();
+    assert(symbol->is_concrete() && "not supported yet: sort variables");
+    if (symbol->get_name() == "\\dv") {
       auto *sort = dynamic_cast<kore_composite_sort *>(
-          symbol->getFormalArguments()[0].get());
+          symbol->get_formal_arguments()[0].get());
       auto *strPattern = dynamic_cast<kore_string_pattern *>(
-          constructor->getArguments()[0].get());
+          constructor->get_arguments()[0].get());
       return std::make_pair(
-          createToken(sort->getCategory(definition_), strPattern->getContents()),
+          create_token(sort->get_category(definition_), strPattern->get_contents()),
           false);
     }
-    if (symbol->getArguments().empty()) {
+    if (symbol->get_arguments().empty()) {
       llvm::StructType *BlockType
           = llvm::StructType::getTypeByName(module_->getContext(), block_struct);
       llvm::Constant *Cast = llvm::ConstantExpr::getIntToPtr(
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(ctx_),
-              (((uint64_t)symbol->getTag()) << 32) | 1),
+              (((uint64_t)symbol->get_tag()) << 32) | 1),
           llvm::PointerType::getUnqual(BlockType));
       return std::make_pair(Cast, false);
     }
     kore_symbol_declaration *symbolDecl
-        = definition_->getSymbolDeclarations().at(symbol->getName());
+        = definition_->get_symbol_declarations().at(symbol->get_name());
     if (symbolDecl->attributes().contains(attribute_set::key::sort_injection)
-        && dynamic_cast<kore_composite_sort *>(symbol->getArguments()[0].get())
-                   ->getCategory(definition_)
+        && dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get())
+                   ->get_category(definition_)
                    .cat
                == SortCategory::Symbol) {
       std::pair<llvm::Constant *, bool> val
-          = (*this)(constructor->getArguments()[0].get());
+          = (*this)(constructor->get_arguments()[0].get());
       if (val.second) {
-        uint32_t tag = symbol->getTag();
-        kore_symbol *inj = definition_->getInjSymbol();
-        if (tag != (uint32_t)-1 && tag >= inj->getFirstTag()
-            && tag <= inj->getLastTag()) {
+        uint32_t tag = symbol->get_tag();
+        kore_symbol *inj = definition_->get_inj_symbol();
+        if (tag != (uint32_t)-1 && tag >= inj->get_first_tag()
+            && tag <= inj->get_last_tag()) {
           return std::make_pair(val.first, true);
         }
-        return std::make_pair(notInjectionCase(constructor, val.first), true);
+        return std::make_pair(not_injection_case(constructor, val.first), true);
       }
-      return std::make_pair(notInjectionCase(constructor, val.first), true);
+      return std::make_pair(not_injection_case(constructor, val.first), true);
     }
-    return std::make_pair(notInjectionCase(constructor, nullptr), false);
+    return std::make_pair(not_injection_case(constructor, nullptr), false);
   }
   assert(false && "Something went wrong when trying to allocate a static term");
   abort();
@@ -133,7 +133,7 @@ create_static_term::operator()(kore_pattern *pattern) {
 
 // NOLINTBEGIN(*-cognitive-complexity)
 llvm::Constant *
-create_static_term::createToken(value_type sort, std::string contents) {
+create_static_term::create_token(value_type sort, std::string contents) {
   switch (sort.cat) {
   case SortCategory::Map:
   case SortCategory::RangeMap:

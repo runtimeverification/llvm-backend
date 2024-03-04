@@ -28,13 +28,13 @@ std::optional<std::string> getMatchFunctionName() {
   kore_ast->preprocess();
 
   // Iterate through axioms and return the one with the give rulen label if exits.
-  for (auto *axiom : kore_ast.get()->getAxioms()) {
+  for (auto *axiom : kore_ast.get()->get_axioms()) {
     // Check if the current axiom has the attribute label.
     if (axiom->attributes().contains(attribute_set::key::label)) {
       // Compare the axiom's label with the given rule label.
       if (rule_label
           == axiom->attributes().get_string(attribute_set::key::label)) {
-        return "intern_match_" + std::to_string(axiom->getOrdinal());
+        return "intern_match_" + std::to_string(axiom->get_ordinal());
       }
     }
   }

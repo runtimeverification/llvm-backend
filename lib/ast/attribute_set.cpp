@@ -75,7 +75,7 @@ std::optional<attribute_set::key> string_to_key(std::string const &name) {
 
 std::optional<attribute_set::key>
 attribute_set::add(std::shared_ptr<kore_composite_pattern> att) {
-  auto name = att->getConstructor()->getName();
+  auto name = att->get_constructor()->get_name();
   attribute_map_.emplace(name, std::move(att));
   return string_to_key(name);
 }
@@ -91,12 +91,12 @@ attribute_set::get(attribute_set::key k) const {
 
 std::string attribute_set::get_string(attribute_set::key k) const {
   auto const &attribute_pattern = get(k);
-  assert(attribute_pattern->getArguments().size() == 1);
+  assert(attribute_pattern->get_arguments().size() == 1);
 
   auto const &string_arg = std::dynamic_pointer_cast<kore_string_pattern>(
-      attribute_pattern->getArguments()[0]);
+      attribute_pattern->get_arguments()[0]);
 
-  return string_arg->getContents();
+  return string_arg->get_contents();
 }
 
 attribute_set::storage_t const &attribute_set::underlying() const {

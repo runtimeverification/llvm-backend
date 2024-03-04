@@ -24,45 +24,45 @@ int main(int argc, char **argv) {
   }
 
   // check that there is a initial configuration
-  if (!(Trace->getInitialConfig().isPattern()
-        && Trace->getInitialConfig().getkore_pattern())) {
+  if (!(Trace->get_initial_config().is_pattern()
+        && Trace->get_initial_config().getkore_pattern())) {
     return 1;
   }
 
   // check that the trace after the initial configuration is 4 events long
-  if (Trace->getTrace().size() != 4U) {
+  if (Trace->get_trace().size() != 4U) {
     return 1;
   }
 
   // check that the first event is the rewrite a() => b()
   auto const Rule1 = std::dynamic_pointer_cast<llvm_rule_event>(
-      Trace->getTrace()[0].getStepEvent());
+      Trace->get_trace()[0].get_step_event());
   if (!Rule1) {
     return 1;
   }
-  if (Rule1->getRuleOrdinal() != 95) {
+  if (Rule1->get_rule_ordinal() != 95) {
     return 1;
   }
 
   // check that the second event is a configuration
-  if (!(Trace->getTrace()[1].isPattern()
-        && Trace->getTrace()[1].getkore_pattern())) {
+  if (!(Trace->get_trace()[1].is_pattern()
+        && Trace->get_trace()[1].getkore_pattern())) {
     return 1;
   }
 
   // check that the third event is the rewrite b() => c()
   auto const Rule2 = std::dynamic_pointer_cast<llvm_rule_event>(
-      Trace->getTrace()[2].getStepEvent());
+      Trace->get_trace()[2].get_step_event());
   if (!Rule2) {
     return 1;
   }
-  if (Rule2->getRuleOrdinal() != 96) {
+  if (Rule2->get_rule_ordinal() != 96) {
     return 1;
   }
 
   // check that the fourth event is a configuration
-  if (!(Trace->getTrace()[3].isPattern()
-        && Trace->getTrace()[3].getkore_pattern())) {
+  if (!(Trace->get_trace()[3].is_pattern()
+        && Trace->get_trace()[3].getkore_pattern())) {
     return 1;
   }
 

@@ -30,21 +30,21 @@ cl::opt<std::string> rule_location(
 
 std::string getSource(kore_axiom_declaration *axiom) {
   auto *sourceAtt = axiom->attributes().get(attribute_set::key::source).get();
-  assert(sourceAtt->getArguments().size() == 1);
+  assert(sourceAtt->get_arguments().size() == 1);
 
   auto *strPattern
-      = dynamic_cast<kore_string_pattern *>(sourceAtt->getArguments()[0].get());
-  return strPattern->getContents();
+      = dynamic_cast<kore_string_pattern *>(sourceAtt->get_arguments()[0].get());
+  return strPattern->get_contents();
 }
 
 location getLocation(kore_axiom_declaration *axiom) {
   auto *locationAtt
       = axiom->attributes().get(attribute_set::key::location).get();
-  assert(locationAtt->getArguments().size() == 1);
+  assert(locationAtt->get_arguments().size() == 1);
 
   auto *strPattern
-      = dynamic_cast<kore_string_pattern *>(locationAtt->getArguments()[0].get());
-  std::string location = strPattern->getContents();
+      = dynamic_cast<kore_string_pattern *>(locationAtt->get_arguments()[0].get());
+  std::string location = strPattern->get_contents();
 
   size_t l_paren = location.find_first_of('(');
   size_t first_comma = location.find_first_of(',');
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
   auto kore_ast = parser.definition();
 
   // Iterate through axioms.
-  for (auto *axiom : kore_ast.get()->getAxioms()) {
+  for (auto *axiom : kore_ast.get()->get_axioms()) {
     if (axiom->attributes().contains(attribute_set::key::source)) {
       auto source = getSource(axiom);
       if (source.find(loc.filename) != std::string::npos) {

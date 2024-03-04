@@ -130,7 +130,7 @@ template <typename It>
 sptr<kore_variable> read_variable(It &ptr, It end, binary_version version) {
   if (peek(ptr) == header_byte<kore_variable>) {
     ++ptr;
-    return kore_variable::Create(read_string(ptr, end, version));
+    return kore_variable::create(read_string(ptr, end, version));
   }
 
   return nullptr;
@@ -143,11 +143,11 @@ ptr<kore_symbol> read_symbol(
   auto arity = read_length(ptr, end, version, 2);
 
   auto name = read_string(ptr, end, version);
-  auto symbol = kore_symbol::Create(name);
+  auto symbol = kore_symbol::create(name);
 
   auto start_idx = sort_stack.size() - arity;
   for (auto i = start_idx; i < sort_stack.size(); ++i) {
-    symbol->addFormalArgument(sort_stack[i]);
+    symbol->add_formal_argument(sort_stack[i]);
   }
 
   for (auto i = 0; i < arity; ++i) {
@@ -162,10 +162,10 @@ sptr<kore_sort> read_composite_sort(
     It &ptr, It end, std::vector<sptr<kore_sort>> &sort_stack,
     binary_version version) {
   auto arity = read_length(ptr, end, version, 2);
-  auto new_sort = kore_composite_sort::Create(read_string(ptr, end, version));
+  auto new_sort = kore_composite_sort::create(read_string(ptr, end, version));
 
   for (auto i = sort_stack.size() - arity; i < sort_stack.size(); ++i) {
-    new_sort->addArgument(sort_stack[i]);
+    new_sort->add_argument(sort_stack[i]);
   }
 
   for (auto i = 0; i < arity; ++i) {
@@ -187,17 +187,17 @@ sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
     case header_byte<kore_string_pattern>:
       ++ptr;
       term_stack.push_back(
-          kore_string_pattern::Create(read_string(ptr, end, version)));
+          kore_string_pattern::create(read_string(ptr, end, version)));
       break;
 
     case header_byte<kore_composite_pattern>: {
       ++ptr;
-      auto new_pattern = kore_composite_pattern::Create(std::move(symbol));
+      auto new_pattern = kore_composite_pattern::create(std::move(symbol));
       symbol = nullptr;
 
       auto arity = read_length(ptr, end, version, 2);
       for (auto i = term_stack.size() - arity; i < term_stack.size(); ++i) {
-        new_pattern->addArgument(term_stack[i]);
+        new_pattern->add_argument(term_stack[i]);
       }
 
       for (auto i = 0; i < arity; ++i) {
@@ -213,7 +213,7 @@ sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
       auto sort = sort_stack.back();
       sort_stack.pop_back();
 
-      term_stack.push_back(kore_variable_pattern::Create(name->getName(), sort));
+      term_stack.push_back(kore_variable_pattern::create(name->get_name(), sort));
       break;
     }
 
@@ -227,7 +227,7 @@ sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
       ++ptr;
 
       auto name = read_string(ptr, end, version);
-      sort_stack.push_back(kore_sort_variable::Create(name));
+      sort_stack.push_back(kore_sort_variable::create(name));
       break;
     }
 

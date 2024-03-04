@@ -51,18 +51,18 @@ private:
   substitution_t substitution_{};
 
 protected:
-  void printSubstitution(std::ostream &out, unsigned indent = 0U) const;
+  void print_substitution(std::ostream &out, unsigned indent = 0U) const;
 
 public:
   llvm_rewrite_event(uint64_t rule_ordinal)
       : rule_ordinal_(rule_ordinal) { }
 
-  [[nodiscard]] uint64_t getRuleOrdinal() const { return rule_ordinal_; }
-  [[nodiscard]] substitution_t const &getSubstitution() const {
+  [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
+  [[nodiscard]] substitution_t const &get_substitution() const {
     return substitution_;
   }
 
-  void addSubstitution(
+  void add_substitution(
       std::string const &name, sptr<kore_pattern> const &term,
       uint64_t pattern_len) {
     substitution_.insert(
@@ -78,7 +78,7 @@ private:
       : llvm_rewrite_event(rule_ordinal) { }
 
 public:
-  static sptr<llvm_rule_event> Create(uint64_t rule_ordinal) {
+  static sptr<llvm_rule_event> create(uint64_t rule_ordinal) {
     return sptr<llvm_rule_event>(new llvm_rule_event(rule_ordinal));
   }
 
@@ -91,7 +91,7 @@ private:
       : llvm_rewrite_event(rule_ordinal) { }
 
 public:
-  static sptr<llvm_side_condition_event> Create(uint64_t rule_ordinal) {
+  static sptr<llvm_side_condition_event> create(uint64_t rule_ordinal) {
     return sptr<llvm_side_condition_event>(
         new llvm_side_condition_event(rule_ordinal));
   }
@@ -110,16 +110,16 @@ private:
       , kore_pattern_(nullptr) { }
 
 public:
-  static sptr<llvm_side_condition_end_event> Create(uint64_t rule_ordinal) {
+  static sptr<llvm_side_condition_end_event> create(uint64_t rule_ordinal) {
     return sptr<llvm_side_condition_end_event>(
         new llvm_side_condition_end_event(rule_ordinal));
   }
 
-  [[nodiscard]] uint64_t getRuleOrdinal() const { return rule_ordinal_; }
+  [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
     return kore_pattern_;
   }
-  [[nodiscard]] uint64_t getPatternLength() const { return pattern_length_; }
+  [[nodiscard]] uint64_t get_pattern_length() const { return pattern_length_; }
   void
   setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
     kore_pattern_ = std::move(kore_pattern);
@@ -141,18 +141,18 @@ private:
 
 public:
   static sptr<llvm_function_event>
-  Create(std::string const &name, std::string const &relative_position) {
+  create(std::string const &name, std::string const &relative_position) {
     return sptr<llvm_function_event>(
         new llvm_function_event(name, relative_position));
   }
 
-  [[nodiscard]] std::string const &getName() const { return name_; }
-  [[nodiscard]] std::string const &getRelativePosition() const {
+  [[nodiscard]] std::string const &get_name() const { return name_; }
+  [[nodiscard]] std::string const &get_relative_position() const {
     return relative_position_;
   }
-  [[nodiscard]] std::vector<llvm_event> const &getArguments() const;
+  [[nodiscard]] std::vector<llvm_event> const &get_arguments() const;
 
-  void addArgument(llvm_event const &argument);
+  void add_argument(llvm_event const &argument);
 
   void print(std::ostream &out, unsigned indent = 0U) const override;
 };
@@ -169,28 +169,28 @@ private:
 
 public:
   static sptr<llvm_hook_event>
-  Create(std::string const &name, std::string const &relative_position) {
+  create(std::string const &name, std::string const &relative_position) {
     return sptr<llvm_hook_event>(new llvm_hook_event(name, relative_position));
   }
 
-  [[nodiscard]] std::string const &getName() const { return name_; }
-  [[nodiscard]] std::string const &getRelativePosition() const {
+  [[nodiscard]] std::string const &get_name() const { return name_; }
+  [[nodiscard]] std::string const &get_relative_position() const {
     return relative_position_;
   }
-  [[nodiscard]] std::vector<llvm_event> const &getArguments() const {
+  [[nodiscard]] std::vector<llvm_event> const &get_arguments() const {
     return arguments_;
   }
   [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
     return kore_pattern_;
   }
-  [[nodiscard]] uint64_t getPatternLength() const { return pattern_length_; }
+  [[nodiscard]] uint64_t get_pattern_length() const { return pattern_length_; }
   void
   setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
     kore_pattern_ = std::move(kore_pattern);
     pattern_length_ = pattern_length;
   }
 
-  void addArgument(llvm_event const &argument);
+  void add_argument(llvm_event const &argument);
 
   void print(std::ostream &out, unsigned indent = 0U) const override;
 };
@@ -203,14 +203,14 @@ private:
   uint64_t pattern_length_{};
 
 public:
-  [[nodiscard]] bool isStep() const { return is_step_event_; }
-  [[nodiscard]] bool isPattern() const { return !isStep(); }
-  [[nodiscard]] sptr<llvm_step_event> getStepEvent() const { return step_event_; }
+  [[nodiscard]] bool is_step() const { return is_step_event_; }
+  [[nodiscard]] bool is_pattern() const { return !is_step(); }
+  [[nodiscard]] sptr<llvm_step_event> get_step_event() const { return step_event_; }
   [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
     return kore_pattern_;
   }
-  [[nodiscard]] uint64_t getPatternLength() const { return pattern_length_; }
-  void setStepEvent(sptr<llvm_step_event> step_event) {
+  [[nodiscard]] uint64_t get_pattern_length() const { return pattern_length_; }
+  void set_step_event(sptr<llvm_step_event> step_event) {
     is_step_event_ = true;
     step_event_ = std::move(step_event);
   }
@@ -231,21 +231,21 @@ private:
   std::vector<llvm_event> trace_{};
 
 public:
-  [[nodiscard]] uint32_t getVersion() const { return version_; }
-  [[nodiscard]] std::vector<llvm_event> const &getPreTrace() const {
+  [[nodiscard]] uint32_t get_version() const { return version_; }
+  [[nodiscard]] std::vector<llvm_event> const &get_pre_trace() const {
     return pre_trace_;
   }
-  [[nodiscard]] llvm_event getInitialConfig() const { return initial_config_; }
-  [[nodiscard]] std::vector<llvm_event> const &getTrace() const {
+  [[nodiscard]] llvm_event get_initial_config() const { return initial_config_; }
+  [[nodiscard]] std::vector<llvm_event> const &get_trace() const {
     return trace_;
   }
-  void setVersion(uint32_t v) { version_ = v; }
-  void setInitialConfig(llvm_event initial_config) {
+  void set_version(uint32_t v) { version_ = v; }
+  void set_initial_config(llvm_event initial_config) {
     initial_config_ = std::move(initial_config);
   }
 
-  void addPreTraceEvent(llvm_event const &event) { pre_trace_.push_back(event); }
-  void addTraceEvent(llvm_event const &event) { trace_.push_back(event); }
+  void add_pre_trace_event(llvm_event const &event) { pre_trace_.push_back(event); }
+  void add_trace_event(llvm_event const &event) { trace_.push_back(event); }
 
   void print(std::ostream &out, unsigned indent = 0U) const;
 };
@@ -390,7 +390,7 @@ private:
       return false;
     }
 
-    event->addSubstitution(name, kore_term, pattern_len);
+    event->add_substitution(name, kore_term, pattern_len);
 
     return check_word(ptr, end, kore_end_sentinel);
   }
@@ -411,7 +411,7 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_hook_event::Create(name, location);
+    auto event = llvm_hook_event::create(name, location);
 
     while (std::distance(ptr, end) < 8U
            || peek_word(ptr) != hook_result_sentinel) {
@@ -419,7 +419,7 @@ private:
       if (!parse_argument(ptr, end, argument)) {
         return nullptr;
       }
-      event->addArgument(argument);
+      event->add_argument(argument);
     }
 
     if (!check_word(ptr, end, hook_result_sentinel)) {
@@ -452,7 +452,7 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_function_event::Create(name, location);
+    auto event = llvm_function_event::create(name, location);
 
     while (std::distance(ptr, end) < 8U
            || peek_word(ptr) != function_end_sentinel) {
@@ -460,7 +460,7 @@ private:
       if (!parse_argument(ptr, end, argument)) {
         return nullptr;
       }
-      event->addArgument(argument);
+      event->add_argument(argument);
     }
 
     if (!check_word(ptr, end, function_end_sentinel)) {
@@ -504,7 +504,7 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_rule_event::Create(ordinal);
+    auto event = llvm_rule_event::create(ordinal);
 
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(ptr, end, event)) {
@@ -531,7 +531,7 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_side_condition_event::Create(ordinal);
+    auto event = llvm_side_condition_event::create(ordinal);
 
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(ptr, end, event)) {
@@ -554,7 +554,7 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_side_condition_end_event::Create(ordinal);
+    auto event = llvm_side_condition_end_event::create(ordinal);
 
     uint64_t pattern_len = 0;
     auto kore_term = parse_kore_term(ptr, end, pattern_len);
@@ -594,7 +594,7 @@ private:
       if (!hook_event) {
         return false;
       }
-      event.setStepEvent(hook_event);
+      event.set_step_event(hook_event);
       return true;
     }
 
@@ -603,7 +603,7 @@ private:
       if (!function_event) {
         return false;
       }
-      event.setStepEvent(function_event);
+      event.set_step_event(function_event);
       return true;
     }
 
@@ -612,7 +612,7 @@ private:
       if (!rule_event) {
         return false;
       }
-      event.setStepEvent(rule_event);
+      event.set_step_event(rule_event);
       return true;
     }
 
@@ -660,7 +660,7 @@ private:
       if (!step_event) {
         return false;
       }
-      event.setStepEvent(step_event);
+      event.set_step_event(step_event);
     }
 
     return true;
@@ -672,14 +672,14 @@ private:
     if (!parse_header(ptr, end, version)) {
       return false;
     }
-    trace.setVersion(version);
+    trace.set_version(version);
 
     while (std::distance(ptr, end) >= 8U && peek_word(ptr) != config_sentinel) {
       llvm_event event;
       if (!parse_event(ptr, end, event)) {
         return false;
       }
-      trace.addPreTraceEvent(event);
+      trace.add_pre_trace_event(event);
     }
 
     uint64_t pattern_len = 0;
@@ -689,14 +689,14 @@ private:
     }
     llvm_event config_event;
     config_event.setkore_pattern(config, pattern_len);
-    trace.setInitialConfig(config_event);
+    trace.set_initial_config(config_event);
 
     while (ptr != end) {
       llvm_event event;
       if (!parse_event(ptr, end, event)) {
         return false;
       }
-      trace.addTraceEvent(event);
+      trace.add_trace_event(event);
     }
 
     return true;

@@ -11,11 +11,11 @@ llvm_function_event::llvm_function_event(
     : name_(std::move(name))
     , relative_position_(std::move(relative_position)) { }
 
-std::vector<llvm_event> const &llvm_function_event::getArguments() const {
+std::vector<llvm_event> const &llvm_function_event::get_arguments() const {
   return arguments_;
 }
 
-void llvm_function_event::addArgument(llvm_event const &argument) {
+void llvm_function_event::add_argument(llvm_event const &argument) {
   arguments_.push_back(argument);
 }
 
@@ -24,11 +24,11 @@ llvm_hook_event::llvm_hook_event(std::string name, std::string relative_position
     , relative_position_(std::move(relative_position))
     , kore_pattern_(nullptr) { }
 
-void llvm_hook_event::addArgument(llvm_event const &argument) {
+void llvm_hook_event::add_argument(llvm_event const &argument) {
   arguments_.push_back(argument);
 }
 
-void llvm_rewrite_event::printSubstitution(
+void llvm_rewrite_event::print_substitution(
     std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   for (auto const &p : substitution_) {
@@ -39,16 +39,16 @@ void llvm_rewrite_event::printSubstitution(
 void llvm_rule_event::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   out << fmt::format(
-      "{}rule: {} {}\n", Indent, getRuleOrdinal(), getSubstitution().size());
-  printSubstitution(out, indent + 1U);
+      "{}rule: {} {}\n", Indent, get_rule_ordinal(), get_substitution().size());
+  print_substitution(out, indent + 1U);
 }
 
 void llvm_side_condition_event::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent * indent_size, ' ');
   out << fmt::format(
-      "{}side condition entry: {} {}\n", Indent, getRuleOrdinal(),
-      getSubstitution().size());
-  printSubstitution(out, indent + 1U);
+      "{}side condition entry: {} {}\n", Indent, get_rule_ordinal(),
+      get_substitution().size());
+  print_substitution(out, indent + 1U);
 }
 
 void llvm_side_condition_end_event::print(

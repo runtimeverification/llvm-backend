@@ -22,18 +22,18 @@ auto X = subject(any);
 std::vector<kore_pattern *>
 getPatternsImpl(kore_pattern *pat, std::vector<kore_pattern *> &result) {
   if (auto *composite = dynamic_cast<kore_composite_pattern *>(pat)) {
-    if (composite->getConstructor()->getName() == "\\top"
-        && composite->getArguments().empty()) {
+    if (composite->get_constructor()->get_name() == "\\top"
+        && composite->get_arguments().empty()) {
       return result;
     }
-    if (composite->getConstructor()->getName() == "\\and"
-        && composite->getArguments().size() == 2) {
+    if (composite->get_constructor()->get_name() == "\\and"
+        && composite->get_arguments().size() == 2) {
       if (auto *firstChild = dynamic_cast<kore_composite_pattern *>(
-              composite->getArguments()[0].get())) {
-        if (firstChild->getConstructor()->getName() == "\\in"
-            && firstChild->getArguments().size() == 2) {
-          result.push_back(firstChild->getArguments()[1].get());
-          return getPatternsImpl(composite->getArguments()[1].get(), result);
+              composite->get_arguments()[0].get())) {
+        if (firstChild->get_constructor()->get_name() == "\\in"
+            && firstChild->get_arguments().size() == 2) {
+          result.push_back(firstChild->get_arguments()[1].get());
+          return getPatternsImpl(composite->get_arguments()[1].get(), result);
         }
       }
     }
@@ -59,15 +59,15 @@ getBuiltin(std::shared_ptr<kore_pattern> const &term) {
   }
 
   auto lhs = std::dynamic_pointer_cast<kore_composite_pattern>(
-      comp->getArguments()[0]);
+      comp->get_arguments()[0]);
   if (!lhs) {
     return std::nullopt;
   }
 
-  if (!lhs->getConstructor()->isBuiltin()) {
+  if (!lhs->get_constructor()->is_builtin()) {
     return lhs;
   }
-  return comp->getArguments()[1];
+  return comp->get_arguments()[1];
 }
 
 [[maybe_unused]] std::optional<std::vector<kore_pattern *>>
@@ -79,7 +79,7 @@ std::optional<std::vector<kore_pattern *>>
 getArguments(std::shared_ptr<kore_pattern> const &term) {
   if (auto comp = std::dynamic_pointer_cast<kore_composite_pattern>(term)) {
     auto result = std::vector<kore_pattern *>{};
-    for (auto const &arg : comp->getArguments()) {
+    for (auto const &arg : comp->get_arguments()) {
       result.push_back(arg.get());
     }
     return result;
@@ -105,7 +105,7 @@ getArguments(std::shared_ptr<kore_pattern> const &term) {
  * 11: lhs(\implies(\top(), \equals(_(Xs), _))) = Xs
  * 12: lhs(\implies(\equals(_, _), \equals(_(Xs), _))) = Xs
  */
-std::vector<kore_pattern *> kore_axiom_declaration::getLeftHandSide() const {
+std::vector<kore_pattern *> kore_axiom_declaration::get_left_hand_side() const {
   auto p0 = rewrites(and_(equals_(any, any), X), any);
   auto p1 = rewrites(and_(X, equals_(any, any)), any);
   auto p2 = rewrites(and_(top(), X), any);
@@ -142,7 +142,7 @@ std::vector<kore_pattern *> kore_axiom_declaration::getLeftHandSide() const {
  * 1: rhs(\equals(_, X)) = X
  * 2: rhs(\rewrites(_, \and(X, Y))) = getBuiltin(\and(X, Y))
  */
-kore_pattern *kore_axiom_declaration::getRightHandSide() const {
+kore_pattern *kore_axiom_declaration::get_right_hand_side() const {
   auto p0 = implies(any, equals_(any, and_(X, any)));
   auto p1 = equals_(any, X);
   auto p2 = rewrites(any, subject(and_(any, any)));
@@ -171,7 +171,7 @@ kore_pattern *kore_axiom_declaration::getRightHandSide() const {
  *  9: requires(\rewrites(\and(_, \equals(X, _)), _)) = X
  * 10: requires(\rewrites(\and(_, \top()), _)) = nullptr
  */
-kore_pattern *kore_axiom_declaration::getRequires() const {
+kore_pattern *kore_axiom_declaration::get_requires() const {
   auto p0 = implies(and_(not_(any), and_(top(), any)), any);
   auto p1 = implies(and_(not_(any), and_(equals_(X, any), any)), any);
   auto p2 = implies(and_(top(), any), any);

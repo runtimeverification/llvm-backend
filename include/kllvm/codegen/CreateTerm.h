@@ -22,17 +22,17 @@ private:
 
   llvm::Value *alloc_arg(
       kore_composite_pattern *pattern, int idx, std::string const &location_stack);
-  llvm::Value *createHook(
+  llvm::Value *create_hook(
       kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
       std::string const &location_stack = "0");
-  llvm::Value *createFunctionCall(
+  llvm::Value *create_function_call(
       std::string const &name, kore_composite_pattern *pattern, bool sret,
       bool tailcc, std::string const &location_stack = "0");
-  llvm::Value *notInjectionCase(
+  llvm::Value *not_injection_case(
       kore_composite_pattern *constructor, llvm::Value *val,
       std::string const &location_stack = "0");
-  bool populateStaticSet(kore_pattern *pattern);
-  std::pair<llvm::Value *, bool> createAllocation(
+  bool populate_static_set(kore_pattern *pattern);
+  std::pair<llvm::Value *, bool> create_allocation(
       kore_pattern *pattern, std::string const &location_stack = "0");
 
 public:
@@ -67,12 +67,12 @@ public:
               we load the value on return.
       - tailcc: true if the call should be made via the tailcc calling convention.
     */
-  llvm::Value *createFunctionCall(
+  llvm::Value *create_function_call(
       std::string const &name, value_type return_cat,
       std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
       std::string const &location_stack = "0");
 
-  [[nodiscard]] llvm::BasicBlock *getCurrentBlock() const {
+  [[nodiscard]] llvm::BasicBlock *get_current_block() const {
     return current_block_;
   }
 };

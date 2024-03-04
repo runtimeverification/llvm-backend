@@ -19,7 +19,7 @@ private:
   llvm::LLVMContext &ctx_;
 
   llvm::Constant *
-  notInjectionCase(kore_composite_pattern *constructor, llvm::Constant *val);
+  not_injection_case(kore_composite_pattern *constructor, llvm::Constant *val);
 
 public:
   create_static_term(kore_definition *definition, llvm::Module *module)
@@ -28,7 +28,7 @@ public:
       , ctx_(module->getContext()) { }
 
   std::pair<llvm::Constant *, bool> operator()(kore_pattern *pattern);
-  llvm::Constant *createToken(value_type sort, std::string contents);
+  llvm::Constant *create_token(value_type sort, std::string contents);
 };
 
 } // namespace kllvm

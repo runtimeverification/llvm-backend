@@ -258,7 +258,7 @@ kore_pattern *kore_pattern_make_interpreter_input(
 }
 
 kore_pattern *kore_pattern_desugar_associative(kore_pattern const *pat) {
-  return new kore_pattern{pat->ptr->desugarAssociative()};
+  return new kore_pattern{pat->ptr->desugar_associative()};
 }
 
 block *kore_pattern_construct(kore_pattern const *pat) {
@@ -336,18 +336,18 @@ void kore_simplify_binary(
 
 kore_pattern *kore_composite_pattern_new(char const *name) {
   return new kore_pattern{
-      kllvm::kore_composite_pattern::Create(std::string(name))};
+      kllvm::kore_composite_pattern::create(std::string(name))};
 }
 
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *sym) {
-  return new kore_pattern{kllvm::kore_composite_pattern::Create(sym->ptr.get())};
+  return new kore_pattern{kllvm::kore_composite_pattern::create(sym->ptr.get())};
 }
 
 void kore_composite_pattern_add_argument(
     kore_pattern *pat, kore_pattern const *arg) {
   if (auto const &cast
       = std::dynamic_pointer_cast<kllvm::kore_composite_pattern>(pat->ptr)) {
-    cast->addArgument(arg->ptr);
+    cast->add_argument(arg->ptr);
   } else {
     abort();
   }
@@ -375,7 +375,7 @@ void kore_sort_free(kore_sort const *sort) {
 }
 
 bool kore_sort_is_concrete(kore_sort const *sort) {
-  return sort->ptr->isConcrete();
+  return sort->ptr->is_concrete();
 }
 
 bool kore_sort_is_kitem(kore_sort const *sort) {
@@ -389,14 +389,14 @@ bool kore_sort_is_k(kore_sort const *sort) {
 /* kore_composite_sort */
 
 kore_sort *kore_composite_sort_new(char const *name) {
-  return new kore_sort{kllvm::kore_composite_sort::Create(std::string(name))};
+  return new kore_sort{kllvm::kore_composite_sort::create(std::string(name))};
 }
 
 void kore_composite_sort_add_argument(
     kore_sort const *sort, kore_sort const *arg) {
   if (auto const &cast
       = std::dynamic_pointer_cast<kllvm::kore_composite_sort>(sort->ptr)) {
-    cast->addArgument(arg->ptr);
+    cast->add_argument(arg->ptr);
   } else {
     abort();
   }
@@ -405,7 +405,7 @@ void kore_composite_sort_add_argument(
 /* kore_symbol */
 
 kore_symbol *kore_symbol_new(char const *name) {
-  return new kore_symbol{kllvm::kore_symbol::Create(std::string(name))};
+  return new kore_symbol{kllvm::kore_symbol::create(std::string(name))};
 }
 
 void kore_symbol_free(kore_symbol const *sym) {
@@ -417,7 +417,7 @@ char *kore_symbol_dump(kore_symbol const *sym) {
 }
 
 void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
-  sym->ptr->addFormalArgument(sort->ptr);
+  sym->ptr->add_formal_argument(sort->ptr);
 }
 
 /* Memory management */
@@ -448,7 +448,7 @@ char *get_c_string(std::string const &str) {
 }
 
 kore_pattern *kore_string_pattern_new_internal(std::string const &str) {
-  return new kore_pattern{kllvm::kore_string_pattern::Create(str)};
+  return new kore_pattern{kllvm::kore_string_pattern::create(str)};
 }
 
 kore_pattern *kore_pattern_new_token_internal(

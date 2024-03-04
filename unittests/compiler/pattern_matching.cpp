@@ -8,8 +8,9 @@ using namespace kllvm::pattern_matching;
 template <typename... Args>
 std::shared_ptr<kore_composite_pattern>
 term(std::string const &s, Args &&...args) {
-  std::shared_ptr<kore_composite_pattern> ret = kore_composite_pattern::Create(s);
-  (ret->addArgument(std::forward<Args>(args)), ...);
+  std::shared_ptr<kore_composite_pattern> ret
+      = kore_composite_pattern::create(s);
+  (ret->add_argument(std::forward<Args>(args)), ...);
   return ret;
 }
 
@@ -89,7 +90,7 @@ BOOST_AUTO_TEST_CASE(literals) {
 static std::optional<std::string>
 get_name(std::shared_ptr<kore_pattern> const &term) {
   if (auto comp = std::dynamic_pointer_cast<kore_composite_pattern>(term)) {
-    return comp->getConstructor()->getName();
+    return comp->get_constructor()->get_name();
   }
 
   return std::nullopt;

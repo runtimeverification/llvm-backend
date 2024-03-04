@@ -82,7 +82,7 @@ fs::path dt_dir() {
 fs::path get_indexed_filename(
     std::map<std::string, std::string> const &index,
     kore_symbol_declaration *decl) {
-  return dt_dir() / index.at(decl->getSymbol()->getName());
+  return dt_dir() / index.at(decl->get_symbol()->get_name());
 }
 
 std::map<std::string, std::string> read_index_file() {
@@ -154,17 +154,17 @@ int main(int argc, char **argv) {
     initDebugInfo(mod.get(), definition_path);
   }
 
-  for (auto *axiom : definition->getAxioms()) {
+  for (auto *axiom : definition->get_axioms()) {
     makeSideConditionFunction(axiom, definition.get(), mod.get());
-    if (!axiom->isTopAxiom()) {
+    if (!axiom->is_top_axiom()) {
       makeApplyRuleFunction(axiom, definition.get(), mod.get());
     } else {
       auto dt_filename
-          = dt_dir() / fmt::format("dt_{}.yaml", axiom->getOrdinal());
+          = dt_dir() / fmt::format("dt_{}.yaml", axiom->get_ordinal());
       if (fs::exists(dt_filename) && !proof_hint_instrumentation) {
         auto residuals = parseYamlSpecialdecisionTree(
-            mod.get(), dt_filename, definition->getAllSymbols(),
-            definition->getHookedSorts());
+            mod.get(), dt_filename, definition->get_all_symbols(),
+            definition->get_hooked_sorts());
         makeApplyRuleFunction(
             axiom, definition.get(), mod.get(), residuals.residuals);
         makeStepFunction(axiom, definition.get(), mod.get(), residuals);
@@ -173,11 +173,11 @@ int main(int argc, char **argv) {
       }
 
       auto match_filename
-          = dt_dir() / fmt::format("match_{}.yaml", axiom->getOrdinal());
+          = dt_dir() / fmt::format("match_{}.yaml", axiom->get_ordinal());
       if (fs::exists(match_filename)) {
         auto *dt = parseYamldecisionTree(
-            mod.get(), match_filename, definition->getAllSymbols(),
-            definition->getHookedSorts());
+            mod.get(), match_filename, definition->get_all_symbols(),
+            definition->get_hooked_sorts());
         makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
       }
     }
@@ -186,33 +186,33 @@ int main(int argc, char **argv) {
   emitConfigParserFunctions(definition.get(), mod.get());
 
   auto *dt = parseYamldecisionTree(
-      mod.get(), decision_tree, definition->getAllSymbols(),
-      definition->getHookedSorts());
+      mod.get(), decision_tree, definition->get_all_symbols(),
+      definition->get_hooked_sorts());
   makeStepFunction(definition.get(), mod.get(), dt, false);
   auto *dtSearch = parseYamldecisionTree(
-      mod.get(), dt_dir() / "dt-search.yaml", definition->getAllSymbols(),
-      definition->getHookedSorts());
+      mod.get(), dt_dir() / "dt-search.yaml", definition->get_all_symbols(),
+      definition->get_hooked_sorts());
   makeStepFunction(definition.get(), mod.get(), dtSearch, true);
 
   auto index = read_index_file();
-  for (auto const &entry : definition->getSymbols()) {
+  for (auto const &entry : definition->get_symbols()) {
     auto *symbol = entry.second;
-    auto *decl = definition->getSymbolDeclarations().at(symbol->getName());
+    auto *decl = definition->get_symbol_declarations().at(symbol->get_name());
     if (decl->attributes().contains(attribute_set::key::function)
-        && !decl->isHooked()) {
+        && !decl->is_hooked()) {
       auto filename = get_indexed_filename(index, decl);
       auto *funcDt = parseYamldecisionTree(
-          mod.get(), filename, definition->getAllSymbols(),
-          definition->getHookedSorts());
-      makeEvalFunction(decl->getSymbol(), definition.get(), mod.get(), funcDt);
-    } else if (decl->isAnywhere()) {
+          mod.get(), filename, definition->get_all_symbols(),
+          definition->get_hooked_sorts());
+      makeEvalFunction(decl->get_symbol(), definition.get(), mod.get(), funcDt);
+    } else if (decl->is_anywhere()) {
       auto filename = get_indexed_filename(index, decl);
       auto *funcDt = parseYamldecisionTree(
-          mod.get(), filename, definition->getAllSymbols(),
-          definition->getHookedSorts());
+          mod.get(), filename, definition->get_all_symbols(),
+          definition->get_hooked_sorts());
 
       makeAnywhereFunction(
-          definition->getAllSymbols().at(ast_to_string(*decl->getSymbol())),
+          definition->get_all_symbols().at(ast_to_string(*decl->get_symbol())),
           definition.get(), mod.get(), funcDt);
     }
   }

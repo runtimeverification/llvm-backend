@@ -240,12 +240,12 @@ public:
   [[nodiscard]] match_result
   match(std::shared_ptr<kore_pattern> const &term) const {
     if (auto composite = std::dynamic_pointer_cast<kore_composite_pattern>(term);
-        composite && composite->getArguments().size() == arity()
-        && composite->getConstructor()->getName() == constructor_) {
+        composite && composite->get_arguments().size() == arity()
+        && composite->get_constructor()->get_name() == constructor_) {
       auto results = std::vector<match_result>{};
 
       detail::enumerate(children_, [&](auto idx, auto const &subpattern) {
-        results.push_back(subpattern.match(composite->getArguments()[idx]));
+        results.push_back(subpattern.match(composite->get_arguments()[idx]));
       });
 
       auto all_match
