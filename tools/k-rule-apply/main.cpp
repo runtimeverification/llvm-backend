@@ -80,7 +80,8 @@ int main(int argc, char **argv) {
 
   reset_match_reason(handle);
   init_static_objects(handle);
-  auto *b = construct_initial_configuration(initial_configuration.get(), handle);
+  auto *b
+      = construct_initial_configuration(initial_configuration.get(), handle);
   if (b == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
@@ -99,7 +100,8 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  print_match_result(std::cout, (match_log *)log, log_size, kompiled_dir, handle);
+  print_match_result(
+      std::cout, (match_log *)log, log_size, kompiled_dir, handle);
 
   dlclose(handle);
   return 0;

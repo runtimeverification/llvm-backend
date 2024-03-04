@@ -28,8 +28,8 @@ extern char kompiled_directory;
 
 char *get_terminated_string(string *str);
 
-static blockheader kseq_header
-    = {get_block_header_for_symbol((uint64_t)get_tag_for_symbol_name("kseq{}"))};
+static blockheader kseq_header = {
+    get_block_header_for_symbol((uint64_t)get_tag_for_symbol_name("kseq{}"))};
 
 static std::map<std::string, std::string> log_files;
 
@@ -329,7 +329,8 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
   int fd = mpz_get_si(i);
   size_t length = mpz_get_ui(len);
 
-  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + length));
+  auto *result
+      = static_cast<string *>(kore_alloc_token(sizeof(string) + length));
   int bytes = read(fd, &(result->data), length);
 
   if (-1 == bytes) {

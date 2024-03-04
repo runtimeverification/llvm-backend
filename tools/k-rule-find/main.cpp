@@ -32,8 +32,8 @@ std::string get_source(kore_axiom_declaration *axiom) {
   auto *source_att = axiom->attributes().get(attribute_set::key::Source).get();
   assert(source_att->get_arguments().size() == 1);
 
-  auto *str_pattern
-      = dynamic_cast<kore_string_pattern *>(source_att->get_arguments()[0].get());
+  auto *str_pattern = dynamic_cast<kore_string_pattern *>(
+      source_att->get_arguments()[0].get());
   return str_pattern->get_contents();
 }
 
@@ -42,8 +42,8 @@ location get_location(kore_axiom_declaration *axiom) {
       = axiom->attributes().get(attribute_set::key::Location).get();
   assert(location_att->get_arguments().size() == 1);
 
-  auto *str_pattern
-      = dynamic_cast<kore_string_pattern *>(location_att->get_arguments()[0].get());
+  auto *str_pattern = dynamic_cast<kore_string_pattern *>(
+      location_att->get_arguments()[0].get());
   std::string location = str_pattern->get_contents();
 
   size_t l_paren = location.find_first_of('(');

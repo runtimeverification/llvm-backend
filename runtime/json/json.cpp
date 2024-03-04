@@ -55,14 +55,15 @@ struct jsonmember {
   block *val;
 };
 
-static blockheader kseq_header
-    = {get_block_header_for_symbol((uint64_t)get_tag_for_symbol_name("kseq{}"))};
+static blockheader kseq_header = {
+    get_block_header_for_symbol((uint64_t)get_tag_for_symbol_name("kseq{}"))};
 
 #define GET_HEADER(name, symbol)                                               \
   static struct blockheader name() {                                           \
     static struct blockheader hdr = {(uint64_t)-1};                            \
     if (hdr.hdr == -1) {                                                       \
-      hdr = get_block_header_for_symbol((uint64_t)get_tag_for_symbol_name(symbol));    \
+      hdr = get_block_header_for_symbol(                                       \
+          (uint64_t)get_tag_for_symbol_name(symbol));                          \
     }                                                                          \
     return hdr;                                                                \
   }
@@ -80,7 +81,7 @@ GET_HEADER(listWrapHdr, "LblJSONList{}");
   static block *name() {                                                       \
     static uint64_t tag = (uint64_t)-1;                                        \
     if (tag == -1) {                                                           \
-      tag = (uint64_t)leaf_block(get_tag_for_symbol_name(symbol));                 \
+      tag = (uint64_t)leaf_block(get_tag_for_symbol_name(symbol));             \
     }                                                                          \
     return (block *)tag;                                                       \
   }

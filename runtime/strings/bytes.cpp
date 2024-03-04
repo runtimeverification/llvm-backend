@@ -98,8 +98,9 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
   mpz_init(twos);
   extract(twos, i, 0, len_long * 8);
   size_t size_in_bytes = (mpz_sizeinbase(twos, 2) + 7) / 8;
-  void *start = result->data
-                + (endianness == tag_big_endian() ? len_long - size_in_bytes : 0);
+  void *start
+      = result->data
+        + (endianness == tag_big_endian() ? len_long - size_in_bytes : 0);
   mpz_export(start, nullptr, order, 1, 0, 0, twos);
   mpz_clear(twos);
   return result;

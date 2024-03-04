@@ -14,7 +14,8 @@
 
 #define KCHAR char
 
-void *construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
+void *
+construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
   return nullptr;
 }
 
@@ -190,7 +191,8 @@ BOOST_AUTO_TEST_CASE(tell) {
                     get_tag_for_symbol_name("inj{SortIOError{}, SortKItem{}}"))
                     .hdr);
   BOOST_CHECK_EQUAL(
-      (uint64_t) * (b->children), ERRBLOCK(get_tag_for_symbol_name(GETTAG(EBADF))));
+      (uint64_t) * (b->children),
+      ERRBLOCK(get_tag_for_symbol_name(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(getc) {
@@ -242,7 +244,8 @@ BOOST_AUTO_TEST_CASE(getc) {
   char const *temp = GETTAG(EOF);
   BOOST_CHECK(std::string(temp) != "");
   BOOST_CHECK_EQUAL(
-      (uint64_t) * (b->children), ERRBLOCK(get_tag_for_symbol_name(GETTAG(EOF))));
+      (uint64_t) * (b->children),
+      ERRBLOCK(get_tag_for_symbol_name(GETTAG(EOF))));
 
   ::close(fd);
 
@@ -253,7 +256,8 @@ BOOST_AUTO_TEST_CASE(getc) {
                     get_tag_for_symbol_name("inj{SortIOError{}, SortKItem{}}"))
                     .hdr);
   BOOST_CHECK_EQUAL(
-      (uint64_t) * (b->children), ERRBLOCK(get_tag_for_symbol_name(GETTAG(EBADF))));
+      (uint64_t) * (b->children),
+      ERRBLOCK(get_tag_for_symbol_name(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(read) {
@@ -265,18 +269,20 @@ BOOST_AUTO_TEST_CASE(read) {
 
   block *b = hook_IO_read(f, length);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(
-                    get_tag_for_symbol_name("inj{SortString{}, SortIOString{}}"))
-                    .hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(
+          get_tag_for_symbol_name("inj{SortString{}, SortIOString{}}"))
+          .hdr);
   string *str = (string *)*(b->children);
 
   BOOST_CHECK_EQUAL(0, strncmp(str->data, "hello ", 6));
 
   b = hook_IO_read(f, length);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(
-                    get_tag_for_symbol_name("inj{SortString{}, SortIOString{}}"))
-                    .hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(
+          get_tag_for_symbol_name("inj{SortString{}, SortIOString{}}"))
+          .hdr);
   str = (string *)*(b->children);
   BOOST_CHECK_EQUAL(0, strncmp(str->data, "world!", 6));
 
@@ -284,9 +290,10 @@ BOOST_AUTO_TEST_CASE(read) {
 
   b = hook_IO_read(f, length);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(
-                    get_tag_for_symbol_name("inj{SortString{}, SortIOString{}}"))
-                    .hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(
+          get_tag_for_symbol_name("inj{SortString{}, SortIOString{}}"))
+          .hdr);
   str = (string *)*(b->children);
   BOOST_CHECK_EQUAL(0, len(str));
 
@@ -298,7 +305,8 @@ BOOST_AUTO_TEST_CASE(read) {
                     get_tag_for_symbol_name("inj{SortIOError{}, SortKItem{}}"))
                     .hdr);
   BOOST_CHECK_EQUAL(
-      (uint64_t) * (b->children), ERRBLOCK(get_tag_for_symbol_name(GETTAG(EBADF))));
+      (uint64_t) * (b->children),
+      ERRBLOCK(get_tag_for_symbol_name(GETTAG(EBADF))));
 }
 
 BOOST_AUTO_TEST_CASE(close) {
@@ -319,7 +327,8 @@ BOOST_AUTO_TEST_CASE(close) {
 
   block *b = hook_IO_close(f1);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -330,7 +339,8 @@ BOOST_AUTO_TEST_CASE(close) {
       ERRBLOCK(get_tag_for_symbol_name(GETTAG(EBADF))));
   b = hook_IO_close(f2);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -372,7 +382,8 @@ BOOST_AUTO_TEST_CASE(putc) {
 
   block *b = hook_IO_putc(f, c);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -402,7 +413,8 @@ BOOST_AUTO_TEST_CASE(seek) {
   mpz_set_si(f, -1);
   block *b = hook_IO_seek(f, loc);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -434,7 +446,8 @@ BOOST_AUTO_TEST_CASE(seekEnd) {
   mpz_set_si(f, -1);
   block *b = hook_IO_seekEnd(f, loc);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -463,7 +476,8 @@ BOOST_AUTO_TEST_CASE(write) {
   mpz_set_si(f, -1);
   block *b = hook_IO_write(f, msg);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -494,7 +508,8 @@ BOOST_AUTO_TEST_CASE(lock) {
   mpz_set_si(f, -1);
   b = hook_IO_lock(f, len);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -525,7 +540,8 @@ BOOST_AUTO_TEST_CASE(unlock) {
   mpz_set_si(f, -1);
   b = hook_IO_unlock(f, len);
   BOOST_CHECK_EQUAL(
-      b->h.hdr, get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
+      b->h.hdr,
+      get_block_header_for_symbol(get_tag_for_symbol_name("kseq{}")).hdr);
   BOOST_CHECK_EQUAL(
       ((block *)*(b->children))->h.hdr,
       get_block_header_for_symbol(
@@ -569,7 +585,8 @@ BOOST_AUTO_TEST_CASE(system) {
 
   BOOST_CHECK_EQUAL(
       ret->h.hdr,
-      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult))).hdr);
+      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult)))
+          .hdr);
   BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) * (ret->children), 0));
 
   string *out = (string *)*(ret->children + 1);
@@ -587,7 +604,8 @@ BOOST_AUTO_TEST_CASE(system) {
   BOOST_CHECK((ret->children + 2) != NULL);
   BOOST_CHECK_EQUAL(
       ret->h.hdr,
-      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult))).hdr);
+      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult)))
+          .hdr);
   BOOST_CHECK(mpz_cmp_si((mpz_ptr) * (ret->children), 0) > 0);
 
   /* Execute program that segfaults */
@@ -601,7 +619,8 @@ BOOST_AUTO_TEST_CASE(system) {
   BOOST_CHECK((ret->children + 2) != NULL);
   BOOST_CHECK_EQUAL(
       ret->h.hdr,
-      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult))).hdr);
+      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult)))
+          .hdr);
   // this assertion fails on some platforms
   // BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) *(ret->children), 139));
 
@@ -616,7 +635,8 @@ BOOST_AUTO_TEST_CASE(system) {
   BOOST_CHECK((ret->children + 2) != NULL);
   BOOST_CHECK_EQUAL(
       ret->h.hdr,
-      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult))).hdr);
+      get_block_header_for_symbol(get_tag_for_symbol_name(GETTAG(systemResult)))
+          .hdr);
   BOOST_CHECK_EQUAL(0, mpz_cmp_si((mpz_ptr) * (ret->children), 0));
 
   string *err = (string *)*(ret->children + 2);

@@ -48,8 +48,8 @@ void init_debug_info(llvm::Module *module, std::string const &filename) {
   //   https://github.com/runtimeverification/k/issues/2637
   //   https://llvm.org/doxygen/classllvm_1_1DIBuilder.html
   dbg_cu = dbg->createCompileUnit(
-      llvm::dwarf::DW_LANG_C, dbg_file, "llvm-kompile-codegen", false, "", 0, "",
-      llvm::DICompileUnit::DebugEmissionKind::FullDebug, 0, false, false,
+      llvm::dwarf::DW_LANG_C, dbg_file, "llvm-kompile-codegen", false, "", 0,
+      "", llvm::DICompileUnit::DebugEmissionKind::FullDebug, 0, false, false,
       llvm::DICompileUnit::DebugNameTableKind::None);
 }
 
@@ -64,7 +64,8 @@ void init_debug_function(
   if (!dbg) {
     return;
   }
-  auto *unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
+  auto *unit
+      = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
   llvm::DIScope *f_context = unit;
   dbg_sp = dbg->createFunction(
       f_context, name, name, unit, dbg_line, type, dbg_line,
@@ -79,8 +80,8 @@ void init_debug_param(
     return;
   }
   llvm::DILocalVariable *dbg_var = dbg->createParameterVariable(
-      dbg_sp, name, arg_no + 1, dbg_file, dbg_line, get_debug_type(type, type_name),
-      true);
+      dbg_sp, name, arg_no + 1, dbg_file, dbg_line,
+      get_debug_type(type, type_name), true);
   dbg->insertDbgValueIntrinsic(
       func->arg_begin() + arg_no, dbg_var, dbg->createExpression(),
       llvm::DILocation::get(func->getContext(), dbg_line, dbg_column, dbg_sp),
@@ -106,10 +107,11 @@ void init_debug_axiom(attribute_set const &att) {
     reset_debug_loc();
     return;
   }
-  kore_composite_pattern *source_att = att.get(attribute_set::key::Source).get();
+  kore_composite_pattern *source_att
+      = att.get(attribute_set::key::Source).get();
   assert(source_att->get_arguments().size() == 1);
-  auto *str_pattern
-      = dynamic_cast<kore_string_pattern *>(source_att->get_arguments()[0].get());
+  auto *str_pattern = dynamic_cast<kore_string_pattern *>(
+      source_att->get_arguments()[0].get());
   std::string source = str_pattern->get_contents();
   if (!att.contains(attribute_set::key::Location)) {
     reset_debug_loc();
@@ -118,8 +120,8 @@ void init_debug_axiom(attribute_set const &att) {
   kore_composite_pattern *location_att
       = att.get(attribute_set::key::Location).get();
   assert(location_att->get_arguments().size() == 1);
-  auto *str_pattern2
-      = dynamic_cast<kore_string_pattern *>(location_att->get_arguments()[0].get());
+  auto *str_pattern2 = dynamic_cast<kore_string_pattern *>(
+      location_att->get_arguments()[0].get());
   std::string location = str_pattern2->get_contents();
   source = source.substr(7, source.length() - 8);
   size_t first_comma = location.find_first_of(',');
@@ -143,7 +145,8 @@ llvm::DIType *get_forward_decl(std::string const &name) {
   if (!dbg) {
     return nullptr;
   }
-  auto *unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
+  auto *unit
+      = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
   return dbg->createForwardDecl(
       llvm::dwarf::DW_TAG_structure_type, name, dbg_cu, unit, 0);
 }
@@ -181,7 +184,8 @@ llvm::DIType *get_debug_type(value_type type, std::string const &type_name) {
     types[type_name] = map;
     return map;
   case sort_category::RangeMap:
-    rangemap = get_pointer_debug_type(get_forward_decl(rangemap_struct), type_name);
+    rangemap
+        = get_pointer_debug_type(get_forward_decl(rangemap_struct), type_name);
     types[type_name] = rangemap;
     return rangemap;
   case sort_category::List:
@@ -197,7 +201,8 @@ llvm::DIType *get_debug_type(value_type type, std::string const &type_name) {
     types[type_name] = integer;
     return integer;
   case sort_category::Float:
-    floating = get_pointer_debug_type(get_forward_decl(float_struct), type_name);
+    floating
+        = get_pointer_debug_type(get_forward_decl(float_struct), type_name);
     types[type_name] = floating;
     return floating;
   case sort_category::StringBuffer:
@@ -302,7 +307,7 @@ void set_debug_loc(llvm::Instruction *instr) {
   if (!dbg) {
     return;
   }
-  instr->setDebugLoc(llvm::DebugLoc(
-      llvm::DILocation::get(instr->getContext(), dbg_line, dbg_column, dbg_sp)));
+  instr->setDebugLoc(llvm::DebugLoc(llvm::DILocation::get(
+      instr->getContext(), dbg_line, dbg_column, dbg_sp)));
 }
 } // namespace kllvm

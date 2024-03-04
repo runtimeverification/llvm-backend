@@ -65,7 +65,8 @@ private:
    * Emit a call that will serialize `value` to the specified `outputFile`.
    */
   llvm::CallInst *emit_write_uint64(
-      llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end);
+      llvm::Value *output_file, uint64_t value,
+      llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `str` to the specified `outputFile`.

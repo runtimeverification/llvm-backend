@@ -198,8 +198,8 @@ bool less_than_eq(pretty_print_data const &data, kore_sort *s1, kore_sort *s2) {
          || (data.subsorts.contains(s1) && data.subsorts.at(s1).contains(s2));
 }
 
-sptr<kore_sort>
-get_arg_sort(kore_symbol *symbol, int position, sptr<kore_sort> first_arg_sort) {
+sptr<kore_sort> get_arg_sort(
+    kore_symbol *symbol, int position, sptr<kore_sort> first_arg_sort) {
   if (!symbol->is_builtin()) {
     return symbol->get_arguments()[position];
   }
@@ -288,9 +288,9 @@ bool is_priority_wrong(
   std::string inner_name = inner->get_constructor()->get_name();
   kore_sort *inner_sort = get_return_sort(inner).get();
   kore_sort *outer_sort = get_arg_sort(
-                             outer->get_constructor(), position,
-                             outer->get_arguments()[0]->get_sort())
-                             .get();
+                              outer->get_constructor(), position,
+                              outer->get_arguments()[0]->get_sort())
+                              .get();
   if (!less_than_eq(data, inner_sort, outer_sort)) {
     return true;
   }
@@ -395,8 +395,10 @@ bool requires_bracket_with_simple_algorithm(
     }
 
     if ((inner_fixity & BareLeft) && left_capture != nullptr) {
-      bool inverse_priority = is_priority_wrong(composite, left_capture, 0, data);
-      auto left_capture_fixity = get_fixity(left_capture->get_constructor(), data);
+      bool inverse_priority
+          = is_priority_wrong(composite, left_capture, 0, data);
+      auto left_capture_fixity
+          = get_fixity(left_capture->get_constructor(), data);
       if (!inverse_priority && (left_capture_fixity & BareRight)) {
         return true;
       }
@@ -426,7 +428,8 @@ sptr<kore_pattern> add_brackets(
         outer->get_arguments()[0]->get_sort());
     sptr<kore_sort> inner_sort = get_return_sort(inner.get());
     for (auto const &entry : data.brackets) {
-      bool is_correct_outer_sort = less_than_eq(data, entry.first, outer_sort.get());
+      bool is_correct_outer_sort
+          = less_than_eq(data, entry.first, outer_sort.get());
       if (is_correct_outer_sort) {
         for (kore_symbol *s : entry.second) {
           bool is_correct_inner_sort = less_than_eq(

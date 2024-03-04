@@ -282,7 +282,8 @@ void print_range_map(
     print_configuration_internal(
         file, entry.first.end(), "SortKItem{}", false, state);
     sfprintf(file, "),");
-    print_configuration_internal(file, entry.second, arg_sorts[1], false, state);
+    print_configuration_internal(
+        file, entry.second, arg_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

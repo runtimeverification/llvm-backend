@@ -42,7 +42,8 @@ get_arena_collection_semispace_id(const struct arena *arena) {
   return ~arena->allocation_semispace_id;
 }
 
-__attribute__((always_inline)) char get_arena_semispace_id_of_object(void *ptr) {
+__attribute__((always_inline)) char
+get_arena_semispace_id_of_object(void *ptr) {
   return mem_block_header(ptr)->semispace;
 }
 
@@ -174,7 +175,8 @@ __attribute__((always_inline)) void arena_clear(struct arena *arena) {
       = arena->first_block ? arena->first_block + BLOCK_SIZE : nullptr;
 }
 
-__attribute__((always_inline)) char *arena_start_ptr(const struct arena *arena) {
+__attribute__((always_inline)) char *
+arena_start_ptr(const struct arena *arena) {
   return arena->first_block ? arena->first_block + sizeof(memory_block_header)
                             : nullptr;
 }

@@ -18,11 +18,13 @@ void *construct_initial_configuration(kore_pattern const *);
 void reset_match_reason();
 match_log *getmatch_log();
 size_t getmatch_log_size();
-void print_match_result(std::ostream &, match_log *, size_t, std::string const &);
+void print_match_result(
+    std::ostream &, match_log *, size_t, std::string const &);
 void init_static_objects();
 }
 
-void *construct_initial_configuration(kore_pattern const *pattern, void *handle) {
+void *
+construct_initial_configuration(kore_pattern const *pattern, void *handle) {
   void *funcPtr = dlsym(handle, "construct_initial_configuration");
   if (funcPtr == NULL) {
     return NULL;

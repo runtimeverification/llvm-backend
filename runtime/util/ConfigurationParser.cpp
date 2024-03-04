@@ -57,7 +57,8 @@ static uint32_t get_tag_for_symbol(kore_symbol const &symbol) {
   return get_tag_for_symbol_name(name.c_str());
 }
 
-void *construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
+void *
+construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
   if (is_symbol_a_function(tag)) {
     return evaluate_function_symbol(tag, arguments.data());
   }
@@ -266,7 +267,8 @@ block *parse_configuration(char const *filename) {
   // InitialConfiguration->print(std::cout);
 
   // Allocate the llvm KORE datastructures for the configuration
-  auto *b = (block *)construct_initial_configuration(initial_configuration.get());
+  auto *b
+      = (block *)construct_initial_configuration(initial_configuration.get());
   deallocate_s_ptr_kore_pattern(std::move(initial_configuration));
   return b;
 }

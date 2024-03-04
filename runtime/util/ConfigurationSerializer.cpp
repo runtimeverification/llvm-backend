@@ -367,7 +367,8 @@ void serialize_configuration_internal(
       }
     }
 
-    emit_symbol(state.instance, name.c_str(), get_symbol_arity(tag), sorts.size());
+    emit_symbol(
+        state.instance, name.c_str(), get_symbol_arity(tag), sorts.size());
   } else {
     emit_symbol(state.instance, symbol, get_symbol_arity(tag));
   }
@@ -410,7 +411,8 @@ void serialize_configuration_to_file(
     FILE *file, block *subject, bool emit_size, bool use_intern) {
   char *data = nullptr;
   size_t size = 0;
-  serialize_configuration(subject, nullptr, &data, &size, emit_size, use_intern);
+  serialize_configuration(
+      subject, nullptr, &data, &size, emit_size, use_intern);
 
   fwrite(data, 1, size, file);
 
@@ -474,7 +476,8 @@ sorted_term_to_kore_pattern(block *subject, char const *sort) {
   char *data_out = nullptr;
   size_t size_out = 0;
 
-  serialize_configuration(term, "SortKItem{}", &data_out, &size_out, true, true);
+  serialize_configuration(
+      term, "SortKItem{}", &data_out, &size_out, true, true);
   auto result = deserialize_pattern(data_out, data_out + size_out);
 
   free(data_out);

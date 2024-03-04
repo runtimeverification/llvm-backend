@@ -364,7 +364,8 @@ hook_STRING_countAllOccurrences(SortString haystack, SortString needle) {
 SortString hook_STRING_transcode(
     SortString input, SortString input_charset, SortString output_charset) {
   iconv_t converter = iconv_open(
-      get_terminated_string(output_charset), get_terminated_string(input_charset));
+      get_terminated_string(output_charset),
+      get_terminated_string(input_charset));
   char *inbuf = input->data;
   size_t inbytesleft = len(input);
   size_t outbytesleft = inbytesleft * 4;
@@ -425,8 +426,8 @@ hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
       new_contents = static_cast<string *>(
           kore_alloc_token_old(sizeof(string) + new_capacity));
     } else {
-      new_contents
-          = static_cast<string *>(kore_alloc_token(sizeof(string) + new_capacity));
+      new_contents = static_cast<string *>(
+          kore_alloc_token(sizeof(string) + new_capacity));
     }
     memcpy(new_contents->data, buf->contents->data, buf->strlen);
     buf->contents = new_contents;

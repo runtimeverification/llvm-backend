@@ -11,8 +11,8 @@ namespace {
 template <typename Elem, typename Hash, typename Equal>
 std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
 transitive_closure(std::unordered_map<
-                  Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-                      relations) {
+                   Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
+                       relations) {
   bool dirty = false;
   do {
     dirty = false;
@@ -54,13 +54,16 @@ void kore_definition::add_module(sptr<kore_module> module) {
       sort_declarations_.insert({sort_decl->get_name(), sort_decl});
       auto sort = kore_composite_sort::create(sort_decl->get_name());
     } else if (
-        auto *symbol_decl = dynamic_cast<kore_symbol_declaration *>(decl.get())) {
+        auto *symbol_decl
+        = dynamic_cast<kore_symbol_declaration *>(decl.get())) {
       symbol_declarations_.insert(
           {symbol_decl->get_symbol()->get_name(), symbol_decl});
     } else if (
         auto *alias_decl = dynamic_cast<kore_alias_declaration *>(decl.get())) {
-      alias_declarations_.insert({alias_decl->get_symbol()->get_name(), alias_decl});
-    } else if (auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get())) {
+      alias_declarations_.insert(
+          {alias_decl->get_symbol()->get_name(), alias_decl});
+    } else if (
+        auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get())) {
       axioms_.push_back(axiom);
     }
   }
@@ -85,8 +88,10 @@ SubsortMap kore_definition::get_subsorts() const {
   for (auto *axiom : axioms_) {
     if (axiom->attributes().contains(attribute_set::key::Subsort)) {
       auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
-      auto const &inner_sort = att->get_constructor()->get_formal_arguments()[0];
-      auto const &outer_sort = att->get_constructor()->get_formal_arguments()[1];
+      auto const &inner_sort
+          = att->get_constructor()->get_formal_arguments()[0];
+      auto const &outer_sort
+          = att->get_constructor()->get_formal_arguments()[1];
       subsorts[inner_sort.get()].insert(outer_sort.get());
     }
   }
@@ -102,11 +107,11 @@ SymbolMap kore_definition::get_overloads() const {
       auto const &att
           = axiom->attributes().get(attribute_set::key::SymbolOverload);
       auto *inner_symbol = std::dynamic_pointer_cast<kore_composite_pattern>(
-                              att->get_arguments()[1])
-                              ->get_constructor();
+                               att->get_arguments()[1])
+                               ->get_constructor();
       auto *outer_symbol = std::dynamic_pointer_cast<kore_composite_pattern>(
-                              att->get_arguments()[0])
-                              ->get_constructor();
+                               att->get_arguments()[0])
+                               ->get_constructor();
       overloads[inner_symbol].insert(outer_symbol);
     }
   }
@@ -128,7 +133,8 @@ void kore_definition::preprocess() {
             attribute_set::key::FreshGenerator)) {
       auto sort = decl.second->get_symbol()->get_sort();
       if (sort->is_concrete()) {
-        fresh_functions_[dynamic_cast<kore_composite_sort *>(sort.get())->get_name()]
+        fresh_functions_[dynamic_cast<kore_composite_sort *>(sort.get())
+                             ->get_name()]
             = decl.second->get_symbol();
       }
     }
@@ -165,7 +171,8 @@ void kore_definition::preprocess() {
   }
   uint32_t next_symbol = 0;
   uint16_t next_layout = 1;
-  auto instantiations = std::unordered_map<kore_symbol, uint32_t, hash_symbol>{};
+  auto instantiations
+      = std::unordered_map<kore_symbol, uint32_t, hash_symbol>{};
   auto layouts = std::unordered_map<std::string, uint16_t>{};
   auto variables
       = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
@@ -198,14 +205,16 @@ void kore_definition::preprocess() {
       for (auto const &sort : symbol->get_arguments()) {
         if (sort->is_concrete()) {
           hooked_sorts_[dynamic_cast<kore_composite_sort *>(sort.get())
-                          ->get_category(this)]
+                            ->get_category(this)]
               = std::dynamic_pointer_cast<kore_composite_sort>(sort);
         }
       }
       if (symbol->get_sort()->is_concrete()) {
-        hooked_sorts_[dynamic_cast<kore_composite_sort *>(symbol->get_sort().get())
-                        ->get_category(this)]
-            = std::dynamic_pointer_cast<kore_composite_sort>(symbol->get_sort());
+        hooked_sorts_[dynamic_cast<kore_composite_sort *>(
+                          symbol->get_sort().get())
+                          ->get_category(this)]
+            = std::dynamic_pointer_cast<kore_composite_sort>(
+                symbol->get_sort());
       }
       if (!symbol->is_concrete()) {
         if (symbol->is_polymorphic()) {

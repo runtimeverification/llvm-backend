@@ -145,7 +145,8 @@ void bind_ast(py::module_ &m) {
           py::arg("is_hooked") = false)
       .def_property_readonly(
           "is_hooked", &kore_composite_sort_declaration::is_hooked)
-      .def_property_readonly("name", &kore_composite_sort_declaration::get_name);
+      .def_property_readonly(
+          "name", &kore_composite_sort_declaration::get_name);
 
   auto symbol_alias_decl_base
       = py::class_<
@@ -173,7 +174,9 @@ void bind_ast(py::module_ &m) {
 
   py::class_<kore_axiom_declaration, std::shared_ptr<kore_axiom_declaration>>(
       ast, "AxiomDeclaration", decl_base)
-      .def(py::init(&kore_axiom_declaration::create), py::arg("is_claim") = false)
+      .def(
+          py::init(&kore_axiom_declaration::create),
+          py::arg("is_claim") = false)
       .def_property_readonly("is_claim", &kore_axiom_declaration::is_claim)
       .def("add_pattern", &kore_axiom_declaration::add_pattern)
       .def_property_readonly("pattern", &kore_axiom_declaration::get_pattern);
@@ -202,7 +205,8 @@ void bind_ast(py::module_ &m) {
         return decl.attributes().underlying();
       });
 
-  py::class_<kore_definition, std::shared_ptr<kore_definition>>(ast, "Definition")
+  py::class_<kore_definition, std::shared_ptr<kore_definition>>(
+      ast, "Definition")
       .def(py::init(&kore_definition::create))
       .def("__repr__", print_repr_adapter<kore_definition>())
       .def("add_module", &kore_definition::add_module)
@@ -340,7 +344,8 @@ void bind_ast(py::module_ &m) {
           "constructor", &kore_composite_pattern::get_constructor)
       .def("desugar_associative", &kore_composite_pattern::desugar_associative)
       .def("add_argument", &kore_composite_pattern::add_argument)
-      .def_property_readonly("arguments", &kore_composite_pattern::get_arguments);
+      .def_property_readonly(
+          "arguments", &kore_composite_pattern::get_arguments);
 
   py::class_<kore_variable_pattern, std::shared_ptr<kore_variable_pattern>>(
       ast, "VariablePattern", pattern_base)
@@ -371,9 +376,10 @@ void bind_parser(py::module_ &mod) {
 void bind_proof_trace(py::module_ &m) {
   auto proof_trace = m.def_submodule("prooftrace", "K LLVM backend KORE AST");
 
-  auto step_event = py::class_<llvm_step_event, std::shared_ptr<llvm_step_event>>(
-                        proof_trace, "llvm_step_event")
-                        .def("__repr__", print_repr_adapter<llvm_step_event>());
+  auto step_event
+      = py::class_<llvm_step_event, std::shared_ptr<llvm_step_event>>(
+            proof_trace, "llvm_step_event")
+            .def("__repr__", print_repr_adapter<llvm_step_event>());
 
   auto rewrite_event
       = py::class_<llvm_rewrite_event, std::shared_ptr<llvm_rewrite_event>>(
@@ -392,7 +398,8 @@ void bind_proof_trace(py::module_ &m) {
       proof_trace, "llvm_side_condition_event", rewrite_event);
 
   py::class_<
-      llvm_side_condition_end_event, std::shared_ptr<llvm_side_condition_end_event>>(
+      llvm_side_condition_end_event,
+      std::shared_ptr<llvm_side_condition_end_event>>(
       proof_trace, "llvm_side_condition_end_event", step_event)
       .def_property_readonly(
           "rule_ordinal", &llvm_side_condition_end_event::get_rule_ordinal)

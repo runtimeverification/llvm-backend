@@ -29,8 +29,8 @@ class kore_composite_pattern;
  */
 class attribute_set {
 public:
-  using storage_t
-      = std::unordered_map<std::string, std::shared_ptr<kore_composite_pattern>>;
+  using storage_t = std::unordered_map<
+      std::string, std::shared_ptr<kore_composite_pattern>>;
 
   enum class key {
     Alias,

@@ -38,7 +38,8 @@ llvm::DIType *get_long_debug_type();
 llvm::DIType *get_void_debug_type();
 llvm::DIType *get_bool_debug_type();
 llvm::DIType *get_short_debug_type();
-llvm::DIType *get_pointer_debug_type(llvm::DIType *, std::string const &type_name);
+llvm::DIType *
+get_pointer_debug_type(llvm::DIType *, std::string const &type_name);
 llvm::DIType *
 get_array_debug_type(llvm::DIType *ty, size_t len, llvm::Align align);
 llvm::DIType *get_char_ptr_debug_type();

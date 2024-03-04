@@ -268,9 +268,10 @@ extern "C" void print_match_result(
         print_sorted_configuration_to_file(
             subject, (block *)match_log[i].subject, match_log[i].sort);
       } else {
-        auto *subject_sort
-            = debug_print_term((block *)match_log[i].subject, match_log[i].sort);
-        auto str_subject_sort = std::string(subject_sort->data, len(subject_sort));
+        auto *subject_sort = debug_print_term(
+            (block *)match_log[i].subject, match_log[i].sort);
+        auto str_subject_sort
+            = std::string(subject_sort->data, len(subject_sort));
         subject_file.ofstream() << str_subject_sort << std::endl;
       }
       kllvm::print_kore(
@@ -284,7 +285,8 @@ extern "C" void print_match_result(
 
       for (int j = 0; j < match_log[i].args.size(); j += 2) {
         auto *type_name = static_cast<char *>(match_log[i].args[j + 1]);
-        print_value_of_type(os, definition_path, match_log[i].args[j], type_name);
+        print_value_of_type(
+            os, definition_path, match_log[i].args[j], type_name);
         if (j + 2 != match_log[i].args.size()) {
           os << ", ";
         }

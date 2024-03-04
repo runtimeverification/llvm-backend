@@ -21,7 +21,8 @@ private:
   std::set<kore_pattern *> static_terms_;
 
   llvm::Value *alloc_arg(
-      kore_composite_pattern *pattern, int idx, std::string const &location_stack);
+      kore_composite_pattern *pattern, int idx,
+      std::string const &location_stack);
   llvm::Value *create_hook(
       kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
       std::string const &location_stack = "0");
@@ -38,7 +39,8 @@ private:
 public:
   create_term(
       llvm::StringMap<llvm::Value *> &substitution, kore_definition *definition,
-      llvm::BasicBlock *entry_block, llvm::Module *module, bool is_anywhere_owise)
+      llvm::BasicBlock *entry_block, llvm::Module *module,
+      bool is_anywhere_owise)
       : substitution_(substitution)
       , definition_(definition)
       , current_block_(entry_block)
@@ -85,12 +87,13 @@ std::unique_ptr<llvm::Module>
 new_module(std::string const &name, llvm::LLVMContext &context);
 
 llvm::StructType *get_block_type(
-    llvm::Module *module, kore_definition *definition, kore_symbol const *symbol);
+    llvm::Module *module, kore_definition *definition,
+    kore_symbol const *symbol);
 uint64_t get_block_header_val(
     llvm::Module *module, kore_symbol const *symbol, llvm::Type *block_type);
 llvm::Value *get_block_header(
-    llvm::Module *module, kore_definition *definition, kore_symbol const *symbol,
-    llvm::Type *block_type);
+    llvm::Module *module, kore_definition *definition,
+    kore_symbol const *symbol, llvm::Type *block_type);
 
 /* returns the llvm::Type corresponding to the type of the result of calling
    createTerm on the specified pattern. */

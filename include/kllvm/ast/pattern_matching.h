@@ -239,7 +239,8 @@ public:
    */
   [[nodiscard]] match_result
   match(std::shared_ptr<kore_pattern> const &term) const {
-    if (auto composite = std::dynamic_pointer_cast<kore_composite_pattern>(term);
+    if (auto composite
+        = std::dynamic_pointer_cast<kore_composite_pattern>(term);
         composite && composite->get_arguments().size() == arity()
         && composite->get_constructor()->get_name() == constructor_) {
       auto results = std::vector<match_result>{};

@@ -340,7 +340,8 @@ kore_pattern *kore_composite_pattern_new(char const *name) {
 }
 
 kore_pattern *kore_composite_pattern_from_symbol(kore_symbol *sym) {
-  return new kore_pattern{kllvm::kore_composite_pattern::create(sym->ptr.get())};
+  return new kore_pattern{
+      kllvm::kore_composite_pattern::create(sym->ptr.get())};
 }
 
 void kore_composite_pattern_add_argument(

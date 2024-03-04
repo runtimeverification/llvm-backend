@@ -78,8 +78,8 @@ llvm::CallInst *proof_event::emit_serialize_configuration(
 
   auto *func_ty = llvm::FunctionType::get(
       void_ty, {i8_ptr_ty, block_ty, i1_ty, i1_ty}, false);
-  auto *serialize
-      = get_or_insert_function(module_, "serialize_configuration_to_file", func_ty);
+  auto *serialize = get_or_insert_function(
+      module_, "serialize_configuration_to_file", func_ty);
 
   return llvm::CallInst::Create(
       serialize,
@@ -100,7 +100,8 @@ llvm::CallInst *proof_event::emit_write_uint64(
 
   auto *i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
 
-  return llvm::CallInst::Create(func, {output_file, i64_value}, "", insert_at_end);
+  return llvm::CallInst::Create(
+      func, {output_file, i64_value}, "", insert_at_end);
 }
 
 llvm::CallInst *proof_event::emit_write_string(
@@ -114,7 +115,8 @@ llvm::CallInst *proof_event::emit_write_string(
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
 
-  auto *print = get_or_insert_function(module_, "print_variable_to_file", func_ty);
+  auto *print
+      = get_or_insert_function(module_, "print_variable_to_file", func_ty);
 
   auto *varname = b.CreateGlobalStringPtr(str, "", 0, module_);
   return b.CreateCall(print, {output_file, varname});
@@ -131,8 +133,10 @@ llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
 llvm::LoadInst *
 proof_event::emit_get_output_file_name(llvm::BasicBlock *insert_at_end) {
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
-  auto *file_name_pointer = module_->getOrInsertGlobal("output_file", i8_ptr_ty);
-  return new llvm::LoadInst(i8_ptr_ty, file_name_pointer, "output", insert_at_end);
+  auto *file_name_pointer
+      = module_->getOrInsertGlobal("output_file", i8_ptr_ty);
+  return new llvm::LoadInst(
+      i8_ptr_ty, file_name_pointer, "output", insert_at_end);
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proof_branch(
@@ -151,7 +155,8 @@ std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proof_branch(
 
   emit_no_op(merge_block);
 
-  llvm::BranchInst::Create(true_block, merge_block, proof_output, insert_at_end);
+  llvm::BranchInst::Create(
+      true_block, merge_block, proof_output, insert_at_end);
   return {true_block, merge_block};
 }
 

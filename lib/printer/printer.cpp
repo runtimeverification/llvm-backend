@@ -312,7 +312,7 @@ preprocessed_print_data get_print_data(
 
   pretty_print_data data
       = {formats, colors,   terminals, priorities, left_assoc, right_assoc,
-         hooks,   brackets, assocs,    comms,      subsorts,  has_color};
+         hooks,   brackets, assocs,    comms,      subsorts,   has_color};
 
   return {data, overloads};
 }

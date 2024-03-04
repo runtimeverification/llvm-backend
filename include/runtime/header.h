@@ -388,7 +388,8 @@ void print_set(
     writer *, set *, char const *, char const *, char const *, void *);
 void print_list(
     writer *, list *, char const *, char const *, char const *, void *);
-void visit_children(block *subject, writer *file, visitor *printer, void *state);
+void visit_children(
+    block *subject, writer *file, visitor *printer, void *state);
 
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);

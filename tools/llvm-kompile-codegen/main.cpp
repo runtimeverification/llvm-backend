@@ -204,7 +204,8 @@ int main(int argc, char **argv) {
       auto *func_dt = parse_yamldecision_tree(
           mod.get(), filename, definition->get_all_symbols(),
           definition->get_hooked_sorts());
-      make_eval_function(decl->get_symbol(), definition.get(), mod.get(), func_dt);
+      make_eval_function(
+          decl->get_symbol(), definition.get(), mod.get(), func_dt);
     } else if (decl->is_anywhere()) {
       auto filename = get_indexed_filename(index, decl);
       auto *func_dt = parse_yamldecision_tree(

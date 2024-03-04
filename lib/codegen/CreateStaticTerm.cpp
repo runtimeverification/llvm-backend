@@ -45,16 +45,16 @@ llvm::Constant *create_static_term::not_injection_case(
 
     llvm::StructType *block_header_type = llvm::StructType::getTypeByName(
         module_->getContext(), blockheader_struct);
-    uint64_t header_val
-        = get_block_header_val(module_, symbol, block_type) | NOT_YOUNG_OBJECT_BIT;
+    uint64_t header_val = get_block_header_val(module_, symbol, block_type)
+                          | NOT_YOUNG_OBJECT_BIT;
     llvm::Constant *block_header = llvm::ConstantStruct::get(
         block_header_type,
         llvm::ConstantInt::get(
             llvm::Type::getInt64Ty(module_->getContext()), header_val));
     block_vals.push_back(block_header);
 
-    llvm::ArrayType *empty_array_type
-        = llvm::ArrayType::get(llvm::Type::getInt64Ty(module_->getContext()), 0);
+    llvm::ArrayType *empty_array_type = llvm::ArrayType::get(
+        llvm::Type::getInt64Ty(module_->getContext()), 0);
     block_vals.push_back(llvm::ConstantArray::get(
         empty_array_type, llvm::ArrayRef<llvm::Constant *>()));
 
@@ -76,9 +76,10 @@ llvm::Constant *create_static_term::not_injection_case(
   std::vector<llvm::Constant *> idxs
       = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0)};
   return llvm::ConstantExpr::getBitCast(
-      llvm::ConstantExpr::getInBoundsGetElementPtr(block_type, global_var, idxs),
-      llvm::PointerType::getUnqual(
-          llvm::StructType::getTypeByName(module_->getContext(), block_struct)));
+      llvm::ConstantExpr::getInBoundsGetElementPtr(
+          block_type, global_var, idxs),
+      llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
+          module_->getContext(), block_struct)));
 }
 
 std::pair<llvm::Constant *, bool>
@@ -92,12 +93,13 @@ create_static_term::operator()(kore_pattern *pattern) {
       auto *str_pattern = dynamic_cast<kore_string_pattern *>(
           constructor->get_arguments()[0].get());
       return std::make_pair(
-          create_token(sort->get_category(definition_), str_pattern->get_contents()),
+          create_token(
+              sort->get_category(definition_), str_pattern->get_contents()),
           false);
     }
     if (symbol->get_arguments().empty()) {
-      llvm::StructType *block_type
-          = llvm::StructType::getTypeByName(module_->getContext(), block_struct);
+      llvm::StructType *block_type = llvm::StructType::getTypeByName(
+          module_->getContext(), block_struct);
       llvm::Constant *cast = llvm::ConstantExpr::getIntToPtr(
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(ctx_),
@@ -154,8 +156,8 @@ create_static_term::create_token(value_type sort, std::string contents) {
       int sign = mpz_sgn(value);
       llvm::ArrayType *limbs_type
           = llvm::ArrayType::get(llvm::Type::getInt64Ty(ctx_), size);
-      llvm::Constant *limbs
-          = module_->getOrInsertGlobal("int_" + contents + "_limbs", limbs_type);
+      llvm::Constant *limbs = module_->getOrInsertGlobal(
+          "int_" + contents + "_limbs", limbs_type);
       auto *limbs_var = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
       std::vector<llvm::Constant *> allocd_limbs;
       for (size_t i = 0; i < size; i++) {
@@ -180,7 +182,8 @@ create_static_term::create_token(value_type sort, std::string contents) {
               module_->getContext(), int_wrapper_struct),
           hdr,
           llvm::ConstantStruct::get(
-              llvm::StructType::getTypeByName(module_->getContext(), int_struct),
+              llvm::StructType::getTypeByName(
+                  module_->getContext(), int_struct),
               num_limbs, mp_size,
               llvm::ConstantExpr::getPointerCast(
                   limbs_var, llvm::Type::getInt64PtrTy(ctx_)))));
@@ -319,8 +322,8 @@ create_static_term::create_token(value_type sort, std::string contents) {
       // the correct gc bit.
       llvm::Constant *block_header = llvm::ConstantStruct::get(
           block_header_type, llvm::ConstantInt::get(
-                               llvm::Type::getInt64Ty(ctx_),
-                               contents.size() | NOT_YOUNG_OBJECT_BIT));
+                                 llvm::Type::getInt64Ty(ctx_),
+                                 contents.size() | NOT_YOUNG_OBJECT_BIT));
       global_var->setInitializer(llvm::ConstantStruct::get(
           string_type, block_header,
           llvm::ConstantDataArray::getString(ctx_, contents, false)));

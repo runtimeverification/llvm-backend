@@ -12,7 +12,8 @@
 
 #define KCHAR char
 
-void *construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
+void *
+construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
   return nullptr;
 }
 
@@ -507,9 +508,10 @@ BOOST_AUTO_TEST_CASE(replace) {
                 hook_STRING_replace(replacee, matcher, replacer, b),
                 make_string("goodbye world hello world hello world he worl")));
   BOOST_CHECK_EQUAL(
-      true, hook_STRING_eq(
-                hook_STRING_replace(replacee, matcher, replacer, c),
-                make_string("goodbye world goodbye world hello world he worl")));
+      true,
+      hook_STRING_eq(
+          hook_STRING_replace(replacee, matcher, replacer, c),
+          make_string("goodbye world goodbye world hello world he worl")));
   BOOST_CHECK_EQUAL(
       true,
       hook_STRING_eq(

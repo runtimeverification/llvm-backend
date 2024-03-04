@@ -205,7 +205,9 @@ private:
 public:
   [[nodiscard]] bool is_step() const { return is_step_event_; }
   [[nodiscard]] bool is_pattern() const { return !is_step(); }
-  [[nodiscard]] sptr<llvm_step_event> get_step_event() const { return step_event_; }
+  [[nodiscard]] sptr<llvm_step_event> get_step_event() const {
+    return step_event_;
+  }
   [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
     return kore_pattern_;
   }
@@ -235,7 +237,9 @@ public:
   [[nodiscard]] std::vector<llvm_event> const &get_pre_trace() const {
     return pre_trace_;
   }
-  [[nodiscard]] llvm_event get_initial_config() const { return initial_config_; }
+  [[nodiscard]] llvm_event get_initial_config() const {
+    return initial_config_;
+  }
   [[nodiscard]] std::vector<llvm_event> const &get_trace() const {
     return trace_;
   }
@@ -244,7 +248,9 @@ public:
     initial_config_ = std::move(initial_config);
   }
 
-  void add_pre_trace_event(llvm_event const &event) { pre_trace_.push_back(event); }
+  void add_pre_trace_event(llvm_event const &event) {
+    pre_trace_.push_back(event);
+  }
   void add_trace_event(llvm_event const &event) { trace_.push_back(event); }
 
   void print(std::ostream &out, unsigned indent = 0U) const;

@@ -216,7 +216,8 @@ void print_map(
     auto entry = *iter;
     print_configuration_internal(file, entry.first, arg_sorts[0], false, state);
     sfprintf(file, ",");
-    print_configuration_internal(file, entry.second, arg_sorts[1], false, state);
+    print_configuration_internal(
+        file, entry.second, arg_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");
