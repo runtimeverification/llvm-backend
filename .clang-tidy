@@ -64,3 +64,7 @@ CheckOptions:
     value: 'lower_case'
   - key: 'readability-identifier-naming.PrivateMemberSuffix'
     value: '_'
+  - key: 'readability-identifier-naming.TemplateParameterCase'
+    value: 'CamelCase'
+  - key: 'readability-identifier-naming.TypeTemplateParameterIgnoredRegexp'
+    value: 'expr-type' # https://github.com/llvm/llvm-project/issues/46097
