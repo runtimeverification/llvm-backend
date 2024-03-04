@@ -179,7 +179,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 string *ffiCall(
-    bool isVariadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
+    bool is_variadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
     block *ret) {
   ffi_cif cif;
   ffi_type **argtypes = nullptr;
@@ -196,7 +196,7 @@ string *ffiCall(
   size_t nfixtypes = hook_LIST_size_long(fixtypes);
   size_t nvartypes = 0;
 
-  if (isVariadic) {
+  if (is_variadic) {
     nvartypes = hook_LIST_size_long(vartypes);
   }
 
@@ -242,7 +242,7 @@ string *ffiCall(
   rtype = getTypeFromBlock(ret);
 
   ffi_status status = FFI_OK;
-  if (isVariadic) {
+  if (is_variadic) {
     status = ffi_prep_cif_var(
         &cif, FFI_DEFAULT_ABI, nfixtypes, nargs, rtype, argtypes);
   } else {

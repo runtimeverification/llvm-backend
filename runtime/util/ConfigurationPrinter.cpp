@@ -90,7 +90,7 @@ void printComma(writer *file, void *state) {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 void printConfigurationInternal(
-    writer *file, block *subject, char const *sort, bool isVar,
+    writer *file, block *subject, char const *sort, bool is_var,
     void *state_ptr) {
   auto &state = *static_cast<print_state *>(state_ptr);
 
@@ -131,7 +131,7 @@ void printConfigurationInternal(
         break;
       }
     }
-    if (isVar && !state.varNames.contains(str)) {
+    if (is_var && !state.varNames.contains(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix;
       while (state.usedVarNames.contains(stdStr + suffix)) {
@@ -141,7 +141,7 @@ void printConfigurationInternal(
       sfprintf(file, "%s", suffix.c_str());
       state.usedVarNames.insert(stdStr);
       state.varNames[str] = suffix;
-    } else if (isVar) {
+    } else if (is_var) {
       sfprintf(file, "%s", state.varNames[str].c_str());
     }
     sfprintf(file, "\")");
@@ -253,49 +253,49 @@ void printSortedConfigurationToFile(
 }
 
 extern "C" void printMatchResult(
-    std::ostream &os, match_log *matchLog, size_t logSize,
-    std::string const &definitionPath) {
+    std::ostream &os, match_log *match_log, size_t log_size,
+    std::string const &definition_path) {
   auto subject_file = temporary_file("subject_XXXXXX");
   auto *subject = subject_file.file_pointer("w");
   auto pattern_file = temporary_file("pattern_XXXXXX");
 
-  for (int i = 0; i < logSize; i++) {
-    if (matchLog[i].kind == match_log::SUCCESS) {
+  for (int i = 0; i < log_size; i++) {
+    if (match_log[i].kind == match_log::SUCCESS) {
       os << "Match succeeds\n";
-    } else if (matchLog[i].kind == match_log::FAIL) {
+    } else if (match_log[i].kind == match_log::FAIL) {
       os << "Subject:\n";
       if (i == 0) {
         printSortedConfigurationToFile(
-            subject, (block *)matchLog[i].subject, matchLog[i].sort);
+            subject, (block *)match_log[i].subject, match_log[i].sort);
       } else {
         auto *subjectSort
-            = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
+            = debug_print_term((block *)match_log[i].subject, match_log[i].sort);
         auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
         subject_file.ofstream() << strSubjectSort << std::endl;
       }
       kllvm::printKORE(
-          os, definitionPath, subject_file.filename(), false, true);
+          os, definition_path, subject_file.filename(), false, true);
       os << "does not match pattern: \n";
-      pattern_file.ofstream() << matchLog[i].pattern << std::endl;
+      pattern_file.ofstream() << match_log[i].pattern << std::endl;
       kllvm::printKORE(
-          os, definitionPath, pattern_file.filename(), false, true);
-    } else if (matchLog[i].kind == match_log::FUNCTION) {
-      os << matchLog[i].debugName << "(";
+          os, definition_path, pattern_file.filename(), false, true);
+    } else if (match_log[i].kind == match_log::FUNCTION) {
+      os << match_log[i].debugName << "(";
 
-      for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-        auto *typeName = static_cast<char *>(matchLog[i].args[j + 1]);
-        printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
-        if (j + 2 != matchLog[i].args.size()) {
+      for (int j = 0; j < match_log[i].args.size(); j += 2) {
+        auto *typeName = static_cast<char *>(match_log[i].args[j + 1]);
+        printValueOfType(os, definition_path, match_log[i].args[j], typeName);
+        if (j + 2 != match_log[i].args.size()) {
           os << ", ";
         }
       }
-      os << ") => " << *static_cast<bool *>(matchLog[i].result) << "\n";
+      os << ") => " << *static_cast<bool *>(match_log[i].result) << "\n";
     }
   }
 }
 
 void printValueOfType(
-    std::ostream &os, std::string const &definitionPath, void *value,
+    std::ostream &os, std::string const &definition_path, void *value,
     std::string const &type) {
   if (type == "%mpz*") {
     os << static_cast<mpz_ptr>(value);
@@ -304,7 +304,7 @@ void printValueOfType(
       auto f = temporary_file("subject_XXXXXX");
       string *s = printConfigurationToString(static_cast<block *>(value));
       f.ofstream() << std::string(s->data, len(s)) << std::endl;
-      kllvm::printKORE(os, definitionPath, f.filename(), false, true);
+      kllvm::printKORE(os, definition_path, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto *s = static_cast<string *>(value);
       os << std::string(s->data, len(s));

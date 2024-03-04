@@ -52,7 +52,7 @@ blockEnumerator() {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 std::unordered_set<block *, hash_block, k_eq> take_search_steps(
-    bool executeToBranch, int64_t depth, int64_t bound, block *subject) {
+    bool execute_to_branch, int64_t depth, int64_t bound, block *subject) {
   static int registered = -1;
   if (registered == -1) {
     registerGCRootsEnumerator(blockEnumerator);
@@ -81,7 +81,7 @@ std::unordered_set<block *, hash_block, k_eq> take_search_steps(
     step_results.clear();
     take_search_step(state);
 
-    if (executeToBranch && step_results.size() > 1) {
+    if (execute_to_branch && step_results.size() > 1) {
       results.insert(state);
       return results;
     }

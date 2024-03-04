@@ -362,9 +362,9 @@ hook_STRING_countAllOccurrences(SortString haystack, SortString needle) {
 }
 
 SortString hook_STRING_transcode(
-    SortString input, SortString inputCharset, SortString outputCharset) {
+    SortString input, SortString input_charset, SortString output_charset) {
   iconv_t converter = iconv_open(
-      getTerminatedString(outputCharset), getTerminatedString(inputCharset));
+      getTerminatedString(output_charset), getTerminatedString(input_charset));
   char *inbuf = input->data;
   size_t inbytesleft = len(input);
   size_t outbytesleft = inbytesleft * 4;

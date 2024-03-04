@@ -208,27 +208,27 @@ std::map<std::string, std::set<std::string>> getPriorities() {
   return priorities;
 }
 
-ptr<kore_definition> const &getDefinition(std::string const &kompiledDir) {
+ptr<kore_definition> const &getDefinition(std::string const &kompiled_dir) {
   static std::map<std::string, ptr<kore_definition>> cache;
 
-  if (cache.find(kompiledDir) == cache.end()) {
-    kore_parser parser(kompiledDir + std::string("/syntaxDefinition.kore"));
-    cache[kompiledDir] = parser.definition();
+  if (cache.find(kompiled_dir) == cache.end()) {
+    kore_parser parser(kompiled_dir + std::string("/syntaxDefinition.kore"));
+    cache[kompiled_dir] = parser.definition();
   }
 
-  return cache.at(kompiledDir);
+  return cache.at(kompiled_dir);
 }
 
 std::vector<ptr<kore_declaration>> const &
-getAxioms(std::string const &kompiledDir) {
+getAxioms(std::string const &kompiled_dir) {
   static std::map<std::string, std::vector<ptr<kore_declaration>>> cache;
 
-  if (cache.find(kompiledDir) == cache.end()) {
-    kore_parser parser(kompiledDir + std::string("/macros.kore"));
-    cache[kompiledDir] = parser.declarations();
+  if (cache.find(kompiled_dir) == cache.end()) {
+    kore_parser parser(kompiled_dir + std::string("/macros.kore"));
+    cache[kompiled_dir] = parser.declarations();
   }
 
-  return cache.at(kompiledDir);
+  return cache.at(kompiled_dir);
 }
 
 struct preprocessed_print_data {
@@ -239,7 +239,7 @@ struct preprocessed_print_data {
 // NOLINTNEXTLINE(*-cognitive-complexity)
 preprocessed_print_data getPrintData(
     ptr<kore_definition> const &def,
-    std::vector<ptr<kore_declaration>> const &axioms, bool hasColor) {
+    std::vector<ptr<kore_declaration>> const &axioms, bool has_color) {
   auto formats = getFormats();
   auto terminals = getTerminals();
   auto assocs = getAssocs();
@@ -312,7 +312,7 @@ preprocessed_print_data getPrintData(
 
   pretty_print_data data
       = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
-         hooks,   brackets, assocs,    comms,      subsorts,  hasColor};
+         hooks,   brackets, assocs,    comms,      subsorts,  has_color};
 
   return {data, overloads};
 }
@@ -324,22 +324,22 @@ namespace kllvm {
 using namespace parser;
 
 std::ostream &printKORE(
-    std::ostream &os, std::string const &definitionPath,
-    std::string const &patternPath, bool hasColor, bool filterSubst,
+    std::ostream &os, std::string const &definition_path,
+    std::string const &pattern_path, bool has_color, bool filter_subst,
     bool pretty) {
   static std::map<std::string, preprocessed_print_data> cache;
 
-  auto const &def = getDefinition(definitionPath);
-  auto const &axioms = getAxioms(definitionPath);
+  auto const &def = getDefinition(definition_path);
+  auto const &axioms = getAxioms(definition_path);
 
   auto getPrintDataOrCached = [&] {
-    if (cache.find(definitionPath) == cache.end()) {
-      cache[definitionPath] = getPrintData(def, axioms, hasColor);
+    if (cache.find(definition_path) == cache.end()) {
+      cache[definition_path] = getPrintData(def, axioms, has_color);
     }
-    return cache.at(definitionPath);
+    return cache.at(definition_path);
   };
 
-  auto config = kore_pattern::load(patternPath);
+  auto config = kore_pattern::load(pattern_path);
   config = config->unflattenAndOr();
   std::map<std::string, std::vector<kore_symbol *>> symbols;
   config->markSymbols(symbols);
@@ -363,7 +363,7 @@ std::ostream &printKORE(
   sptr<kore_pattern> sorted = expanded->sortCollections(data);
   sptr<kore_pattern> filtered;
 
-  if (filterSubst) {
+  if (filter_subst) {
     std::set<std::string> vars = sorted->gatherSingletonVars();
     filtered = sorted->filterSubstitution(data, vars);
     filtered = filtered->dedupeDisjuncts();

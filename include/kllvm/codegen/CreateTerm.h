@@ -21,30 +21,30 @@ private:
   std::set<kore_pattern *> staticTerms;
 
   llvm::Value *alloc_arg(
-      kore_composite_pattern *pattern, int idx, std::string const &locationStack);
+      kore_composite_pattern *pattern, int idx, std::string const &location_stack);
   llvm::Value *createHook(
-      kore_composite_pattern *hookAtt, kore_composite_pattern *pattern,
-      std::string const &locationStack = "0");
+      kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
+      std::string const &location_stack = "0");
   llvm::Value *createFunctionCall(
       std::string const &name, kore_composite_pattern *pattern, bool sret,
-      bool tailcc, std::string const &locationStack = "0");
+      bool tailcc, std::string const &location_stack = "0");
   llvm::Value *notInjectionCase(
       kore_composite_pattern *constructor, llvm::Value *val,
-      std::string const &locationStack = "0");
+      std::string const &location_stack = "0");
   bool populateStaticSet(kore_pattern *pattern);
   std::pair<llvm::Value *, bool> createAllocation(
-      kore_pattern *pattern, std::string const &locationStack = "0");
+      kore_pattern *pattern, std::string const &location_stack = "0");
 
 public:
   create_term(
-      llvm::StringMap<llvm::Value *> &Substitution, kore_definition *Definition,
-      llvm::BasicBlock *EntryBlock, llvm::Module *Module, bool isAnywhereOwise)
-      : Substitution(Substitution)
-      , Definition(Definition)
-      , CurrentBlock(EntryBlock)
-      , Module(Module)
-      , Ctx(Module->getContext())
-      , isAnywhereOwise(isAnywhereOwise) { }
+      llvm::StringMap<llvm::Value *> &substitution, kore_definition *definition,
+      llvm::BasicBlock *entry_block, llvm::Module *module, bool is_anywhere_owise)
+      : Substitution(substitution)
+      , Definition(definition)
+      , CurrentBlock(entry_block)
+      , Module(module)
+      , Ctx(module->getContext())
+      , isAnywhereOwise(is_anywhere_owise) { }
 
   /* adds code to the specified basic block in the specified module which
      constructs an llvm value corresponding to the specified KORE RHS pattern
@@ -68,9 +68,9 @@ public:
       - tailcc: true if the call should be made via the tailcc calling convention.
     */
   llvm::Value *createFunctionCall(
-      std::string const &name, value_type returnCat,
+      std::string const &name, value_type return_cat,
       std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
-      std::string const &locationStack = "0");
+      std::string const &location_stack = "0");
 
   [[nodiscard]] llvm::BasicBlock *getCurrentBlock() const {
     return CurrentBlock;
@@ -82,15 +82,15 @@ std::string escape(std::string const &str);
 /* Creates a new llvm::Module with the predefined declarations common to all
    llvm modules in the llvm backend. */
 std::unique_ptr<llvm::Module>
-newModule(std::string const &name, llvm::LLVMContext &Context);
+newModule(std::string const &name, llvm::LLVMContext &context);
 
 llvm::StructType *getBlockType(
-    llvm::Module *Module, kore_definition *definition, kore_symbol const *symbol);
+    llvm::Module *module, kore_definition *definition, kore_symbol const *symbol);
 uint64_t getBlockHeaderVal(
-    llvm::Module *Module, kore_symbol const *symbol, llvm::Type *BlockType);
+    llvm::Module *module, kore_symbol const *symbol, llvm::Type *block_type);
 llvm::Value *getBlockHeader(
-    llvm::Module *Module, kore_definition *definition, kore_symbol const *symbol,
-    llvm::Type *BlockType);
+    llvm::Module *module, kore_definition *definition, kore_symbol const *symbol,
+    llvm::Type *block_type);
 
 /* returns the llvm::Type corresponding to the type of the result of calling
    createTerm on the specified pattern. */
@@ -102,16 +102,16 @@ value_type termType(
  * returns the name of the function. */
 void makeApplyRuleFunction(
     kore_axiom_declaration *axiom, kore_definition *definition,
-    llvm::Module *Module, bool bigStep = false);
+    llvm::Module *module, bool big_step = false);
 std::string makeApplyRuleFunction(
     kore_axiom_declaration *axiom, kore_definition *definition,
-    llvm::Module *Module, std::vector<residual> const &residuals);
+    llvm::Module *module, std::vector<residual> const &residuals);
 /** creates a function that evaluates the side condition of the specified rule,
  * and returns the name of the function. Returns empty string if function has no
  * side condition. */
 std::string makeSideConditionFunction(
     kore_axiom_declaration *axiom, kore_definition *definition,
-    llvm::Module *Module);
+    llvm::Module *module);
 
 extern std::string map_struct;
 extern std::string list_struct;
@@ -124,25 +124,25 @@ extern std::string buffer_struct;
 extern std::string block_struct;
 extern std::string blockheader_struct;
 
-llvm::StructType *getBlockType(llvm::Module *Module);
+llvm::StructType *getBlockType(llvm::Module *module);
 
 llvm::Type *getArgType(value_type cat, llvm::Module *mod);
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
-llvm::Type *getvalue_type(value_type sort, llvm::Module *Module);
-llvm::Type *getParamType(value_type sort, llvm::Module *Module);
+llvm::Type *getvalue_type(value_type sort, llvm::Module *module);
+llvm::Type *getParamType(value_type sort, llvm::Module *module);
 
 bool isCollectionSort(value_type cat);
 bool isInjectionSymbol(kore_pattern *p, kore_symbol *sym);
 
-void addAbort(llvm::BasicBlock *block, llvm::Module *Module);
+void addAbort(llvm::BasicBlock *block, llvm::Module *module);
 
 llvm::Value *allocateTerm(
-    llvm::Type *AllocType, llvm::BasicBlock *block,
-    char const *allocFn = "koreAlloc");
+    llvm::Type *alloc_type, llvm::BasicBlock *block,
+    char const *alloc_fn = "koreAlloc");
 llvm::Value *allocateTerm(
-    llvm::Type *AllocType, llvm::Value *Len, llvm::BasicBlock *block,
-    char const *allocFn = "koreAlloc");
+    llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
+    char const *alloc_fn = "koreAlloc");
 } // namespace kllvm
 
 #endif // CREATE_TERM_H

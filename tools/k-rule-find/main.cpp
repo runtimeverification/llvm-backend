@@ -90,12 +90,12 @@ location parseLocation(std::string const &loc) {
 }
 
 bool checkRanges(
-    location const &param, location const &file, bool checkColumn) {
+    location const &param, location const &file, bool check_column) {
   auto line
       = param.start_line >= file.start_line && param.end_line <= file.end_line;
   auto column = param.start_column >= file.start_column
                 && param.end_column <= file.end_column;
-  return checkColumn ? line && column : line;
+  return check_column ? line && column : line;
 }
 
 int main(int argc, char **argv) {

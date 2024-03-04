@@ -58,7 +58,7 @@ void finalizeDebugInfo() {
 }
 
 void initDebugFunction(
-    std::string const &name, std::string const &linkageName,
+    std::string const &name, std::string const &linkage_name,
     llvm::DISubroutineType *type, kore_definition *definition,
     llvm::Function *func) {
   if (!dbg) {
@@ -73,16 +73,16 @@ void initDebugFunction(
 }
 
 void initDebugParam(
-    llvm::Function *func, unsigned argNo, std::string const &name,
-    value_type type, std::string const &typeName) {
+    llvm::Function *func, unsigned arg_no, std::string const &name,
+    value_type type, std::string const &type_name) {
   if (!dbg) {
     return;
   }
   llvm::DILocalVariable *DbgVar = dbg->createParameterVariable(
-      dbg_sp, name, argNo + 1, dbg_file, dbg_line, getDebugType(type, typeName),
+      dbg_sp, name, arg_no + 1, dbg_file, dbg_line, getDebugType(type, type_name),
       true);
   dbg->insertDbgValueIntrinsic(
-      func->arg_begin() + argNo, DbgVar, dbg->createExpression(),
+      func->arg_begin() + arg_no, DbgVar, dbg->createExpression(),
       llvm::DILocation::get(func->getContext(), dbg_line, dbg_column, dbg_sp),
       &func->getEntryBlock());
 }
@@ -157,7 +157,7 @@ static std::string float_struct = "floating";
 static std::string buffer_struct = "stringbuffer";
 static std::string block_struct = "block";
 
-llvm::DIType *getDebugType(value_type type, std::string const &typeName) {
+llvm::DIType *getDebugType(value_type type, std::string const &type_name) {
   if (!dbg) {
     return nullptr;
   }
@@ -172,51 +172,51 @@ llvm::DIType *getDebugType(value_type type, std::string const &typeName) {
   llvm::DIType *boolean = nullptr;
   llvm::DIType *mint = nullptr;
   llvm::DIType *symbol = nullptr;
-  if (types[typeName]) {
-    return types[typeName];
+  if (types[type_name]) {
+    return types[type_name];
   }
   switch (type.cat) {
   case SortCategory::Map:
-    map = getPointerDebugType(getForwardDecl(map_struct), typeName);
-    types[typeName] = map;
+    map = getPointerDebugType(getForwardDecl(map_struct), type_name);
+    types[type_name] = map;
     return map;
   case SortCategory::RangeMap:
-    rangemap = getPointerDebugType(getForwardDecl(rangemap_struct), typeName);
-    types[typeName] = rangemap;
+    rangemap = getPointerDebugType(getForwardDecl(rangemap_struct), type_name);
+    types[type_name] = rangemap;
     return rangemap;
   case SortCategory::List:
-    list = getPointerDebugType(getForwardDecl(list_struct), typeName);
-    types[typeName] = list;
+    list = getPointerDebugType(getForwardDecl(list_struct), type_name);
+    types[type_name] = list;
     return list;
   case SortCategory::Set:
-    set = getPointerDebugType(getForwardDecl(set_struct), typeName);
-    types[typeName] = set;
+    set = getPointerDebugType(getForwardDecl(set_struct), type_name);
+    types[type_name] = set;
     return set;
   case SortCategory::Int:
-    integer = getPointerDebugType(getForwardDecl(int_struct), typeName);
-    types[typeName] = integer;
+    integer = getPointerDebugType(getForwardDecl(int_struct), type_name);
+    types[type_name] = integer;
     return integer;
   case SortCategory::Float:
-    floating = getPointerDebugType(getForwardDecl(float_struct), typeName);
-    types[typeName] = floating;
+    floating = getPointerDebugType(getForwardDecl(float_struct), type_name);
+    types[type_name] = floating;
     return floating;
   case SortCategory::StringBuffer:
-    buffer = getPointerDebugType(getForwardDecl(buffer_struct), typeName);
-    types[typeName] = buffer;
+    buffer = getPointerDebugType(getForwardDecl(buffer_struct), type_name);
+    types[type_name] = buffer;
     return buffer;
   case SortCategory::Bool:
-    boolean = dbg->createBasicType(typeName, 8, llvm::dwarf::DW_ATE_boolean);
-    types[typeName] = boolean;
+    boolean = dbg->createBasicType(type_name, 8, llvm::dwarf::DW_ATE_boolean);
+    types[type_name] = boolean;
     return boolean;
   case SortCategory::MInt:
     mint = dbg->createBasicType(
-        typeName, type.bits, llvm::dwarf::DW_ATE_unsigned);
-    types[typeName] = mint;
+        type_name, type.bits, llvm::dwarf::DW_ATE_unsigned);
+    types[type_name] = mint;
     return mint;
   case SortCategory::Symbol:
   case SortCategory::Variable:
-    symbol = getPointerDebugType(getForwardDecl(block_struct), typeName);
-    types[typeName] = symbol;
+    symbol = getPointerDebugType(getForwardDecl(block_struct), type_name);
+    types[type_name] = symbol;
     return symbol;
   case SortCategory::Uncomputed: abort();
   }
@@ -264,12 +264,12 @@ llvm::DIType *getCharDebugType() {
 }
 
 llvm::DIType *
-getPointerDebugType(llvm::DIType *ty, std::string const &typeName) {
+getPointerDebugType(llvm::DIType *ty, std::string const &type_name) {
   if (!dbg) {
     return nullptr;
   }
   auto *ptrType = dbg->createPointerType(ty, sizeof(size_t) * 8);
-  return dbg->createTypedef(ptrType, typeName, dbg_file, 0, dbg_cu);
+  return dbg->createTypedef(ptrType, type_name, dbg_file, 0, dbg_cu);
 }
 
 llvm::DIType *
@@ -290,12 +290,12 @@ llvm::DIType *getShortDebugType() {
 }
 
 llvm::DISubroutineType *getDebugFunctionType(
-    llvm::Metadata *returnType, std::vector<llvm::Metadata *> argTypes) {
+    llvm::Metadata *return_type, std::vector<llvm::Metadata *> arg_types) {
   if (!dbg) {
     return nullptr;
   }
-  argTypes.insert(argTypes.begin(), returnType);
-  return dbg->createSubroutineType(dbg->getOrCreateTypeArray(argTypes));
+  arg_types.insert(arg_types.begin(), return_type);
+  return dbg->createSubroutineType(dbg->getOrCreateTypeArray(arg_types));
 }
 
 void setDebugLoc(llvm::Instruction *instr) {

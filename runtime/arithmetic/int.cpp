@@ -385,7 +385,7 @@ SortK hook_INT_srand(SortInt seed) {
   return dot_k();
 }
 
-SortInt hook_INT_rand(SortInt upperBound) {
+SortInt hook_INT_rand(SortInt upper_bound) {
   mpz_t result;
   mpz_init(result);
   if (!kllvm_rand_state_initialized) {
@@ -394,7 +394,7 @@ SortInt hook_INT_rand(SortInt upperBound) {
     gmp_randseed(kllvm_rand_state, result);
     kllvm_rand_state_initialized = true;
   }
-  mpz_urandomm(result, kllvm_rand_state, upperBound);
+  mpz_urandomm(result, kllvm_rand_state, upper_bound);
   return move_int(result);
 }
 
@@ -426,7 +426,7 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   return resultptr;
 }
 
-mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
+mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool is_signed) {
   mpz_t result;
   mpz_t twos;
   mpz_init(twos);
@@ -435,7 +435,7 @@ mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
   uint64_t nwords = (bits + 63) / 64;
   mpz_import(twos, nwords, -1, sizeof(size_t), 0, 0, i);
 
-  if (isSigned) {
+  if (is_signed) {
     signed_extract(result, twos, 0, bits);
     return move_int(result);
   }

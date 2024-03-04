@@ -398,7 +398,7 @@ string *hook_BUFFER_toString(stringbuffer *buf);
 
 size_t hook_SET_size_long(set *);
 
-mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
+mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool is_signed);
 
 block *debruijnize(block *);
 block *incrementDebruijn(block *);
@@ -426,7 +426,7 @@ void init_float2(floating *, std::string);
 std::string intToStringInBase(mpz_t, uint64_t);
 std::string intToString(mpz_t);
 void printValueOfType(
-    std::ostream &os, std::string const &definitionPath, void *value,
+    std::ostream &os, std::string const &definition_path, void *value,
     std::string const &type);
 
 template <typename... Args>

@@ -30,7 +30,7 @@ private:
    * behaviour.
    */
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
-  proofBranch(std::string const &label, llvm::BasicBlock *insertAtEnd);
+  proofBranch(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
    * Set up a standard event prelude by creating a pair of basic blocks for the
@@ -41,7 +41,7 @@ private:
    * `emitGetOutputFileName`.
    */
   std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
-  eventPrelude(std::string const &label, llvm::BasicBlock *insertAtEnd);
+  eventPrelude(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `term` to the specified `outputFile` as
@@ -49,8 +49,8 @@ private:
    * term must be known.
    */
   llvm::CallInst *emitSerializeTerm(
-      kore_composite_sort &sort, llvm::Value *outputFile, llvm::Value *term,
-      llvm::BasicBlock *insertAtEnd);
+      kore_composite_sort &sort, llvm::Value *output_file, llvm::Value *term,
+      llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `config` to the specified `outputFile` as
@@ -58,21 +58,21 @@ private:
    * passed must be a top-level configuration.
    */
   llvm::CallInst *emitSerializeConfiguration(
-      llvm::Value *outputFile, llvm::Value *config,
-      llvm::BasicBlock *insertAtEnd);
+      llvm::Value *output_file, llvm::Value *config,
+      llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `value` to the specified `outputFile`.
    */
   llvm::CallInst *emitWriteUInt64(
-      llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd);
+      llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call that will serialize `str` to the specified `outputFile`.
    */
   llvm::CallInst *emitWriteString(
-      llvm::Value *outputFile, std::string const &str,
-      llvm::BasicBlock *insertAtEnd);
+      llvm::Value *output_file, std::string const &str,
+      llvm::BasicBlock *insert_at_end);
 
   /* 
    * Emit an instruction that has no effect and will be removed by optimization
@@ -83,18 +83,18 @@ private:
    * branch is created. If the MergeBlock has no instructions, this has resulted
    * in a segfault when printing the IR. Adding an effective no-op prevents this.
    */
-  llvm::BinaryOperator *emitNoOp(llvm::BasicBlock *insertAtEnd);
+  llvm::BinaryOperator *emitNoOp(llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit instructions to load the path of the interpreter's current output
    * file; used here for binary proof trace data.
    */
-  llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insertAtEnd);
+  llvm::LoadInst *emitGetOutputFileName(llvm::BasicBlock *insert_at_end);
 
 public:
   [[nodiscard]] llvm::BasicBlock *hookEvent_pre(
       std::string const &name, llvm::BasicBlock *current_block,
-      std::string const &locationStack);
+      std::string const &location_stack);
 
   [[nodiscard]] llvm::BasicBlock *hookEvent_post(
       llvm::Value *val, kore_composite_sort *sort,
@@ -116,7 +116,7 @@ public:
 
   [[nodiscard]] llvm::BasicBlock *functionEvent_pre(
       llvm::BasicBlock *current_block, kore_composite_pattern *pattern,
-      std::string const &locationStack);
+      std::string const &location_stack);
 
   [[nodiscard]] llvm::BasicBlock *
   functionEvent_post(llvm::BasicBlock *current_block);
@@ -129,10 +129,10 @@ public:
       kore_axiom_declaration *axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
-  proof_event(kore_definition *Definition, llvm::Module *Module)
-      : Definition(Definition)
-      , Module(Module)
-      , Ctx(Module->getContext()) { }
+  proof_event(kore_definition *definition, llvm::Module *module)
+      : Definition(definition)
+      , Module(module)
+      , Ctx(module->getContext()) { }
 };
 
 } // namespace kllvm

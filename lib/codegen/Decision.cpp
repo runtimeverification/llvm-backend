@@ -89,8 +89,8 @@ bool decision_node::beginNode(decision *d, std::string const &name) {
 }
 
 static std::pair<std::string, std::string>
-getFailPattern(decision_case const &_case, bool isInt) {
-  if (isInt) {
+getFailPattern(decision_case const &_case, bool is_int) {
+  if (is_int) {
     size_t bitwidth = _case.getLiteral().getBitWidth();
     if (bitwidth == 1) {
       return std::make_pair(
@@ -121,14 +121,14 @@ getFailPattern(decision_case const &_case, bool isInt) {
 
 static std::pair<std::string, std::string> getFailPattern(
     std::vector<std::pair<llvm::BasicBlock *, decision_case const *>> const
-        &caseData,
-    bool isInt, llvm::BasicBlock *FailBlock) {
+        &case_data,
+    bool is_int, llvm::BasicBlock *fail_block) {
   std::string reason;
   std::string sort;
-  for (auto const &entry : caseData) {
+  for (auto const &entry : case_data) {
     auto const &_case = *entry.second;
-    if (entry.first != FailBlock) {
-      auto caseReason = getFailPattern(_case, isInt);
+    if (entry.first != fail_block) {
+      auto caseReason = getFailPattern(_case, is_int);
       if (reason.empty()) {
         reason = caseReason.second;
         sort = caseReason.first;
@@ -694,8 +694,8 @@ llvm::Constant *decision::stringLiteral(std::string const &str) {
 static void initChoiceBuffer(
     decision_node *dt, llvm::Module *module, llvm::BasicBlock *block,
     llvm::BasicBlock *stuck, llvm::BasicBlock *fail,
-    llvm::AllocaInst **choiceBufferOut, llvm::AllocaInst **choiceDepthOut,
-    llvm::IndirectBrInst **jumpOut) {
+    llvm::AllocaInst **choice_buffer_out, llvm::AllocaInst **choice_depth_out,
+    llvm::IndirectBrInst **jump_out) {
   std::unordered_set<leaf_node *> leaves;
   dt->preprocess(leaves);
   auto *ty = llvm::ArrayType::get(
@@ -725,15 +725,15 @@ static void initChoiceBuffer(
   llvm::IndirectBrInst *jump
       = llvm::IndirectBrInst::Create(failAddress, 1, fail);
   jump->addDestination(stuck);
-  *choiceBufferOut = choiceBuffer;
-  *choiceDepthOut = choiceDepth;
-  *jumpOut = jump;
+  *choice_buffer_out = choiceBuffer;
+  *choice_depth_out = choiceDepth;
+  *jump_out = jump;
 }
 
 void makeEvalOrAnywhereFunction(
     kore_symbol *function, kore_definition *definition, llvm::Module *module,
     decision_node *dt,
-    void (*addStuck)(
+    void (*add_stuck)(
         llvm::BasicBlock *, llvm::Module *, kore_symbol *, decision &,
         kore_definition *)) {
   auto returnSort = dynamic_cast<kore_composite_sort *>(function->getSort().get())
@@ -798,61 +798,61 @@ void makeEvalOrAnywhereFunction(
         matchFunc, i, val->getName().str(), cats[i],
         ast_to_string(*function->getArguments()[i]));
   }
-  addStuck(stuck, module, function, codegen, definition);
+  add_stuck(stuck, module, function, codegen, definition);
 
   codegen(dt);
 }
 
 void abortWhenStuck(
-    llvm::BasicBlock *CurrentBlock, llvm::Module *Module, kore_symbol *symbol,
+    llvm::BasicBlock *current_block, llvm::Module *module, kore_symbol *symbol,
     decision &codegen, kore_definition *d) {
-  auto &Ctx = Module->getContext();
+  auto &Ctx = module->getContext();
   symbol = d->getAllSymbols().at(ast_to_string(*symbol));
-  auto *BlockType = getBlockType(Module, d, symbol);
+  auto *BlockType = getBlockType(module, d, symbol);
   llvm::Value *Ptr = nullptr;
   auto *BlockPtr = llvm::PointerType::getUnqual(
-      llvm::StructType::getTypeByName(Module->getContext(), block_struct));
+      llvm::StructType::getTypeByName(module->getContext(), block_struct));
   if (symbol->getArguments().empty()) {
     Ptr = llvm::ConstantExpr::getIntToPtr(
         llvm::ConstantInt::get(
             llvm::Type::getInt64Ty(Ctx),
             ((uint64_t)symbol->getTag() << 32 | 1)),
-        getvalue_type({SortCategory::Symbol, 0}, Module));
+        getvalue_type({SortCategory::Symbol, 0}, module));
   } else {
-    llvm::Value *BlockHeader = getBlockHeader(Module, d, symbol, BlockType);
-    llvm::Value *Block = allocateTerm(BlockType, CurrentBlock);
+    llvm::Value *BlockHeader = getBlockHeader(module, d, symbol, BlockType);
+    llvm::Value *Block = allocateTerm(BlockType, current_block);
     llvm::Value *BlockHeaderPtr = llvm::GetElementPtrInst::CreateInBounds(
         BlockType, Block,
         {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
          llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0)},
-        symbol->getName(), CurrentBlock);
-    new llvm::StoreInst(BlockHeader, BlockHeaderPtr, CurrentBlock);
+        symbol->getName(), current_block);
+    new llvm::StoreInst(BlockHeader, BlockHeaderPtr, current_block);
     for (int idx = 0; idx < symbol->getArguments().size(); idx++) {
       auto cat
           = dynamic_cast<kore_composite_sort *>(symbol->getArguments()[idx].get())
                 ->getCategory(d);
-      auto *type = getParamType(cat, Module);
+      auto *type = getParamType(cat, module);
       llvm::Value *ChildValue
           = codegen.load(std::make_pair("_" + std::to_string(idx + 1), type));
       llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
           BlockType, Block,
           {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0),
            llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx + 2)},
-          "", CurrentBlock);
+          "", current_block);
       if (isCollectionSort(cat)) {
         ChildValue = new llvm::LoadInst(
-            getArgType(cat, Module), ChildValue, "", CurrentBlock);
+            getArgType(cat, module), ChildValue, "", current_block);
       }
-      new llvm::StoreInst(ChildValue, ChildPtr, CurrentBlock);
+      new llvm::StoreInst(ChildValue, ChildPtr, current_block);
     }
-    Ptr = new llvm::BitCastInst(Block, BlockPtr, "", CurrentBlock);
+    Ptr = new llvm::BitCastInst(Block, BlockPtr, "", current_block);
   }
   llvm::CallInst::Create(
       getOrInsertFunction(
-          Module, "finish_rewriting", llvm::Type::getVoidTy(Ctx), BlockPtr,
+          module, "finish_rewriting", llvm::Type::getVoidTy(Ctx), BlockPtr,
           llvm::Type::getInt1Ty(Ctx)),
-      {Ptr, llvm::ConstantInt::getTrue(Ctx)}, "", CurrentBlock);
-  new llvm::UnreachableInst(Ctx, CurrentBlock);
+      {Ptr, llvm::ConstantInt::getTrue(Ctx)}, "", current_block);
+  new llvm::UnreachableInst(Ctx, current_block);
 }
 
 void makeEvalFunction(

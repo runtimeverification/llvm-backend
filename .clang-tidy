@@ -56,3 +56,5 @@ CheckOptions:
     value: 'lower_case'
   - key: 'readability-identifier-naming.GlobalVariableIgnoredRegexp'
     value: 'and_|not_|equals_|X'
+  - key: 'readability-identifier-naming.ParameterCase'
+    value: 'lower_case'

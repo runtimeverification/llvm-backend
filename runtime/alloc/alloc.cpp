@@ -56,10 +56,10 @@ bool youngspaceAlmostFull(size_t threshold) {
   return (totalBytes - freeBytes) * 100 > threshold * 95;
 }
 
-void koreAllocSwap(bool swapOld) {
+void koreAllocSwap(bool swap_old) {
   arenaSwapAndClear(&youngspace);
   arenaClear(&alwaysgcspace);
-  if (swapOld) {
+  if (swap_old) {
     arenaSwapAndClear(&oldspace);
   }
 }

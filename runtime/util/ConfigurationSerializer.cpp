@@ -55,7 +55,7 @@ static std::string drop_back(std::string const &s, int n) {
 }
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, char const *sort, bool isVar, void *state);
+    writer *file, block *subject, char const *sort, bool is_var, void *state);
 
 /**
  * Emit a symbol of the form ctor{...}(...); this should be preceded by the
@@ -280,7 +280,7 @@ cached_symbol_sort_list(std::string const &symbol) {
 }
 
 void serializeConfigurationInternal(
-    writer *file, block *subject, char const *sort, bool isVar,
+    writer *file, block *subject, char const *sort, bool is_var,
     void *state_ptr) {
   auto &state = *static_cast<serialization_state *>(state_ptr);
 
@@ -306,7 +306,7 @@ void serializeConfigurationInternal(
     auto *str = (string *)subject;
     size_t subject_len = len(subject);
 
-    if (isVar && !state.varNames.contains(str)) {
+    if (is_var && !state.varNames.contains(str)) {
       std::string stdStr = std::string(str->data, len(str));
       std::string suffix;
       while (state.usedVarNames.contains(stdStr + suffix)) {
@@ -316,7 +316,7 @@ void serializeConfigurationInternal(
       emitToken(state.instance, sort, suffix.c_str());
       state.usedVarNames.insert(stdStr);
       state.varNames[str] = suffix;
-    } else if (isVar) {
+    } else if (is_var) {
       emitToken(state.instance, sort, state.varNames[str].c_str());
     } else {
       emitToken(state.instance, sort, str->data, subject_len);

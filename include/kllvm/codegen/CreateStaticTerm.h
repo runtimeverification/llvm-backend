@@ -22,10 +22,10 @@ private:
   notInjectionCase(kore_composite_pattern *constructor, llvm::Constant *val);
 
 public:
-  create_static_term(kore_definition *Definition, llvm::Module *Module)
-      : Definition(Definition)
-      , Module(Module)
-      , Ctx(Module->getContext()) { }
+  create_static_term(kore_definition *definition, llvm::Module *module)
+      : Definition(definition)
+      , Module(module)
+      , Ctx(module->getContext()) { }
 
   std::pair<llvm::Constant *, bool> operator()(kore_pattern *pattern);
   llvm::Constant *createToken(value_type sort, std::string contents);

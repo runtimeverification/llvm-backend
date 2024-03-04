@@ -134,18 +134,18 @@ private:
 
   bool isCheckNull;
 
-  switch_node(std::string name, llvm::Type *type, bool isCheckNull)
+  switch_node(std::string name, llvm::Type *type, bool is_check_null)
       : name(std::move(name))
       , type(type)
-      , isCheckNull(isCheckNull) { }
+      , isCheckNull(is_check_null) { }
 
 public:
   ~switch_node() override = default;
   void addCase(decision_case const &_case) { cases.push_back(_case); }
 
   static switch_node *
-  Create(std::string const &name, llvm::Type *type, bool isCheckNull) {
-    return new switch_node(name, type, isCheckNull);
+  Create(std::string const &name, llvm::Type *type, bool is_check_null) {
+    return new switch_node(name, type, is_check_null);
   }
 
   [[nodiscard]] std::string getName() const { return name; }
@@ -315,23 +315,23 @@ private:
   decision_node *child;
 
   make_iterator_node(
-      std::string collection, llvm::Type *collectionType, std::string name,
-      llvm::Type *type, std::string hookName, decision_node *child)
+      std::string collection, llvm::Type *collection_type, std::string name,
+      llvm::Type *type, std::string hook_name, decision_node *child)
       : collection(std::move(collection))
-      , collectionType(collectionType)
+      , collectionType(collection_type)
       , name(std::move(name))
       , type(type)
-      , hookName(std::move(hookName))
+      , hookName(std::move(hook_name))
       , child(child) { }
 
 public:
   ~make_iterator_node() override = default;
   static make_iterator_node *Create(
-      std::string const &collection, llvm::Type *collectionType,
-      std::string const &name, llvm::Type *type, std::string const &hookName,
+      std::string const &collection, llvm::Type *collection_type,
+      std::string const &name, llvm::Type *type, std::string const &hook_name,
       decision_node *child) {
     return new make_iterator_node(
-        collection, collectionType, name, type, hookName, child);
+        collection, collection_type, name, type, hook_name, child);
   }
 
   void codegen(decision *d) override;
@@ -356,23 +356,23 @@ private:
   decision_node *child;
 
   iter_next_node(
-      std::string iterator, llvm::Type *iteratorType, std::string binding,
-      llvm::Type *bindingType, std::string hookName, decision_node *child)
+      std::string iterator, llvm::Type *iterator_type, std::string binding,
+      llvm::Type *binding_type, std::string hook_name, decision_node *child)
       : iterator(std::move(iterator))
-      , iteratorType(iteratorType)
+      , iteratorType(iterator_type)
       , binding(std::move(binding))
-      , bindingType(bindingType)
-      , hookName(std::move(hookName))
+      , bindingType(binding_type)
+      , hookName(std::move(hook_name))
       , child(child) { }
 
 public:
   ~iter_next_node() override = default;
   static iter_next_node *Create(
-      std::string const &iterator, llvm::Type *iteratorType,
-      std::string const &binding, llvm::Type *bindingType,
-      std::string const &hookName, decision_node *child) {
+      std::string const &iterator, llvm::Type *iterator_type,
+      std::string const &binding, llvm::Type *binding_type,
+      std::string const &hook_name, decision_node *child) {
     return new iter_next_node(
-        iterator, iteratorType, binding, bindingType, hookName, child);
+        iterator, iterator_type, binding, binding_type, hook_name, child);
   }
 
   void codegen(decision *d) override;
@@ -413,25 +413,25 @@ private:
 
 public:
   decision(
-      kore_definition *Definition, llvm::BasicBlock *EntryBlock,
-      llvm::BasicBlock *FailureBlock, llvm::IndirectBrInst *FailJump,
-      llvm::AllocaInst *ChoiceBuffer, llvm::AllocaInst *ChoiceDepth,
-      llvm::Module *Module, value_type Cat, llvm::PHINode *FailSubject,
-      llvm::PHINode *FailPattern, llvm::PHINode *FailSort,
-      llvm::AllocaInst *HasSearchResults)
-      : Definition(Definition)
-      , CurrentBlock(EntryBlock)
-      , FailureBlock(FailureBlock)
-      , FailJump(FailJump)
-      , ChoiceBuffer(ChoiceBuffer)
-      , ChoiceDepth(ChoiceDepth)
-      , Module(Module)
-      , Ctx(Module->getContext())
-      , Cat(Cat)
-      , FailSubject(FailSubject)
-      , FailPattern(FailPattern)
-      , FailSort(FailSort)
-      , HasSearchResults(HasSearchResults) { }
+      kore_definition *definition, llvm::BasicBlock *entry_block,
+      llvm::BasicBlock *failure_block, llvm::IndirectBrInst *fail_jump,
+      llvm::AllocaInst *choice_buffer, llvm::AllocaInst *choice_depth,
+      llvm::Module *module, value_type cat, llvm::PHINode *fail_subject,
+      llvm::PHINode *fail_pattern, llvm::PHINode *fail_sort,
+      llvm::AllocaInst *has_search_results)
+      : Definition(definition)
+      , CurrentBlock(entry_block)
+      , FailureBlock(failure_block)
+      , FailJump(fail_jump)
+      , ChoiceBuffer(choice_buffer)
+      , ChoiceDepth(choice_depth)
+      , Module(module)
+      , Ctx(module->getContext())
+      , Cat(cat)
+      , FailSubject(fail_subject)
+      , FailPattern(fail_pattern)
+      , FailSort(fail_sort)
+      , HasSearchResults(has_search_results) { }
 
   /* adds code to the specified basic block to take a single step based on
      the specified decision tree and return the result of taking that step. */

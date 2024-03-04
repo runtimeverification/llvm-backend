@@ -32,13 +32,13 @@ transitiveClosure(std::unordered_map<
 } // namespace
 
 std::unordered_set<std::string>
-kore_definition::getSortsHookedTo(std::string const &hookName) const {
+kore_definition::getSortsHookedTo(std::string const &hook_name) const {
   auto ret = std::unordered_set<std::string>{};
 
   for (auto const &[name, decl] : getSortDeclarations()) {
     if (decl->isHooked()) {
       if (auto hook = decl->attributes().get_string(attribute_set::key::hook);
-          hook == hookName) {
+          hook == hook_name) {
         ret.insert(name);
       }
     }
@@ -47,8 +47,8 @@ kore_definition::getSortsHookedTo(std::string const &hookName) const {
   return ret;
 }
 
-void kore_definition::addModule(sptr<kore_module> Module) {
-  for (auto const &decl : Module->getDeclarations()) {
+void kore_definition::addModule(sptr<kore_module> module) {
+  for (auto const &decl : module->getDeclarations()) {
     if (auto *sortDecl
         = dynamic_cast<kore_composite_sort_declaration *>(decl.get())) {
       sortDeclarations.insert({sortDecl->getName(), sortDecl});
@@ -64,7 +64,7 @@ void kore_definition::addModule(sptr<kore_module> Module) {
       axioms.push_back(axiom);
     }
   }
-  modules.push_back(std::move(Module));
+  modules.push_back(std::move(module));
 }
 
 void kore_definition::insertReservedSymbols() {

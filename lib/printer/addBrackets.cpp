@@ -134,11 +134,11 @@ Fixity getFixity(kore_symbol *sym, pretty_print_data const &data) {
  * returns: the left capture of the term, or NULL if no such term exists
  */
 kore_composite_pattern *getLeftCapture(
-    kore_composite_pattern *previousLeftCapture, kore_composite_pattern *outer,
+    kore_composite_pattern *previous_left_capture, kore_composite_pattern *outer,
     int position, pretty_print_data const &data) {
   Fixity fixity = getFixity(outer->getConstructor(), data);
   if (position == 0 && (fixity & BARE_LEFT)) {
-    return previousLeftCapture;
+    return previous_left_capture;
   }
 
   return outer;
@@ -168,11 +168,11 @@ kore_composite_pattern *getLeftCapture(
  */
 
 kore_composite_pattern *getRightCapture(
-    kore_composite_pattern *previousRightCapture, kore_composite_pattern *outer,
+    kore_composite_pattern *previous_right_capture, kore_composite_pattern *outer,
     int position, pretty_print_data const &data) {
   Fixity fixity = getFixity(outer->getConstructor(), data);
   if (position == outer->getArguments().size() - 1 && (fixity & BARE_RIGHT)) {
-    return previousRightCapture;
+    return previous_right_capture;
   }
 
   return outer;
@@ -196,7 +196,7 @@ bool lessThanEq(pretty_print_data const &data, kore_sort *s1, kore_sort *s2) {
 }
 
 sptr<kore_sort>
-getArgSort(kore_symbol *symbol, int position, sptr<kore_sort> firstArgSort) {
+getArgSort(kore_symbol *symbol, int position, sptr<kore_sort> first_arg_sort) {
   if (!symbol->isBuiltin()) {
     return symbol->getArguments()[position];
   }
@@ -215,16 +215,16 @@ getArgSort(kore_symbol *symbol, int position, sptr<kore_sort> firstArgSort) {
 
   if (symbol->getName() == "\\forall" || symbol->getName() == "\\exists") {
     if (position == 0) {
-      assert(firstArgSort != nullptr);
-      return firstArgSort;
+      assert(first_arg_sort != nullptr);
+      return first_arg_sort;
     }
 
     return symbol->getFormalArguments()[0];
   }
 
   if (symbol->getName() == "\\mu" || symbol->getName() == "\\nu") {
-    assert(firstArgSort != nullptr);
-    return firstArgSort;
+    assert(first_arg_sort != nullptr);
+    return first_arg_sort;
   }
 
   abort();
@@ -353,8 +353,8 @@ bool isPriorityWrong(
  */
 // NOLINTNEXTLINE(*-cognitive-complexity)
 bool requiresBracketWithSimpleAlgorithm(
-    kore_composite_pattern *outer, kore_composite_pattern *leftCapture,
-    kore_composite_pattern *rightCapture, kore_pattern *inner, int position,
+    kore_composite_pattern *outer, kore_composite_pattern *left_capture,
+    kore_composite_pattern *right_capture, kore_pattern *inner, int position,
     pretty_print_data const &data) {
   if (auto *composite = dynamic_cast<kore_composite_pattern *>(inner)) {
     std::string innerName = composite->getConstructor()->getName();
@@ -380,19 +380,19 @@ bool requiresBracketWithSimpleAlgorithm(
 
     Fixity innerFixity = getFixity(composite->getConstructor(), data);
 
-    if ((innerFixity & BARE_RIGHT) && rightCapture != nullptr) {
+    if ((innerFixity & BARE_RIGHT) && right_capture != nullptr) {
       bool inversePriority = isPriorityWrong(
-          composite, rightCapture, composite->getArguments().size() - 1, data);
+          composite, right_capture, composite->getArguments().size() - 1, data);
       Fixity rightCaptureFixity
-          = getFixity(rightCapture->getConstructor(), data);
+          = getFixity(right_capture->getConstructor(), data);
       if (!inversePriority && (rightCaptureFixity & BARE_LEFT)) {
         return true;
       }
     }
 
-    if ((innerFixity & BARE_LEFT) && leftCapture != nullptr) {
-      bool inversePriority = isPriorityWrong(composite, leftCapture, 0, data);
-      Fixity leftCaptureFixity = getFixity(leftCapture->getConstructor(), data);
+    if ((innerFixity & BARE_LEFT) && left_capture != nullptr) {
+      bool inversePriority = isPriorityWrong(composite, left_capture, 0, data);
+      Fixity leftCaptureFixity = getFixity(left_capture->getConstructor(), data);
       if (!inversePriority && (leftCaptureFixity & BARE_RIGHT)) {
         return true;
       }
@@ -405,18 +405,18 @@ bool requiresBracketWithSimpleAlgorithm(
 
 sptr<kore_pattern> addBrackets(
     sptr<kore_pattern> inner, kore_composite_pattern *outer,
-    kore_composite_pattern *leftCapture, kore_composite_pattern *rightCapture,
+    kore_composite_pattern *left_capture, kore_composite_pattern *right_capture,
     int position, pretty_print_data const &data) {
   if (auto *innerComposite
       = dynamic_cast<kore_composite_pattern *>(inner.get())) {
     if (innerComposite->getConstructor()->getName() == "inj") {
       return addBrackets(
-          innerComposite->getArguments()[0], outer, leftCapture, rightCapture,
+          innerComposite->getArguments()[0], outer, left_capture, right_capture,
           position, data);
     }
   }
   if (requiresBracketWithSimpleAlgorithm(
-          outer, leftCapture, rightCapture, inner.get(), position, data)) {
+          outer, left_capture, right_capture, inner.get(), position, data)) {
     sptr<kore_sort> outerSort = getArgSort(
         outer->getConstructor(), position, outer->getArguments()[0]->getSort());
     sptr<kore_sort> innerSort = getReturnSort(inner.get());
@@ -443,8 +443,8 @@ sptr<kore_pattern> addBrackets(
 }
 
 sptr<kore_pattern> addBrackets(
-    sptr<kore_pattern> t, kore_composite_pattern *previousLeftCapture,
-    kore_composite_pattern *previousRightCapture, pretty_print_data const &data) {
+    sptr<kore_pattern> t, kore_composite_pattern *previous_left_capture,
+    kore_composite_pattern *previous_right_capture, pretty_print_data const &data) {
   if (auto *outer = dynamic_cast<kore_composite_pattern *>(t.get())) {
     if (outer->getConstructor()->getName() == "\\dv") {
       return t;
@@ -456,9 +456,9 @@ sptr<kore_pattern> addBrackets(
     int position = 0;
     for (auto const &inner : outer->getArguments()) {
       kore_composite_pattern *leftCapture
-          = getLeftCapture(previousLeftCapture, outer, position, data);
+          = getLeftCapture(previous_left_capture, outer, position, data);
       kore_composite_pattern *rightCapture
-          = getRightCapture(previousRightCapture, outer, position, data);
+          = getRightCapture(previous_right_capture, outer, position, data);
       sptr<kore_pattern> newInner = addBrackets(
           inner, outer, leftCapture, rightCapture, position, data);
       newInner = addBrackets(newInner, leftCapture, rightCapture, data);

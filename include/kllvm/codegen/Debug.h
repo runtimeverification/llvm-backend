@@ -21,24 +21,24 @@ void initDebugInfo(llvm::Module *module, std::string const &filename);
 void finalizeDebugInfo();
 
 void initDebugFunction(
-    std::string const &name, std::string const &linkageName,
+    std::string const &name, std::string const &linkage_name,
     llvm::DISubroutineType *type, kore_definition *definition,
     llvm::Function *func);
 
 void initDebugAxiom(attribute_set const &att);
 void initDebugParam(
-    llvm::Function *func, unsigned argNo, std::string const &name,
-    value_type type, std::string const &typeName);
+    llvm::Function *func, unsigned arg_no, std::string const &name,
+    value_type type, std::string const &type_name);
 void initDebugGlobal(
     std::string const &name, llvm::DIType *type, llvm::GlobalVariable *var);
 
-llvm::DIType *getDebugType(value_type type, std::string const &typeName);
+llvm::DIType *getDebugType(value_type type, std::string const &type_name);
 llvm::DIType *getIntDebugType();
 llvm::DIType *getLongDebugType();
 llvm::DIType *getVoidDebugType();
 llvm::DIType *getBoolDebugType();
 llvm::DIType *getShortDebugType();
-llvm::DIType *getPointerDebugType(llvm::DIType *, std::string const &typeName);
+llvm::DIType *getPointerDebugType(llvm::DIType *, std::string const &type_name);
 llvm::DIType *
 getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align);
 llvm::DIType *getCharPtrDebugType();

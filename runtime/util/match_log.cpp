@@ -46,7 +46,7 @@ void addMatchFailReason(void *subject, char const *pattern, char const *sort) {
 }
 
 void addMatchFunction(
-    char const *debugName, char const *function, void *result, ...) {
+    char const *debug_name, char const *function, void *result, ...) {
   // This function needs to use C variadic arguments because it's called from
   // generated LLVM IR.
   // NOLINTBEGIN(*-vararg)
@@ -63,7 +63,7 @@ void addMatchFunction(
   }
 
   match_logs.push_back(
-      {match_log::FUNCTION, function, debugName, result, args, nullptr, nullptr,
+      {match_log::FUNCTION, function, debug_name, result, args, nullptr, nullptr,
        nullptr});
 
   va_end(ap);

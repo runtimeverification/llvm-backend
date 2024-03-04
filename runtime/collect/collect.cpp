@@ -41,8 +41,8 @@ size_t get_size(uint64_t hdr, uint16_t layout) {
   return size_hdr(hdr);
 }
 
-void migrate(block **blockPtr) {
-  block *currBlock = *blockPtr;
+void migrate(block **block_ptr) {
+  block *currBlock = *block_ptr;
   if (is_leaf_block(currBlock) || !is_heap_block(currBlock)) {
     return;
   }
@@ -65,16 +65,16 @@ void migrate(block **blockPtr) {
     MIGRATE_HEADER(newBlock);
     *forwardingAddress = newBlock;
     currBlock->h.hdr |= FWD_PTR_BIT;
-    *blockPtr = newBlock;
+    *block_ptr = newBlock;
   } else {
-    *blockPtr = *forwardingAddress;
+    *block_ptr = *forwardingAddress;
   }
 }
 
 // call this function instead of migrate on objects directly referenced by
 // shared objects (like collection nodes) that are not tracked by gc
-void migrate_once(block **blockPtr) {
-  block *currBlock = *blockPtr;
+void migrate_once(block **block_ptr) {
+  block *currBlock = *block_ptr;
   if (is_leaf_block(currBlock) || !is_heap_block(currBlock)) {
     return;
   }
@@ -82,12 +82,12 @@ void migrate_once(block **blockPtr) {
           == getArenaSemispaceIDOfObject((void *)currBlock)
       || oldspace_collection_id()
              == getArenaSemispaceIDOfObject((void *)currBlock)) {
-    migrate(blockPtr);
+    migrate(block_ptr);
   }
 }
 
-static void migrate_string_buffer(stringbuffer **bufferPtr) {
-  stringbuffer *buffer = *bufferPtr;
+static void migrate_string_buffer(stringbuffer **buffer_ptr) {
+  stringbuffer *buffer = *buffer_ptr;
   uint64_t const hdr = buffer->h.hdr;
   uint64_t const cap = len(buffer->contents);
   INITIALIZE_MIGRATE();
@@ -112,11 +112,11 @@ static void migrate_string_buffer(stringbuffer **bufferPtr) {
     *(stringbuffer **)(buffer->contents) = newBuffer;
     buffer->h.hdr |= FWD_PTR_BIT;
   }
-  *bufferPtr = *(stringbuffer **)(buffer->contents);
+  *buffer_ptr = *(stringbuffer **)(buffer->contents);
 }
 
-static void migrate_mpz(mpz_ptr *mpzPtr) {
-  mpz_hdr *intgr = STRUCT_BASE(mpz_hdr, i, *mpzPtr);
+static void migrate_mpz(mpz_ptr *ptr) {
+  mpz_hdr *intgr = STRUCT_BASE(mpz_hdr, i, *ptr);
   uint64_t const hdr = intgr->h.hdr;
   INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
@@ -159,11 +159,11 @@ static void migrate_mpz(mpz_ptr *mpzPtr) {
     *(mpz_ptr *)(&intgr->i->_mp_d) = newIntgr->i;
     intgr->h.hdr |= FWD_PTR_BIT;
   }
-  *mpzPtr = *(mpz_ptr *)(&intgr->i->_mp_d);
+  *ptr = *(mpz_ptr *)(&intgr->i->_mp_d);
 }
 
-static void migrate_floating(floating **floatingPtr) {
-  floating_hdr *flt = STRUCT_BASE(floating_hdr, f, *floatingPtr);
+static void migrate_floating(floating **floating_ptr) {
+  floating_hdr *flt = STRUCT_BASE(floating_hdr, f, *floating_ptr);
   uint64_t const hdr = flt->h.hdr;
   INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
@@ -196,13 +196,13 @@ static void migrate_floating(floating **floatingPtr) {
     *(floating **)(flt->f.f->_mpfr_d) = &newFlt->f;
     flt->h.hdr |= FWD_PTR_BIT;
   }
-  *floatingPtr = *(floating **)(flt->f.f->_mpfr_d);
+  *floating_ptr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
 static void
-migrate_child(void *currBlock, layoutitem *args, unsigned i, bool ptr) {
+migrate_child(void *curr_block, layoutitem *args, unsigned i, bool ptr) {
   layoutitem *argData = args + i;
-  void *arg = ((char *)currBlock) + argData->offset;
+  void *arg = ((char *)curr_block) + argData->offset;
   switch (argData->cat) {
   case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
   case RANGEMAP_LAYOUT: migrate_rangemap(ptr ? *(rangemap **)arg : arg); break;
@@ -256,7 +256,7 @@ void initStaticObjects(void) {
   setKoreMemoryFunctionsForGMP();
 }
 
-void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
+void koreCollect(void **roots, uint8_t nroots, layoutitem *type_info) {
   is_gc = true;
   collect_old = shouldCollectOldGen();
   MEM_LOG("Starting garbage collection\n");
@@ -274,7 +274,7 @@ void koreCollect(void **roots, uint8_t nroots, layoutitem *typeInfo) {
 #endif
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
   for (int i = 0; i < nroots; i++) {
-    migrate_child(roots, typeInfo, i, true);
+    migrate_child(roots, type_info, i, true);
   }
   migrateRoots();
   char *scan_ptr = youngspace_ptr();

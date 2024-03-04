@@ -117,8 +117,8 @@ bool kore_sort_variable::operator==(kore_sort const &other) const {
   return false;
 }
 
-void kore_composite_sort::addArgument(sptr<kore_sort> const &Argument) {
-  arguments.push_back(Argument);
+void kore_composite_sort::addArgument(sptr<kore_sort> const &argument) {
+  arguments.push_back(argument);
 }
 
 bool kore_composite_sort::operator==(kore_sort const &other) const {
@@ -166,8 +166,8 @@ value_type kore_composite_sort::getCategory(kore_definition *definition) {
                             ->attributes();
       auto const &natAtt = att.get(attribute_set::key::nat);
       assert(natAtt->getArguments().size() == 1);
-      auto *strPattern
-          = dynamic_cast<kore_string_pattern *>(natAtt->getArguments()[0].get());
+      auto *strPattern = dynamic_cast<kore_string_pattern *>(
+          natAtt->getArguments()[0].get());
       name = name + " " + strPattern->getContents();
     } else {
       print(std::cerr);
@@ -191,48 +191,48 @@ std::string kore_composite_sort::getHook(kore_definition *definition) const {
   return strPattern->getContents();
 }
 
-value_type kore_composite_sort::getCategory(std::string const &hookName) {
+value_type kore_composite_sort::getCategory(std::string const &hook_name) {
   SortCategory category = SortCategory::Uncomputed;
   uint64_t bits = 0;
-  if (hookName == "MAP.Map") {
+  if (hook_name == "MAP.Map") {
     category = SortCategory::Map;
-  } else if (hookName == "RANGEMAP.RangeMap") {
+  } else if (hook_name == "RANGEMAP.RangeMap") {
     category = SortCategory::RangeMap;
-  } else if (hookName == "LIST.List") {
+  } else if (hook_name == "LIST.List") {
     category = SortCategory::List;
-  } else if (hookName == "SET.Set") {
+  } else if (hook_name == "SET.Set") {
     category = SortCategory::Set;
-  } else if (hookName == "INT.Int") {
+  } else if (hook_name == "INT.Int") {
     category = SortCategory::Int;
-  } else if (hookName == "FLOAT.Float") {
+  } else if (hook_name == "FLOAT.Float") {
     category = SortCategory::Float;
-  } else if (hookName == "BUFFER.StringBuffer") {
+  } else if (hook_name == "BUFFER.StringBuffer") {
     category = SortCategory::StringBuffer;
-  } else if (hookName == "BOOL.Bool") {
+  } else if (hook_name == "BOOL.Bool") {
     category = SortCategory::Bool;
-  } else if (hookName == "KVAR.KVar") {
+  } else if (hook_name == "KVAR.KVar") {
     category = SortCategory::Variable;
     // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
     // bitwidth N
-  } else if (hookName.substr(0, 10) == "MINT.MInt ") {
+  } else if (hook_name.substr(0, 10) == "MINT.MInt ") {
     category = SortCategory::MInt;
-    bits = std::stoi(hookName.substr(10));
+    bits = std::stoi(hook_name.substr(10));
   } else {
     category = SortCategory::Symbol;
   }
   return {category, bits};
 }
 
-void kore_symbol::addArgument(sptr<kore_sort> const &Argument) {
-  arguments.push_back(Argument);
+void kore_symbol::addArgument(sptr<kore_sort> const &argument) {
+  arguments.push_back(argument);
 }
 
-void kore_symbol::addFormalArgument(sptr<kore_sort> const &Argument) {
-  formalArguments.push_back(Argument);
+void kore_symbol::addFormalArgument(sptr<kore_sort> const &argument) {
+  formalArguments.push_back(argument);
 }
 
-void kore_symbol::addSort(sptr<kore_sort> Sort) {
-  sort = std::move(Sort);
+void kore_symbol::addSort(sptr<kore_sort> sort) {
+  this->sort = std::move(sort);
 }
 
 bool kore_symbol::operator==(kore_symbol const &other) const {
@@ -341,8 +341,8 @@ std::string kore_variable_pattern::getName() const {
   return name->getName();
 }
 
-void kore_composite_pattern::addArgument(sptr<kore_pattern> const &Argument) {
-  arguments.push_back(Argument);
+void kore_composite_pattern::addArgument(sptr<kore_pattern> const &argument) {
+  arguments.push_back(argument);
 }
 
 void kore_composite_pattern::markSymbols(
@@ -365,7 +365,8 @@ void kore_composite_pattern::markVariables(
   }
 }
 
-sptr<kore_pattern> kore_composite_pattern::substitute(substitution const &subst) {
+sptr<kore_pattern>
+kore_composite_pattern::substitute(substitution const &subst) {
   if (arguments.empty()) {
     return shared_from_this();
   }
@@ -431,7 +432,8 @@ static void append(std::ostream &out, std::string const &str) {
 }
 
 static void color(
-    std::ostream &out, std::string const &color, pretty_print_data const &data) {
+    std::ostream &out, std::string const &color,
+    pretty_print_data const &data) {
   if (data.hasColor) {
     static bool once = true;
     static std::map<std::string, std::string> colors;
@@ -1000,7 +1002,8 @@ sptr<kore_pattern> kore_composite_pattern::filterSubstitution(
               || (name.size() > 1
                   && (name[0] == '@' || name[0] == '!' || name[0] == '?')
                   && name[1] == '_'))) {
-        sptr<kore_composite_pattern> unit = kore_composite_pattern::Create("\\top");
+        sptr<kore_composite_pattern> unit
+            = kore_composite_pattern::Create("\\top");
         unit->getConstructor()->addFormalArgument(
             constructor->getFormalArguments()[1]);
         return unit;
@@ -1113,16 +1116,17 @@ sptr<kore_pattern> kore_composite_pattern::unflattenAndOr() {
 sptr<kore_pattern> kore_composite_pattern::expandMacros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<kore_declaration>> const &macros, bool reverse,
-    std::set<size_t> &appliedRules, std::set<std::string> const &macroSymbols) {
+    std::set<size_t> &applied_rules,
+    std::set<std::string> const &macro_symbols) {
   sptr<kore_composite_pattern> applied
       = kore_composite_pattern::Create(constructor.get());
   for (auto &arg : arguments) {
     std::set<size_t> dummyApplied;
     applied->addArgument(arg->expandMacros(
-        subsorts, overloads, macros, reverse, dummyApplied, macroSymbols));
+        subsorts, overloads, macros, reverse, dummyApplied, macro_symbols));
   }
 
-  if (macroSymbols.find(constructor->getName()) == macroSymbols.end()) {
+  if (macro_symbols.find(constructor->getName()) == macro_symbols.end()) {
     return applied;
   }
 
@@ -1144,12 +1148,12 @@ sptr<kore_pattern> kore_composite_pattern::expandMacros(
     if (matches
         && (decl->attributes().contains(attribute_set::key::macro_rec)
             || decl->attributes().contains(attribute_set::key::alias_rec)
-            || !appliedRules.contains(i))) {
-      std::set<size_t> oldAppliedRules = appliedRules;
-      appliedRules.insert(i);
+            || !applied_rules.contains(i))) {
+      std::set<size_t> oldAppliedRules = applied_rules;
+      applied_rules.insert(i);
       auto result = rhs->substitute(subst)->expandMacros(
-          subsorts, overloads, macros, reverse, appliedRules, macroSymbols);
-      appliedRules = oldAppliedRules;
+          subsorts, overloads, macros, reverse, applied_rules, macro_symbols);
+      applied_rules = oldAppliedRules;
       return result;
     }
     i++;
@@ -1206,7 +1210,8 @@ bool kore_composite_pattern::matches(
     }
     if (subj->getConstructor()->getName() == "inj") {
       sptr<kore_pattern> child = subj->getArguments()[0];
-      if (auto *composite = dynamic_cast<kore_composite_pattern *>(child.get())) {
+      if (auto *composite
+          = dynamic_cast<kore_composite_pattern *>(child.get())) {
         if (overloads.contains(composite->getConstructor())
             && overloads.at(composite->getConstructor())
                    .contains(getConstructor())) {
@@ -1260,12 +1265,12 @@ bool kore_string_pattern::matches(
 }
 
 void kore_declaration::addObjectSortVariable(
-    sptr<kore_sort_variable> const &SortVariable) {
-  objectSortVariables.push_back(SortVariable);
+    sptr<kore_sort_variable> const &sort_variable) {
+  objectSortVariables.push_back(sort_variable);
 }
 
-void kore_axiom_declaration::addPattern(sptr<kore_pattern> Pattern) {
-  pattern = std::move(Pattern);
+void kore_axiom_declaration::addPattern(sptr<kore_pattern> pattern) {
+  this->pattern = std::move(pattern);
 }
 
 bool kore_axiom_declaration::isRequired() const {
@@ -1308,12 +1313,13 @@ bool kore_axiom_declaration::isTopAxiom() const {
   return false;
 }
 
-void kore_alias_declaration::addVariables(sptr<kore_composite_pattern> Variables) {
-  boundVariables = std::move(Variables);
+void kore_alias_declaration::addVariables(
+    sptr<kore_composite_pattern> variables) {
+  boundVariables = std::move(variables);
 }
 
-void kore_alias_declaration::addPattern(sptr<kore_pattern> Pattern) {
-  pattern = std::move(Pattern);
+void kore_alias_declaration::addPattern(sptr<kore_pattern> pattern) {
+  this->pattern = std::move(pattern);
 }
 
 kore_pattern::substitution
@@ -1334,75 +1340,75 @@ bool kore_symbol_declaration::isAnywhere() const {
   return attributes().contains(attribute_set::key::anywhere);
 }
 
-void kore_module::addDeclaration(sptr<kore_declaration> Declaration) {
-  declarations.push_back(std::move(Declaration));
+void kore_module::addDeclaration(sptr<kore_declaration> declaration) {
+  declarations.push_back(std::move(declaration));
 }
 
 // Pretty printer
-void kore_sort_variable::print(std::ostream &Out, unsigned indent) const {
+void kore_sort_variable::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << name;
+  out << Indent << name;
 }
 
-void kore_composite_sort::print(std::ostream &Out, unsigned indent) const {
+void kore_composite_sort::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << name << "{";
+  out << Indent << name << "{";
   bool isFirst = true;
   for (auto const &Argument : arguments) {
     if (!isFirst) {
-      Out << ",";
+      out << ",";
     }
-    Argument->print(Out);
+    Argument->print(out);
     isFirst = false;
   }
-  Out << "}";
+  out << "}";
 }
 
-void kore_symbol::print(std::ostream &Out, unsigned indent) const {
-  print(Out, indent, true);
+void kore_symbol::print(std::ostream &out, unsigned indent) const {
+  print(out, indent, true);
 }
 
-void kore_symbol::print(std::ostream &Out, unsigned indent, bool formal) const {
+void kore_symbol::print(std::ostream &out, unsigned indent, bool formal) const {
   std::string Indent(indent, ' ');
-  Out << Indent << name << "{";
+  out << Indent << name << "{";
   bool isFirst = true;
   for (auto const &Argument : (formal ? formalArguments : arguments)) {
     if (!isFirst) {
-      Out << ", ";
+      out << ", ";
     }
-    Argument->print(Out);
+    Argument->print(out);
     isFirst = false;
   }
-  Out << "}";
+  out << "}";
 }
 
-void kore_variable::print(std::ostream &Out, unsigned indent) const {
+void kore_variable::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << name;
+  out << Indent << name;
 }
 
-void kore_variable_pattern::print(std::ostream &Out, unsigned indent) const {
+void kore_variable_pattern::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent;
-  name->print(Out);
-  Out << " : ";
-  sort->print(Out);
+  out << Indent;
+  name->print(out);
+  out << " : ";
+  sort->print(out);
 }
 
-void kore_composite_pattern::print(std::ostream &Out, unsigned indent) const {
+void kore_composite_pattern::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent;
-  constructor->print(Out);
-  Out << "(";
+  out << Indent;
+  constructor->print(out);
+  out << "(";
   bool isFirst = true;
   for (auto const &Argument : arguments) {
     if (!isFirst) {
-      Out << ",";
+      out << ",";
     }
-    Argument->print(Out);
+    Argument->print(out);
     isFirst = false;
   }
-  Out << ")";
+  out << ")";
 }
 
 static std::string escapeString(std::string const &str) {
@@ -1421,132 +1427,132 @@ static std::string escapeString(std::string const &str) {
   return result;
 }
 
-void kore_string_pattern::print(std::ostream &Out, unsigned indent) const {
+void kore_string_pattern::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "\"" << escapeString(contents) << "\"";
+  out << Indent << "\"" << escapeString(contents) << "\"";
 }
 
 static void printAttributeList(
-    std::ostream &Out, attribute_set const &attributes, unsigned indent = 0) {
+    std::ostream &out, attribute_set const &attributes, unsigned indent = 0) {
 
   std::string Indent(indent, ' ');
-  Out << Indent << "[";
+  out << Indent << "[";
   bool isFirst = true;
   for (auto const &[name, pattern] : attributes) {
     if (!isFirst) {
-      Out << ",";
+      out << ",";
     }
-    pattern->print(Out);
+    pattern->print(out);
     isFirst = false;
   }
-  Out << "]";
+  out << "]";
 }
 
-void kore_declaration::printSortVariables(std::ostream &Out) const {
-  Out << "{";
+void kore_declaration::printSortVariables(std::ostream &out) const {
+  out << "{";
   bool isFirst = true;
   for (auto const &Variable : objectSortVariables) {
     if (!isFirst) {
-      Out << ",";
+      out << ",";
     }
-    Variable->print(Out);
+    Variable->print(out);
     isFirst = false;
   }
-  Out << "}";
+  out << "}";
 }
 
 void kore_composite_sort_declaration::print(
-    std::ostream &Out, unsigned indent) const {
+    std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << (_isHooked ? "hooked-sort " : "sort ") << sortName;
-  printSortVariables(Out);
-  Out << " ";
-  printAttributeList(Out, attributes());
+  out << Indent << (_isHooked ? "hooked-sort " : "sort ") << sortName;
+  printSortVariables(out);
+  out << " ";
+  printAttributeList(out, attributes());
 }
 
-void kore_symbol_declaration::print(std::ostream &Out, unsigned indent) const {
+void kore_symbol_declaration::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << (_isHooked ? "hooked-symbol " : "symbol ")
+  out << Indent << (_isHooked ? "hooked-symbol " : "symbol ")
       << getSymbol()->getName();
-  printSortVariables(Out);
-  Out << "(";
+  printSortVariables(out);
+  out << "(";
   bool isFirst = true;
   for (auto const &Argument : getSymbol()->getArguments()) {
     if (!isFirst) {
-      Out << ",";
+      out << ",";
     }
-    Argument->print(Out);
+    Argument->print(out);
     isFirst = false;
   }
-  Out << ") : ";
-  getSymbol()->getSort()->print(Out);
-  Out << " ";
-  printAttributeList(Out, attributes());
+  out << ") : ";
+  getSymbol()->getSort()->print(out);
+  out << " ";
+  printAttributeList(out, attributes());
 }
 
-void kore_alias_declaration::print(std::ostream &Out, unsigned indent) const {
+void kore_alias_declaration::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "alias " << getSymbol()->getName();
-  printSortVariables(Out);
-  Out << "(";
+  out << Indent << "alias " << getSymbol()->getName();
+  printSortVariables(out);
+  out << "(";
   bool isFirst = true;
   for (auto const &Argument : getSymbol()->getArguments()) {
     if (!isFirst) {
-      Out << ",";
+      out << ",";
     }
-    Argument->print(Out);
+    Argument->print(out);
     isFirst = false;
   }
-  Out << ") : ";
-  getSymbol()->getSort()->print(Out);
-  Out << " where ";
-  boundVariables->print(Out);
-  Out << " := ";
-  pattern->print(Out);
-  Out << " ";
-  printAttributeList(Out, attributes());
+  out << ") : ";
+  getSymbol()->getSort()->print(out);
+  out << " where ";
+  boundVariables->print(out);
+  out << " := ";
+  pattern->print(out);
+  out << " ";
+  printAttributeList(out, attributes());
 }
 
-void kore_axiom_declaration::print(std::ostream &Out, unsigned indent) const {
+void kore_axiom_declaration::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << (isClaim() ? "claim " : "axiom ");
-  printSortVariables(Out);
-  pattern->print(Out);
-  Out << " ";
-  printAttributeList(Out, attributes());
+  out << Indent << (isClaim() ? "claim " : "axiom ");
+  printSortVariables(out);
+  pattern->print(out);
+  out << " ";
+  printAttributeList(out, attributes());
 }
 
 void kore_module_import_declaration::print(
-    std::ostream &Out, unsigned indent) const {
+    std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "import " << moduleName;
-  Out << " ";
-  printAttributeList(Out, attributes());
+  out << Indent << "import " << moduleName;
+  out << " ";
+  printAttributeList(out, attributes());
 }
 
-void kore_module::print(std::ostream &Out, unsigned indent) const {
+void kore_module::print(std::ostream &out, unsigned indent) const {
   std::string Indent(indent, ' ');
-  Out << Indent << "module " << name << "\n";
+  out << Indent << "module " << name << "\n";
   bool isFirst = true;
   for (auto const &Declaration : declarations) {
     if (!isFirst) {
-      Out << "\n";
+      out << "\n";
     }
-    Declaration->print(Out, indent + 2);
-    Out << "\n";
+    Declaration->print(out, indent + 2);
+    out << "\n";
     isFirst = false;
   }
-  Out << Indent << "endmodule\n";
-  printAttributeList(Out, attributes(), indent);
+  out << Indent << "endmodule\n";
+  printAttributeList(out, attributes(), indent);
 }
 
-void kore_definition::print(std::ostream &Out, unsigned indent) const {
-  printAttributeList(Out, attributes(), indent);
-  Out << "\n";
+void kore_definition::print(std::ostream &out, unsigned indent) const {
+  printAttributeList(out, attributes(), indent);
+  out << "\n";
   for (auto const &Module : modules) {
-    Out << "\n";
-    Module->print(Out, indent);
-    Out << "\n";
+    out << "\n";
+    Module->print(out, indent);
+    out << "\n";
   }
 }
 
@@ -1613,9 +1619,9 @@ void kore_variable::serialize_to(serializer &s) const {
 void kllvm::readMultimap(
     std::string const &name, kore_symbol_declaration *decl,
     std::map<std::string, std::set<std::string>> &output,
-    attribute_set::key attName) {
-  if (decl->attributes().contains(attName)) {
-    kore_composite_pattern *att = decl->attributes().get(attName).get();
+    attribute_set::key att_name) {
+  if (decl->attributes().contains(att_name)) {
+    kore_composite_pattern *att = decl->attributes().get(att_name).get();
     for (auto const &pat : att->getArguments()) {
       auto *child = dynamic_cast<kore_composite_pattern *>(pat.get());
       output[name].insert(child->getConstructor()->getName());

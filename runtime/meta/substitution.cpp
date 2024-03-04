@@ -20,24 +20,24 @@ set set_map(void *, block *(block *));
 }
 
 template <class New>
-void makeDirty(bool &dirty, uint64_t offset, New newArg, block *&newBlock) {
+void makeDirty(bool &dirty, uint64_t offset, New new_arg, block *&new_block) {
   if (!dirty) {
     dirty = true;
-    auto *alloc = (block *)koreAlloc(size_hdr(newBlock->h.hdr));
-    alloc->h = newBlock->h;
+    auto *alloc = (block *)koreAlloc(size_hdr(new_block->h.hdr));
+    alloc->h = new_block->h;
     reset_gc(alloc);
-    memcpy(alloc->children, newBlock->children, offset - 8);
-    newBlock = alloc;
+    memcpy(alloc->children, new_block->children, offset - 8);
+    new_block = alloc;
   }
-  New *newPtr = (New *)(((char *)newBlock) + offset);
-  *newPtr = newArg;
+  New *newPtr = (New *)(((char *)new_block) + offset);
+  *newPtr = new_arg;
 }
 
-block *debruijnizeInternal(block *currBlock) {
-  if (is_leaf_block(currBlock)) {
-    return currBlock;
+block *debruijnizeInternal(block *curr_block) {
+  if (is_leaf_block(curr_block)) {
+    return curr_block;
   }
-  uint64_t const hdr = currBlock->h.hdr;
+  uint64_t const hdr = curr_block->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     uint32_t tag = tag_hdr(hdr);
@@ -47,10 +47,10 @@ block *debruijnizeInternal(block *currBlock) {
     }
     layout *layoutData = getLayoutData(layoutInt);
     bool dirty = false;
-    block *newBlock = currBlock;
+    block *newBlock = curr_block;
     for (unsigned i = 0; i < layoutData->nargs; i++) {
       layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)currBlock) + argData->offset;
+      void *arg = ((char *)curr_block) + argData->offset;
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, debruijnizeInternal);
@@ -100,12 +100,12 @@ block *debruijnizeInternal(block *currBlock) {
     }
     return newBlock;
   }
-  return currBlock;
+  return curr_block;
 }
 
-block *replaceBinderInternal(block *currBlock) {
-  if (is_variable_block(currBlock)) {
-    uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
+block *replaceBinderInternal(block *curr_block) {
+  if (is_variable_block(curr_block)) {
+    uint64_t varIdx = ((uintptr_t)curr_block) >> 32;
     if (idx == varIdx) {
       return (block *)var;
     }
@@ -113,12 +113,12 @@ block *replaceBinderInternal(block *currBlock) {
       varIdx--;
       return variable_block(varIdx);
     }
-    return currBlock;
+    return curr_block;
   }
-  if (is_leaf_block(currBlock)) {
-    return currBlock;
+  if (is_leaf_block(curr_block)) {
+    return curr_block;
   }
-  uint64_t const hdr = currBlock->h.hdr;
+  uint64_t const hdr = curr_block->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     uint32_t tag = tag_hdr(hdr);
@@ -128,10 +128,10 @@ block *replaceBinderInternal(block *currBlock) {
     }
     layout *layoutData = getLayoutData(layoutInt);
     bool dirty = false;
-    block *newBlock = currBlock;
+    block *newBlock = curr_block;
     for (unsigned i = 0; i < layoutData->nargs; i++) {
       layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)currBlock) + argData->offset;
+      void *arg = ((char *)curr_block) + argData->offset;
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, replaceBinderInternal);
@@ -175,16 +175,16 @@ block *replaceBinderInternal(block *currBlock) {
     }
     return newBlock;
   }
-  return currBlock;
+  return curr_block;
 }
 
-block *substituteInternal(block *currBlock) {
-  if (is_leaf_block(currBlock)) {
-    return currBlock;
+block *substituteInternal(block *curr_block) {
+  if (is_leaf_block(curr_block)) {
+    return curr_block;
   }
-  uint64_t const hdr = currBlock->h.hdr;
+  uint64_t const hdr = curr_block->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
-  if (hook_KEQUAL_eq(currBlock, to_replace)) {
+  if (hook_KEQUAL_eq(curr_block, to_replace)) {
     idx2 = 0;
     if (layoutInt) {
       uint32_t tag = tag_hdr(hdr);
@@ -198,7 +198,7 @@ block *substituteInternal(block *currBlock) {
   if (layoutInt) {
     layout *layoutData = getLayoutData(layoutInt);
     bool dirty = false;
-    block *newBlock = currBlock;
+    block *newBlock = curr_block;
     uint32_t tag = tag_hdr(hdr);
     std::vector<void *> arguments;
     bool isBinder = isSymbolABinder(tag);
@@ -207,7 +207,7 @@ block *substituteInternal(block *currBlock) {
     }
     for (unsigned i = 0; i < layoutData->nargs; i++) {
       layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)currBlock) + argData->offset;
+      void *arg = ((char *)curr_block) + argData->offset;
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, substituteInternal);
@@ -269,7 +269,7 @@ block *substituteInternal(block *currBlock) {
     }
     return newBlock;
   }
-  return currBlock;
+  return curr_block;
 }
 
 extern "C" {
@@ -292,24 +292,24 @@ block *debruijnize(block *term) {
   return newBlock;
 }
 
-block *incrementDebruijn(block *currBlock) {
-  if (is_variable_block(currBlock)) {
-    uint64_t varIdx = ((uintptr_t)currBlock) >> 32;
+block *incrementDebruijn(block *curr_block) {
+  if (is_variable_block(curr_block)) {
+    uint64_t varIdx = ((uintptr_t)curr_block) >> 32;
     if (varIdx >= idx2) {
       varIdx += idx;
       return variable_block(varIdx);
     }
-    return currBlock;
+    return curr_block;
   }
-  if (is_leaf_block(currBlock)) {
-    return currBlock;
+  if (is_leaf_block(curr_block)) {
+    return curr_block;
   }
-  uint64_t const hdr = currBlock->h.hdr;
+  uint64_t const hdr = curr_block->h.hdr;
   uint16_t layoutInt = layout_hdr(hdr);
   if (layoutInt) {
     layout *layoutData = getLayoutData(layoutInt);
     bool dirty = false;
-    block *newBlock = currBlock;
+    block *newBlock = curr_block;
     uint32_t tag = tag_hdr(hdr);
     bool isBinder = isSymbolABinder(tag);
     if (isBinder) {
@@ -317,7 +317,7 @@ block *incrementDebruijn(block *currBlock) {
     }
     for (unsigned i = 0; i < layoutData->nargs; i++) {
       layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)currBlock) + argData->offset;
+      void *arg = ((char *)curr_block) + argData->offset;
       switch (argData->cat) {
       case MAP_LAYOUT: {
         map newArg = map_map(arg, incrementDebruijn);
@@ -366,7 +366,7 @@ block *incrementDebruijn(block *currBlock) {
     }
     return newBlock;
   }
-  return currBlock;
+  return curr_block;
 }
 
 block *alphaRename(block *term) {
@@ -386,16 +386,16 @@ block *replaceBinderIndex(block *term, block *variable) {
 }
 
 block *
-hook_SUBSTITUTION_substOne(block *body, SortKItem newVal, SortKItem varInj) {
-  bool isSameSort = tag_hdr(newVal->h.hdr) == tag_hdr(varInj->h.hdr);
+hook_SUBSTITUTION_substOne(block *body, SortKItem new_val, SortKItem var_inj) {
+  bool isSameSort = tag_hdr(new_val->h.hdr) == tag_hdr(var_inj->h.hdr);
   idx = 0;
-  replacement = *(block **)(((char *)newVal) + sizeof(blockheader));
+  replacement = *(block **)(((char *)new_val) + sizeof(blockheader));
   if (isSameSort) {
-    to_replace = *(block **)(((char *)varInj) + sizeof(blockheader));
+    to_replace = *(block **)(((char *)var_inj) + sizeof(blockheader));
     replacement_inj = replacement;
   } else {
-    to_replace = varInj;
-    replacement_inj = newVal;
+    to_replace = var_inj;
+    replacement_inj = new_val;
   }
   return substituteInternal(body);
 }

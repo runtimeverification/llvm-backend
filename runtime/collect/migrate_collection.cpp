@@ -4,8 +4,8 @@
 
 #include <cstring>
 
-void migrate_collection_node(void **nodePtr) {
-  string *currBlock = STRUCT_BASE(string, data, *nodePtr);
+void migrate_collection_node(void **node_ptr) {
+  string *currBlock = STRUCT_BASE(string, data, *node_ptr);
   if (youngspace_collection_id()
           != getArenaSemispaceIDOfObject((void *)currBlock)
       && oldspace_collection_id()
@@ -30,7 +30,7 @@ void migrate_collection_node(void **nodePtr) {
     *(void **)(currBlock + 1) = newBlock + 1;
     currBlock->h.hdr |= FWD_PTR_BIT;
   }
-  *nodePtr = *(void **)(currBlock + 1);
+  *node_ptr = *(void **)(currBlock + 1);
 }
 
 struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {

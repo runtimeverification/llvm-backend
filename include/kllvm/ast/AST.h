@@ -62,8 +62,8 @@ public:
   virtual bool operator==(kore_sort const &other) const = 0;
   bool operator!=(kore_sort const &other) const { return !(*this == other); }
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
-  virtual void prettyPrint(std::ostream &Out) const = 0;
+  virtual void print(std::ostream &out, unsigned indent = 0) const = 0;
+  virtual void prettyPrint(std::ostream &out) const = 0;
   virtual void serialize_to(serializer &s) const = 0;
 
   virtual ~kore_sort() = default;
@@ -99,8 +99,8 @@ private:
   std::string name;
 
 public:
-  static sptr<kore_sort_variable> Create(std::string const &Name) {
-    return sptr<kore_sort_variable>(new kore_sort_variable(Name));
+  static sptr<kore_sort_variable> Create(std::string const &name) {
+    return sptr<kore_sort_variable>(new kore_sort_variable(name));
   }
 
   bool isConcrete() const override { return false; }
@@ -108,8 +108,8 @@ public:
     return subst.at(*this);
   }
 
-  void print(std::ostream &Out, unsigned indent = 0) const override;
-  void prettyPrint(std::ostream &Out) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
+  void prettyPrint(std::ostream &out) const override;
   void serialize_to(serializer &s) const override;
 
   bool operator==(kore_sort const &other) const override;
@@ -117,8 +117,8 @@ public:
   std::string const &getName() const { return name; }
 
 private:
-  kore_sort_variable(std::string Name)
-      : name(std::move(Name)) { }
+  kore_sort_variable(std::string name)
+      : name(std::move(name)) { }
 };
 
 enum class SortCategory {
@@ -159,20 +159,20 @@ private:
 
 public:
   static sptr<kore_composite_sort> Create(
-      std::string const &Name, value_type Cat = {SortCategory::Uncomputed, 0}) {
-    return sptr<kore_composite_sort>(new kore_composite_sort(Name, Cat));
+      std::string const &name, value_type cat = {SortCategory::Uncomputed, 0}) {
+    return sptr<kore_composite_sort>(new kore_composite_sort(name, cat));
   }
 
   std::string getName() const { return name; }
   value_type getCategory(kore_definition *definition);
   std::string getHook(kore_definition *definition) const;
-  static value_type getCategory(std::string const &hookName);
+  static value_type getCategory(std::string const &hook_name);
 
   bool isConcrete() const override;
   sptr<kore_sort> substitute(substitution const &subst) override;
 
-  void addArgument(sptr<kore_sort> const &Argument);
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void addArgument(sptr<kore_sort> const &argument);
+  void print(std::ostream &out, unsigned indent = 0) const override;
   void prettyPrint(std::ostream &out) const override;
   void serialize_to(serializer &s) const override;
   bool operator==(kore_sort const &other) const override;
@@ -180,8 +180,8 @@ public:
   std::vector<sptr<kore_sort>> const &getArguments() const { return arguments; }
 
 private:
-  kore_composite_sort(std::string Name, value_type category)
-      : name(std::move(Name))
+  kore_composite_sort(std::string name, value_type category)
+      : name(std::move(name))
       , category(category) { }
 };
 
@@ -221,13 +221,13 @@ private:
   uint16_t layout{};
 
 public:
-  static ptr<kore_symbol> Create(std::string const &Name) {
-    return ptr<kore_symbol>(new kore_symbol(Name));
+  static ptr<kore_symbol> Create(std::string const &name) {
+    return ptr<kore_symbol>(new kore_symbol(name));
   }
 
-  void addArgument(sptr<kore_sort> const &Argument);
-  void addFormalArgument(sptr<kore_sort> const &Argument);
-  void addSort(sptr<kore_sort> Sort);
+  void addArgument(sptr<kore_sort> const &argument);
+  void addFormalArgument(sptr<kore_sort> const &argument);
+  void addSort(sptr<kore_sort> sort);
   void initPatternArguments() { arguments.swap(formalArguments); }
 
   [[nodiscard]] std::string const &getName() const { return name; }
@@ -248,8 +248,8 @@ public:
   void setTag(uint32_t val) { firstTag = lastTag = val; }
   [[nodiscard]] uint16_t getLayout() const { return layout; }
 
-  void print(std::ostream &Out, unsigned indent = 0) const;
-  void print(std::ostream &Out, unsigned indent, bool formal) const;
+  void print(std::ostream &out, unsigned indent = 0) const;
+  void print(std::ostream &out, unsigned indent, bool formal) const;
   void serialize_to(serializer &s) const;
 
   bool operator==(kore_symbol const &other) const;
@@ -275,8 +275,8 @@ public:
   friend kore_definition;
 
 private:
-  kore_symbol(std::string Name)
-      : name(std::move(Name))
+  kore_symbol(std::string name)
+      : name(std::move(name))
       , sort(nullptr) { }
 };
 
@@ -309,20 +309,20 @@ private:
   std::string name;
 
 public:
-  static ptr<kore_variable> Create(std::string const &Name) {
-    return ptr<kore_variable>(new kore_variable(Name));
+  static ptr<kore_variable> Create(std::string const &name) {
+    return ptr<kore_variable>(new kore_variable(name));
   }
 
   [[nodiscard]] std::string getName() const;
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const;
+  virtual void print(std::ostream &out, unsigned indent = 0) const;
   virtual void serialize_to(serializer &s) const;
 
   virtual ~kore_variable() = default;
 
 private:
-  kore_variable(std::string Name)
-      : name(std::move(Name)) { }
+  kore_variable(std::string name)
+      : name(std::move(name)) { }
 };
 
 class kore_variable_pattern;
@@ -375,7 +375,7 @@ public:
 
   virtual ~kore_pattern() = default;
 
-  virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
+  virtual void print(std::ostream &out, unsigned indent = 0) const = 0;
 
   virtual void serialize_to(serializer &s) const = 0;
 
@@ -438,7 +438,7 @@ private:
   virtual sptr<kore_pattern> expandMacros(
       SubsortMap const &subsorts, SymbolMap const &overloads,
       std::vector<ptr<kore_declaration>> const &axioms, bool reverse,
-      std::set<size_t> &appliedRules, std::set<std::string> const &macroSymbols)
+      std::set<size_t> &applied_rules, std::set<std::string> const &macro_symbols)
       = 0;
 };
 
@@ -453,8 +453,8 @@ private:
 
 public:
   static ptr<kore_variable_pattern>
-  Create(std::string const &Name, sptr<kore_sort> sort) {
-    ptr<kore_variable> Var = kore_variable::Create(Name);
+  Create(std::string const &name, sptr<kore_sort> sort) {
+    ptr<kore_variable> Var = kore_variable::Create(name);
     return ptr<kore_variable_pattern>(
         new kore_variable_pattern(std::move(Var), std::move(sort)));
   }
@@ -462,7 +462,7 @@ public:
   std::string getName() const;
   sptr<kore_sort> getSort() const override { return sort; }
 
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
   void serialize_to(serializer &s) const override;
 
   void
@@ -510,14 +510,14 @@ private:
   sptr<kore_pattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<kore_declaration>> const &macros, bool reverse,
-      std::set<size_t> &appliedRules,
-      std::set<std::string> const &macroSymbols) override {
+      std::set<size_t> &applied_rules,
+      std::set<std::string> const &macro_symbols) override {
     return shared_from_this();
   }
 
-  kore_variable_pattern(ptr<kore_variable> Name, sptr<kore_sort> Sort)
-      : name(std::move(Name))
-      , sort(std::move(std::move(Sort))) { }
+  kore_variable_pattern(ptr<kore_variable> name, sptr<kore_sort> sort)
+      : name(std::move(name))
+      , sort(std::move(std::move(sort))) { }
 };
 
 void deallocateSPtrKorePattern(sptr<kore_pattern> pattern);
@@ -528,16 +528,16 @@ private:
   std::vector<sptr<kore_pattern>> arguments;
 
 public:
-  static ptr<kore_composite_pattern> Create(std::string const &Name) {
-    ptr<kore_symbol> Sym = kore_symbol::Create(Name);
+  static ptr<kore_composite_pattern> Create(std::string const &name) {
+    ptr<kore_symbol> Sym = kore_symbol::Create(name);
     return ptr<kore_composite_pattern>(new kore_composite_pattern(std::move(Sym)));
   }
-  static ptr<kore_composite_pattern> Create(ptr<kore_symbol> Sym) {
-    return ptr<kore_composite_pattern>(new kore_composite_pattern(std::move(Sym)));
+  static ptr<kore_composite_pattern> Create(ptr<kore_symbol> sym) {
+    return ptr<kore_composite_pattern>(new kore_composite_pattern(std::move(sym)));
   }
-  static ptr<kore_composite_pattern> Create(kore_symbol *Sym) {
-    ptr<kore_symbol> newSym = kore_symbol::Create(Sym->getName());
-    *newSym = *Sym;
+  static ptr<kore_composite_pattern> Create(kore_symbol *sym) {
+    ptr<kore_symbol> newSym = kore_symbol::Create(sym->getName());
+    *newSym = *sym;
     return ptr<kore_composite_pattern>(
         new kore_composite_pattern(std::move(newSym)));
   }
@@ -558,9 +558,9 @@ public:
     return arguments;
   }
 
-  void addArgument(sptr<kore_pattern> const &Argument);
+  void addArgument(sptr<kore_pattern> const &argument);
 
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
   void serialize_to(serializer &s) const override;
 
   void
@@ -586,13 +586,13 @@ private:
   sptr<kore_pattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<kore_declaration>> const &macros, bool reverse,
-      std::set<size_t> &appliedRules,
-      std::set<std::string> const &macroSymbols) override;
+      std::set<size_t> &applied_rules,
+      std::set<std::string> const &macro_symbols) override;
 
   friend void ::kllvm::deallocateSPtrKorePattern(sptr<kore_pattern> pattern);
 
-  kore_composite_pattern(ptr<kore_symbol> Constructor)
-      : constructor(std::move(Constructor)) { }
+  kore_composite_pattern(ptr<kore_symbol> constructor)
+      : constructor(std::move(constructor)) { }
 };
 
 class kore_string_pattern : public kore_pattern {
@@ -600,13 +600,13 @@ private:
   std::string contents;
 
 public:
-  static ptr<kore_string_pattern> Create(std::string const &Contents) {
-    return ptr<kore_string_pattern>(new kore_string_pattern(Contents));
+  static ptr<kore_string_pattern> Create(std::string const &contents) {
+    return ptr<kore_string_pattern>(new kore_string_pattern(contents));
   }
 
   std::string getContents() { return contents; }
 
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
   void serialize_to(serializer &s) const override;
   void
   prettyPrint(std::ostream &out, pretty_print_data const &data) const override {
@@ -651,13 +651,13 @@ private:
   sptr<kore_pattern> expandMacros(
       SubsortMap const &, SymbolMap const &,
       std::vector<ptr<kore_declaration>> const &macros, bool reverse,
-      std::set<size_t> &appliedRules,
-      std::set<std::string> const &macroSymbols) override {
+      std::set<size_t> &applied_rules,
+      std::set<std::string> const &macro_symbols) override {
     return shared_from_this();
   }
 
-  kore_string_pattern(std::string Contents)
-      : contents(std::move(Contents)) { }
+  kore_string_pattern(std::string contents)
+      : contents(std::move(contents)) { }
 };
 
 // kore_declaration
@@ -670,8 +670,8 @@ public:
   attribute_set &attributes() { return attributes_; }
   [[nodiscard]] attribute_set const &attributes() const { return attributes_; }
 
-  void addObjectSortVariable(sptr<kore_sort_variable> const &SortVariable);
-  virtual void print(std::ostream &Out, unsigned indent = 0) const = 0;
+  void addObjectSortVariable(sptr<kore_sort_variable> const &sort_variable);
+  virtual void print(std::ostream &out, unsigned indent = 0) const = 0;
 
   [[nodiscard]] std::vector<sptr<kore_sort_variable>> const &
   getObjectSortVariables() const {
@@ -680,7 +680,7 @@ public:
   virtual ~kore_declaration() = default;
 
 protected:
-  void printSortVariables(std::ostream &Out) const;
+  void printSortVariables(std::ostream &out) const;
 };
 
 class kore_composite_sort_declaration : public kore_declaration {
@@ -690,20 +690,20 @@ private:
 
 public:
   static ptr<kore_composite_sort_declaration>
-  Create(std::string const &Name, bool isHooked = false) {
+  Create(std::string const &name, bool is_hooked = false) {
     return ptr<kore_composite_sort_declaration>(
-        new kore_composite_sort_declaration(Name, isHooked));
+        new kore_composite_sort_declaration(name, is_hooked));
   }
 
   [[nodiscard]] std::string getName() const { return sortName; }
   [[nodiscard]] bool isHooked() const { return _isHooked; }
 
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
 
 private:
-  kore_composite_sort_declaration(std::string Name, bool _isHooked)
-      : _isHooked(_isHooked)
-      , sortName(std::move(Name)) { }
+  kore_composite_sort_declaration(std::string name, bool is_hooked)
+      : _isHooked(is_hooked)
+      , sortName(std::move(name)) { }
 };
 
 class kore_symbol_alias_declaration : public kore_declaration {
@@ -711,8 +711,8 @@ private:
   ptr<kore_symbol> symbol;
 
 protected:
-  kore_symbol_alias_declaration(ptr<kore_symbol> Symbol)
-      : symbol(std::move(Symbol)) { }
+  kore_symbol_alias_declaration(ptr<kore_symbol> symbol)
+      : symbol(std::move(symbol)) { }
 
 public:
   [[nodiscard]] kore_symbol *getSymbol() const { return symbol.get(); }
@@ -724,22 +724,22 @@ private:
 
 public:
   static ptr<kore_symbol_declaration>
-  Create(std::string const &Name, bool isHooked = false) {
-    ptr<kore_symbol> Sym = kore_symbol::Create(Name);
+  Create(std::string const &name, bool is_hooked = false) {
+    ptr<kore_symbol> Sym = kore_symbol::Create(name);
     return ptr<kore_symbol_declaration>(
-        new kore_symbol_declaration(std::move(Sym), isHooked));
+        new kore_symbol_declaration(std::move(Sym), is_hooked));
   }
 
   [[nodiscard]] bool isHooked() const { return _isHooked; }
 
   [[nodiscard]] bool isAnywhere() const;
 
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
 
 private:
-  kore_symbol_declaration(ptr<kore_symbol> Symbol, bool _isHooked)
-      : kore_symbol_alias_declaration(std::move(Symbol))
-      , _isHooked(_isHooked) { }
+  kore_symbol_declaration(ptr<kore_symbol> symbol, bool is_hooked)
+      : kore_symbol_alias_declaration(std::move(symbol))
+      , _isHooked(is_hooked) { }
 };
 
 class kore_alias_declaration : public kore_symbol_alias_declaration {
@@ -748,24 +748,24 @@ private:
   sptr<kore_pattern> pattern;
 
 public:
-  static ptr<kore_alias_declaration> Create(std::string const &Name) {
-    ptr<kore_symbol> Sym = kore_symbol::Create(Name);
+  static ptr<kore_alias_declaration> Create(std::string const &name) {
+    ptr<kore_symbol> Sym = kore_symbol::Create(name);
     return ptr<kore_alias_declaration>(
         new kore_alias_declaration(std::move(Sym)));
   }
 
   void addVariables(sptr<kore_composite_pattern> variables);
-  void addPattern(sptr<kore_pattern> Pattern);
+  void addPattern(sptr<kore_pattern> pattern);
   kore_pattern::substitution getSubstitution(kore_composite_pattern *subject);
   [[nodiscard]] kore_composite_pattern *getBoundVariables() const {
     return boundVariables.get();
   }
   sptr<kore_pattern> &getPattern() { return pattern; }
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
 
 private:
-  kore_alias_declaration(ptr<kore_symbol> Symbol)
-      : kore_symbol_alias_declaration(std::move(Symbol)) { }
+  kore_alias_declaration(ptr<kore_symbol> symbol)
+      : kore_symbol_alias_declaration(std::move(symbol)) { }
 };
 
 class kore_axiom_declaration : public kore_declaration {
@@ -774,16 +774,16 @@ private:
   unsigned ordinal{};
   bool _isClaim;
 
-  kore_axiom_declaration(bool isClaim)
-      : _isClaim(isClaim) { }
+  kore_axiom_declaration(bool is_claim)
+      : _isClaim(is_claim) { }
 
 public:
-  static ptr<kore_axiom_declaration> Create(bool isClaim = false) {
-    return ptr<kore_axiom_declaration>(new kore_axiom_declaration(isClaim));
+  static ptr<kore_axiom_declaration> Create(bool is_claim = false) {
+    return ptr<kore_axiom_declaration>(new kore_axiom_declaration(is_claim));
   }
 
-  void addPattern(sptr<kore_pattern> Pattern);
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void addPattern(sptr<kore_pattern> pattern);
+  void print(std::ostream &out, unsigned indent = 0) const override;
 
   /* returns true if the axiom is actually required to be translated to llvm
      and false if it is an axiom pertaining to symbolic execution which is not
@@ -806,18 +806,18 @@ private:
   std::string moduleName;
 
 public:
-  static ptr<kore_module_import_declaration> Create(std::string const &Name) {
+  static ptr<kore_module_import_declaration> Create(std::string const &name) {
     return ptr<kore_module_import_declaration>(
-        new kore_module_import_declaration(Name));
+        new kore_module_import_declaration(name));
   }
 
   [[nodiscard]] std::string const &getModuleName() const { return moduleName; }
 
-  void print(std::ostream &Out, unsigned indent = 0) const override;
+  void print(std::ostream &out, unsigned indent = 0) const override;
 
 private:
-  kore_module_import_declaration(std::string Name)
-      : moduleName(std::move(Name)) { }
+  kore_module_import_declaration(std::string name)
+      : moduleName(std::move(name)) { }
 };
 
 // kore_module
@@ -828,15 +828,15 @@ private:
   attribute_set attributes_;
 
 public:
-  static ptr<kore_module> Create(std::string const &Name) {
-    return ptr<kore_module>(new kore_module(Name));
+  static ptr<kore_module> Create(std::string const &name) {
+    return ptr<kore_module>(new kore_module(name));
   }
 
   attribute_set &attributes() { return attributes_; }
   [[nodiscard]] attribute_set const &attributes() const { return attributes_; }
 
-  void addDeclaration(sptr<kore_declaration> Declaration);
-  void print(std::ostream &Out, unsigned indent = 0) const;
+  void addDeclaration(sptr<kore_declaration> declaration);
+  void print(std::ostream &out, unsigned indent = 0) const;
 
   [[nodiscard]] std::string const &getName() const { return name; }
   [[nodiscard]] std::vector<sptr<kore_declaration>> const &
@@ -845,8 +845,8 @@ public:
   }
 
 private:
-  kore_module(std::string Name)
-      : name(std::move(Name)) { }
+  kore_module(std::string name)
+      : name(std::move(name)) { }
 };
 
 // kore_definition
@@ -926,8 +926,8 @@ public:
   attribute_set &attributes() { return attributes_; }
   [[nodiscard]] attribute_set const &attributes() const { return attributes_; }
 
-  void addModule(sptr<kore_module> Module);
-  void print(std::ostream &Out, unsigned indent = 0) const;
+  void addModule(sptr<kore_module> module);
+  void print(std::ostream &out, unsigned indent = 0) const;
 
   /*
    * Return the set of sorts that are hooked to a particular hook name.
@@ -940,7 +940,7 @@ public:
    * well.
    */
   [[nodiscard]] std::unordered_set<std::string>
-  getSortsHookedTo(std::string const &hookName) const;
+  getSortsHookedTo(std::string const &hook_name) const;
 
   /*
    * Build this definition's subsort relation from axioms that have the

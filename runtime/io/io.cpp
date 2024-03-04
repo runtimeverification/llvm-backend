@@ -589,11 +589,11 @@ string *hook_KREFLECTION_getenv(string *str) {
   KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.getenv");
 }
 
-string *hook_KREFLECTION_sort(block *K) {
+string *hook_KREFLECTION_sort(block *k) {
   KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.sort");
 }
 
-block *hook_KREFLECTION_getKLabel(block *K) {
+block *hook_KREFLECTION_getKLabel(block *k) {
   KLLVM_HOOK_INVALID_ARGUMENT("not implemented: KREFLECTION.getKLabel");
 }
 
