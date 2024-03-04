@@ -44,69 +44,69 @@ namespace kllvm {
 
 static llvm::Constant *getSymbolNamePtr(
     kore_symbol *symbol, llvm::BasicBlock *set_block_name, llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
+  llvm::LLVMContext &ctx = module->getContext();
   auto name = ast_to_string(*symbol);
   if (set_block_name) {
     set_block_name->setName(name);
   }
-  auto *Str = llvm::ConstantDataArray::getString(Ctx, name, true);
+  auto *str = llvm::ConstantDataArray::getString(ctx, name, true);
   auto *global = module->getOrInsertGlobal(
-      fmt::format("sym_name_{}", name), Str->getType());
-  auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(Str);
+      fmt::format("sym_name_{}", name), str->getType());
+  auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  if (!global_var->hasInitializer()) {
+    global_var->setInitializer(str);
   }
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
-  auto *Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-      Str->getType(), globalVar, indices);
-  return Ptr;
+  auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+      str->getType(), global_var, indices);
+  return ptr;
 }
 
 static llvm::Function *getStrcmp(llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
+  llvm::LLVMContext &ctx = module->getContext();
   auto *type = llvm::FunctionType::get(
-      llvm::Type::getInt32Ty(Ctx),
-      {llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx)}, false);
+      llvm::Type::getInt32Ty(ctx),
+      {llvm::Type::getInt8PtrTy(ctx), llvm::Type::getInt8PtrTy(ctx)}, false);
   return getOrInsertFunction(module, "strcmp", type);
 }
 
 static void
 emitGetTagForSymbolName(kore_definition *definition, llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
+  llvm::LLVMContext &ctx = module->getContext();
   auto *type = llvm::FunctionType::get(
-      llvm::Type::getInt32Ty(Ctx), {llvm::Type::getInt8PtrTy(Ctx)}, false);
+      llvm::Type::getInt32Ty(ctx), {llvm::Type::getInt8PtrTy(ctx)}, false);
   auto *func = getOrInsertFunction(module, "getTagForSymbolNameInternal", type);
-  auto *CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
-  auto *MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
-  auto *Phi = llvm::PHINode::Create(
-      llvm::Type::getInt32Ty(Ctx), definition->get_symbols().size(), "phi",
-      MergeBlock);
+  auto *current_block = llvm::BasicBlock::Create(ctx, "");
+  auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
+  auto *phi = llvm::PHINode::Create(
+      llvm::Type::getInt32Ty(ctx), definition->get_symbols().size(), "phi",
+      merge_block);
   auto const &syms = definition->get_all_symbols();
-  llvm::Function *Strcmp = getStrcmp(module);
+  llvm::Function *strcmp = getStrcmp(module);
   for (auto const &entry : syms) {
     uint32_t tag = entry.second->get_tag();
     auto *symbol = entry.second;
-    CurrentBlock->insertInto(func);
-    auto *Ptr = getSymbolNamePtr(symbol, CurrentBlock, module);
+    current_block->insertInto(func);
+    auto *ptr = getSymbolNamePtr(symbol, current_block, module);
     auto *compare = llvm::CallInst::Create(
-        Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
+        strcmp, {func->arg_begin(), ptr}, "", current_block);
     auto *icmp = new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_EQ, compare,
-        llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0));
-    auto *FalseBlock = llvm::BasicBlock::Create(Ctx, "");
-    llvm::BranchInst::Create(MergeBlock, FalseBlock, icmp, CurrentBlock);
-    Phi->addIncoming(
-        llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CurrentBlock);
-    CurrentBlock = FalseBlock;
+        *current_block, llvm::CmpInst::ICMP_EQ, compare,
+        llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0));
+    auto *false_block = llvm::BasicBlock::Create(ctx, "");
+    llvm::BranchInst::Create(merge_block, false_block, icmp, current_block);
+    phi->addIncoming(
+        llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), tag), current_block);
+    current_block = false_block;
   }
-  Phi->addIncoming(
-      llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), ERROR_TAG),
-      CurrentBlock);
-  llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-  CurrentBlock->insertInto(func);
-  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
+  phi->addIncoming(
+      llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), ERROR_TAG),
+      current_block);
+  llvm::BranchInst::Create(merge_block, current_block);
+  current_block->insertInto(func);
+  llvm::ReturnInst::Create(ctx, phi, merge_block);
+  merge_block->insertInto(func);
 }
 
 static std::string string_struct = "string";
@@ -117,48 +117,48 @@ static void emitDataTableForSymbol(
     std::string const &name, llvm::Type *ty, llvm::DIType *dity,
     kore_definition *definition, llvm::Module *module,
     llvm::Constant *getter(kore_definition *, llvm::Module *, kore_symbol *)) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  std::vector<llvm::Type *> argTypes;
-  argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
+  llvm::LLVMContext &ctx = module->getContext();
+  std::vector<llvm::Type *> arg_types;
+  arg_types.push_back(llvm::Type::getInt32Ty(ctx));
   auto *func = getOrInsertFunction(
-      module, name, llvm::FunctionType::get(ty, argTypes, false));
+      module, name, llvm::FunctionType::get(ty, arg_types, false));
   initDebugFunction(
       name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition,
       func);
-  auto *EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
-  auto *MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
-  auto *stuck = llvm::BasicBlock::Create(Ctx, "stuck");
+  auto *entry_block = llvm::BasicBlock::Create(ctx, "entry", func);
+  auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
+  auto *stuck = llvm::BasicBlock::Create(ctx, "stuck");
   auto const &syms = definition->get_symbols();
   auto *icmp = new llvm::ICmpInst(
-      *EntryBlock, llvm::CmpInst::ICMP_ULE, func->arg_begin(),
+      *entry_block, llvm::CmpInst::ICMP_ULE, func->arg_begin(),
       llvm::ConstantInt::get(
-          llvm::Type::getInt32Ty(Ctx), syms.rbegin()->first));
-  llvm::BranchInst::Create(MergeBlock, stuck, icmp, EntryBlock);
-  auto *tableType = llvm::ArrayType::get(ty, syms.size());
-  auto *table = module->getOrInsertGlobal("table_" + name, tableType);
-  auto *globalVar = llvm::cast<llvm::GlobalVariable>(table);
+          llvm::Type::getInt32Ty(ctx), syms.rbegin()->first));
+  llvm::BranchInst::Create(merge_block, stuck, icmp, entry_block);
+  auto *table_type = llvm::ArrayType::get(ty, syms.size());
+  auto *table = module->getOrInsertGlobal("table_" + name, table_type);
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(table);
   initDebugGlobal(
       "table_" + name,
       getArrayDebugType(
           dity, syms.size(), llvm::DataLayout(module).getABITypeAlign(ty)),
-      globalVar);
+      global_var);
   std::vector<llvm::Constant *> values;
   for (auto entry : syms) {
     auto *symbol = entry.second;
     auto *val = getter(definition, module, symbol);
     values.push_back(val);
   }
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(llvm::ConstantArray::get(tableType, values));
+  if (!global_var->hasInitializer()) {
+    global_var->setInitializer(llvm::ConstantArray::get(table_type, values));
   }
   auto *offset = new llvm::ZExtInst(
-      func->arg_begin(), llvm::Type::getInt64Ty(Ctx), "", MergeBlock);
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+      func->arg_begin(), llvm::Type::getInt64Ty(ctx), "", merge_block);
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   auto *retval = llvm::GetElementPtrInst::Create(
-      tableType, globalVar, {zero, offset}, "", MergeBlock);
-  MergeBlock->insertInto(func);
-  auto *load = new llvm::LoadInst(ty, retval, "", MergeBlock);
-  llvm::ReturnInst::Create(Ctx, load, MergeBlock);
+      table_type, global_var, {zero, offset}, "", merge_block);
+  merge_block->insertInto(func);
+  auto *load = new llvm::LoadInst(ty, retval, "", merge_block);
+  llvm::ReturnInst::Create(ctx, load, merge_block);
   addAbort(stuck, module);
   stuck->insertInto(func);
 }
@@ -169,48 +169,48 @@ static void emitDataForSymbol(
     std::pair<llvm::Value *, llvm::BasicBlock *> getter(
         kore_definition *, llvm::Module *, kore_symbol *,
         llvm::Instruction *)) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  std::vector<llvm::Type *> argTypes;
-  argTypes.push_back(llvm::Type::getInt32Ty(Ctx));
+  llvm::LLVMContext &ctx = module->getContext();
+  std::vector<llvm::Type *> arg_types;
+  arg_types.push_back(llvm::Type::getInt32Ty(ctx));
   if (is_eval) {
     auto *ty = llvm::PointerType::getUnqual(
-        llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0));
-    argTypes.push_back(ty);
+        llvm::ArrayType::get(llvm::Type::getInt8PtrTy(ctx), 0));
+    arg_types.push_back(ty);
   }
   auto *func = getOrInsertFunction(
-      module, name, llvm::FunctionType::get(ty, argTypes, false));
+      module, name, llvm::FunctionType::get(ty, arg_types, false));
   if (!is_eval) {
     initDebugFunction(
         name, name, getDebugFunctionType(dity, {getIntDebugType()}), definition,
         func);
   }
-  auto *EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
-  auto *MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
-  auto *stuck = llvm::BasicBlock::Create(Ctx, "stuck");
+  auto *entry_block = llvm::BasicBlock::Create(ctx, "entry", func);
+  auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
+  auto *stuck = llvm::BasicBlock::Create(ctx, "stuck");
   auto const &syms = definition->get_symbols();
   auto *Switch = llvm::SwitchInst::Create(
-      func->arg_begin(), stuck, syms.size(), EntryBlock);
-  auto *Phi = llvm::PHINode::Create(
-      ty, definition->get_symbols().size(), "phi", MergeBlock);
+      func->arg_begin(), stuck, syms.size(), entry_block);
+  auto *phi = llvm::PHINode::Create(
+      ty, definition->get_symbols().size(), "phi", merge_block);
   for (auto entry : syms) {
     uint32_t tag = entry.first;
     auto *symbol = entry.second;
     auto *decl = definition->get_symbol_declarations().at(symbol->get_name());
-    bool isFunc = decl->attributes().contains(attribute_set::key::Function)
+    bool is_func = decl->attributes().contains(attribute_set::key::Function)
                   || decl->attributes().contains(attribute_set::key::Anywhere);
-    if (is_eval && !isFunc) {
+    if (is_eval && !is_func) {
       continue;
     }
-    auto *CaseBlock
-        = llvm::BasicBlock::Create(Ctx, "tag" + std::to_string(tag), func);
-    auto *Branch = llvm::BranchInst::Create(MergeBlock, CaseBlock);
-    auto pair = getter(definition, module, symbol, Branch);
-    Phi->addIncoming(pair.first, pair.second);
+    auto *case_block
+        = llvm::BasicBlock::Create(ctx, "tag" + std::to_string(tag), func);
+    auto *branch = llvm::BranchInst::Create(merge_block, case_block);
+    auto pair = getter(definition, module, symbol, branch);
+    phi->addIncoming(pair.first, pair.second);
     Switch->addCase(
-        llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CaseBlock);
+        llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), tag), case_block);
   }
-  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
+  llvm::ReturnInst::Create(ctx, phi, merge_block);
+  merge_block->insertInto(func);
   addAbort(stuck, module);
   stuck->insertInto(func);
 }
@@ -218,9 +218,9 @@ static void emitDataForSymbol(
 static std::pair<llvm::Value *, llvm::BasicBlock *> getHeader(
     kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
     llvm::Instruction *inst) {
-  auto *BlockType = getBlockType(module, definition, symbol);
+  auto *block_type = getBlockType(module, definition, symbol);
   return std::make_pair(
-      getBlockHeader(module, definition, symbol, BlockType), inst->getParent());
+      getBlockHeader(module, definition, symbol, block_type), inst->getParent());
 }
 
 static void
@@ -299,14 +299,14 @@ static void emitGetSymbolArity(kore_definition *def, llvm::Module *mod) {
 static llvm::Value *getArgValue(
     llvm::Value *arguments_array, int idx, llvm::BasicBlock *case_block,
     value_type cat, llvm::Module *mod) {
-  llvm::LLVMContext &Ctx = mod->getContext();
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::LLVMContext &ctx = mod->getContext();
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
 
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx);
 
   auto *addr = llvm::GetElementPtrInst::Create(
       llvm::ArrayType::get(i8_ptr_ty, 0), arguments_array,
-      {zero, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), idx)}, "",
+      {zero, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), idx)}, "",
       case_block);
   llvm::Value *arg = new llvm::LoadInst(i8_ptr_ty, addr, "", case_block);
 
@@ -343,23 +343,23 @@ static llvm::Value *getArgValue(
 static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
     kore_definition *def, llvm::Module *mod, kore_symbol *symbol,
     llvm::Instruction *inst) {
-  llvm::LLVMContext &Ctx = mod->getContext();
-  llvm::BasicBlock *CaseBlock = inst->getParent();
+  llvm::LLVMContext &ctx = mod->getContext();
+  llvm::BasicBlock *case_block = inst->getParent();
   inst->removeFromParent();
-  llvm::Function *func = CaseBlock->getParent();
-  llvm::Value *ArgumentsArray = func->arg_begin() + 1;
+  llvm::Function *func = case_block->getParent();
+  llvm::Value *arguments_array = func->arg_begin() + 1;
   int idx = 0;
   llvm::StringMap<llvm::Value *> subst;
   auto pattern = kore_composite_pattern::create(symbol);
   for (auto const &sort : symbol->get_arguments()) {
     value_type cat
         = dynamic_cast<kore_composite_sort *>(sort.get())->get_category(def);
-    llvm::Value *arg = getArgValue(ArgumentsArray, idx, CaseBlock, cat, mod);
+    llvm::Value *arg = getArgValue(arguments_array, idx, case_block, cat, mod);
     std::string name = "_" + std::to_string(idx++);
     subst.insert({name, arg});
     pattern->add_argument(kore_variable_pattern::create(name, sort));
   }
-  create_term creator(subst, def, CaseBlock, mod, false);
+  create_term creator(subst, def, case_block, mod, false);
   llvm::Value *result = creator(pattern.get()).first;
   llvm::Value *retval = nullptr;
   value_type cat = dynamic_cast<kore_composite_sort *>(symbol->get_sort().get())
@@ -375,18 +375,18 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   case sort_category::List:
   case sort_category::Set:
     retval = new llvm::BitCastInst(
-        result, llvm::Type::getInt8PtrTy(Ctx), "", creator.get_current_block());
+        result, llvm::Type::getInt8PtrTy(ctx), "", creator.get_current_block());
     break;
   case sort_category::Bool:
   case sort_category::MInt: {
-    llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
-        creator.get_current_block(), llvm::Type::getInt64Ty(Ctx),
+    llvm::Instruction *malloc = llvm::CallInst::CreateMalloc(
+        creator.get_current_block(), llvm::Type::getInt64Ty(ctx),
         result->getType(), llvm::ConstantExpr::getSizeOf(result->getType()),
         nullptr, nullptr);
-    Malloc->insertAfter(&creator.get_current_block()->back());
-    new llvm::StoreInst(result, Malloc, creator.get_current_block());
+    malloc->insertAfter(&creator.get_current_block()->back());
+    new llvm::StoreInst(result, malloc, creator.get_current_block());
     retval = new llvm::BitCastInst(
-        Malloc, llvm::Type::getInt8PtrTy(Ctx), "", creator.get_current_block());
+        malloc, llvm::Type::getInt8PtrTy(ctx), "", creator.get_current_block());
     break;
   }
   case sort_category::Uncomputed: abort();
@@ -404,85 +404,85 @@ emitEvaluateFunctionSymbol(kore_definition *def, llvm::Module *mod) {
 
 static void
 emitGetTagForFreshSort(kore_definition *definition, llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
+  llvm::LLVMContext &ctx = module->getContext();
   auto *func = getOrInsertFunction(
-      module, "getTagForFreshSort", llvm::Type::getInt32Ty(Ctx),
-      llvm::Type::getInt8PtrTy(Ctx));
-  auto *CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
-  auto *MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
-  auto *Phi = llvm::PHINode::Create(
-      llvm::Type::getInt32Ty(Ctx), definition->get_sort_declarations().size(),
-      "phi", MergeBlock);
+      module, "getTagForFreshSort", llvm::Type::getInt32Ty(ctx),
+      llvm::Type::getInt8PtrTy(ctx));
+  auto *current_block = llvm::BasicBlock::Create(ctx, "");
+  auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
+  auto *phi = llvm::PHINode::Create(
+      llvm::Type::getInt32Ty(ctx), definition->get_sort_declarations().size(),
+      "phi", merge_block);
   auto const &sorts = definition->get_sort_declarations();
-  llvm::Function *Strcmp = getStrcmp(module);
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::Function *strcmp = getStrcmp(module);
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   llvm::Constant *zero32
-      = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
-  bool hasCase = false;
+      = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+  bool has_case = false;
   for (auto const &entry : sorts) {
     std::string name = entry.first;
     if (!definition->get_fresh_functions().contains(name)) {
       continue;
     }
-    hasCase = true;
-    CurrentBlock->insertInto(func);
-    CurrentBlock->setName("is_" + name);
-    auto *Str = llvm::ConstantDataArray::getString(Ctx, name, true);
+    has_case = true;
+    current_block->insertInto(func);
+    current_block->setName("is_" + name);
+    auto *str = llvm::ConstantDataArray::getString(ctx, name, true);
     auto *global
-        = module->getOrInsertGlobal("sort_name_" + name, Str->getType());
-    auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
-    if (!globalVar->hasInitializer()) {
-      globalVar->setInitializer(Str);
+        = module->getOrInsertGlobal("sort_name_" + name, str->getType());
+    auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+    if (!global_var->hasInitializer()) {
+      global_var->setInitializer(str);
     }
     auto indices = std::vector<llvm::Constant *>{zero, zero};
-    auto *Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-        Str->getType(), globalVar, indices);
+    auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+        str->getType(), global_var, indices);
     auto *compare = llvm::CallInst::Create(
-        Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
+        strcmp, {func->arg_begin(), ptr}, "", current_block);
     auto *icmp = new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_EQ, compare, zero32);
-    auto *FalseBlock = llvm::BasicBlock::Create(Ctx, "");
-    auto *CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
-    llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
+        *current_block, llvm::CmpInst::ICMP_EQ, compare, zero32);
+    auto *false_block = llvm::BasicBlock::Create(ctx, "");
+    auto *case_block = llvm::BasicBlock::Create(ctx, name, func);
+    llvm::BranchInst::Create(case_block, false_block, icmp, current_block);
     auto *symbol = definition->get_fresh_functions().at(name);
-    Phi->addIncoming(
+    phi->addIncoming(
         llvm::ConstantInt::get(
-            llvm::Type::getInt32Ty(Ctx),
+            llvm::Type::getInt32Ty(ctx),
             definition->get_all_symbols().at(ast_to_string(*symbol))->get_tag()),
-        CaseBlock);
-    llvm::BranchInst::Create(MergeBlock, CaseBlock);
-    CurrentBlock = FalseBlock;
+        case_block);
+    llvm::BranchInst::Create(merge_block, case_block);
+    current_block = false_block;
   }
-  CurrentBlock->insertInto(func);
-  addAbort(CurrentBlock, module);
-  if (hasCase) {
-    llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-    MergeBlock->insertInto(func);
+  current_block->insertInto(func);
+  addAbort(current_block, module);
+  if (has_case) {
+    llvm::ReturnInst::Create(ctx, phi, merge_block);
+    merge_block->insertInto(func);
   }
 }
 
 static void emitGetToken(kore_definition *definition, llvm::Module *module) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  auto *getTokenType = llvm::FunctionType::get(
-      llvm::Type::getInt8PtrTy(Ctx),
-      {llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
-       llvm::Type::getInt8PtrTy(Ctx)},
+  llvm::LLVMContext &ctx = module->getContext();
+  auto *get_token_type = llvm::FunctionType::get(
+      llvm::Type::getInt8PtrTy(ctx),
+      {llvm::Type::getInt8PtrTy(ctx), llvm::Type::getInt64Ty(ctx),
+       llvm::Type::getInt8PtrTy(ctx)},
       false);
-  auto *func = getOrInsertFunction(module, "getToken", getTokenType);
-  auto *CurrentBlock = llvm::BasicBlock::Create(Ctx, "");
-  auto *MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
-  auto *Phi = llvm::PHINode::Create(
-      llvm::Type::getInt8PtrTy(Ctx), definition->get_sort_declarations().size(),
-      "phi", MergeBlock);
+  auto *func = getOrInsertFunction(module, "getToken", get_token_type);
+  auto *current_block = llvm::BasicBlock::Create(ctx, "");
+  auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
+  auto *phi = llvm::PHINode::Create(
+      llvm::Type::getInt8PtrTy(ctx), definition->get_sort_declarations().size(),
+      "phi", merge_block);
   auto const &sorts = definition->get_sort_declarations();
-  llvm::Function *Strcmp = getStrcmp(module);
+  llvm::Function *strcmp = getStrcmp(module);
   llvm::Function *string_equal = getOrInsertFunction(
-      module, "string_equal", llvm::Type::getInt1Ty(Ctx),
-      llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt64Ty(Ctx), llvm::Type::getInt64Ty(Ctx));
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+      module, "string_equal", llvm::Type::getInt1Ty(ctx),
+      llvm::Type::getInt8PtrTy(ctx), llvm::Type::getInt8PtrTy(ctx),
+      llvm::Type::getInt64Ty(ctx), llvm::Type::getInt64Ty(ctx));
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   llvm::Constant *zero32
-      = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
+      = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
   for (auto const &entry : sorts) {
     std::string name = entry.first;
     if (!entry.second->get_object_sort_variables().empty()) {
@@ -494,25 +494,25 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
     if (cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable) {
       continue;
     }
-    CurrentBlock->insertInto(func);
-    CurrentBlock->setName("is_" + name);
-    auto *Str = llvm::ConstantDataArray::getString(Ctx, name, true);
+    current_block->insertInto(func);
+    current_block->setName("is_" + name);
+    auto *str = llvm::ConstantDataArray::getString(ctx, name, true);
     auto *global
-        = module->getOrInsertGlobal("sort_name_" + name, Str->getType());
-    auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
-    if (!globalVar->hasInitializer()) {
-      globalVar->setInitializer(Str);
+        = module->getOrInsertGlobal("sort_name_" + name, str->getType());
+    auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    if (!global_var->hasInitializer()) {
+      global_var->setInitializer(str);
     }
     auto indices = std::vector<llvm::Constant *>{zero, zero};
-    auto *Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-        Str->getType(), globalVar, indices);
+    auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+        str->getType(), global_var, indices);
     auto *compare = llvm::CallInst::Create(
-        Strcmp, {func->arg_begin(), Ptr}, "", CurrentBlock);
+        strcmp, {func->arg_begin(), ptr}, "", current_block);
     auto *icmp = new llvm::ICmpInst(
-        *CurrentBlock, llvm::CmpInst::ICMP_EQ, compare, zero32);
-    auto *FalseBlock = llvm::BasicBlock::Create(Ctx, "");
-    auto *CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
-    llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
+        *current_block, llvm::CmpInst::ICMP_EQ, compare, zero32);
+    auto *false_block = llvm::BasicBlock::Create(ctx, "");
+    auto *case_block = llvm::BasicBlock::Create(ctx, name, func);
+    llvm::BranchInst::Create(case_block, false_block, icmp, current_block);
     switch (cat.cat) {
     case sort_category::Map:
     case sort_category::RangeMap:
@@ -521,143 +521,143 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
     case sort_category::StringBuffer:
     case sort_category::MInt:
       // TODO: tokens
-      addAbort(CaseBlock, module);
+      addAbort(case_block, module);
       break;
     case sort_category::Bool: {
-      auto *Str = llvm::ConstantDataArray::getString(Ctx, "true", false);
-      auto *global = module->getOrInsertGlobal("bool_true", Str->getType());
-      auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
-      if (!globalVar->hasInitializer()) {
-        globalVar->setInitializer(Str);
+      auto *str = llvm::ConstantDataArray::getString(ctx, "true", false);
+      auto *global = module->getOrInsertGlobal("bool_true", str->getType());
+      auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+      if (!global_var->hasInitializer()) {
+        global_var->setInitializer(str);
       }
-      auto *Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-          Str->getType(), globalVar, indices);
-      auto *Len = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 4);
+      auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+          str->getType(), global_var, indices);
+      auto *len = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 4);
       auto *compare = llvm::CallInst::Create(
           string_equal,
-          {func->arg_begin() + 2, Ptr, func->arg_begin() + 1, Len}, "",
-          CaseBlock);
-      llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
-          CaseBlock, llvm::Type::getInt64Ty(Ctx), compare->getType(),
+          {func->arg_begin() + 2, ptr, func->arg_begin() + 1, len}, "",
+          case_block);
+      llvm::Instruction *malloc = llvm::CallInst::CreateMalloc(
+          case_block, llvm::Type::getInt64Ty(ctx), compare->getType(),
           llvm::ConstantExpr::getSizeOf(compare->getType()), nullptr, nullptr);
-      Malloc->insertAfter(&CaseBlock->back());
-      new llvm::StoreInst(compare, Malloc, CaseBlock);
+      malloc->insertAfter(&case_block->back());
+      new llvm::StoreInst(compare, malloc, case_block);
       auto *result = new llvm::BitCastInst(
-          Malloc, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
-      Phi->addIncoming(result, CaseBlock);
-      llvm::BranchInst::Create(MergeBlock, CaseBlock);
+          malloc, llvm::Type::getInt8PtrTy(ctx), "", case_block);
+      phi->addIncoming(result, case_block);
+      llvm::BranchInst::Create(merge_block, case_block);
       break;
     }
     case sort_category::Float: {
       llvm::Type *Float
           = llvm::StructType::getTypeByName(module->getContext(), float_struct);
-      llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
-      llvm::Function *InitFloat = getOrInsertFunction(
-          module, "init_float", llvm::Type::getVoidTy(Ctx),
-          llvm::PointerType::getUnqual(Float), llvm::Type::getInt8PtrTy(Ctx));
+      llvm::Value *term = allocateTerm(Float, case_block, "koreAllocFloating");
+      llvm::Function *init_float = getOrInsertFunction(
+          module, "init_float", llvm::Type::getVoidTy(ctx),
+          llvm::PointerType::getUnqual(Float), llvm::Type::getInt8PtrTy(ctx));
       llvm::CallInst::Create(
-          InitFloat, {Term, func->arg_begin() + 2}, "", CaseBlock);
+          init_float, {term, func->arg_begin() + 2}, "", case_block);
       auto *cast = new llvm::BitCastInst(
-          Term, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
-      Phi->addIncoming(cast, CaseBlock);
-      llvm::BranchInst::Create(MergeBlock, CaseBlock);
+          term, llvm::Type::getInt8PtrTy(ctx), "", case_block);
+      phi->addIncoming(cast, case_block);
+      llvm::BranchInst::Create(merge_block, case_block);
       break;
     }
     case sort_category::Int: {
-      auto const &thirdArg = func->arg_begin() + 2;
-      llvm::Value *FirstChar = new llvm::LoadInst(
-          llvm::Type::getInt8Ty(Ctx), thirdArg, "", CaseBlock);
-      llvm::Constant *asciiPlus
-          = llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), 43);
-      auto *icmpFirst = new llvm::ICmpInst(
-          *CaseBlock, llvm::CmpInst::ICMP_EQ, FirstChar, asciiPlus);
-      auto *IfIsPlus = llvm::BasicBlock::Create(Ctx, "if_is_plus", func);
-      auto *ElseNoPlus = llvm::BasicBlock::Create(Ctx, "else_no_plus", func);
-      llvm::BranchInst::Create(IfIsPlus, ElseNoPlus, icmpFirst, CaseBlock);
+      auto const &third_arg = func->arg_begin() + 2;
+      llvm::Value *first_char = new llvm::LoadInst(
+          llvm::Type::getInt8Ty(ctx), third_arg, "", case_block);
+      llvm::Constant *ascii_plus
+          = llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx), 43);
+      auto *icmp_first = new llvm::ICmpInst(
+          *case_block, llvm::CmpInst::ICMP_EQ, first_char, ascii_plus);
+      auto *if_is_plus = llvm::BasicBlock::Create(ctx, "if_is_plus", func);
+      auto *else_no_plus = llvm::BasicBlock::Create(ctx, "else_no_plus", func);
+      llvm::BranchInst::Create(if_is_plus, else_no_plus, icmp_first, case_block);
       llvm::Constant *one
-          = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1);
-      llvm::Value *Pruned = llvm::GetElementPtrInst::CreateInBounds(
-          llvm::Type::getInt8Ty(Ctx), func->arg_begin() + 2, {one}, "",
-          IfIsPlus);
-      llvm::BranchInst::Create(ElseNoPlus, IfIsPlus);
-      auto *phiStr = llvm::PHINode::Create(
-          llvm::Type::getInt8PtrTy(Ctx), 2, "", ElseNoPlus);
-      phiStr->addIncoming(func->arg_begin() + 2, CaseBlock);
-      phiStr->addIncoming(Pruned, IfIsPlus);
-      CaseBlock = ElseNoPlus;
+          = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1);
+      llvm::Value *pruned = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt8Ty(ctx), func->arg_begin() + 2, {one}, "",
+          if_is_plus);
+      llvm::BranchInst::Create(else_no_plus, if_is_plus);
+      auto *phi_str = llvm::PHINode::Create(
+          llvm::Type::getInt8PtrTy(ctx), 2, "", else_no_plus);
+      phi_str->addIncoming(func->arg_begin() + 2, case_block);
+      phi_str->addIncoming(pruned, if_is_plus);
+      case_block = else_no_plus;
       llvm::Type *Int
           = llvm::StructType::getTypeByName(module->getContext(), int_struct);
-      llvm::Value *Term = allocateTerm(Int, CaseBlock, "koreAllocInteger");
-      llvm::Function *MpzInitSet = getOrInsertFunction(
-          module, "__gmpz_init_set_str", llvm::Type::getInt32Ty(Ctx),
-          llvm::PointerType::getUnqual(Int), llvm::Type::getInt8PtrTy(Ctx),
-          llvm::Type::getInt32Ty(Ctx));
-      auto *Call = llvm::CallInst::Create(
-          MpzInitSet,
-          {Term, phiStr,
-           llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 10)},
-          "", CaseBlock);
+      llvm::Value *term = allocateTerm(Int, case_block, "koreAllocInteger");
+      llvm::Function *mpz_init_set = getOrInsertFunction(
+          module, "__gmpz_init_set_str", llvm::Type::getInt32Ty(ctx),
+          llvm::PointerType::getUnqual(Int), llvm::Type::getInt8PtrTy(ctx),
+          llvm::Type::getInt32Ty(ctx));
+      auto *call = llvm::CallInst::Create(
+          mpz_init_set,
+          {term, phi_str,
+           llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 10)},
+          "", case_block);
       auto *icmp = new llvm::ICmpInst(
-          *CaseBlock, llvm::CmpInst::ICMP_EQ, Call, zero32);
-      auto *AbortBlock = llvm::BasicBlock::Create(Ctx, "invalid_int", func);
-      addAbort(AbortBlock, module);
+          *case_block, llvm::CmpInst::ICMP_EQ, call, zero32);
+      auto *abort_block = llvm::BasicBlock::Create(ctx, "invalid_int", func);
+      addAbort(abort_block, module);
       auto *cast = new llvm::BitCastInst(
-          Term, llvm::Type::getInt8PtrTy(Ctx), "", CaseBlock);
-      llvm::BranchInst::Create(MergeBlock, AbortBlock, icmp, CaseBlock);
-      Phi->addIncoming(cast, CaseBlock);
+          term, llvm::Type::getInt8PtrTy(ctx), "", case_block);
+      llvm::BranchInst::Create(merge_block, abort_block, icmp, case_block);
+      phi->addIncoming(cast, case_block);
       break;
     }
     case sort_category::Variable:
     case sort_category::Symbol: break;
     case sort_category::Uncomputed: abort();
     }
-    CurrentBlock = FalseBlock;
+    current_block = false_block;
   }
-  CurrentBlock->setName("symbol");
-  CurrentBlock->insertInto(func);
-  auto *StringType
+  current_block->setName("symbol");
+  current_block->insertInto(func);
+  auto *string_type
       = llvm::StructType::getTypeByName(module->getContext(), string_struct);
-  auto *Len = llvm::BinaryOperator::Create(
+  auto *len = llvm::BinaryOperator::Create(
       llvm::Instruction::Add, func->arg_begin() + 1,
-      llvm::ConstantExpr::getSizeOf(StringType), "", CurrentBlock);
-  llvm::Value *Block
-      = allocateTerm(StringType, Len, CurrentBlock, "koreAllocToken");
-  auto *HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      StringType, Block, {zero, zero32, zero32}, "", CurrentBlock);
-  auto *BlockSize
-      = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(Ctx));
-  auto *BlockSizeVal = new llvm::LoadInst(
-      llvm::Type::getInt64Ty(Ctx), BlockSize, "", CurrentBlock);
-  auto *BlockAllocSize = llvm::BinaryOperator::Create(
-      llvm::Instruction::Sub, BlockSizeVal,
-      llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(Ctx)), "",
-      CurrentBlock);
+      llvm::ConstantExpr::getSizeOf(string_type), "", current_block);
+  llvm::Value *block
+      = allocateTerm(string_type, len, current_block, "koreAllocToken");
+  auto *hdr_ptr = llvm::GetElementPtrInst::CreateInBounds(
+      string_type, block, {zero, zero32, zero32}, "", current_block);
+  auto *block_size
+      = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(ctx));
+  auto *block_size_val = new llvm::LoadInst(
+      llvm::Type::getInt64Ty(ctx), block_size, "", current_block);
+  auto *block_alloc_size = llvm::BinaryOperator::Create(
+      llvm::Instruction::Sub, block_size_val,
+      llvm::ConstantExpr::getSizeOf(llvm::Type::getInt8PtrTy(ctx)), "",
+      current_block);
   auto *icmp = new llvm::ICmpInst(
-      *CurrentBlock, llvm::CmpInst::ICMP_UGT, Len, BlockAllocSize);
-  auto *Mask = llvm::SelectInst::Create(
+      *current_block, llvm::CmpInst::ICMP_UGT, len, block_alloc_size);
+  auto *mask = llvm::SelectInst::Create(
       icmp,
-      llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), NOT_YOUNG_OBJECT_BIT),
-      llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0), "", CurrentBlock);
-  auto *HdrOred = llvm::BinaryOperator::Create(
-      llvm::Instruction::Or, func->arg_begin() + 1, Mask, "", CurrentBlock);
-  new llvm::StoreInst(HdrOred, HdrPtr, CurrentBlock);
-  llvm::Function *Memcpy = getOrInsertFunction(
-      module, "memcpy", llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx),
-      llvm::Type::getInt64Ty(Ctx));
-  auto *StrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      StringType, Block,
-      {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 1), zero}, "",
-      CurrentBlock);
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), NOT_YOUNG_OBJECT_BIT),
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0), "", current_block);
+  auto *hdr_ored = llvm::BinaryOperator::Create(
+      llvm::Instruction::Or, func->arg_begin() + 1, mask, "", current_block);
+  new llvm::StoreInst(hdr_ored, hdr_ptr, current_block);
+  llvm::Function *memcpy = getOrInsertFunction(
+      module, "memcpy", llvm::Type::getInt8PtrTy(ctx),
+      llvm::Type::getInt8PtrTy(ctx), llvm::Type::getInt8PtrTy(ctx),
+      llvm::Type::getInt64Ty(ctx));
+  auto *str_ptr = llvm::GetElementPtrInst::CreateInBounds(
+      string_type, block,
+      {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 1), zero}, "",
+      current_block);
   llvm::CallInst::Create(
-      Memcpy, {StrPtr, func->arg_begin() + 2, func->arg_begin() + 1}, "",
-      CurrentBlock);
+      memcpy, {str_ptr, func->arg_begin() + 2, func->arg_begin() + 1}, "",
+      current_block);
   auto *cast = new llvm::BitCastInst(
-      Block, llvm::Type::getInt8PtrTy(Ctx), "", CurrentBlock);
-  llvm::BranchInst::Create(MergeBlock, CurrentBlock);
-  Phi->addIncoming(cast, CurrentBlock);
-  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
+      block, llvm::Type::getInt8PtrTy(ctx), "", current_block);
+  llvm::BranchInst::Create(merge_block, current_block);
+  phi->addIncoming(cast, current_block);
+  llvm::ReturnInst::Create(ctx, phi, merge_block);
+  merge_block->insertInto(func);
 }
 
 static llvm::PointerType *makeWriterType(llvm::LLVMContext &ctx) {
@@ -699,7 +699,7 @@ makePackedVisitorStructureType(llvm::LLVMContext &ctx, llvm::Module *module) {
   auto *file = makeWriterType(ctx);
 
   if (types.find(&ctx) == types.end()) {
-    auto elementTypes = std::vector<llvm::Type *>{
+    auto element_types = std::vector<llvm::Type *>{
         {makeVisitorType(
              ctx, file, getvalue_type({sort_category::Symbol, 0}, module), 1, 1),
          makeVisitorType(
@@ -740,8 +740,8 @@ makePackedVisitorStructureType(llvm::LLVMContext &ctx, llvm::Module *module) {
                  getvalue_type({sort_category::RangeMap, 0}, module)),
              3, 0)}};
 
-    auto *structTy = llvm::StructType::create(ctx, elementTypes, name);
-    types[&ctx] = structTy;
+    auto *struct_ty = llvm::StructType::create(ctx, element_types, name);
+    types[&ctx] = struct_ty;
   }
 
   return types.at(&ctx);
@@ -753,58 +753,58 @@ static void emitTraversal(
     void getter(
         kore_definition *, llvm::Module *, kore_symbol *, llvm::BasicBlock *,
         std::vector<llvm::Value *> const &callbacks)) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  std::vector<llvm::Type *> argTypes;
+  llvm::LLVMContext &ctx = module->getContext();
+  std::vector<llvm::Type *> arg_types;
 
   auto *block_ty = getBlockType(module);
-  argTypes.push_back(block_ty->getPointerTo());
+  arg_types.push_back(block_ty->getPointerTo());
 
   if (is_visitor) {
     // cf runtime/util/header.h visitChildren
-    auto *file = makeWriterType(Ctx);
-    argTypes.push_back(file);
-    argTypes.push_back(
-        makePackedVisitorStructureType(Ctx, module)->getPointerTo());
-    argTypes.push_back(llvm::Type::getInt8PtrTy(Ctx));
+    auto *file = makeWriterType(ctx);
+    arg_types.push_back(file);
+    arg_types.push_back(
+        makePackedVisitorStructureType(ctx, module)->getPointerTo());
+    arg_types.push_back(llvm::Type::getInt8PtrTy(ctx));
   } else {
-    argTypes.push_back(llvm::PointerType::getUnqual(
-        llvm::ArrayType::get(llvm::Type::getInt8PtrTy(Ctx), 0)));
+    arg_types.push_back(llvm::PointerType::getUnqual(
+        llvm::ArrayType::get(llvm::Type::getInt8PtrTy(ctx), 0)));
   }
 
   auto *func = llvm::cast<llvm::Function>(getOrInsertFunction(
       module, name,
-      llvm::FunctionType::get(llvm::Type::getVoidTy(Ctx), argTypes, false)));
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+      llvm::FunctionType::get(llvm::Type::getVoidTy(ctx), arg_types, false)));
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   llvm::Constant *zero32
-      = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), 0);
-  auto *EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
+      = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+  auto *entry_block = llvm::BasicBlock::Create(ctx, "entry", func);
 
-  auto *HdrPtr = llvm::GetElementPtrInst::CreateInBounds(
-      block_ty, func->arg_begin(), {zero, zero32, zero32}, "", EntryBlock);
-  auto *Hdr
-      = new llvm::LoadInst(llvm::Type::getInt64Ty(Ctx), HdrPtr, "", EntryBlock);
-  auto *Tag
-      = new llvm::TruncInst(Hdr, llvm::Type::getInt32Ty(Ctx), "", EntryBlock);
+  auto *hdr_ptr = llvm::GetElementPtrInst::CreateInBounds(
+      block_ty, func->arg_begin(), {zero, zero32, zero32}, "", entry_block);
+  auto *hdr
+      = new llvm::LoadInst(llvm::Type::getInt64Ty(ctx), hdr_ptr, "", entry_block);
+  auto *tag
+      = new llvm::TruncInst(hdr, llvm::Type::getInt32Ty(ctx), "", entry_block);
 
   auto callbacks = std::vector<llvm::Value *>{};
   if (is_visitor) {
-    auto *visitorStruct = func->getArg(2);
-    auto *visitorType = makePackedVisitorStructureType(Ctx, module);
+    auto *visitor_struct = func->getArg(2);
+    auto *visitor_type = makePackedVisitorStructureType(ctx, module);
 
-    for (auto i = 0; i < visitorType->getNumElements(); ++i) {
+    for (auto i = 0; i < visitor_type->getNumElements(); ++i) {
       auto *ptr = llvm::GetElementPtrInst::CreateInBounds(
-          visitorType, visitorStruct,
-          {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), i)}, "",
-          EntryBlock);
+          visitor_type, visitor_struct,
+          {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), i)}, "",
+          entry_block);
 
       callbacks.push_back(new llvm::LoadInst(
-          visitorType->getTypeAtIndex(i), ptr, "", EntryBlock));
+          visitor_type->getTypeAtIndex(i), ptr, "", entry_block));
     }
   }
 
-  auto *stuck = llvm::BasicBlock::Create(Ctx, "stuck");
+  auto *stuck = llvm::BasicBlock::Create(ctx, "stuck");
   auto const &syms = definition->get_symbols();
-  auto *Switch = llvm::SwitchInst::Create(Tag, stuck, syms.size(), EntryBlock);
+  auto *Switch = llvm::SwitchInst::Create(tag, stuck, syms.size(), entry_block);
 
   for (auto entry : syms) {
     uint32_t tag = entry.first;
@@ -812,12 +812,12 @@ static void emitTraversal(
     if (symbol->get_arguments().empty()) {
       continue;
     }
-    auto *CaseBlock
-        = llvm::BasicBlock::Create(Ctx, "tag" + std::to_string(tag), func);
+    auto *case_block
+        = llvm::BasicBlock::Create(ctx, "tag" + std::to_string(tag), func);
     Switch->addCase(
-        llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), tag), CaseBlock);
-    getter(definition, module, symbol, CaseBlock, callbacks);
-    llvm::ReturnInst::Create(Ctx, CaseBlock);
+        llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), tag), case_block);
+    getter(definition, module, symbol, case_block, callbacks);
+    llvm::ReturnInst::Create(ctx, case_block);
   }
   addAbort(stuck, module);
   stuck->insertInto(func);
@@ -826,28 +826,28 @@ static void emitTraversal(
 static void getStore(
     kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
     llvm::BasicBlock *case_block, std::vector<llvm::Value *> const &) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::LLVMContext &ctx = module->getContext();
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   llvm::Function *func = case_block->getParent();
-  llvm::Value *ArgumentsArray = func->arg_begin() + 1;
+  llvm::Value *arguments_array = func->arg_begin() + 1;
   int idx = 0;
-  auto *BlockType = getBlockType(module, definition, symbol);
+  auto *block_type = getBlockType(module, definition, symbol);
   auto *cast = new llvm::BitCastInst(
-      func->arg_begin(), llvm::PointerType::getUnqual(BlockType), "",
+      func->arg_begin(), llvm::PointerType::getUnqual(block_type), "",
       case_block);
   for (auto const &sort : symbol->get_arguments()) {
     value_type cat = dynamic_cast<kore_composite_sort *>(sort.get())
                          ->get_category(definition);
-    llvm::Value *arg = getArgValue(ArgumentsArray, idx, case_block, cat, module);
+    llvm::Value *arg = getArgValue(arguments_array, idx, case_block, cat, module);
     llvm::Type *arg_ty = getArgType(cat, module);
-    llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
-        BlockType, cast,
-        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
+    llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
+        block_type, cast,
+        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), idx++ + 2)},
         "", case_block);
     if (isCollectionSort(cat)) {
       arg = new llvm::LoadInst(arg_ty, arg, "", case_block);
     }
-    new llvm::StoreInst(arg, ChildPtr, case_block);
+    new llvm::StoreInst(arg, child_ptr, case_block);
   }
 }
 
@@ -872,41 +872,41 @@ static void visitCollection(
     kore_composite_sort *composite_sort, llvm::Function *func,
     llvm::Value *child_ptr, llvm::BasicBlock *case_block, llvm::Value *callback,
     llvm::Value *state_ptr) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::LLVMContext &ctx = module->getContext();
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
-  auto *sortDecl
+  auto *sort_decl
       = definition->get_sort_declarations().at(composite_sort->get_name());
-  llvm::Constant *concatPtr = nullptr;
-  if (sortDecl->attributes().contains(attribute_set::key::Concat)) {
-    auto *concat = (kore_composite_pattern *)sortDecl->attributes()
+  llvm::Constant *concat_ptr = nullptr;
+  if (sort_decl->attributes().contains(attribute_set::key::Concat)) {
+    auto *concat = (kore_composite_pattern *)sort_decl->attributes()
                        .get(attribute_set::key::Concat)
                        ->get_arguments()[0]
                        .get();
-    concatPtr = getSymbolNamePtr(concat->get_constructor(), nullptr, module);
+    concat_ptr = getSymbolNamePtr(concat->get_constructor(), nullptr, module);
   } else {
-    concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
+    concat_ptr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(ctx));
   }
-  auto *unit = (kore_composite_pattern *)sortDecl->attributes()
+  auto *unit = (kore_composite_pattern *)sort_decl->attributes()
                    .get(attribute_set::key::Unit)
                    ->get_arguments()[0]
                    .get();
-  auto *unitPtr = getSymbolNamePtr(unit->get_constructor(), nullptr, module);
-  auto *element = (kore_composite_pattern *)sortDecl->attributes()
+  auto *unit_ptr = getSymbolNamePtr(unit->get_constructor(), nullptr, module);
+  auto *element = (kore_composite_pattern *)sort_decl->attributes()
                       .get(attribute_set::key::Element)
                       ->get_arguments()[0]
                       .get();
-  auto *elementPtr
+  auto *element_ptr
       = getSymbolNamePtr(element->get_constructor(), nullptr, module);
-  auto *file = makeWriterType(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *fnType = llvm::FunctionType::get(
-      llvm::Type::getVoidTy(Ctx),
+  auto *file = makeWriterType(ctx);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx);
+  auto *fn_type = llvm::FunctionType::get(
+      llvm::Type::getVoidTy(ctx),
       {file, child_ptr->getType(), i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i8_ptr_ty},
       false);
   llvm::CallInst::Create(
-      fnType, callback,
-      {func->arg_begin() + 1, child_ptr, unitPtr, elementPtr, concatPtr,
+      fn_type, callback,
+      {func->arg_begin() + 1, child_ptr, unit_ptr, element_ptr, concat_ptr,
        state_ptr},
       "", case_block);
 }
@@ -915,137 +915,137 @@ static void visitCollection(
 static void getVisitor(
     kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
     llvm::BasicBlock *case_block, std::vector<llvm::Value *> const &callbacks) {
-  llvm::LLVMContext &Ctx = module->getContext();
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::LLVMContext &ctx = module->getContext();
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
   llvm::Function *func = case_block->getParent();
   int idx = 0;
-  auto *BlockType = getBlockType(module, definition, symbol);
+  auto *block_type = getBlockType(module, definition, symbol);
   auto *cast = new llvm::BitCastInst(
-      func->arg_begin(), llvm::PointerType::getUnqual(BlockType), "",
+      func->arg_begin(), llvm::PointerType::getUnqual(block_type), "",
       case_block);
   unsigned i = 0;
-  auto *file = makeWriterType(Ctx);
+  auto *file = makeWriterType(ctx);
 
   auto *state_ptr = func->arg_end() - 1;
 
   for (auto const &sort : symbol->get_arguments()) {
-    auto *compositeSort = dynamic_cast<kore_composite_sort *>(sort.get());
-    value_type cat = compositeSort->get_category(definition);
-    llvm::Value *ChildPtr = llvm::GetElementPtrInst::CreateInBounds(
-        BlockType, cast,
-        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Ctx), idx++ + 2)},
+    auto *composite_sort = dynamic_cast<kore_composite_sort *>(sort.get());
+    value_type cat = composite_sort->get_category(definition);
+    llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
+        block_type, cast,
+        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), idx++ + 2)},
         "", case_block);
-    llvm::Value *Child = new llvm::LoadInst(
-        getvalue_type(cat, module), ChildPtr, "", case_block);
+    llvm::Value *child = new llvm::LoadInst(
+        getvalue_type(cat, module), child_ptr, "", case_block);
     auto sort_name = ast_to_string(*sort);
-    auto *Str = llvm::ConstantDataArray::getString(Ctx, sort_name, true);
+    auto *str = llvm::ConstantDataArray::getString(ctx, sort_name, true);
     auto *global = module->getOrInsertGlobal(
-        fmt::format("sort_name_{}", sort_name), Str->getType());
-    auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
-    if (!globalVar->hasInitializer()) {
-      globalVar->setInitializer(Str);
+        fmt::format("sort_name_{}", sort_name), str->getType());
+    auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    if (!global_var->hasInitializer()) {
+      global_var->setInitializer(str);
     }
-    llvm::Constant *CharPtr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-        Str->getType(), global, indices);
+    llvm::Constant *char_ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+        str->getType(), global, indices);
     switch (cat.cat) {
     case sort_category::Variable:
     case sort_category::Symbol:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
-              llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
-               llvm::Type::getInt1Ty(Ctx), llvm::Type::getInt8PtrTy(Ctx)},
+              llvm::Type::getVoidTy(ctx),
+              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+               llvm::Type::getInt1Ty(ctx), llvm::Type::getInt8PtrTy(ctx)},
               false),
           callbacks.at(0),
-          {func->arg_begin() + 1, Child, CharPtr,
+          {func->arg_begin() + 1, child, char_ptr,
            llvm::ConstantInt::get(
-               llvm::Type::getInt1Ty(Ctx), cat.cat == sort_category::Variable),
+               llvm::Type::getInt1Ty(ctx), cat.cat == sort_category::Variable),
            state_ptr},
           "", case_block);
       break;
     case sort_category::Int:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
-              llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
-               llvm::Type::getInt8PtrTy(Ctx)},
+              llvm::Type::getVoidTy(ctx),
+              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+               llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(4), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          callbacks.at(4), {func->arg_begin() + 1, child, char_ptr, state_ptr},
           "", case_block);
       break;
     case sort_category::Float:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
-              llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
-               llvm::Type::getInt8PtrTy(Ctx)},
+              llvm::Type::getVoidTy(ctx),
+              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+               llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(5), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          callbacks.at(5), {func->arg_begin() + 1, child, char_ptr, state_ptr},
           "", case_block);
       break;
     case sort_category::Bool:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
-              llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
-               llvm::Type::getInt8PtrTy(Ctx)},
+              llvm::Type::getVoidTy(ctx),
+              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+               llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(6), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          callbacks.at(6), {func->arg_begin() + 1, child, char_ptr, state_ptr},
           "", case_block);
       break;
     case sort_category::StringBuffer:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
-              llvm::Type::getVoidTy(Ctx),
-              {file, Child->getType(), llvm::Type::getInt8PtrTy(Ctx),
-               llvm::Type::getInt8PtrTy(Ctx)},
+              llvm::Type::getVoidTy(ctx),
+              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+               llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(7), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
+          callbacks.at(7), {func->arg_begin() + 1, child, char_ptr, state_ptr},
           "", case_block);
       break;
     case sort_category::MInt: {
       llvm::Value *mint = new llvm::LoadInst(
-          getArgType(cat, module), ChildPtr, "mint", case_block);
+          getArgType(cat, module), child_ptr, "mint", case_block);
       size_t nwords = (cat.bits + 63) / 64;
       auto *nbits
-          = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), cat.bits);
-      auto *fnType = llvm::FunctionType::get(
-          llvm::Type::getVoidTy(Ctx),
-          {file, llvm::Type::getInt64PtrTy(Ctx), llvm::Type::getInt64Ty(Ctx),
-           llvm::Type::getInt8PtrTy(Ctx), llvm::Type::getInt8PtrTy(Ctx)},
+          = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), cat.bits);
+      auto *fn_type = llvm::FunctionType::get(
+          llvm::Type::getVoidTy(ctx),
+          {file, llvm::Type::getInt64PtrTy(ctx), llvm::Type::getInt64Ty(ctx),
+           llvm::Type::getInt8PtrTy(ctx), llvm::Type::getInt8PtrTy(ctx)},
           false);
       if (nwords == 0) {
         llvm::CallInst::Create(
-            fnType, func->arg_begin() + 10,
+            fn_type, func->arg_begin() + 10,
             {func->arg_begin() + 1,
-             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(Ctx)),
-             nbits, CharPtr, state_ptr},
+             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(ctx)),
+             nbits, char_ptr, state_ptr},
             "", case_block);
       } else {
-        auto *Ptr = allocateTerm(
-            llvm::Type::getInt64Ty(Ctx),
-            llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), nwords * 8),
+        auto *ptr = allocateTerm(
+            llvm::Type::getInt64Ty(ctx),
+            llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), nwords * 8),
             case_block, "koreAllocAlwaysGC");
         if (nwords == 1) {
-          llvm::Value *Word = nullptr;
+          llvm::Value *word = nullptr;
           if (cat.bits == 64) {
-            Word = mint;
+            word = mint;
           } else {
-            Word = new llvm::ZExtInst(
-                mint, llvm::Type::getInt64Ty(Ctx), "word", case_block);
+            word = new llvm::ZExtInst(
+                mint, llvm::Type::getInt64Ty(ctx), "word", case_block);
           }
-          new llvm::StoreInst(Word, Ptr, case_block);
+          new llvm::StoreInst(word, ptr, case_block);
         } else { // nwords >= 2
-          llvm::Value *Ptr2 = Ptr;
+          llvm::Value *ptr2 = ptr;
           llvm::Value *accum = mint;
           for (size_t i = 0; i < nwords; i++) {
-            auto *Word = new llvm::TruncInst(
-                accum, llvm::Type::getInt64Ty(Ctx), "word", case_block);
-            new llvm::StoreInst(Word, Ptr2, case_block);
-            Ptr2 = llvm::GetElementPtrInst::Create(
-                llvm::Type::getInt64Ty(Ctx), Ptr2,
-                {llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 1)}, "ptr",
+            auto *word = new llvm::TruncInst(
+                accum, llvm::Type::getInt64Ty(ctx), "word", case_block);
+            new llvm::StoreInst(word, ptr2, case_block);
+            ptr2 = llvm::GetElementPtrInst::Create(
+                llvm::Type::getInt64Ty(ctx), ptr2,
+                {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 1)}, "ptr",
                 case_block);
             accum = llvm::BinaryOperator::Create(
                 llvm::Instruction::LShr, accum,
@@ -1054,30 +1054,30 @@ static void getVisitor(
           }
         }
         llvm::CallInst::Create(
-            fnType, callbacks.at(8),
-            {func->arg_begin() + 1, Ptr, nbits, CharPtr, state_ptr}, "",
+            fn_type, callbacks.at(8),
+            {func->arg_begin() + 1, ptr, nbits, char_ptr, state_ptr}, "",
             case_block);
       }
       break;
     }
     case sort_category::Map:
       visitCollection(
-          definition, module, compositeSort, func, ChildPtr, case_block,
+          definition, module, composite_sort, func, child_ptr, case_block,
           callbacks.at(1), state_ptr);
       break;
     case sort_category::RangeMap:
       visitCollection(
-          definition, module, compositeSort, func, ChildPtr, case_block,
+          definition, module, composite_sort, func, child_ptr, case_block,
           callbacks.at(10), state_ptr);
       break;
     case sort_category::Set:
       visitCollection(
-          definition, module, compositeSort, func, ChildPtr, case_block,
+          definition, module, composite_sort, func, child_ptr, case_block,
           callbacks.at(3), state_ptr);
       break;
     case sort_category::List: {
       visitCollection(
-          definition, module, compositeSort, func, ChildPtr, case_block,
+          definition, module, composite_sort, func, child_ptr, case_block,
           callbacks.at(2), state_ptr);
       break;
     }
@@ -1086,7 +1086,7 @@ static void getVisitor(
     if (i != symbol->get_arguments().size() - 1) {
       llvm::CallInst::Create(
           llvm::FunctionType::get(
-              llvm::Type::getVoidTy(Ctx), {file, llvm::Type::getInt8PtrTy(Ctx)},
+              llvm::Type::getVoidTy(ctx), {file, llvm::Type::getInt8PtrTy(ctx)},
               false),
           callbacks.at(9), {func->arg_begin() + 1, state_ptr}, "", case_block);
     }
@@ -1113,50 +1113,50 @@ static llvm::Constant *getLayoutData(
     kore_definition *def) {
   uint8_t len = symbol->get_arguments().size();
   std::vector<llvm::Constant *> elements;
-  llvm::LLVMContext &Ctx = module->getContext();
-  auto *BlockType = getBlockType(module, def, symbol);
+  llvm::LLVMContext &ctx = module->getContext();
+  auto *block_type = getBlockType(module, def, symbol);
   int i = 2;
   for (auto const &sort : symbol->get_arguments()) {
     value_type cat
         = dynamic_cast<kore_composite_sort *>(sort.get())->get_category(def);
     auto *offset = getOffsetOfMember(
-        module, BlockType,
+        module, block_type,
         i++); //llvm::ConstantExpr::getOffsetOf(BlockType, i++);
     elements.push_back(llvm::ConstantStruct::get(
         llvm::StructType::getTypeByName(
             module->getContext(), layoutitem_struct),
         offset,
         llvm::ConstantInt::get(
-            llvm::Type::getInt16Ty(Ctx), (int)cat.cat + cat.bits)));
+            llvm::Type::getInt16Ty(ctx), (int)cat.cat + cat.bits)));
   }
-  auto *Arr = llvm::ConstantArray::get(
+  auto *arr = llvm::ConstantArray::get(
       llvm::ArrayType::get(
           llvm::StructType::getTypeByName(
               module->getContext(), layoutitem_struct),
           len),
       elements);
   auto *global = module->getOrInsertGlobal(
-      "layout_item_" + std::to_string(layout), Arr->getType());
-  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(Arr);
+      "layout_item_" + std::to_string(layout), arr->getType());
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  if (!global_var->hasInitializer()) {
+    global_var->setInitializer(arr);
   }
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), 0);
+  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
-  auto *Ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-      Arr->getType(), globalVar, indices);
+  auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+      arr->getType(), global_var, indices);
   std::string name = "layout_" + std::to_string(layout);
   auto *global2 = module->getOrInsertGlobal(
       name,
       llvm::StructType::getTypeByName(module->getContext(), layout_struct));
-  auto *globalVar2 = llvm::cast<llvm::GlobalVariable>(global2);
-  initDebugGlobal(name, getForwardDecl(layout_struct), globalVar2);
-  if (!globalVar2->hasInitializer()) {
-    globalVar2->setInitializer(llvm::ConstantStruct::get(
+  auto *global_var2 = llvm::cast<llvm::GlobalVariable>(global2);
+  initDebugGlobal(name, getForwardDecl(layout_struct), global_var2);
+  if (!global_var2->hasInitializer()) {
+    global_var2->setInitializer(llvm::ConstantStruct::get(
         llvm::StructType::getTypeByName(module->getContext(), layout_struct),
-        llvm::ConstantInt::get(llvm::Type::getInt8Ty(Ctx), len), Ptr));
+        llvm::ConstantInt::get(llvm::Type::getInt8Ty(ctx), len), ptr));
   }
-  return globalVar2;
+  return global_var2;
 }
 
 static void emitLayouts(kore_definition *definition, llvm::Module *module) {
@@ -1164,43 +1164,43 @@ static void emitLayouts(kore_definition *definition, llvm::Module *module) {
   for (auto entry : definition->get_symbols()) {
     layouts[entry.second->get_layout()] = entry.second;
   }
-  llvm::LLVMContext &Ctx = module->getContext();
-  std::vector<llvm::Type *> argTypes;
-  argTypes.push_back(llvm::Type::getInt16Ty(Ctx));
+  llvm::LLVMContext &ctx = module->getContext();
+  std::vector<llvm::Type *> arg_types;
+  arg_types.push_back(llvm::Type::getInt16Ty(ctx));
   auto *func = llvm::cast<llvm::Function>(getOrInsertFunction(
       module, "getLayoutData",
       llvm::FunctionType::get(
           llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
               module->getContext(), layout_struct)),
-          argTypes, false)));
+          arg_types, false)));
   initDebugFunction(
       "getLayoutData", "getLayoutData",
       getDebugFunctionType(
           getPointerDebugType(getForwardDecl(layout_struct), "layout *"),
           {getShortDebugType()}),
       definition, func);
-  auto *EntryBlock = llvm::BasicBlock::Create(Ctx, "entry", func);
-  auto *MergeBlock = llvm::BasicBlock::Create(Ctx, "exit");
-  auto *stuck = llvm::BasicBlock::Create(Ctx, "stuck");
+  auto *entry_block = llvm::BasicBlock::Create(ctx, "entry", func);
+  auto *merge_block = llvm::BasicBlock::Create(ctx, "exit");
+  auto *stuck = llvm::BasicBlock::Create(ctx, "stuck");
   auto *Switch = llvm::SwitchInst::Create(
-      func->arg_begin(), stuck, layouts.size(), EntryBlock);
-  auto *Phi = llvm::PHINode::Create(
+      func->arg_begin(), stuck, layouts.size(), entry_block);
+  auto *phi = llvm::PHINode::Create(
       llvm::PointerType::getUnqual(
           llvm::StructType::getTypeByName(module->getContext(), layout_struct)),
-      layouts.size(), "phi", MergeBlock);
+      layouts.size(), "phi", merge_block);
   for (auto entry : layouts) {
     uint16_t layout = entry.first;
     auto *symbol = entry.second;
-    auto *CaseBlock = llvm::BasicBlock::Create(
-        Ctx, "layout" + std::to_string(layout), func);
-    llvm::BranchInst::Create(MergeBlock, CaseBlock);
+    auto *case_block = llvm::BasicBlock::Create(
+        ctx, "layout" + std::to_string(layout), func);
+    llvm::BranchInst::Create(merge_block, case_block);
     auto *data = getLayoutData(layout, symbol, module, definition);
-    Phi->addIncoming(data, CaseBlock);
+    phi->addIncoming(data, case_block);
     Switch->addCase(
-        llvm::ConstantInt::get(llvm::Type::getInt16Ty(Ctx), layout), CaseBlock);
+        llvm::ConstantInt::get(llvm::Type::getInt16Ty(ctx), layout), case_block);
   }
-  llvm::ReturnInst::Create(Ctx, Phi, MergeBlock);
-  MergeBlock->insertInto(func);
+  llvm::ReturnInst::Create(ctx, phi, merge_block);
+  merge_block->insertInto(func);
   addAbort(stuck, module);
   stuck->insertInto(func);
 }
@@ -1210,21 +1210,21 @@ static void emitVisitChildren(kore_definition *def, llvm::Module *mod) {
 }
 
 static void emitInjTags(kore_definition *def, llvm::Module *mod) {
-  llvm::LLVMContext &Ctx = mod->getContext();
+  llvm::LLVMContext &ctx = mod->getContext();
   auto *global
-      = mod->getOrInsertGlobal("FIRST_INJ_TAG", llvm::Type::getInt32Ty(Ctx));
-  auto *globalVar = llvm::cast<llvm::GlobalVariable>(global);
-  globalVar->setConstant(true);
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(llvm::ConstantInt::get(
-        llvm::Type::getInt32Ty(Ctx), def->get_inj_symbol()->get_first_tag()));
+      = mod->getOrInsertGlobal("FIRST_INJ_TAG", llvm::Type::getInt32Ty(ctx));
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setConstant(true);
+  if (!global_var->hasInitializer()) {
+    global_var->setInitializer(llvm::ConstantInt::get(
+        llvm::Type::getInt32Ty(ctx), def->get_inj_symbol()->get_first_tag()));
   }
-  global = mod->getOrInsertGlobal("LAST_INJ_TAG", llvm::Type::getInt32Ty(Ctx));
-  globalVar = llvm::cast<llvm::GlobalVariable>(global);
-  globalVar->setConstant(true);
-  if (!globalVar->hasInitializer()) {
-    globalVar->setInitializer(llvm::ConstantInt::get(
-        llvm::Type::getInt32Ty(Ctx), def->get_inj_symbol()->get_last_tag()));
+  global = mod->getOrInsertGlobal("LAST_INJ_TAG", llvm::Type::getInt32Ty(ctx));
+  global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setConstant(true);
+  if (!global_var->hasInitializer()) {
+    global_var->setInitializer(llvm::ConstantInt::get(
+        llvm::Type::getInt32Ty(ctx), def->get_inj_symbol()->get_last_tag()));
   }
 }
 
@@ -1233,18 +1233,18 @@ static void emitSortTable(kore_definition *def, llvm::Module *mod) {
                    kore_symbol *symbol) -> llvm::Constant * {
     auto &ctx = module->getContext();
 
-    auto *subtableType = llvm::ArrayType::get(
+    auto *subtable_type = llvm::ArrayType::get(
         llvm::Type::getInt8PtrTy(ctx), symbol->get_arguments().size());
     auto *subtable = module->getOrInsertGlobal(
-        fmt::format("sorts_{}", ast_to_string(*symbol)), subtableType);
-    auto *subtableVar = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
+        fmt::format("sorts_{}", ast_to_string(*symbol)), subtable_type);
+    auto *subtable_var = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
     initDebugGlobal(
         "sorts_" + symbol->get_name(),
         getArrayDebugType(
             getCharPtrDebugType(), symbol->get_arguments().size(),
             llvm::DataLayout(module).getABITypeAlign(
                 llvm::Type::getInt8PtrTy(ctx))),
-        subtableVar);
+        subtable_var);
     llvm::Constant *zero
         = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
     auto indices = std::vector<llvm::Constant *>{zero, zero};
@@ -1252,18 +1252,18 @@ static void emitSortTable(kore_definition *def, llvm::Module *mod) {
     std::vector<llvm::Constant *> subvalues;
     for (const auto &i : symbol->get_arguments()) {
       auto arg_str = ast_to_string(*i);
-      auto *strType = llvm::ArrayType::get(
+      auto *str_type = llvm::ArrayType::get(
           llvm::Type::getInt8Ty(ctx), arg_str.size() + 1);
-      auto *sortName = module->getOrInsertGlobal(
-          fmt::format("sort_name_{}", arg_str), strType);
+      auto *sort_name = module->getOrInsertGlobal(
+          fmt::format("sort_name_{}", arg_str), str_type);
       subvalues.push_back(llvm::ConstantExpr::getInBoundsGetElementPtr(
-          strType, sortName, indices));
+          str_type, sort_name, indices));
     }
-    subtableVar->setInitializer(
-        llvm::ConstantArray::get(subtableType, subvalues));
+    subtable_var->setInitializer(
+        llvm::ConstantArray::get(subtable_type, subvalues));
 
     return llvm::ConstantExpr::getInBoundsGetElementPtr(
-        subtableType, subtableVar, indices);
+        subtable_type, subtable_var, indices);
   };
 
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(mod->getContext());

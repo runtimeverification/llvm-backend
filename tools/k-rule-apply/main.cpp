@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   // Parse the given KORE Pattern and get the block* to use as input for the
   // match function.
   parser::kore_parser parser(kore_pattern_filename.getValue());
-  auto InitialConfiguration = parser.pattern();
+  auto initial_configuration = parser.pattern();
 
   auto match_function_name = getMatchFunctionName();
   if (!match_function_name.has_value()) {
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 
   resetMatchReason(handle);
   initStaticObjects(handle);
-  auto *b = constructInitialConfiguration(InitialConfiguration.get(), handle);
+  auto *b = constructInitialConfiguration(initial_configuration.get(), handle);
   if (b == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
@@ -93,13 +93,13 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  size_t logSize = getmatch_logSize(handle);
-  if (logSize == -1) {
+  size_t log_size = getmatch_logSize(handle);
+  if (log_size == -1) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
-  printMatchResult(std::cout, (match_log *)log, logSize, kompiled_dir, handle);
+  printMatchResult(std::cout, (match_log *)log, log_size, kompiled_dir, handle);
 
   dlclose(handle);
   return 0;

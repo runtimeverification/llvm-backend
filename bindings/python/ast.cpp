@@ -432,9 +432,9 @@ void bind_proof_trace(py::module_ &m) {
       .def_static(
           "parse",
           [](py::bytes const &bytes) {
-            proof_trace_parser Parser(false);
+            proof_trace_parser parser(false);
             auto str = std::string(bytes);
-            return Parser.parse_proof_trace(str);
+            return parser.parse_proof_trace(str);
           },
           py::arg("bytes"));
 }

@@ -28,11 +28,11 @@ getPatternsImpl(kore_pattern *pat, std::vector<kore_pattern *> &result) {
     }
     if (composite->get_constructor()->get_name() == "\\and"
         && composite->get_arguments().size() == 2) {
-      if (auto *firstChild = dynamic_cast<kore_composite_pattern *>(
+      if (auto *first_child = dynamic_cast<kore_composite_pattern *>(
               composite->get_arguments()[0].get())) {
-        if (firstChild->get_constructor()->get_name() == "\\in"
-            && firstChild->get_arguments().size() == 2) {
-          result.push_back(firstChild->get_arguments()[1].get());
+        if (first_child->get_constructor()->get_name() == "\\in"
+            && first_child->get_arguments().size() == 2) {
+          result.push_back(first_child->get_arguments()[1].get());
           return getPatternsImpl(composite->get_arguments()[1].get(), result);
         }
       }

@@ -35,8 +35,9 @@ cl::opt<std::string> input_filename(
 cl::opt<kore_file_format> input_format(
     "from", cl::desc("Specify input file format"),
     cl::values(
-        clEnumVal(Detect, "Detect input format automatically"),
-        clEnumVal(Text, "Textual KORE"), clEnumVal(Binary, "Binary KORE")),
+        clEnumValN(Detect, "detect", "Detect input format automatically"),
+        clEnumValN(Text, "text", "Textual KORE"),
+        clEnumValN(Binary, "binary", "Binary KORE")),
     cl::init(Detect), cl::cat(kore_convert_cat));
 
 cl::opt<std::string> output_filename(
@@ -46,8 +47,9 @@ cl::opt<std::string> output_filename(
 cl::opt<kore_file_format> output_format(
     "to", cl::desc("Specify output file format"),
     cl::values(
-        clEnumVal(Detect, "Convert binary <=> text"),
-        clEnumVal(Text, "Textual KORE"), clEnumVal(Binary, "Binary KORE")),
+        clEnumValN(Detect, "detect", "Convert binary <=> text"),
+        clEnumValN(Text, "text", "Textual KORE"),
+        clEnumValN(Binary, "binary", "Binary KORE")),
     cl::init(Detect), cl::cat(kore_convert_cat));
 
 cl::opt<bool> force_binary(

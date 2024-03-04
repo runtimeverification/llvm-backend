@@ -44,16 +44,16 @@ size_t youngspace_size(void) {
 }
 
 bool youngspaceAlmostFull(size_t threshold) {
-  char *nextBlock = *(char **)youngspace.block_start;
-  if (nextBlock) {
+  char *next_block = *(char **)youngspace.block_start;
+  if (next_block) {
     // not on the last block, so short circuit and assume that we can keep
     // allocating for now.
     return false;
   }
-  ptrdiff_t freeBytes = youngspace.block_end - youngspace.block;
-  size_t totalBytes
+  ptrdiff_t free_bytes = youngspace.block_end - youngspace.block;
+  size_t total_bytes
       = youngspace.num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
-  return (totalBytes - freeBytes) * 100 > threshold * 95;
+  return (total_bytes - free_bytes) * 100 > threshold * 95;
 }
 
 void koreAllocSwap(bool swap_old) {

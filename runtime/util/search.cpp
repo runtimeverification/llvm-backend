@@ -30,20 +30,20 @@ blockEnumerator() {
 
   blocks.clear();
 
-  for (auto &keyVal : states) {
-    blocks.push_back(const_cast<block **>(&(keyVal)));
+  for (auto &key_val : states) {
+    blocks.push_back(const_cast<block **>(&(key_val)));
   }
   blocks.push_back(&state);
-  for (auto &keyVal : step_results) {
-    blocks.push_back(const_cast<block **>(&(keyVal)));
+  for (auto &key_val : step_results) {
+    blocks.push_back(const_cast<block **>(&(key_val)));
   }
 
-  for (auto const &keyVal : states_set) {
-    blocks.push_back(const_cast<block **>(&(keyVal)));
+  for (auto const &key_val : states_set) {
+    blocks.push_back(const_cast<block **>(&(key_val)));
   }
 
-  for (auto const &keyVal : results) {
-    blocks.push_back(const_cast<block **>(&(keyVal)));
+  for (auto const &key_val : results) {
+    blocks.push_back(const_cast<block **>(&(key_val)));
   }
 
   return std::make_pair(blocks.begin(), blocks.end());

@@ -29,10 +29,10 @@ llvm::Constant *createGlobalSortStringPtr(
 llvm::CallInst *proof_event::emit_serialize_term(
     kore_composite_sort &sort, llvm::Value *output_file, llvm::Value *term,
     llvm::BasicBlock *insert_at_end) {
-  auto B = llvm::IRBuilder(insert_at_end);
+  auto b = llvm::IRBuilder(insert_at_end);
 
   auto cat = sort.get_category(definition_);
-  auto *sort_name_ptr = createGlobalSortStringPtr(B, sort, module_);
+  auto *sort_name_ptr = createGlobalSortStringPtr(b, sort, module_);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
@@ -47,14 +47,14 @@ llvm::CallInst *proof_event::emit_serialize_term(
     auto *serialize
         = getOrInsertFunction(module_, "serializeTermToFile", func_ty);
 
-    return B.CreateCall(
+    return b.CreateCall(
         serialize,
         {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_)});
   }
   if (term->getType()->isIntegerTy()) {
-    term = B.CreateIntToPtr(term, i8_ptr_ty);
+    term = b.CreateIntToPtr(term, i8_ptr_ty);
   } else {
-    term = B.CreatePointerCast(term, i8_ptr_ty);
+    term = b.CreatePointerCast(term, i8_ptr_ty);
   }
 
   auto *func_ty = llvm::FunctionType::get(
@@ -63,7 +63,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
   auto *serialize
       = getOrInsertFunction(module_, "serializeRawTermToFile", func_ty);
 
-  return B.CreateCall(
+  return b.CreateCall(
       serialize,
       {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_)});
 }
@@ -106,7 +106,7 @@ llvm::CallInst *proof_event::emit_write_u_int64(
 llvm::CallInst *proof_event::emit_write_string(
     llvm::Value *output_file, std::string const &str,
     llvm::BasicBlock *insert_at_end) {
-  auto B = llvm::IRBuilder(insert_at_end);
+  auto b = llvm::IRBuilder(insert_at_end);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
@@ -116,8 +116,8 @@ llvm::CallInst *proof_event::emit_write_string(
 
   auto *print = getOrInsertFunction(module_, "printVariableToFile", func_ty);
 
-  auto *varname = B.CreateGlobalStringPtr(str, "", 0, module_);
-  return B.CreateCall(print, {output_file, varname});
+  auto *varname = b.CreateGlobalStringPtr(str, "", 0, module_);
+  return b.CreateCall(print, {output_file, varname});
 }
 
 llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
@@ -131,8 +131,8 @@ llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
 llvm::LoadInst *
 proof_event::emit_get_output_file_name(llvm::BasicBlock *insert_at_end) {
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
-  auto *fileNamePointer = module_->getOrInsertGlobal("output_file", i8_ptr_ty);
-  return new llvm::LoadInst(i8_ptr_ty, fileNamePointer, "output", insert_at_end);
+  auto *file_name_pointer = module_->getOrInsertGlobal("output_file", i8_ptr_ty);
+  return new llvm::LoadInst(i8_ptr_ty, file_name_pointer, "output", insert_at_end);
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proof_branch(
@@ -336,13 +336,13 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 
   int i = 0;
   for (auto entry = vars.begin(); entry != vars.end(); ++i, ++entry) {
-    auto varName = entry->first;
+    auto var_name = entry->first;
     auto *var = entry->second;
     auto *val = args[i];
 
     auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->get_sort());
 
-    emit_write_string(outputFile, varName, true_block);
+    emit_write_string(outputFile, var_name, true_block);
     emit_serialize_term(*sort, outputFile, val, true_block);
     emit_write_u_int64(outputFile, detail::word(0xCC), true_block);
   }

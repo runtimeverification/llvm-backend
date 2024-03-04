@@ -94,10 +94,10 @@ void printConfigurationInternal(
     void *state_ptr) {
   auto &state = *static_cast<print_state *>(state_ptr);
 
-  uint8_t isConstant = ((uintptr_t)subject) & 3;
-  if (isConstant) {
+  uint8_t is_constant = ((uintptr_t)subject) & 3;
+  if (is_constant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
-    if (isConstant == 3) {
+    if (is_constant == 3) {
       // bound variable
       printConfigurationInternal(
           file, state.bound_variables[state.bound_variables.size() - 1 - tag],
@@ -132,14 +132,14 @@ void printConfigurationInternal(
       }
     }
     if (is_var && !state.var_names.contains(str)) {
-      std::string stdStr = std::string(str->data, len(str));
+      std::string std_str = std::string(str->data, len(str));
       std::string suffix;
-      while (state.used_var_names.contains(stdStr + suffix)) {
+      while (state.used_var_names.contains(std_str + suffix)) {
         suffix = std::to_string(state.var_counter++);
       }
-      stdStr = stdStr + suffix;
+      std_str = std_str + suffix;
       sfprintf(file, "%s", suffix.c_str());
-      state.used_var_names.insert(stdStr);
+      state.used_var_names.insert(std_str);
       state.var_names[str] = suffix;
     } else if (is_var) {
       sfprintf(file, "%s", state.var_names[str].c_str());
@@ -148,15 +148,15 @@ void printConfigurationInternal(
     return;
   }
   uint32_t tag = tag_hdr(subject->h.hdr);
-  bool isBinder = isSymbolABinder(tag);
-  if (isBinder) {
+  bool is_binder = isSymbolABinder(tag);
+  if (is_binder) {
     state.bound_variables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
   char const *symbol = getSymbolNameForTag(tag);
-  std::string symbolStr(symbol);
-  if (symbolStr.rfind("inj{", 0) == 0) {
-    std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(','));
+  std::string symbol_str(symbol);
+  if (symbol_str.rfind("inj{", 0) == 0) {
+    std::string prefix = symbol_str.substr(0, symbol_str.find_first_of(','));
     sfprintf(file, "%s, %s}(", prefix.c_str(), sort);
   } else {
     sfprintf(file, "%s(", symbol);
@@ -177,7 +177,7 @@ void printConfigurationInternal(
 
   visitChildren(subject, file, &callbacks, state_ptr);
 
-  if (isBinder) {
+  if (is_binder) {
     state.bound_variables.pop_back();
   }
   sfprintf(file, ")");
@@ -268,10 +268,10 @@ extern "C" void printMatchResult(
         printSortedConfigurationToFile(
             subject, (block *)match_log[i].subject, match_log[i].sort);
       } else {
-        auto *subjectSort
+        auto *subject_sort
             = debug_print_term((block *)match_log[i].subject, match_log[i].sort);
-        auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
-        subject_file.ofstream() << strSubjectSort << std::endl;
+        auto str_subject_sort = std::string(subject_sort->data, len(subject_sort));
+        subject_file.ofstream() << str_subject_sort << std::endl;
       }
       kllvm::printKORE(
           os, definition_path, subject_file.filename(), false, true);
@@ -283,8 +283,8 @@ extern "C" void printMatchResult(
       os << match_log[i].debug_name << "(";
 
       for (int j = 0; j < match_log[i].args.size(); j += 2) {
-        auto *typeName = static_cast<char *>(match_log[i].args[j + 1]);
-        printValueOfType(os, definition_path, match_log[i].args[j], typeName);
+        auto *type_name = static_cast<char *>(match_log[i].args[j + 1]);
+        printValueOfType(os, definition_path, match_log[i].args[j], type_name);
         if (j + 2 != match_log[i].args.size()) {
           os << ", ";
         }

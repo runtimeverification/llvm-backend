@@ -145,8 +145,8 @@ int main(int argc, char **argv) {
   ptr<kore_definition> definition = parser.definition();
   definition->preprocess();
 
-  llvm::LLVMContext Context;
-  std::unique_ptr<llvm::Module> mod = newModule("definition", Context);
+  llvm::LLVMContext context;
+  std::unique_ptr<llvm::Module> mod = newModule("definition", context);
 
   emit_metadata(*mod);
 
@@ -189,10 +189,10 @@ int main(int argc, char **argv) {
       mod.get(), decision_tree, definition->get_all_symbols(),
       definition->get_hooked_sorts());
   makeStepFunction(definition.get(), mod.get(), dt, false);
-  auto *dtSearch = parseYamldecisionTree(
+  auto *dt_search = parseYamldecisionTree(
       mod.get(), dt_dir() / "dt-search.yaml", definition->get_all_symbols(),
       definition->get_hooked_sorts());
-  makeStepFunction(definition.get(), mod.get(), dtSearch, true);
+  makeStepFunction(definition.get(), mod.get(), dt_search, true);
 
   auto index = read_index_file();
   for (auto const &entry : definition->get_symbols()) {
@@ -201,19 +201,19 @@ int main(int argc, char **argv) {
     if (decl->attributes().contains(attribute_set::key::Function)
         && !decl->is_hooked()) {
       auto filename = get_indexed_filename(index, decl);
-      auto *funcDt = parseYamldecisionTree(
+      auto *func_dt = parseYamldecisionTree(
           mod.get(), filename, definition->get_all_symbols(),
           definition->get_hooked_sorts());
-      makeEvalFunction(decl->get_symbol(), definition.get(), mod.get(), funcDt);
+      makeEvalFunction(decl->get_symbol(), definition.get(), mod.get(), func_dt);
     } else if (decl->is_anywhere()) {
       auto filename = get_indexed_filename(index, decl);
-      auto *funcDt = parseYamldecisionTree(
+      auto *func_dt = parseYamldecisionTree(
           mod.get(), filename, definition->get_all_symbols(),
           definition->get_hooked_sorts());
 
       makeAnywhereFunction(
           definition->get_all_symbols().at(ast_to_string(*decl->get_symbol())),
-          definition.get(), mod.get(), funcDt);
+          definition.get(), mod.get(), func_dt);
     }
   }
 

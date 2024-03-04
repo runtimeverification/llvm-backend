@@ -143,33 +143,33 @@ static ffi_type *getTypeFromBlock(block *elem) {
   } else if (
       tag_hdr(elem->h.hdr) == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
     list *elements = (list *)*elem->children;
-    size_t numFields = hook_LIST_size_long(elements);
-    block *structField = nullptr;
+    size_t num_fields = hook_LIST_size_long(elements);
+    block *struct_field = nullptr;
 
-    auto *structType = (ffi_type *)malloc(sizeof(ffi_type));
-    structType->size = 0;
-    structType->alignment = 0;
-    structType->type = FFI_TYPE_STRUCT;
-    structType->elements
-        = (ffi_type **)malloc(sizeof(ffi_type *) * (numFields + 1));
+    auto *struct_type = (ffi_type *)malloc(sizeof(ffi_type));
+    struct_type->size = 0;
+    struct_type->alignment = 0;
+    struct_type->type = FFI_TYPE_STRUCT;
+    struct_type->elements
+        = (ffi_type **)malloc(sizeof(ffi_type *) * (num_fields + 1));
 
-    for (int j = 0; j < numFields; j++) {
-      structField = hook_LIST_get_long(elements, j);
+    for (int j = 0; j < num_fields; j++) {
+      struct_field = hook_LIST_get_long(elements, j);
 
-      if (tag_hdr(structField->h.hdr)
+      if (tag_hdr(struct_field->h.hdr)
           != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
         KLLVM_HOOK_INVALID_ARGUMENT("Struct list contains invalid FFI type");
       }
 
-      structType->elements[j]
-          = getTypeFromBlock((block *)*(structField->children));
+      struct_type->elements[j]
+          = getTypeFromBlock((block *)*(struct_field->children));
     }
 
-    structType->elements[numFields] = nullptr;
+    struct_type->elements[num_fields] = nullptr;
 
-    struct_types.push_back(structType);
+    struct_types.push_back(struct_type);
 
-    return structType;
+    return struct_type;
   }
   // NOLINTEND(*-branch-clone)
 
@@ -319,12 +319,12 @@ static std::map<std::string, void *> getPrivateSymbols() {
 SortInt hook_FFI_address(SortString fn) {
   char *func = getTerminatedString(fn);
 
-  std::string funcStr = func;
-  static std::map<std::string, void *> const privateSymbols
+  std::string func_str = func;
+  static std::map<std::string, void *> const private_symbols
       = getPrivateSymbols();
 
   void *address = nullptr;
-  if (auto it = privateSymbols.find(funcStr); it != privateSymbols.end()) {
+  if (auto it = private_symbols.find(func_str); it != private_symbols.end()) {
     address = it->second;
   } else {
     void *handle = so_lib_handle();
@@ -344,8 +344,8 @@ firstBlockEnumerator() {
 
   blocks.clear();
 
-  for (auto &keyVal : allocated_k_item_ptrs) {
-    blocks.push_back(const_cast<block **>(&(keyVal.first)));
+  for (auto &key_val : allocated_k_item_ptrs) {
+    blocks.push_back(const_cast<block **>(&(key_val.first)));
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
@@ -360,8 +360,8 @@ secondBlockEnumerator() {
 
   blocks.clear();
 
-  for (auto &keyVal : allocated_bytes_refs) {
-    blocks.push_back(const_cast<block **>(&(keyVal.second)));
+  for (auto &key_val : allocated_bytes_refs) {
+    blocks.push_back(const_cast<block **>(&(key_val.second)));
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
@@ -415,15 +415,15 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
 }
 
 block *hook_FFI_free(block *kitem) {
-  auto ptrIter = allocated_k_item_ptrs.find(kitem);
-  auto refIter = allocated_bytes_refs.find(ptrIter->second);
+  auto ptr_iter = allocated_k_item_ptrs.find(kitem);
+  auto ref_iter = allocated_bytes_refs.find(ptr_iter->second);
 
-  if (ptrIter != allocated_k_item_ptrs.end()) {
+  if (ptr_iter != allocated_k_item_ptrs.end()) {
     free(allocated_k_item_ptrs[kitem]);
-    allocated_k_item_ptrs.erase(ptrIter);
+    allocated_k_item_ptrs.erase(ptr_iter);
 
-    if (refIter != allocated_bytes_refs.end()) {
-      allocated_bytes_refs.erase(refIter);
+    if (ref_iter != allocated_bytes_refs.end()) {
+      allocated_bytes_refs.erase(ref_iter);
     } else {
       throw std::runtime_error("Internal memory map is out of sync");
     }
@@ -433,17 +433,17 @@ block *hook_FFI_free(block *kitem) {
 }
 
 block *hook_FFI_freeAll(void) {
-  for (auto &allocatedKItemPtr : allocated_k_item_ptrs) {
-    hook_FFI_free(allocatedKItemPtr.first);
+  for (auto &allocated_k_item_ptr : allocated_k_item_ptrs) {
+    hook_FFI_free(allocated_k_item_ptr.first);
   }
 
   return dot_k();
 }
 
 block *hook_FFI_bytes_ref(string *bytes) {
-  auto refIter = allocated_bytes_refs.find(bytes);
+  auto ref_iter = allocated_bytes_refs.find(bytes);
 
-  if (refIter == allocated_bytes_refs.end()) {
+  if (ref_iter == allocated_bytes_refs.end()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Bytes have no reference");
   }
 

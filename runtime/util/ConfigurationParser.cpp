@@ -62,11 +62,11 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
     return evaluateFunctionSymbol(tag, arguments.data());
   }
 
-  struct blockheader headerVal = getBlockHeaderForSymbol(tag);
-  size_t size = size_hdr(headerVal.hdr);
+  struct blockheader header_val = getBlockHeaderForSymbol(tag);
+  size_t size = size_hdr(header_val.hdr);
 
   if (tag >= FIRST_INJ_TAG && tag <= LAST_INJ_TAG) {
-    uint16_t layout_code = layout_hdr(headerVal.hdr);
+    uint16_t layout_code = layout_hdr(header_val.hdr);
     layout *data = getLayoutData(layout_code);
     if (data->args[0].cat == SYMBOL_LAYOUT) {
       auto *child = (block *)arguments[0];
@@ -79,15 +79,15 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
     }
   }
 
-  auto *Block = (block *)koreAlloc(size);
-  Block->h = headerVal;
+  auto *new_block = (block *)koreAlloc(size);
+  new_block->h = header_val;
 
-  storeSymbolChildren(Block, arguments.data());
+  storeSymbolChildren(new_block, arguments.data());
   if (isSymbolABinder(tag)) {
-    Block = debruijnize(Block);
+    new_block = debruijnize(new_block);
   }
 
-  return Block;
+  return new_block;
 }
 
 struct construction {
@@ -97,13 +97,13 @@ struct construction {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
-  std::vector<std::variant<kore_pattern const *, construction>> workList{
+  std::vector<std::variant<kore_pattern const *, construction>> work_list{
       initial};
   std::vector<void *> output;
 
-  while (!workList.empty()) {
-    std::variant<kore_pattern const *, construction> current = workList.back();
-    workList.pop_back();
+  while (!work_list.empty()) {
+    std::variant<kore_pattern const *, construction> current = work_list.back();
+    work_list.pop_back();
 
     if (std::holds_alternative<kore_pattern const *>(current)) {
       auto const *constructor = dynamic_cast<kore_composite_pattern const *>(
@@ -117,9 +117,9 @@ extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
       if (symbol->get_name() == "\\dv") {
         auto *const sort = dynamic_cast<kore_composite_sort *>(
             symbol->get_formal_arguments()[0].get());
-        auto *const strPattern = dynamic_cast<kore_string_pattern *>(
+        auto *const str_pattern = dynamic_cast<kore_string_pattern *>(
             constructor->get_arguments()[0].get());
-        std::string contents = strPattern->get_contents();
+        std::string contents = str_pattern->get_contents();
         output.push_back(getToken(
             sort->get_name().c_str(), contents.size(), contents.c_str()));
         continue;
@@ -137,9 +137,9 @@ extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
       }
 
       construction term{tag, constructor->get_arguments().size()};
-      workList.emplace_back(term);
+      work_list.emplace_back(term);
       for (auto const &child : constructor->get_arguments()) {
-        workList.emplace_back(child.get());
+        work_list.emplace_back(child.get());
       }
     } else {
       uint32_t tag = std::get_if<construction>(&current)->tag;
@@ -262,12 +262,12 @@ block *parseConfiguration(char const *filename) {
     auto data = file_contents(filename);
     return deserializeConfiguration(data.data(), data.size());
   }
-  auto InitialConfiguration = parser::kore_parser(filename).pattern();
+  auto initial_configuration = parser::kore_parser(filename).pattern();
   // InitialConfiguration->print(std::cout);
 
   // Allocate the llvm KORE datastructures for the configuration
-  auto *b = (block *)constructInitialConfiguration(InitialConfiguration.get());
-  deallocateSPtrKorePattern(std::move(InitialConfiguration));
+  auto *b = (block *)constructInitialConfiguration(initial_configuration.get());
+  deallocateSPtrKorePattern(std::move(initial_configuration));
   return b;
 }
 

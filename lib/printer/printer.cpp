@@ -126,31 +126,31 @@ std::set<std::string> getComms() {
 }
 
 std::map<std::string, std::set<std::string>> getLeftAssocs() {
-  static std::map<std::string, std::set<std::string>> leftAssocs;
+  static std::map<std::string, std::set<std::string>> left_assocs;
   static bool once = true;
 
   if (once) {
-    leftAssocs["kseq"].insert("kseq");
-    leftAssocs["append"].insert("append");
-    leftAssocs["\\and"].insert("\\and");
-    leftAssocs["\\or"].insert("\\or");
-    leftAssocs["\\rewrites"].insert("\\rewrites");
+    left_assocs["kseq"].insert("kseq");
+    left_assocs["append"].insert("append");
+    left_assocs["\\and"].insert("\\and");
+    left_assocs["\\or"].insert("\\or");
+    left_assocs["\\rewrites"].insert("\\rewrites");
     once = false;
   }
 
-  return leftAssocs;
+  return left_assocs;
 }
 
 std::map<std::string, std::set<std::string>> getRightAssocs() {
-  static std::map<std::string, std::set<std::string>> rightAssocs;
+  static std::map<std::string, std::set<std::string>> right_assocs;
   static bool once = true;
 
   if (once) {
-    rightAssocs["\\rewrites"].insert("\\rewrites");
+    right_assocs["\\rewrites"].insert("\\rewrites");
     once = false;
   }
 
-  return rightAssocs;
+  return right_assocs;
 }
 
 std::map<std::string, std::set<std::string>> getPriorities() {
@@ -244,8 +244,8 @@ preprocessed_print_data getPrintData(
   auto terminals = getTerminals();
   auto assocs = getAssocs();
   auto comms = getComms();
-  auto leftAssoc = getLeftAssocs();
-  auto rightAssoc = getRightAssocs();
+  auto left_assoc = getLeftAssocs();
+  auto right_assoc = getRightAssocs();
   auto priorities = getPriorities();
 
   BracketMap brackets;
@@ -273,17 +273,17 @@ preprocessed_print_data getPrintData(
       }
 
       if (entry.second->attributes().contains(attribute_set::key::Colors)) {
-        std::string colorAtt
+        std::string color_att
             = entry.second->attributes().get_string(attribute_set::key::Colors);
         std::vector<std::string> color;
         size_t idx = 0;
         do {
-          size_t pos = colorAtt.find_first_of(',', idx);
+          size_t pos = color_att.find_first_of(',', idx);
           if (pos == std::string::npos) {
-            color.push_back(trim(colorAtt.substr(idx)));
+            color.push_back(trim(color_att.substr(idx)));
             break;
           }
-          color.push_back(trim(colorAtt.substr(idx, pos - idx)));
+          color.push_back(trim(color_att.substr(idx, pos - idx)));
           idx = pos + 1;
 
         } while (true);
@@ -295,8 +295,8 @@ preprocessed_print_data getPrintData(
             entry.second->get_symbol());
       }
 
-      readMultimap(name, entry.second, leftAssoc, attribute_set::key::Left);
-      readMultimap(name, entry.second, rightAssoc, attribute_set::key::Right);
+      readMultimap(name, entry.second, left_assoc, attribute_set::key::Left);
+      readMultimap(name, entry.second, right_assoc, attribute_set::key::Right);
       readMultimap(
           name, entry.second, priorities, attribute_set::key::Priorities);
     }
@@ -311,7 +311,7 @@ preprocessed_print_data getPrintData(
   }
 
   pretty_print_data data
-      = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
+      = {formats, colors,   terminals, priorities, left_assoc, right_assoc,
          hooks,   brackets, assocs,    comms,      subsorts,  has_color};
 
   return {data, overloads};
@@ -332,7 +332,7 @@ std::ostream &printKORE(
   auto const &def = getDefinition(definition_path);
   auto const &axioms = getAxioms(definition_path);
 
-  auto getPrintDataOrCached = [&] {
+  auto get_print_data_or_cached = [&] {
     if (cache.find(definition_path) == cache.end()) {
       cache[definition_path] = getPrintData(def, axioms, has_color);
     }
@@ -356,7 +356,7 @@ std::ostream &printKORE(
     }
   }
 
-  auto [data, overloads] = getPrintDataOrCached();
+  auto [data, overloads] = get_print_data_or_cached();
 
   sptr<kore_pattern> expanded
       = config->expand_macros(data.subsorts, overloads, axioms, true);
@@ -372,11 +372,11 @@ std::ostream &printKORE(
     filtered = sorted;
   }
 
-  sptr<kore_pattern> withBrackets = addBrackets(filtered, data);
+  sptr<kore_pattern> with_brackets = addBrackets(filtered, data);
   if (pretty) {
-    withBrackets->pretty_print(os, data);
+    with_brackets->pretty_print(os, data);
   } else {
-    withBrackets->print(os);
+    with_brackets->print(os);
   }
   os << std::endl;
 

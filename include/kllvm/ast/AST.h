@@ -454,9 +454,9 @@ private:
 public:
   static ptr<kore_variable_pattern>
   create(std::string const &name, sptr<kore_sort> sort) {
-    ptr<kore_variable> Var = kore_variable::create(name);
+    ptr<kore_variable> var = kore_variable::create(name);
     return ptr<kore_variable_pattern>(
-        new kore_variable_pattern(std::move(Var), std::move(sort)));
+        new kore_variable_pattern(std::move(var), std::move(sort)));
   }
 
   std::string get_name() const;
@@ -529,17 +529,17 @@ private:
 
 public:
   static ptr<kore_composite_pattern> create(std::string const &name) {
-    ptr<kore_symbol> Sym = kore_symbol::create(name);
-    return ptr<kore_composite_pattern>(new kore_composite_pattern(std::move(Sym)));
+    ptr<kore_symbol> sym = kore_symbol::create(name);
+    return ptr<kore_composite_pattern>(new kore_composite_pattern(std::move(sym)));
   }
   static ptr<kore_composite_pattern> create(ptr<kore_symbol> sym) {
     return ptr<kore_composite_pattern>(new kore_composite_pattern(std::move(sym)));
   }
   static ptr<kore_composite_pattern> create(kore_symbol *sym) {
-    ptr<kore_symbol> newSym = kore_symbol::create(sym->get_name());
-    *newSym = *sym;
+    ptr<kore_symbol> new_sym = kore_symbol::create(sym->get_name());
+    *new_sym = *sym;
     return ptr<kore_composite_pattern>(
-        new kore_composite_pattern(std::move(newSym)));
+        new kore_composite_pattern(std::move(new_sym)));
   }
 
   sptr<kore_sort> get_sort() const override {
@@ -725,9 +725,9 @@ private:
 public:
   static ptr<kore_symbol_declaration>
   create(std::string const &name, bool is_hooked = false) {
-    ptr<kore_symbol> Sym = kore_symbol::create(name);
+    ptr<kore_symbol> sym = kore_symbol::create(name);
     return ptr<kore_symbol_declaration>(
-        new kore_symbol_declaration(std::move(Sym), is_hooked));
+        new kore_symbol_declaration(std::move(sym), is_hooked));
   }
 
   [[nodiscard]] bool is_hooked() const { return is_hooked_; }
@@ -749,9 +749,9 @@ private:
 
 public:
   static ptr<kore_alias_declaration> create(std::string const &name) {
-    ptr<kore_symbol> Sym = kore_symbol::create(name);
+    ptr<kore_symbol> sym = kore_symbol::create(name);
     return ptr<kore_alias_declaration>(
-        new kore_alias_declaration(std::move(Sym)));
+        new kore_alias_declaration(std::move(sym)));
   }
 
   void add_variables(sptr<kore_composite_pattern> variables);

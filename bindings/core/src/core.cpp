@@ -23,12 +23,12 @@ std::shared_ptr<kore_pattern> make_rawTerm(
     std::shared_ptr<kore_sort> const &to) {
   auto inj = make_injection(term, from, to);
 
-  auto rawTerm_sym = kore_symbol::create("rawTerm");
+  auto raw_term_sym = kore_symbol::create("rawTerm");
 
-  auto rawTerm = kore_composite_pattern::create(std::move(rawTerm_sym));
-  rawTerm->add_argument(inj);
+  auto raw_term = kore_composite_pattern::create(std::move(raw_term_sym));
+  raw_term->add_argument(inj);
 
-  return rawTerm;
+  return raw_term;
 }
 
 std::shared_ptr<kore_pattern> make_injection(
@@ -75,8 +75,8 @@ block *simplify_to_term(
   if (is_sort_kitem(sort) || is_sort_k(sort)) {
     return construct_term(pattern);
   }
-  auto rawTerm = make_rawTerm(pattern, sort, kitem_sort);
-  return construct_term(rawTerm);
+  auto raw_term = make_rawTerm(pattern, sort, kitem_sort);
+  return construct_term(raw_term);
 }
 
 std::shared_ptr<kore_pattern> simplify(

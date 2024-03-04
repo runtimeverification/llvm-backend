@@ -5,32 +5,32 @@
 #include <cstring>
 
 void migrate_collection_node(void **node_ptr) {
-  string *currBlock = STRUCT_BASE(string, data, *node_ptr);
+  string *curr_block = STRUCT_BASE(string, data, *node_ptr);
   if (youngspace_collection_id()
-          != getArenaSemispaceIDOfObject((void *)currBlock)
+          != getArenaSemispaceIDOfObject((void *)curr_block)
       && oldspace_collection_id()
-             != getArenaSemispaceIDOfObject((void *)currBlock)) {
+             != getArenaSemispaceIDOfObject((void *)curr_block)) {
     return;
   }
-  uint64_t const hdr = currBlock->h.hdr;
+  uint64_t const hdr = curr_block->h.hdr;
   INITIALIZE_MIGRATE();
-  size_t lenInBytes = get_size(hdr, 0);
+  size_t len_in_bytes = get_size(hdr, 0);
   if (!hasForwardingAddress) {
-    string *newBlock = nullptr;
+    string *new_block = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newBlock = (string *)koreAllocOld(lenInBytes);
+      new_block = (string *)koreAllocOld(len_in_bytes);
     } else {
-      newBlock = (string *)koreAlloc(lenInBytes);
+      new_block = (string *)koreAlloc(len_in_bytes);
     }
 #ifdef GC_DBG
     numBytesLiveAtCollection[oldAge] += lenInBytes;
 #endif
-    memcpy(newBlock, currBlock, lenInBytes);
-    MIGRATE_HEADER(newBlock);
-    *(void **)(currBlock + 1) = newBlock + 1;
-    currBlock->h.hdr |= FWD_PTR_BIT;
+    memcpy(new_block, curr_block, len_in_bytes);
+    MIGRATE_HEADER(new_block);
+    *(void **)(curr_block + 1) = new_block + 1;
+    curr_block->h.hdr |= FWD_PTR_BIT;
   }
-  *node_ptr = *(void **)(currBlock + 1);
+  *node_ptr = *(void **)(curr_block + 1);
 }
 
 struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {

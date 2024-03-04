@@ -214,18 +214,18 @@ SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
 SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
   mpz_t result;
   size_t length = 0;
-  char const *dataStart = nullptr;
+  char const *data_start = nullptr;
 
   if (*(input->data) == '+') {
     length = len(input) - 1;
-    dataStart = input->data + 1;
+    data_start = input->data + 1;
   } else {
     length = len(input);
-    dataStart = input->data;
+    data_start = input->data;
   }
 
   auto *copy = static_cast<char *>(koreAllocToken(length + 1));
-  memcpy(copy, dataStart, length);
+  memcpy(copy, data_start, length);
   copy[length] = 0;
   if (mpz_init_set_str(result, copy, base)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -411,29 +411,29 @@ SortStringBuffer hook_BUFFER_concat(SortStringBuffer buf, SortString s) {
 
 stringbuffer *
 hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
-  uint64_t newCapacity = len(buf->contents);
-  uint64_t minCapacity = buf->strlen + n;
-  uint64_t notYoungObjectBit = buf->h.hdr & NOT_YOUNG_OBJECT_BIT;
-  if (newCapacity < minCapacity) {
-    newCapacity = len(buf->contents) * 2 + 2;
-    if (newCapacity < minCapacity) {
-      newCapacity = minCapacity;
+  uint64_t new_capacity = len(buf->contents);
+  uint64_t min_capacity = buf->strlen + n;
+  uint64_t not_young_object_bit = buf->h.hdr & NOT_YOUNG_OBJECT_BIT;
+  if (new_capacity < min_capacity) {
+    new_capacity = len(buf->contents) * 2 + 2;
+    if (new_capacity < min_capacity) {
+      new_capacity = min_capacity;
     }
     string *new_contents = nullptr;
-    if (notYoungObjectBit) {
+    if (not_young_object_bit) {
       assert(buf->h.hdr & AGE_MASK);
       new_contents = static_cast<string *>(
-          koreAllocTokenOld(sizeof(string) + newCapacity));
+          koreAllocTokenOld(sizeof(string) + new_capacity));
     } else {
       new_contents
-          = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
+          = static_cast<string *>(koreAllocToken(sizeof(string) + new_capacity));
     }
     memcpy(new_contents->data, buf->contents->data, buf->strlen);
     buf->contents = new_contents;
   }
   memcpy(buf->contents->data + buf->strlen, data, n);
   buf->strlen += n;
-  init_with_len(buf->contents, newCapacity);
+  init_with_len(buf->contents, new_capacity);
   return buf;
 }
 
@@ -464,16 +464,16 @@ void init_float2(floating *result, std::string contents) {
   }
   result->exp = exp;
   mpfr_init2(result->f, prec);
-  int retValue = 0;
+  int ret_value = 0;
   if (contents == "+Infinity" || contents == "-Infinity"
       || contents == "Infinity") {
-    retValue = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);
+    ret_value = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);
   } else {
     size_t last = contents.find_last_of("fFdDpP");
     std::string str_value = contents.substr(0, last);
-    retValue = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
+    ret_value = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
   }
-  if (retValue != 0) {
+  if (ret_value != 0) {
     KLLVM_HOOK_INVALID_ARGUMENT("Can't convert to float: {}", contents);
   }
 }

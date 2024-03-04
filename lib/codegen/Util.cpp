@@ -16,10 +16,10 @@ namespace kllvm {
 
 llvm::Function *koreHeapAlloc(std::string const &name, llvm::Module *module) {
   llvm::Type *size_type = llvm::Type::getInt64Ty(module->getContext());
-  auto *allocType = llvm::FunctionType::get(
+  auto *alloc_type = llvm::FunctionType::get(
       llvm::Type::getInt8PtrTy(module->getContext()),
       llvm::ArrayRef<llvm::Type *>(size_type), false);
-  return getOrInsertFunction(module, name, allocType);
+  return getOrInsertFunction(module, name, alloc_type);
 }
 
 } // namespace kllvm

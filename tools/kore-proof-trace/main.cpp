@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&kore_proof_trace_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  proof_trace_parser Parser(verbose_output);
-  auto Trace = Parser.parse_proof_trace_from_file(input_filename);
-  if (Trace.has_value()) {
+  proof_trace_parser parser(verbose_output);
+  auto trace = parser.parse_proof_trace_from_file(input_filename);
+  if (trace.has_value()) {
     return 0;
   }
 

@@ -17,7 +17,7 @@ transitiveClosure(std::unordered_map<
   do {
     dirty = false;
     for (auto &entry : relations) {
-      SortSet newSucc;
+      SortSet new_succ;
       for (auto &elem : entry.second) {
         auto &relation = relations[elem];
         for (auto *elem2 : relation) {
@@ -49,17 +49,17 @@ kore_definition::get_sorts_hooked_to(std::string const &hook_name) const {
 
 void kore_definition::add_module(sptr<kore_module> module) {
   for (auto const &decl : module->get_declarations()) {
-    if (auto *sortDecl
+    if (auto *sort_decl
         = dynamic_cast<kore_composite_sort_declaration *>(decl.get())) {
-      sort_declarations_.insert({sortDecl->get_name(), sortDecl});
-      auto sort = kore_composite_sort::create(sortDecl->get_name());
+      sort_declarations_.insert({sort_decl->get_name(), sort_decl});
+      auto sort = kore_composite_sort::create(sort_decl->get_name());
     } else if (
-        auto *symbolDecl = dynamic_cast<kore_symbol_declaration *>(decl.get())) {
+        auto *symbol_decl = dynamic_cast<kore_symbol_declaration *>(decl.get())) {
       symbol_declarations_.insert(
-          {symbolDecl->get_symbol()->get_name(), symbolDecl});
+          {symbol_decl->get_symbol()->get_name(), symbol_decl});
     } else if (
-        auto *aliasDecl = dynamic_cast<kore_alias_declaration *>(decl.get())) {
-      alias_declarations_.insert({aliasDecl->get_symbol()->get_name(), aliasDecl});
+        auto *alias_decl = dynamic_cast<kore_alias_declaration *>(decl.get())) {
+      alias_declarations_.insert({alias_decl->get_symbol()->get_name(), alias_decl});
     } else if (auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get())) {
       axioms_.push_back(axiom);
     }
@@ -85,9 +85,9 @@ SubsortMap kore_definition::get_subsorts() const {
   for (auto *axiom : axioms_) {
     if (axiom->attributes().contains(attribute_set::key::Subsort)) {
       auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
-      auto const &innerSort = att->get_constructor()->get_formal_arguments()[0];
-      auto const &outerSort = att->get_constructor()->get_formal_arguments()[1];
-      subsorts[innerSort.get()].insert(outerSort.get());
+      auto const &inner_sort = att->get_constructor()->get_formal_arguments()[0];
+      auto const &outer_sort = att->get_constructor()->get_formal_arguments()[1];
+      subsorts[inner_sort.get()].insert(outer_sort.get());
     }
   }
 
@@ -101,13 +101,13 @@ SymbolMap kore_definition::get_overloads() const {
     if (axiom->attributes().contains(attribute_set::key::SymbolOverload)) {
       auto const &att
           = axiom->attributes().get(attribute_set::key::SymbolOverload);
-      auto *innerSymbol = std::dynamic_pointer_cast<kore_composite_pattern>(
+      auto *inner_symbol = std::dynamic_pointer_cast<kore_composite_pattern>(
                               att->get_arguments()[1])
                               ->get_constructor();
-      auto *outerSymbol = std::dynamic_pointer_cast<kore_composite_pattern>(
+      auto *outer_symbol = std::dynamic_pointer_cast<kore_composite_pattern>(
                               att->get_arguments()[0])
                               ->get_constructor();
-      overloads[innerSymbol].insert(outerSymbol);
+      overloads[inner_symbol].insert(outer_symbol);
     }
   }
 
@@ -122,7 +122,7 @@ void kore_definition::preprocess() {
     axiom->pattern_ = axiom->pattern_->expand_aliases(this);
   }
   auto symbols = std::map<std::string, std::vector<kore_symbol *>>{};
-  unsigned nextOrdinal = 0;
+  unsigned next_ordinal = 0;
   for (auto const &decl : symbol_declarations_) {
     if (decl.second->attributes().contains(
             attribute_set::key::FreshGenerator)) {
@@ -135,8 +135,8 @@ void kore_definition::preprocess() {
   }
   for (auto iter = axioms_.begin(); iter != axioms_.end();) {
     auto *axiom = *iter;
-    axiom->ordinal_ = nextOrdinal;
-    ordinals_[nextOrdinal++] = axiom;
+    axiom->ordinal_ = next_ordinal;
+    ordinals_[next_ordinal++] = axiom;
     axiom->pattern_->mark_symbols(symbols);
     if (!axiom->is_required()) {
       iter = axioms_.erase(iter);
@@ -163,33 +163,33 @@ void kore_definition::preprocess() {
       symbol->instantiate_symbol(decl);
     }
   }
-  uint32_t nextSymbol = 0;
-  uint16_t nextLayout = 1;
+  uint32_t next_symbol = 0;
+  uint16_t next_layout = 1;
   auto instantiations = std::unordered_map<kore_symbol, uint32_t, hash_symbol>{};
   auto layouts = std::unordered_map<std::string, uint16_t>{};
   auto variables
       = std::unordered_map<std::string, std::pair<uint32_t, uint32_t>>{};
   for (auto const &entry : symbols) {
-    uint32_t firstTag = nextSymbol;
+    uint32_t first_tag = next_symbol;
     for (auto *symbol : entry.second) {
       if (symbol->is_concrete()) {
         if (!instantiations.contains(*symbol)) {
-          instantiations.emplace(*symbol, nextSymbol++);
+          instantiations.emplace(*symbol, next_symbol++);
         }
-        std::string layoutStr = symbol->layout_string(this);
-        if (!layouts.contains(layoutStr)) {
-          layouts.emplace(layoutStr, nextLayout++);
+        std::string layout_str = symbol->layout_string(this);
+        if (!layouts.contains(layout_str)) {
+          layouts.emplace(layout_str, next_layout++);
         }
         symbol->first_tag_ = symbol->last_tag_ = instantiations.at(*symbol);
-        symbol->layout_ = layouts.at(layoutStr);
+        symbol->layout_ = layouts.at(layout_str);
         object_symbols_[symbol->first_tag_] = symbol;
         all_object_symbols_[ast_to_string(*symbol)] = symbol;
       }
     }
-    uint32_t lastTag = nextSymbol - 1;
+    uint32_t last_tag = next_symbol - 1;
     if (!entry.second.empty()) {
       variables.emplace(
-          entry.first, std::pair<uint32_t, uint32_t>{firstTag, lastTag});
+          entry.first, std::pair<uint32_t, uint32_t>{first_tag, last_tag});
     }
   }
   for (auto const &entry : symbols) {

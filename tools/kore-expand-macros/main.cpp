@@ -34,13 +34,13 @@ int main(int argc, char **argv) {
   std::sort(
       axioms.begin(), axioms.end(),
       [](ptr<kore_declaration> const &l, ptr<kore_declaration> const &r) {
-        std::string lStr
+        std::string l_str
             = l->attributes().get_string(attribute_set::key::Priority);
-        std::string rStr
+        std::string r_str
             = r->attributes().get_string(attribute_set::key::Priority);
-        int lInt = std::stoi(lStr);
-        int rInt = std::stoi(rStr);
-        return lInt < rInt;
+        int l_int = std::stoi(l_str);
+        int r_int = std::stoi(r_str);
+        return l_int < r_int;
       });
 
   auto config = kore_pattern::load(argv[2]);

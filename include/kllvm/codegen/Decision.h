@@ -159,15 +159,15 @@ public:
     if (preprocessed_) {
       return;
     }
-    bool hasDefault = false;
+    bool has_default = false;
     for (auto const &_case : cases_) {
       _case.get_child()->preprocess(leaves);
       containsfail_node_
           = containsfail_node_ || _case.get_child()->containsfail_node_;
-      hasDefault = hasDefault || _case.get_constructor() == nullptr;
+      has_default = has_default || _case.get_constructor() == nullptr;
       choice_depth_ = std::max(choice_depth_, _case.get_child()->choice_depth_);
     }
-    if (!hasDefault) {
+    if (!has_default) {
       containsfail_node_ = true;
     }
     preprocessed_ = true;

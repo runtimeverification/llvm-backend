@@ -64,10 +64,10 @@ void initDebugFunction(
   if (!dbg) {
     return;
   }
-  auto *Unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
-  llvm::DIScope *FContext = Unit;
+  auto *unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
+  llvm::DIScope *f_context = unit;
   dbg_sp = dbg->createFunction(
-      FContext, name, name, Unit, dbg_line, type, dbg_line,
+      f_context, name, name, unit, dbg_line, type, dbg_line,
       llvm::DINode::DIFlags::FlagZero, llvm::DISubprogram::SPFlagDefinition);
   func->setSubprogram(dbg_sp);
 }
@@ -78,11 +78,11 @@ void initDebugParam(
   if (!dbg) {
     return;
   }
-  llvm::DILocalVariable *DbgVar = dbg->createParameterVariable(
+  llvm::DILocalVariable *dbg_var = dbg->createParameterVariable(
       dbg_sp, name, arg_no + 1, dbg_file, dbg_line, getDebugType(type, type_name),
       true);
   dbg->insertDbgValueIntrinsic(
-      func->arg_begin() + arg_no, DbgVar, dbg->createExpression(),
+      func->arg_begin() + arg_no, dbg_var, dbg->createExpression(),
       llvm::DILocation::get(func->getContext(), dbg_line, dbg_column, dbg_sp),
       &func->getEntryBlock());
 }
@@ -93,9 +93,9 @@ void initDebugGlobal(
     return;
   }
   resetDebugLoc();
-  auto *DbgExp = dbg->createGlobalVariableExpression(
+  auto *dbg_exp = dbg->createGlobalVariableExpression(
       dbg_cu, name, name, dbg_file, dbg_line, type, false);
-  var->addDebugInfo(DbgExp);
+  var->addDebugInfo(dbg_exp);
 }
 
 void initDebugAxiom(attribute_set const &att) {
@@ -106,21 +106,21 @@ void initDebugAxiom(attribute_set const &att) {
     resetDebugLoc();
     return;
   }
-  kore_composite_pattern *sourceAtt = att.get(attribute_set::key::Source).get();
-  assert(sourceAtt->get_arguments().size() == 1);
-  auto *strPattern
-      = dynamic_cast<kore_string_pattern *>(sourceAtt->get_arguments()[0].get());
-  std::string source = strPattern->get_contents();
+  kore_composite_pattern *source_att = att.get(attribute_set::key::Source).get();
+  assert(source_att->get_arguments().size() == 1);
+  auto *str_pattern
+      = dynamic_cast<kore_string_pattern *>(source_att->get_arguments()[0].get());
+  std::string source = str_pattern->get_contents();
   if (!att.contains(attribute_set::key::Location)) {
     resetDebugLoc();
     return;
   }
-  kore_composite_pattern *locationAtt
+  kore_composite_pattern *location_att
       = att.get(attribute_set::key::Location).get();
-  assert(locationAtt->get_arguments().size() == 1);
-  auto *strPattern2
-      = dynamic_cast<kore_string_pattern *>(locationAtt->get_arguments()[0].get());
-  std::string location = strPattern2->get_contents();
+  assert(location_att->get_arguments().size() == 1);
+  auto *str_pattern2
+      = dynamic_cast<kore_string_pattern *>(location_att->get_arguments()[0].get());
+  std::string location = str_pattern2->get_contents();
   source = source.substr(7, source.length() - 8);
   size_t first_comma = location.find_first_of(',');
   dbg_line = std::stoi(location.substr(9, first_comma - 9));
@@ -143,9 +143,9 @@ llvm::DIType *getForwardDecl(std::string const &name) {
   if (!dbg) {
     return nullptr;
   }
-  auto *Unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
+  auto *unit = dbg->createFile(dbg_file->getFilename(), dbg_file->getDirectory());
   return dbg->createForwardDecl(
-      llvm::dwarf::DW_TAG_structure_type, name, dbg_cu, Unit, 0);
+      llvm::dwarf::DW_TAG_structure_type, name, dbg_cu, unit, 0);
 }
 
 static std::string map_struct = "map";
@@ -268,8 +268,8 @@ getPointerDebugType(llvm::DIType *ty, std::string const &type_name) {
   if (!dbg) {
     return nullptr;
   }
-  auto *ptrType = dbg->createPointerType(ty, sizeof(size_t) * 8);
-  return dbg->createTypedef(ptrType, type_name, dbg_file, 0, dbg_cu);
+  auto *ptr_type = dbg->createPointerType(ty, sizeof(size_t) * 8);
+  return dbg->createTypedef(ptr_type, type_name, dbg_file, 0, dbg_cu);
 }
 
 llvm::DIType *

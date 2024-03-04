@@ -34,92 +34,92 @@ static blockheader kseq_header
 static std::map<std::string, std::string> log_files;
 
 static block *block_errno() {
-  char const *errStr = nullptr;
+  char const *err_str = nullptr;
   switch (errno) {
-  case EOF: errStr = GETTAG(EOF); break;
-  case E2BIG: errStr = GETTAG(E2BIG); break;
-  case EACCES: errStr = GETTAG(EACCES); break;
-  case EAGAIN: errStr = GETTAG(EAGAIN); break;
-  case EBADF: errStr = GETTAG(EBADF); break;
-  case EBUSY: errStr = GETTAG(EBUSY); break;
-  case ECHILD: errStr = GETTAG(ECHILD); break;
-  case EDEADLK: errStr = GETTAG(EDEADLK); break;
-  case EDOM: errStr = GETTAG(EDOM); break;
-  case EEXIST: errStr = GETTAG(EEXIST); break;
-  case EFAULT: errStr = GETTAG(EFAULT); break;
-  case EFBIG: errStr = GETTAG(EFBIG); break;
-  case EINTR: errStr = GETTAG(EINTR); break;
-  case EINVAL: errStr = GETTAG(EINVAL); break;
-  case EIO: errStr = GETTAG(EIO); break;
-  case EISDIR: errStr = GETTAG(EISDIR); break;
-  case EMFILE: errStr = GETTAG(EMFILE); break;
-  case EMLINK: errStr = GETTAG(EMLINK); break;
-  case ENAMETOOLONG: errStr = GETTAG(ENAMETOOLONG); break;
-  case ENFILE: errStr = GETTAG(ENFILE); break;
-  case ENODEV: errStr = GETTAG(ENODEV); break;
-  case ENOENT: errStr = GETTAG(ENOENT); break;
-  case ENOEXEC: errStr = GETTAG(ENOEXEC); break;
-  case ENOLCK: errStr = GETTAG(ENOLCK); break;
-  case ENOMEM: errStr = GETTAG(ENOMEM); break;
-  case ENOSPC: errStr = GETTAG(ENOSPC); break;
-  case ENOSYS: errStr = GETTAG(ENOSYS); break;
-  case ENOTDIR: errStr = GETTAG(ENOTDIR); break;
-  case ENOTEMPTY: errStr = GETTAG(ENOTEMPTY); break;
-  case ENOTTY: errStr = GETTAG(ENOTTY); break;
-  case ENXIO: errStr = GETTAG(ENXIO); break;
-  case EPERM: errStr = GETTAG(EPERM); break;
-  case EPIPE: errStr = GETTAG(EPIPE); break;
-  case ERANGE: errStr = GETTAG(ERANGE); break;
-  case EROFS: errStr = GETTAG(EROFS); break;
-  case ESPIPE: errStr = GETTAG(ESPIPE); break;
-  case ESRCH: errStr = GETTAG(ESRCH); break;
-  case EXDEV: errStr = GETTAG(EXDEV); break;
+  case EOF: err_str = GETTAG(EOF); break;
+  case E2BIG: err_str = GETTAG(E2BIG); break;
+  case EACCES: err_str = GETTAG(EACCES); break;
+  case EAGAIN: err_str = GETTAG(EAGAIN); break;
+  case EBADF: err_str = GETTAG(EBADF); break;
+  case EBUSY: err_str = GETTAG(EBUSY); break;
+  case ECHILD: err_str = GETTAG(ECHILD); break;
+  case EDEADLK: err_str = GETTAG(EDEADLK); break;
+  case EDOM: err_str = GETTAG(EDOM); break;
+  case EEXIST: err_str = GETTAG(EEXIST); break;
+  case EFAULT: err_str = GETTAG(EFAULT); break;
+  case EFBIG: err_str = GETTAG(EFBIG); break;
+  case EINTR: err_str = GETTAG(EINTR); break;
+  case EINVAL: err_str = GETTAG(EINVAL); break;
+  case EIO: err_str = GETTAG(EIO); break;
+  case EISDIR: err_str = GETTAG(EISDIR); break;
+  case EMFILE: err_str = GETTAG(EMFILE); break;
+  case EMLINK: err_str = GETTAG(EMLINK); break;
+  case ENAMETOOLONG: err_str = GETTAG(ENAMETOOLONG); break;
+  case ENFILE: err_str = GETTAG(ENFILE); break;
+  case ENODEV: err_str = GETTAG(ENODEV); break;
+  case ENOENT: err_str = GETTAG(ENOENT); break;
+  case ENOEXEC: err_str = GETTAG(ENOEXEC); break;
+  case ENOLCK: err_str = GETTAG(ENOLCK); break;
+  case ENOMEM: err_str = GETTAG(ENOMEM); break;
+  case ENOSPC: err_str = GETTAG(ENOSPC); break;
+  case ENOSYS: err_str = GETTAG(ENOSYS); break;
+  case ENOTDIR: err_str = GETTAG(ENOTDIR); break;
+  case ENOTEMPTY: err_str = GETTAG(ENOTEMPTY); break;
+  case ENOTTY: err_str = GETTAG(ENOTTY); break;
+  case ENXIO: err_str = GETTAG(ENXIO); break;
+  case EPERM: err_str = GETTAG(EPERM); break;
+  case EPIPE: err_str = GETTAG(EPIPE); break;
+  case ERANGE: err_str = GETTAG(ERANGE); break;
+  case EROFS: err_str = GETTAG(EROFS); break;
+  case ESPIPE: err_str = GETTAG(ESPIPE); break;
+  case ESRCH: err_str = GETTAG(ESRCH); break;
+  case EXDEV: err_str = GETTAG(EXDEV); break;
 #if EWOULDBLOCK != EAGAIN
   case EWOULDBLOCK: errStr = GETTAG(EWOULDBLOCK); break;
 #endif
-  case EINPROGRESS: errStr = GETTAG(EINPROGRESS); break;
-  case EALREADY: errStr = GETTAG(EALREADY); break;
-  case ENOTSOCK: errStr = GETTAG(ENOTSOCK); break;
-  case EDESTADDRREQ: errStr = GETTAG(EDESTADDRREQ); break;
-  case EMSGSIZE: errStr = GETTAG(EMSGSIZE); break;
-  case EPROTOTYPE: errStr = GETTAG(EPROTOTYPE); break;
-  case ENOPROTOOPT: errStr = GETTAG(ENOPROTOOPT); break;
-  case EPROTONOSUPPORT: errStr = GETTAG(EPROTONOSUPPORT); break;
-  case ESOCKTNOSUPPORT: errStr = GETTAG(ESOCKTNOSUPPORT); break;
-  case EOPNOTSUPP: errStr = GETTAG(EOPNOTSUPP); break;
-  case EPFNOSUPPORT: errStr = GETTAG(EPFNOSUPPORT); break;
-  case EAFNOSUPPORT: errStr = GETTAG(EAFNOSUPPORT); break;
-  case EADDRINUSE: errStr = GETTAG(EADDRINUSE); break;
-  case EADDRNOTAVAIL: errStr = GETTAG(EADDRNOTAVAIL); break;
-  case ENETDOWN: errStr = GETTAG(ENETDOWN); break;
-  case ENETUNREACH: errStr = GETTAG(ENETUNREACH); break;
-  case ENETRESET: errStr = GETTAG(ENETRESET); break;
-  case ECONNABORTED: errStr = GETTAG(ECONNABORTED); break;
-  case ECONNRESET: errStr = GETTAG(ECONNRESET); break;
-  case ENOBUFS: errStr = GETTAG(ENOBUFS); break;
-  case EISCONN: errStr = GETTAG(EISCONN); break;
-  case ENOTCONN: errStr = GETTAG(ENOTCONN); break;
-  case ESHUTDOWN: errStr = GETTAG(ESHUTDOWN); break;
-  case ETOOMANYREFS: errStr = GETTAG(ETOOMANYREFS); break;
-  case ETIMEDOUT: errStr = GETTAG(ETIMEDOUT); break;
-  case ECONNREFUSED: errStr = GETTAG(ECONNREFUSED); break;
-  case EHOSTDOWN: errStr = GETTAG(EHOSTDOWN); break;
-  case EHOSTUNREACH: errStr = GETTAG(EHOSTUNREACH); break;
-  case ELOOP: errStr = GETTAG(ELOOP); break;
-  case EOVERFLOW: errStr = GETTAG(EOVERFLOW); break;
+  case EINPROGRESS: err_str = GETTAG(EINPROGRESS); break;
+  case EALREADY: err_str = GETTAG(EALREADY); break;
+  case ENOTSOCK: err_str = GETTAG(ENOTSOCK); break;
+  case EDESTADDRREQ: err_str = GETTAG(EDESTADDRREQ); break;
+  case EMSGSIZE: err_str = GETTAG(EMSGSIZE); break;
+  case EPROTOTYPE: err_str = GETTAG(EPROTOTYPE); break;
+  case ENOPROTOOPT: err_str = GETTAG(ENOPROTOOPT); break;
+  case EPROTONOSUPPORT: err_str = GETTAG(EPROTONOSUPPORT); break;
+  case ESOCKTNOSUPPORT: err_str = GETTAG(ESOCKTNOSUPPORT); break;
+  case EOPNOTSUPP: err_str = GETTAG(EOPNOTSUPP); break;
+  case EPFNOSUPPORT: err_str = GETTAG(EPFNOSUPPORT); break;
+  case EAFNOSUPPORT: err_str = GETTAG(EAFNOSUPPORT); break;
+  case EADDRINUSE: err_str = GETTAG(EADDRINUSE); break;
+  case EADDRNOTAVAIL: err_str = GETTAG(EADDRNOTAVAIL); break;
+  case ENETDOWN: err_str = GETTAG(ENETDOWN); break;
+  case ENETUNREACH: err_str = GETTAG(ENETUNREACH); break;
+  case ENETRESET: err_str = GETTAG(ENETRESET); break;
+  case ECONNABORTED: err_str = GETTAG(ECONNABORTED); break;
+  case ECONNRESET: err_str = GETTAG(ECONNRESET); break;
+  case ENOBUFS: err_str = GETTAG(ENOBUFS); break;
+  case EISCONN: err_str = GETTAG(EISCONN); break;
+  case ENOTCONN: err_str = GETTAG(ENOTCONN); break;
+  case ESHUTDOWN: err_str = GETTAG(ESHUTDOWN); break;
+  case ETOOMANYREFS: err_str = GETTAG(ETOOMANYREFS); break;
+  case ETIMEDOUT: err_str = GETTAG(ETIMEDOUT); break;
+  case ECONNREFUSED: err_str = GETTAG(ECONNREFUSED); break;
+  case EHOSTDOWN: err_str = GETTAG(EHOSTDOWN); break;
+  case EHOSTUNREACH: err_str = GETTAG(EHOSTUNREACH); break;
+  case ELOOP: err_str = GETTAG(ELOOP); break;
+  case EOVERFLOW: err_str = GETTAG(EOVERFLOW); break;
   default:
-    auto *retBlock
+    auto *ret_block
         = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
-    retBlock->h = getBlockHeaderForSymbol(
+    ret_block->h = getBlockHeaderForSymbol(
         (uint64_t)getTagForSymbolName("Lbl'Hash'unknownIOError{}"));
     mpz_t err;
     mpz_init_set_si(err, errno);
     mpz_ptr p = move_int(err);
-    memcpy(retBlock->children, &p, sizeof(mpz_ptr));
-    return retBlock;
+    memcpy(ret_block->children, &p, sizeof(mpz_ptr));
+    return ret_block;
   }
 
-  return leaf_block(getTagForSymbolName(errStr));
+  return leaf_block(getTagForSymbolName(err_str));
 }
 
 static blockheader header_int() {
@@ -157,26 +157,26 @@ static blockheader header_string() {
 
 static inline block *getKSeqErrorBlock() {
   block *err = block_errno();
-  auto *retBlock
+  auto *ret_block
       = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(block *)));
   auto *inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  retBlock->h = kseq_header;
+  ret_block->h = kseq_header;
   inj->h = header_err();
   memcpy(inj->children, &err, sizeof(block *));
-  memcpy(retBlock->children, &inj, sizeof(block *));
+  memcpy(ret_block->children, &inj, sizeof(block *));
 
   auto *dot_k_block = dot_k();
-  memcpy(retBlock->children + 1, &dot_k_block, sizeof(block *));
-  return retBlock;
+  memcpy(ret_block->children + 1, &dot_k_block, sizeof(block *));
+  return ret_block;
 }
 
 static inline block *getInjErrorBlock() {
   block *p = block_errno();
-  auto *retBlock
+  auto *ret_block
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  retBlock->h = header_err();
-  memcpy(retBlock->children, &p, sizeof(block *));
-  return retBlock;
+  ret_block->h = header_err();
+  memcpy(ret_block->children, &p, sizeof(block *));
+  return ret_block;
 }
 
 #define MODE_R 1
@@ -257,13 +257,13 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
     return getInjErrorBlock();
   }
 
-  auto *retBlock
+  auto *ret_block
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
-  retBlock->h = header_int();
+  ret_block->h = header_int();
   mpz_init_set_si(result, fd);
   mpz_ptr p = move_int(result);
-  memcpy(retBlock->children, &p, sizeof(mpz_ptr));
-  return retBlock;
+  memcpy(ret_block->children, &p, sizeof(mpz_ptr));
+  return ret_block;
 }
 
 SortIOInt hook_IO_tell(SortInt i) {
@@ -278,14 +278,14 @@ SortIOInt hook_IO_tell(SortInt i) {
     return getInjErrorBlock();
   }
 
-  auto *retBlock
+  auto *ret_block
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
-  retBlock->h = header_int();
+  ret_block->h = header_int();
   mpz_t result;
   mpz_init_set_si(result, (long)loc);
   mpz_ptr p = move_int(result);
-  memcpy(retBlock->children, &p, sizeof(mpz_ptr));
-  return retBlock;
+  memcpy(ret_block->children, &p, sizeof(mpz_ptr));
+  return ret_block;
 }
 
 SortIOInt hook_IO_getc(SortInt i) {
@@ -299,25 +299,25 @@ SortIOInt hook_IO_getc(SortInt i) {
 
   if (ret == 0) {
     block *p = leaf_block(getTagForSymbolName(GETTAG(EOF)));
-    auto *retBlock
+    auto *ret_block
         = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-    retBlock->h = header_err();
-    memcpy(retBlock->children, &p, sizeof(block *));
-    return retBlock;
+    ret_block->h = header_err();
+    memcpy(ret_block->children, &p, sizeof(block *));
+    return ret_block;
   }
 
   if (ret == -1) {
     return getInjErrorBlock();
   }
 
-  auto *retBlock
+  auto *ret_block
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
-  retBlock->h = header_int();
+  ret_block->h = header_int();
   mpz_t result;
   mpz_init_set_si(result, (int)c);
   mpz_ptr p = move_int(result);
-  memcpy(retBlock->children, &p, sizeof(mpz_ptr));
-  return retBlock;
+  memcpy(ret_block->children, &p, sizeof(mpz_ptr));
+  return ret_block;
 }
 
 SortIOString hook_IO_read(SortInt i, SortInt len) {
@@ -338,12 +338,12 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
 
   result = static_cast<string *>(koreResizeLastAlloc(
       result, sizeof(string) + bytes, sizeof(string) + length));
-  auto *retBlock
+  auto *ret_block
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  retBlock->h = header_string();
+  ret_block->h = header_string();
   init_with_len(result, bytes);
-  memcpy(retBlock->children, &result, sizeof(string *));
-  return retBlock;
+  memcpy(ret_block->children, &result, sizeof(string *));
+  return ret_block;
 }
 
 SortK hook_IO_close(SortInt i) {
@@ -496,15 +496,15 @@ SortIOInt hook_IO_accept(SortInt sock) {
     return getInjErrorBlock();
   }
 
-  auto *retBlock
+  auto *ret_block
       = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
-  retBlock->h = header_int();
+  ret_block->h = header_int();
 
   mpz_t result;
   mpz_init_set_si(result, clientsock);
   mpz_ptr p = move_int(result);
-  memcpy(retBlock->children, &p, sizeof(mpz_ptr));
-  return retBlock;
+  memcpy(ret_block->children, &p, sizeof(mpz_ptr));
+  return ret_block;
 }
 
 SortK hook_IO_shutdownWrite(SortInt sock) {
@@ -525,14 +525,14 @@ SortK hook_IO_shutdownWrite(SortInt sock) {
 void flush_IO_logs() {
   std::string pid = std::to_string(getpid());
   for (auto const &log : log_files) {
-    std::string pathStr = log.first;
+    std::string path_str = log.first;
     std::string msg = log.second;
-    size_t length = pathStr.length();
+    size_t length = path_str.length();
     char *path1 = (char *)malloc(sizeof(char) * (length + 1));
-    strncpy(path1, pathStr.c_str(), length + 1);
+    strncpy(path1, path_str.c_str(), length + 1);
     path1[length] = '\0';
     char *path2 = (char *)malloc(sizeof(char) * (length + 1));
-    strncpy(path2, pathStr.c_str(), length + 1);
+    strncpy(path2, path_str.c_str(), length + 1);
     path2[length] = '\0';
     char *dir = dirname(path1);
     if (getenv("K_LOG_DIR")) {
@@ -547,8 +547,8 @@ void flush_IO_logs() {
     if (getenv("K_LOG_PREFIX")) {
       prefix = getenv("K_LOG_PREFIX");
     }
-    auto fullPath = fmt::format("{}/{}{}_{}", fulldir, prefix, pid, base);
-    FILE *f = fopen(fullPath.c_str(), "a+");
+    auto full_path = fmt::format("{}/{}{}_{}", fulldir, prefix, pid, base);
+    FILE *f = fopen(full_path.c_str(), "a+");
     fwrite(msg.c_str(), sizeof(char), msg.length(), f);
     fclose(f);
     free(path1);
@@ -560,10 +560,10 @@ SortK hook_IO_log(SortString path, SortString msg) {
   char *p = getTerminatedString(path);
   char *m = getTerminatedString(msg);
 
-  static bool flushRegistered = false;
-  if (!flushRegistered) {
+  static bool flush_registered = false;
+  if (!flush_registered) {
     atexit(&flush_IO_logs);
-    flushRegistered = true;
+    flush_registered = true;
   }
 
   log_files[p].append(m);
@@ -644,23 +644,23 @@ SortIOFile hook_IO_mkstemp(SortString filename) {
     return getInjErrorBlock();
   }
 
-  auto *retBlock = static_cast<block *>(
+  auto *ret_block = static_cast<block *>(
       koreAlloc(sizeof(block) + sizeof(string *) + sizeof(mpz_ptr)));
 
   mpz_t result;
   mpz_init_set_si(result, ret);
   mpz_ptr p = move_int(result);
   size_t length = len(filename);
-  auto *retString = static_cast<string *>(
+  auto *ret_string = static_cast<string *>(
       koreAllocToken(sizeof(string) + sizeof(char) * length));
-  memcpy(retString->data, temp, sizeof(char) * length);
-  init_with_len(retString, length);
-  memcpy(retBlock->children, &retString, sizeof(string *));
-  memcpy(retBlock->children + 1, &p, sizeof(mpz_ptr));
-  retBlock->h = getBlockHeaderForSymbol(
+  memcpy(ret_string->data, temp, sizeof(char) * length);
+  init_with_len(ret_string, length);
+  memcpy(ret_block->children, &ret_string, sizeof(string *));
+  memcpy(ret_block->children + 1, &p, sizeof(mpz_ptr));
+  ret_block->h = getBlockHeaderForSymbol(
       (uint64_t)getTagForSymbolName(GETTAG(tempFile)));
 
-  return retBlock;
+  return ret_block;
 }
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
@@ -669,8 +669,8 @@ SortKItem hook_IO_system(SortString cmd) {
   int ret = 0;
   int out[2];
   int err[2];
-  stringbuffer *outBuffer = hook_BUFFER_empty();
-  stringbuffer *errBuffer = hook_BUFFER_empty();
+  stringbuffer *out_buffer = hook_BUFFER_empty();
+  stringbuffer *err_buffer = hook_BUFFER_empty();
   char buf[IOBUFSIZE];
 
   // NOLINTNEXTLINE(*-assignment-in-if-condition)
@@ -724,7 +724,7 @@ SortKItem hook_IO_system(SortString cmd) {
         FD_CLR(out[0], &read_fds);
         done++;
       } else {
-        hook_BUFFER_concat_raw(outBuffer, buf, nread);
+        hook_BUFFER_concat_raw(out_buffer, buf, nread);
       }
     }
     if (FD_ISSET(err[0], &ready_fds)) {
@@ -737,7 +737,7 @@ SortKItem hook_IO_system(SortString cmd) {
         FD_CLR(err[0], &read_fds);
         done++;
       } else {
-        hook_BUFFER_concat_raw(errBuffer, buf, nread);
+        hook_BUFFER_concat_raw(err_buffer, buf, nread);
       }
     }
   }
@@ -745,24 +745,24 @@ SortKItem hook_IO_system(SortString cmd) {
   waitpid(pid, &ret, 0);
   ret = WEXITSTATUS(ret);
 
-  auto *retBlock = static_cast<block *>(koreAlloc(
+  auto *ret_block = static_cast<block *>(koreAlloc(
       sizeof(block) + sizeof(mpz_ptr) + sizeof(string *) + sizeof(string *)));
 
   mpz_t result;
   mpz_init_set_si(result, ret);
   mpz_ptr p = move_int(result);
-  memcpy(retBlock->children, &p, sizeof(mpz_ptr));
+  memcpy(ret_block->children, &p, sizeof(mpz_ptr));
 
-  retBlock->h = getBlockHeaderForSymbol(
+  ret_block->h = getBlockHeaderForSymbol(
       (uint64_t)getTagForSymbolName(GETTAG(systemResult)));
-  string *outStr = nullptr;
-  string *errStr = nullptr;
-  outStr = hook_BUFFER_toString(outBuffer);
-  errStr = hook_BUFFER_toString(errBuffer);
-  memcpy(retBlock->children + 1, &outStr, sizeof(string *));
-  memcpy(retBlock->children + 2, &errStr, sizeof(string *));
+  string *out_str = nullptr;
+  string *err_str = nullptr;
+  out_str = hook_BUFFER_toString(out_buffer);
+  err_str = hook_BUFFER_toString(err_buffer);
+  memcpy(ret_block->children + 1, &out_str, sizeof(string *));
+  memcpy(ret_block->children + 2, &err_str, sizeof(string *));
 
-  return retBlock;
+  return ret_block;
 }
 
 block *hook_IO_stat(string *path) {

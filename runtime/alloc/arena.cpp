@@ -76,16 +76,16 @@ static void *megabyte_malloc() {
 }
 
 static void freshBlock(struct arena *arena) {
-  char *nextBlock = nullptr;
+  char *next_block = nullptr;
   if (arena->block_start == nullptr) {
-    nextBlock = (char *)megabyte_malloc();
-    arena->first_block = nextBlock;
-    auto *nextHeader = (memory_block_header *)nextBlock;
-    nextHeader->next_block = nullptr;
-    nextHeader->semispace = arena->allocation_semispace_id;
+    next_block = (char *)megabyte_malloc();
+    arena->first_block = next_block;
+    auto *next_header = (memory_block_header *)next_block;
+    next_header->next_block = nullptr;
+    next_header->semispace = arena->allocation_semispace_id;
     arena->num_blocks++;
   } else {
-    nextBlock = *(char **)arena->block_start;
+    next_block = *(char **)arena->block_start;
     if (arena->block != arena->block_end) {
       if (arena->block_end - arena->block == 8) {
         *(uint64_t *)arena->block
@@ -95,21 +95,21 @@ static void freshBlock(struct arena *arena) {
                                     - 8; // 16-bit or more sentinel value
       }
     }
-    if (!nextBlock) {
+    if (!next_block) {
       MEM_LOG(
           "Allocating new block for the first time in arena %d\n",
           Arena->allocation_semispace_id);
-      nextBlock = (char *)megabyte_malloc();
-      *(char **)arena->block_start = nextBlock;
-      auto *nextHeader = (memory_block_header *)nextBlock;
-      nextHeader->next_block = nullptr;
-      nextHeader->semispace = arena->allocation_semispace_id;
+      next_block = (char *)megabyte_malloc();
+      *(char **)arena->block_start = next_block;
+      auto *next_header = (memory_block_header *)next_block;
+      next_header->next_block = nullptr;
+      next_header->semispace = arena->allocation_semispace_id;
       arena->num_blocks++;
     }
   }
-  arena->block = nextBlock + sizeof(memory_block_header);
-  arena->block_start = nextBlock;
-  arena->block_end = nextBlock + BLOCK_SIZE;
+  arena->block = next_block + sizeof(memory_block_header);
+  arena->block_start = next_block;
+  arena->block_end = next_block + BLOCK_SIZE;
   MEM_LOG(
       "New block at %p (remaining %zd)\n", Arena->block,
       BLOCK_SIZE - sizeof(memory_block_header));

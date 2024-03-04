@@ -30,12 +30,12 @@ void migrateRoots() {
     return;
   }
 
-  for (auto &blockEnumerator : block_enumerators) {
-    auto BlockIteratorPair = (*blockEnumerator)();
-    auto BlockStartIt = BlockIteratorPair.first;
-    auto BlockEndIt = BlockIteratorPair.second;
+  for (auto &block_enumerator : block_enumerators) {
+    auto block_iterator_pair = (*block_enumerator)();
+    auto block_start_it = block_iterator_pair.first;
+    auto block_end_it = block_iterator_pair.second;
 
-    for (auto it = BlockStartIt; it != BlockEndIt; ++it) {
+    for (auto it = block_start_it; it != block_end_it; ++it) {
       migrate(*it);
     }
   }

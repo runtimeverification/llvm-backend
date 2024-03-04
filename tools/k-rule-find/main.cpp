@@ -29,22 +29,22 @@ cl::opt<std::string> rule_location(
     cl::cat(k_rule_cat));
 
 std::string getSource(kore_axiom_declaration *axiom) {
-  auto *sourceAtt = axiom->attributes().get(attribute_set::key::Source).get();
-  assert(sourceAtt->get_arguments().size() == 1);
+  auto *source_att = axiom->attributes().get(attribute_set::key::Source).get();
+  assert(source_att->get_arguments().size() == 1);
 
-  auto *strPattern
-      = dynamic_cast<kore_string_pattern *>(sourceAtt->get_arguments()[0].get());
-  return strPattern->get_contents();
+  auto *str_pattern
+      = dynamic_cast<kore_string_pattern *>(source_att->get_arguments()[0].get());
+  return str_pattern->get_contents();
 }
 
 location getLocation(kore_axiom_declaration *axiom) {
-  auto *locationAtt
+  auto *location_att
       = axiom->attributes().get(attribute_set::key::Location).get();
-  assert(locationAtt->get_arguments().size() == 1);
+  assert(location_att->get_arguments().size() == 1);
 
-  auto *strPattern
-      = dynamic_cast<kore_string_pattern *>(locationAtt->get_arguments()[0].get());
-  std::string location = strPattern->get_contents();
+  auto *str_pattern
+      = dynamic_cast<kore_string_pattern *>(location_att->get_arguments()[0].get());
+  std::string location = str_pattern->get_contents();
 
   size_t l_paren = location.find_first_of('(');
   size_t first_comma = location.find_first_of(',');
@@ -73,17 +73,17 @@ location parseLocation(std::string const &loc) {
     exit(EXIT_FAILURE);
   }
 
-  std::string lineColumn = loc.substr(pos + 1);
-  size_t pos_lc = lineColumn.find(':');
+  std::string line_column = loc.substr(pos + 1);
+  size_t pos_lc = line_column.find(':');
 
   // If another “:” isn’t found, the tool assumes no column number was given.
   int64_t line = 0;
   int64_t column = -1;
   if (pos_lc == std::string::npos) {
-    line = stoi(lineColumn);
+    line = stoi(line_column);
   } else {
-    line = stoi(lineColumn.substr(0, pos_lc));
-    column = stoi(lineColumn.substr(pos_lc + 1));
+    line = stoi(line_column.substr(0, pos_lc));
+    column = stoi(line_column.substr(pos_lc + 1));
   }
 
   return {loc.substr(0, pos), line, line, column, column};

@@ -168,14 +168,14 @@ ptr<kore_declaration> kore_parser::sentence() {
     consume(current);
     name = consume(token::ID);
     consume(token::LEFTBRACE);
-    auto sortDecl = kore_composite_sort_declaration::create(
+    auto sort_decl = kore_composite_sort_declaration::create(
         name, current == token::HOOKEDSORT);
-    sort_variables(sortDecl.get());
+    sort_variables(sort_decl.get());
     consume(token::RIGHTBRACE);
     consume(token::LEFTBRACKET);
-    attributes(sortDecl.get());
+    attributes(sort_decl.get());
     consume(token::RIGHTBRACKET);
-    return sortDecl;
+    return sort_decl;
   }
   case token::SYMBOL:
   case token::HOOKEDSYMBOL: {
@@ -190,8 +190,8 @@ ptr<kore_declaration> kore_parser::sentence() {
     sorts(symbol->get_symbol());
     consume(token::RIGHTPAREN);
     consume(token::COLON);
-    auto returnSort = sort();
-    symbol->get_symbol()->add_sort(std::move(returnSort));
+    auto return_sort = sort();
+    symbol->get_symbol()->add_sort(std::move(return_sort));
     consume(token::LEFTBRACKET);
     attributes(symbol.get());
     consume(token::RIGHTBRACKET);
@@ -208,8 +208,8 @@ ptr<kore_declaration> kore_parser::sentence() {
     sorts(alias->get_symbol());
     consume(token::RIGHTPAREN);
     consume(token::COLON);
-    auto returnSort = sort();
-    alias->get_symbol()->add_sort(std::move(returnSort));
+    auto return_sort = sort();
+    alias->get_symbol()->add_sort(std::move(return_sort));
     consume(token::WHERE);
     auto variables = application_pattern_internal();
     alias->add_variables(std::move(variables));
@@ -270,12 +270,12 @@ void kore_parser::sorts(Node *node) {
 
 template <typename Node>
 void kore_parser::sorts_ne(Node *node) {
-  auto _sort = sort();
-  node->add_argument(std::move(_sort));
+  auto s = sort();
+  node->add_argument(std::move(s));
   while (peek() == token::COMMA) {
     consume(token::COMMA);
-    _sort = sort();
-    node->add_argument(std::move(_sort));
+    s = sort();
+    node->add_argument(std::move(s));
   }
 }
 
@@ -357,21 +357,21 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
     if (name == "\\left-assoc") {
       sptr<kore_pattern> accum = pats[0];
       for (auto i = 1U; i < pats.size(); i++) {
-        sptr<kore_composite_pattern> newAccum
+        sptr<kore_composite_pattern> new_accum
             = kore_composite_pattern::create(pat->get_constructor());
-        newAccum->add_argument(accum);
-        newAccum->add_argument(pats[i]);
-        accum = newAccum;
+        new_accum->add_argument(accum);
+        new_accum->add_argument(pats[i]);
+        accum = new_accum;
       }
       return accum;
     }
     sptr<kore_pattern> accum = pats[pats.size() - 1];
     for (int i = pats.size() - 2; i >= 0; i--) {
-      sptr<kore_composite_pattern> newAccum
+      sptr<kore_composite_pattern> new_accum
           = kore_composite_pattern::create(pat->get_constructor());
-      newAccum->add_argument(pats[i]);
-      newAccum->add_argument(accum);
-      accum = newAccum;
+      new_accum->add_argument(pats[i]);
+      new_accum->add_argument(accum);
+      accum = new_accum;
     }
     return accum;
   }

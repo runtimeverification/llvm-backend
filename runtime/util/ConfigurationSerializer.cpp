@@ -284,12 +284,12 @@ void serializeConfigurationInternal(
     void *state_ptr) {
   auto &state = *static_cast<serialization_state *>(state_ptr);
 
-  uint8_t isConstant = ((uintptr_t)subject) & 3;
+  uint8_t is_constant = ((uintptr_t)subject) & 3;
 
-  if (isConstant) {
+  if (is_constant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
 
-    if (isConstant == 3) {
+    if (is_constant == 3) {
       // bound variable
       serializeConfigurationInternal(
           file, state.bound_variables[state.bound_variables.size() - 1 - tag],
@@ -307,14 +307,14 @@ void serializeConfigurationInternal(
     size_t subject_len = len(subject);
 
     if (is_var && !state.var_names.contains(str)) {
-      std::string stdStr = std::string(str->data, len(str));
+      std::string std_str = std::string(str->data, len(str));
       std::string suffix;
-      while (state.used_var_names.contains(stdStr + suffix)) {
+      while (state.used_var_names.contains(std_str + suffix)) {
         suffix = std::to_string(state.var_counter++);
       }
-      stdStr = stdStr + suffix;
+      std_str = std_str + suffix;
       emitToken(state.instance, sort, suffix.c_str());
-      state.used_var_names.insert(stdStr);
+      state.used_var_names.insert(std_str);
       state.var_names[str] = suffix;
     } else if (is_var) {
       emitToken(state.instance, sort, state.var_names[str].c_str());
@@ -326,8 +326,8 @@ void serializeConfigurationInternal(
   }
 
   uint32_t tag = tag_hdr(subject->h.hdr);
-  bool isBinder = isSymbolABinder(tag);
-  if (isBinder) {
+  bool is_binder = isSymbolABinder(tag);
+  if (is_binder) {
     state.bound_variables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
@@ -372,7 +372,7 @@ void serializeConfigurationInternal(
     emitSymbol(state.instance, symbol, getSymbolArity(tag));
   }
 
-  if (isBinder) {
+  if (is_binder) {
     state.bound_variables.pop_back();
   }
 }

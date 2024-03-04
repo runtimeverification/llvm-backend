@@ -42,46 +42,46 @@ size_t get_size(uint64_t hdr, uint16_t layout) {
 }
 
 void migrate(block **block_ptr) {
-  block *currBlock = *block_ptr;
-  if (is_leaf_block(currBlock) || !is_heap_block(currBlock)) {
+  block *curr_block = *block_ptr;
+  if (is_leaf_block(curr_block) || !is_heap_block(curr_block)) {
     return;
   }
-  uint64_t const hdr = currBlock->h.hdr;
+  uint64_t const hdr = curr_block->h.hdr;
   INITIALIZE_MIGRATE();
   uint16_t layout = layout_hdr(hdr);
-  size_t lenInBytes = get_size(hdr, layout);
-  auto **forwardingAddress = (block **)(currBlock + 1);
+  size_t len_in_bytes = get_size(hdr, layout);
+  auto **forwarding_address = (block **)(curr_block + 1);
   if (!hasForwardingAddress) {
-    block *newBlock = nullptr;
+    block *new_block = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newBlock = (block *)koreAllocOld(lenInBytes);
+      new_block = (block *)koreAllocOld(len_in_bytes);
     } else {
-      newBlock = (block *)koreAlloc(lenInBytes);
+      new_block = (block *)koreAlloc(len_in_bytes);
     }
 #ifdef GC_DBG
     numBytesLiveAtCollection[oldAge] += lenInBytes;
 #endif
-    memcpy(newBlock, currBlock, lenInBytes);
-    MIGRATE_HEADER(newBlock);
-    *forwardingAddress = newBlock;
-    currBlock->h.hdr |= FWD_PTR_BIT;
-    *block_ptr = newBlock;
+    memcpy(new_block, curr_block, len_in_bytes);
+    MIGRATE_HEADER(new_block);
+    *forwarding_address = new_block;
+    curr_block->h.hdr |= FWD_PTR_BIT;
+    *block_ptr = new_block;
   } else {
-    *block_ptr = *forwardingAddress;
+    *block_ptr = *forwarding_address;
   }
 }
 
 // call this function instead of migrate on objects directly referenced by
 // shared objects (like collection nodes) that are not tracked by gc
 void migrate_once(block **block_ptr) {
-  block *currBlock = *block_ptr;
-  if (is_leaf_block(currBlock) || !is_heap_block(currBlock)) {
+  block *curr_block = *block_ptr;
+  if (is_leaf_block(curr_block) || !is_heap_block(curr_block)) {
     return;
   }
   if (youngspace_collection_id()
-          == getArenaSemispaceIDOfObject((void *)currBlock)
+          == getArenaSemispaceIDOfObject((void *)curr_block)
       || oldspace_collection_id()
-             == getArenaSemispaceIDOfObject((void *)currBlock)) {
+             == getArenaSemispaceIDOfObject((void *)curr_block)) {
     migrate(block_ptr);
   }
 }
@@ -92,24 +92,24 @@ static void migrate_string_buffer(stringbuffer **buffer_ptr) {
   uint64_t const cap = len(buffer->contents);
   INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
-    stringbuffer *newBuffer = nullptr;
-    string *newContents = nullptr;
+    stringbuffer *new_buffer = nullptr;
+    string *new_contents = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newBuffer = (stringbuffer *)koreAllocOld(sizeof(stringbuffer));
-      newContents = (string *)koreAllocTokenOld(sizeof(string) + cap);
+      new_buffer = (stringbuffer *)koreAllocOld(sizeof(stringbuffer));
+      new_contents = (string *)koreAllocTokenOld(sizeof(string) + cap);
     } else {
-      newBuffer = (stringbuffer *)koreAlloc(sizeof(stringbuffer));
-      newContents = (string *)koreAllocToken(sizeof(string) + cap);
+      new_buffer = (stringbuffer *)koreAlloc(sizeof(stringbuffer));
+      new_contents = (string *)koreAllocToken(sizeof(string) + cap);
     }
 #ifdef GC_DBG
     numBytesLiveAtCollection[oldAge]
         += cap + sizeof(stringbuffer) + sizeof(string);
 #endif
-    memcpy(newContents, buffer->contents, sizeof(string) + buffer->strlen);
-    memcpy(newBuffer, buffer, sizeof(stringbuffer));
-    MIGRATE_HEADER(newBuffer);
-    newBuffer->contents = newContents;
-    *(stringbuffer **)(buffer->contents) = newBuffer;
+    memcpy(new_contents, buffer->contents, sizeof(string) + buffer->strlen);
+    memcpy(new_buffer, buffer, sizeof(stringbuffer));
+    MIGRATE_HEADER(new_buffer);
+    new_buffer->contents = new_contents;
+    *(stringbuffer **)(buffer->contents) = new_buffer;
     buffer->h.hdr |= FWD_PTR_BIT;
   }
   *buffer_ptr = *(stringbuffer **)(buffer->contents);
@@ -120,43 +120,43 @@ static void migrate_mpz(mpz_ptr *ptr) {
   uint64_t const hdr = intgr->h.hdr;
   INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
-    mpz_hdr *newIntgr = nullptr;
-    string *newLimbs = nullptr;
-    bool hasLimbs = intgr->i->_mp_alloc > 0;
+    mpz_hdr *new_intgr = nullptr;
+    string *new_limbs = nullptr;
+    bool has_limbs = intgr->i->_mp_alloc > 0;
 #ifdef GC_DBG
     numBytesLiveAtCollection[oldAge] += sizeof(mpz_hdr);
 #endif
-    if (hasLimbs) {
+    if (has_limbs) {
       string *limbs = STRUCT_BASE(string, data, intgr->i->_mp_d);
-      size_t lenLimbs = len(limbs);
+      size_t len_limbs = len(limbs);
 
 #ifdef GC_DBG
       numBytesLiveAtCollection[oldAge] += lenLimbs + sizeof(string);
 #endif
 
-      assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == lenLimbs);
+      assert(intgr->i->_mp_alloc * sizeof(mp_limb_t) == len_limbs);
 
       if (shouldPromote || (isInOldGen && collect_old)) {
-        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocIntegerOld(0));
-        newLimbs = (string *)koreAllocTokenOld(sizeof(string) + lenLimbs);
+        new_intgr = STRUCT_BASE(mpz_hdr, i, koreAllocIntegerOld(0));
+        new_limbs = (string *)koreAllocTokenOld(sizeof(string) + len_limbs);
       } else {
-        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocInteger(0));
-        newLimbs = (string *)koreAllocToken(sizeof(string) + lenLimbs);
+        new_intgr = STRUCT_BASE(mpz_hdr, i, koreAllocInteger(0));
+        new_limbs = (string *)koreAllocToken(sizeof(string) + len_limbs);
       }
-      memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
+      memcpy(new_limbs, limbs, sizeof(string) + len_limbs);
     } else {
       if (shouldPromote || (isInOldGen && collect_old)) {
-        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocIntegerOld(0));
+        new_intgr = STRUCT_BASE(mpz_hdr, i, koreAllocIntegerOld(0));
       } else {
-        newIntgr = STRUCT_BASE(mpz_hdr, i, koreAllocInteger(0));
+        new_intgr = STRUCT_BASE(mpz_hdr, i, koreAllocInteger(0));
       }
     }
-    memcpy(newIntgr, intgr, sizeof(mpz_hdr));
-    MIGRATE_HEADER(newIntgr);
-    if (hasLimbs) {
-      newIntgr->i->_mp_d = (mp_limb_t *)newLimbs->data;
+    memcpy(new_intgr, intgr, sizeof(mpz_hdr));
+    MIGRATE_HEADER(new_intgr);
+    if (has_limbs) {
+      new_intgr->i->_mp_d = (mp_limb_t *)new_limbs->data;
     }
-    *(mpz_ptr *)(&intgr->i->_mp_d) = newIntgr->i;
+    *(mpz_ptr *)(&intgr->i->_mp_d) = new_intgr->i;
     intgr->h.hdr |= FWD_PTR_BIT;
   }
   *ptr = *(mpz_ptr *)(&intgr->i->_mp_d);
@@ -167,10 +167,10 @@ static void migrate_floating(floating **floating_ptr) {
   uint64_t const hdr = flt->h.hdr;
   INITIALIZE_MIGRATE();
   if (!hasForwardingAddress) {
-    floating_hdr *newFlt = nullptr;
-    string *newLimbs = nullptr;
+    floating_hdr *new_flt = nullptr;
+    string *new_limbs = nullptr;
     string *limbs = STRUCT_BASE(string, data, flt->f.f->_mpfr_d - 1);
-    size_t lenLimbs = len(limbs);
+    size_t len_limbs = len(limbs);
 
 #ifdef GC_DBG
     numBytesLiveAtCollection[oldAge]
@@ -180,20 +180,20 @@ static void migrate_floating(floating **floating_ptr) {
     assert(
         ((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb)
             * sizeof(mp_limb_t)
-        <= lenLimbs);
+        <= len_limbs);
 
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newFlt = STRUCT_BASE(floating_hdr, f, koreAllocFloatingOld(0));
-      newLimbs = (string *)koreAllocTokenOld(sizeof(string) + lenLimbs);
+      new_flt = STRUCT_BASE(floating_hdr, f, koreAllocFloatingOld(0));
+      new_limbs = (string *)koreAllocTokenOld(sizeof(string) + len_limbs);
     } else {
-      newFlt = STRUCT_BASE(floating_hdr, f, koreAllocFloating(0));
-      newLimbs = (string *)koreAllocToken(sizeof(string) + lenLimbs);
+      new_flt = STRUCT_BASE(floating_hdr, f, koreAllocFloating(0));
+      new_limbs = (string *)koreAllocToken(sizeof(string) + len_limbs);
     }
-    memcpy(newLimbs, limbs, sizeof(string) + lenLimbs);
-    memcpy(newFlt, flt, sizeof(floating_hdr));
-    MIGRATE_HEADER(newFlt);
-    newFlt->f.f->_mpfr_d = (mp_limb_t *)newLimbs->data + 1;
-    *(floating **)(flt->f.f->_mpfr_d) = &newFlt->f;
+    memcpy(new_limbs, limbs, sizeof(string) + len_limbs);
+    memcpy(new_flt, flt, sizeof(floating_hdr));
+    MIGRATE_HEADER(new_flt);
+    new_flt->f.f->_mpfr_d = (mp_limb_t *)new_limbs->data + 1;
+    *(floating **)(flt->f.f->_mpfr_d) = &new_flt->f;
     flt->h.hdr |= FWD_PTR_BIT;
   }
   *floating_ptr = *(floating **)(flt->f.f->_mpfr_d);
@@ -201,9 +201,9 @@ static void migrate_floating(floating **floating_ptr) {
 
 static void
 migrate_child(void *curr_block, layoutitem *args, unsigned i, bool ptr) {
-  layoutitem *argData = args + i;
-  void *arg = ((char *)curr_block) + argData->offset;
-  switch (argData->cat) {
+  layoutitem *arg_data = args + i;
+  void *arg = ((char *)curr_block) + arg_data->offset;
+  switch (arg_data->cat) {
   case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
   case RANGEMAP_LAYOUT: migrate_rangemap(ptr ? *(rangemap **)arg : arg); break;
   case LIST_LAYOUT: migrate_list(ptr ? *(list **)arg : arg); break;
@@ -220,16 +220,16 @@ migrate_child(void *curr_block, layoutitem *args, unsigned i, bool ptr) {
 }
 
 static char *evacuate(char *scan_ptr, char **alloc_ptr) {
-  auto *currBlock = (block *)scan_ptr;
-  uint64_t const hdr = currBlock->h.hdr;
-  uint16_t layoutInt = layout_hdr(hdr);
-  if (layoutInt) {
-    layout *layoutData = getLayoutData(layoutInt);
-    for (unsigned i = 0; i < layoutData->nargs; i++) {
-      migrate_child(currBlock, layoutData->args, i, false);
+  auto *curr_block = (block *)scan_ptr;
+  uint64_t const hdr = curr_block->h.hdr;
+  uint16_t layout_int = layout_hdr(hdr);
+  if (layout_int) {
+    layout *layout_data = getLayoutData(layout_int);
+    for (unsigned i = 0; i < layout_data->nargs; i++) {
+      migrate_child(curr_block, layout_data->args, i, false);
     }
   }
-  return movePtr(scan_ptr, get_size(hdr, layoutInt), *alloc_ptr);
+  return movePtr(scan_ptr, get_size(hdr, layout_int), *alloc_ptr);
 }
 
 // Contains the decision logic for collecting the old generation.

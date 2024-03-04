@@ -29,8 +29,8 @@ void makeDirty(bool &dirty, uint64_t offset, New new_arg, block *&new_block) {
     memcpy(alloc->children, new_block->children, offset - 8);
     new_block = alloc;
   }
-  New *newPtr = (New *)(((char *)new_block) + offset);
-  *newPtr = new_arg;
+  New *new_ptr = (New *)(((char *)new_block) + offset);
+  *new_ptr = new_arg;
 }
 
 block *debruijnizeInternal(block *curr_block) {
@@ -38,52 +38,52 @@ block *debruijnizeInternal(block *curr_block) {
     return curr_block;
   }
   uint64_t const hdr = curr_block->h.hdr;
-  uint16_t layoutInt = layout_hdr(hdr);
-  if (layoutInt) {
+  uint16_t layout_int = layout_hdr(hdr);
+  if (layout_int) {
     uint32_t tag = tag_hdr(hdr);
-    bool isBinder = isSymbolABinder(tag);
-    if (isBinder) {
+    bool is_binder = isSymbolABinder(tag);
+    if (is_binder) {
       idx++;
     }
-    layout *layoutData = getLayoutData(layoutInt);
+    layout *layout_data = getLayoutData(layout_int);
     bool dirty = false;
-    block *newBlock = curr_block;
-    for (unsigned i = 0; i < layoutData->nargs; i++) {
-      layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)curr_block) + argData->offset;
-      switch (argData->cat) {
+    block *new_block = curr_block;
+    for (unsigned i = 0; i < layout_data->nargs; i++) {
+      layoutitem *arg_data = layout_data->args + i;
+      void *arg = ((char *)curr_block) + arg_data->offset;
+      switch (arg_data->cat) {
       case MAP_LAYOUT: {
-        map newArg = map_map(arg, debruijnizeInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        map new_arg = map_map(arg, debruijnizeInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case RANGEMAP_LAYOUT: {
-        rangemap newArg = rangemap_map(arg, debruijnizeInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        rangemap new_arg = rangemap_map(arg, debruijnizeInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case LIST_LAYOUT: {
-        list newArg = list_map(arg, debruijnizeInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        list new_arg = list_map(arg, debruijnizeInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case SET_LAYOUT: {
-        set newArg = set_map(arg, debruijnizeInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        set new_arg = set_map(arg, debruijnizeInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case SYMBOL_LAYOUT: {
-        block *oldArg = *(block **)arg;
-        block *newArg = debruijnizeInternal(oldArg);
-        if (oldArg != newArg || dirty) {
-          makeDirty(dirty, argData->offset, newArg, newBlock);
+        block *old_arg = *(block **)arg;
+        block *new_arg = debruijnizeInternal(old_arg);
+        if (old_arg != new_arg || dirty) {
+          makeDirty(dirty, arg_data->offset, new_arg, new_block);
         }
         break;
       }
       case VARIABLE_LAYOUT: {
-        if ((i != 0 || !isBinder) && hook_STRING_eq(var, *(string **)arg)) {
-          block *newArg = variable_block(idx);
-          makeDirty(dirty, argData->offset, newArg, newBlock);
+        if ((i != 0 || !is_binder) && hook_STRING_eq(var, *(string **)arg)) {
+          block *new_arg = variable_block(idx);
+          makeDirty(dirty, arg_data->offset, new_arg, new_block);
         }
         break;
       }
@@ -95,23 +95,23 @@ block *debruijnizeInternal(block *curr_block) {
         break;
       }
     }
-    if (isBinder) {
+    if (is_binder) {
       idx--;
     }
-    return newBlock;
+    return new_block;
   }
   return curr_block;
 }
 
 block *replaceBinderInternal(block *curr_block) {
   if (is_variable_block(curr_block)) {
-    uint64_t varIdx = ((uintptr_t)curr_block) >> 32;
-    if (idx == varIdx) {
+    uint64_t var_idx = ((uintptr_t)curr_block) >> 32;
+    if (idx == var_idx) {
       return (block *)var;
     }
-    if (idx < varIdx) {
-      varIdx--;
-      return variable_block(varIdx);
+    if (idx < var_idx) {
+      var_idx--;
+      return variable_block(var_idx);
     }
     return curr_block;
   }
@@ -119,46 +119,46 @@ block *replaceBinderInternal(block *curr_block) {
     return curr_block;
   }
   uint64_t const hdr = curr_block->h.hdr;
-  uint16_t layoutInt = layout_hdr(hdr);
-  if (layoutInt) {
+  uint16_t layout_int = layout_hdr(hdr);
+  if (layout_int) {
     uint32_t tag = tag_hdr(hdr);
-    bool isBinder = isSymbolABinder(tag);
-    if (isBinder) {
+    bool is_binder = isSymbolABinder(tag);
+    if (is_binder) {
       idx++;
     }
-    layout *layoutData = getLayoutData(layoutInt);
+    layout *layout_data = getLayoutData(layout_int);
     bool dirty = false;
-    block *newBlock = curr_block;
-    for (unsigned i = 0; i < layoutData->nargs; i++) {
-      layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)curr_block) + argData->offset;
-      switch (argData->cat) {
+    block *new_block = curr_block;
+    for (unsigned i = 0; i < layout_data->nargs; i++) {
+      layoutitem *arg_data = layout_data->args + i;
+      void *arg = ((char *)curr_block) + arg_data->offset;
+      switch (arg_data->cat) {
       case MAP_LAYOUT: {
-        map newArg = map_map(arg, replaceBinderInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        map new_arg = map_map(arg, replaceBinderInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case RANGEMAP_LAYOUT: {
-        rangemap newArg = rangemap_map(arg, replaceBinderInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        rangemap new_arg = rangemap_map(arg, replaceBinderInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case LIST_LAYOUT: {
-        list newArg = list_map(arg, replaceBinderInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        list new_arg = list_map(arg, replaceBinderInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case SET_LAYOUT: {
-        set newArg = set_map(arg, replaceBinderInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        set new_arg = set_map(arg, replaceBinderInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case VARIABLE_LAYOUT:
       case SYMBOL_LAYOUT: {
-        block *oldArg = *(block **)arg;
-        block *newArg = replaceBinderInternal(oldArg);
-        if (oldArg != newArg || dirty) {
-          makeDirty(dirty, argData->offset, newArg, newBlock);
+        block *old_arg = *(block **)arg;
+        block *new_arg = replaceBinderInternal(old_arg);
+        if (old_arg != new_arg || dirty) {
+          makeDirty(dirty, arg_data->offset, new_arg, new_block);
         }
         break;
       }
@@ -170,10 +170,10 @@ block *replaceBinderInternal(block *curr_block) {
         break;
       }
     }
-    if (isBinder) {
+    if (is_binder) {
       idx--;
     }
-    return newBlock;
+    return new_block;
   }
   return curr_block;
 }
@@ -183,64 +183,64 @@ block *substituteInternal(block *curr_block) {
     return curr_block;
   }
   uint64_t const hdr = curr_block->h.hdr;
-  uint16_t layoutInt = layout_hdr(hdr);
+  uint16_t layout_int = layout_hdr(hdr);
   if (hook_KEQUAL_eq(curr_block, to_replace)) {
     idx2 = 0;
-    if (layoutInt) {
+    if (layout_int) {
       uint32_t tag = tag_hdr(hdr);
-      uint32_t injTag = getInjectionForSortOfTag(tag);
-      if (tag_hdr(replacement_inj->h.hdr) != injTag) {
+      uint32_t inj_tag = getInjectionForSortOfTag(tag);
+      if (tag_hdr(replacement_inj->h.hdr) != inj_tag) {
         return incrementDebruijn(replacement_inj);
       }
     }
     return incrementDebruijn(replacement);
   }
-  if (layoutInt) {
-    layout *layoutData = getLayoutData(layoutInt);
+  if (layout_int) {
+    layout *layout_data = getLayoutData(layout_int);
     bool dirty = false;
-    block *newBlock = curr_block;
+    block *new_block = curr_block;
     uint32_t tag = tag_hdr(hdr);
     std::vector<void *> arguments;
-    bool isBinder = isSymbolABinder(tag);
-    if (isBinder) {
+    bool is_binder = isSymbolABinder(tag);
+    if (is_binder) {
       idx++;
     }
-    for (unsigned i = 0; i < layoutData->nargs; i++) {
-      layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)curr_block) + argData->offset;
-      switch (argData->cat) {
+    for (unsigned i = 0; i < layout_data->nargs; i++) {
+      layoutitem *arg_data = layout_data->args + i;
+      void *arg = ((char *)curr_block) + arg_data->offset;
+      switch (arg_data->cat) {
       case MAP_LAYOUT: {
-        map newArg = map_map(arg, substituteInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
-        arguments.push_back(((char *)newBlock) + argData->offset);
+        map new_arg = map_map(arg, substituteInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
+        arguments.push_back(((char *)new_block) + arg_data->offset);
         break;
       }
       case RANGEMAP_LAYOUT: {
-        rangemap newArg = rangemap_map(arg, substituteInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
-        arguments.push_back(((char *)newBlock) + argData->offset);
+        rangemap new_arg = rangemap_map(arg, substituteInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
+        arguments.push_back(((char *)new_block) + arg_data->offset);
         break;
       }
       case LIST_LAYOUT: {
-        list newArg = list_map(arg, substituteInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
-        arguments.push_back(((char *)newBlock) + argData->offset);
+        list new_arg = list_map(arg, substituteInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
+        arguments.push_back(((char *)new_block) + arg_data->offset);
         break;
       }
       case SET_LAYOUT: {
-        set newArg = set_map(arg, substituteInternal);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
-        arguments.push_back(((char *)newBlock) + argData->offset);
+        set new_arg = set_map(arg, substituteInternal);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
+        arguments.push_back(((char *)new_block) + arg_data->offset);
         break;
       }
       case VARIABLE_LAYOUT:
       case SYMBOL_LAYOUT: {
-        block *oldArg = *(block **)arg;
-        block *newArg = substituteInternal(oldArg);
-        if (oldArg != newArg || dirty) {
-          makeDirty(dirty, argData->offset, newArg, newBlock);
+        block *old_arg = *(block **)arg;
+        block *new_arg = substituteInternal(old_arg);
+        if (old_arg != new_arg || dirty) {
+          makeDirty(dirty, arg_data->offset, new_arg, new_block);
         }
-        arguments.push_back(newArg);
+        arguments.push_back(new_arg);
         break;
       }
       case STRINGBUFFER_LAYOUT:
@@ -252,22 +252,22 @@ block *substituteInternal(block *curr_block) {
         break;
       }
     }
-    if (isBinder) {
+    if (is_binder) {
       idx--;
     }
     if (isSymbolAFunction(tag)) {
       uint64_t idx_stack = idx;
       block *to_replace_stack = to_replace;
       block *replacement_stack = replacement;
-      block *replacementInj_stack = replacement_inj;
+      block *replacement_inj_stack = replacement_inj;
       auto *result = (block *)evaluateFunctionSymbol(tag, arguments.data());
       to_replace = to_replace_stack;
       replacement = replacement_stack;
-      replacement_inj = replacementInj_stack;
+      replacement_inj = replacement_inj_stack;
       idx = idx_stack;
       return result;
     }
-    return newBlock;
+    return new_block;
   }
   return curr_block;
 }
@@ -275,29 +275,29 @@ block *substituteInternal(block *curr_block) {
 extern "C" {
 
 block *debruijnize(block *term) {
-  auto *layoutData = getLayoutData(get_layout(term));
-  auto layoutVar = layoutData->args[0];
-  auto layoutBody = layoutData->args[layoutData->nargs - 1];
-  var = *(string **)(((char *)term) + layoutVar.offset);
+  auto *layout_data = getLayoutData(get_layout(term));
+  auto layout_var = layout_data->args[0];
+  auto layout_body = layout_data->args[layout_data->nargs - 1];
+  var = *(string **)(((char *)term) + layout_var.offset);
   idx = 0;
-  auto *bodyPtr = *(block **)(((char *)term) + layoutBody.offset);
-  auto *newBody = debruijnizeInternal(bodyPtr);
-  auto *newBlock = term;
-  if (newBody != bodyPtr) {
+  auto *body_ptr = *(block **)(((char *)term) + layout_body.offset);
+  auto *new_body = debruijnizeInternal(body_ptr);
+  auto *new_block = term;
+  if (new_body != body_ptr) {
     bool dirty = false;
-    makeDirty(dirty, layoutBody.offset, newBody, newBlock);
+    makeDirty(dirty, layout_body.offset, new_body, new_block);
   }
-  auto *newVar = *(string **)(((char *)newBlock) + layoutVar.offset);
-  newVar->h.hdr |= VARIABLE_BIT;
-  return newBlock;
+  auto *new_var = *(string **)(((char *)new_block) + layout_var.offset);
+  new_var->h.hdr |= VARIABLE_BIT;
+  return new_block;
 }
 
 block *incrementDebruijn(block *curr_block) {
   if (is_variable_block(curr_block)) {
-    uint64_t varIdx = ((uintptr_t)curr_block) >> 32;
-    if (varIdx >= idx2) {
-      varIdx += idx;
-      return variable_block(varIdx);
+    uint64_t var_idx = ((uintptr_t)curr_block) >> 32;
+    if (var_idx >= idx2) {
+      var_idx += idx;
+      return variable_block(var_idx);
     }
     return curr_block;
   }
@@ -305,51 +305,51 @@ block *incrementDebruijn(block *curr_block) {
     return curr_block;
   }
   uint64_t const hdr = curr_block->h.hdr;
-  uint16_t layoutInt = layout_hdr(hdr);
-  if (layoutInt) {
-    layout *layoutData = getLayoutData(layoutInt);
+  uint16_t layout_int = layout_hdr(hdr);
+  if (layout_int) {
+    layout *layout_data = getLayoutData(layout_int);
     bool dirty = false;
-    block *newBlock = curr_block;
+    block *new_block = curr_block;
     uint32_t tag = tag_hdr(hdr);
-    bool isBinder = isSymbolABinder(tag);
-    if (isBinder) {
+    bool is_binder = isSymbolABinder(tag);
+    if (is_binder) {
       idx2++;
     }
-    for (unsigned i = 0; i < layoutData->nargs; i++) {
-      layoutitem *argData = layoutData->args + i;
-      void *arg = ((char *)curr_block) + argData->offset;
-      switch (argData->cat) {
+    for (unsigned i = 0; i < layout_data->nargs; i++) {
+      layoutitem *arg_data = layout_data->args + i;
+      void *arg = ((char *)curr_block) + arg_data->offset;
+      switch (arg_data->cat) {
       case MAP_LAYOUT: {
-        map newArg = map_map(arg, incrementDebruijn);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        map new_arg = map_map(arg, incrementDebruijn);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case RANGEMAP_LAYOUT: {
-        rangemap newArg = rangemap_map(arg, incrementDebruijn);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        rangemap new_arg = rangemap_map(arg, incrementDebruijn);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case LIST_LAYOUT: {
-        list newArg = list_map(arg, incrementDebruijn);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        list new_arg = list_map(arg, incrementDebruijn);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case SET_LAYOUT: {
-        set newArg = set_map(arg, incrementDebruijn);
-        makeDirty(dirty, argData->offset, newArg, newBlock);
+        set new_arg = set_map(arg, incrementDebruijn);
+        makeDirty(dirty, arg_data->offset, new_arg, new_block);
         break;
       }
       case VARIABLE_LAYOUT:
       case SYMBOL_LAYOUT: {
-        block *oldArg = *(block **)arg;
-        block *newArg = nullptr;
-        if (i == 0 && isBinder) {
-          newArg = alphaRename(oldArg);
+        block *old_arg = *(block **)arg;
+        block *new_arg = nullptr;
+        if (i == 0 && is_binder) {
+          new_arg = alphaRename(old_arg);
         } else {
-          newArg = incrementDebruijn(oldArg);
+          new_arg = incrementDebruijn(old_arg);
         }
-        if (oldArg != newArg || dirty) {
-          makeDirty(dirty, argData->offset, newArg, newBlock);
+        if (old_arg != new_arg || dirty) {
+          makeDirty(dirty, arg_data->offset, new_arg, new_block);
         }
         break;
       }
@@ -361,10 +361,10 @@ block *incrementDebruijn(block *curr_block) {
         break;
       }
     }
-    if (isBinder) {
+    if (is_binder) {
       idx2--;
     }
-    return newBlock;
+    return new_block;
   }
   return curr_block;
 }
@@ -372,11 +372,11 @@ block *incrementDebruijn(block *curr_block) {
 block *alphaRename(block *term) {
   auto *var = (string *)term;
   size_t var_len = len(var);
-  auto *newToken = (string *)koreAllocToken(sizeof(string) + var_len);
-  memcpy(newToken->data, var->data, var_len);
-  init_with_len(newToken, var_len);
-  newToken->h.hdr |= VARIABLE_BIT;
-  return (block *)newToken;
+  auto *new_token = (string *)koreAllocToken(sizeof(string) + var_len);
+  memcpy(new_token->data, var->data, var_len);
+  init_with_len(new_token, var_len);
+  new_token->h.hdr |= VARIABLE_BIT;
+  return (block *)new_token;
 }
 
 block *replaceBinderIndex(block *term, block *variable) {
@@ -387,10 +387,10 @@ block *replaceBinderIndex(block *term, block *variable) {
 
 block *
 hook_SUBSTITUTION_substOne(block *body, SortKItem new_val, SortKItem var_inj) {
-  bool isSameSort = tag_hdr(new_val->h.hdr) == tag_hdr(var_inj->h.hdr);
+  bool is_same_sort = tag_hdr(new_val->h.hdr) == tag_hdr(var_inj->h.hdr);
   idx = 0;
   replacement = *(block **)(((char *)new_val) + sizeof(blockheader));
-  if (isSameSort) {
+  if (is_same_sort) {
     to_replace = *(block **)(((char *)var_inj) + sizeof(blockheader));
     replacement_inj = replacement;
   } else {
