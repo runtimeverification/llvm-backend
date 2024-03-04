@@ -213,7 +213,8 @@ sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
       auto sort = sort_stack.back();
       sort_stack.pop_back();
 
-      term_stack.push_back(kore_variable_pattern::create(name->get_name(), sort));
+      term_stack.push_back(
+          kore_variable_pattern::create(name->get_name(), sort));
       break;
     }
 
@@ -254,7 +255,7 @@ std::string file_contents(std::string const &fn, int max_bytes = -1);
 
 template <typename It>
 sptr<kore_pattern>
-deserialize_pattern(It begin, It end, bool strip_raw_term = true) {
+deserialize_pattern(It begin, It end, bool should_strip_raw_term = true) {
   // Try to parse the file even if the magic header isn't correct; by the time
   // we're here we already know that we're trying to parse a binary KORE file.
   // The header itself gets used by the application when detecting binary vs.
@@ -272,8 +273,8 @@ deserialize_pattern(It begin, It end, bool strip_raw_term = true) {
 
   auto result = detail::read(begin, end, version);
 
-  if (strip_raw_term) {
-    return stripRawTerm(result);
+  if (should_strip_raw_term) {
+    return strip_raw_term(result);
   }
 
   return result;

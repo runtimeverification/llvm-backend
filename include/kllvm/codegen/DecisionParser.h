@@ -23,15 +23,15 @@ struct partial_step {
   std::vector<residual> residuals;
 };
 
-decision_node *parseYamldecisionTreeFromString(
+decision_node *parse_yamldecision_tree_from_string(
     llvm::Module *, std::string const &yaml,
     std::map<std::string, kore_symbol *> const &syms,
     std::map<value_type, sptr<kore_composite_sort>> const &sorts);
-decision_node *parseYamldecisionTree(
+decision_node *parse_yamldecision_tree(
     llvm::Module *, std::string const &filename,
     std::map<std::string, kore_symbol *> const &syms,
     std::map<value_type, sptr<kore_composite_sort>> const &sorts);
-partial_step parseYamlSpecialdecisionTree(
+partial_step parse_yaml_specialdecision_tree(
     llvm::Module *, std::string const &filename,
     std::map<std::string, kore_symbol *> const &syms,
     std::map<value_type, sptr<kore_composite_sort>> const &sorts);

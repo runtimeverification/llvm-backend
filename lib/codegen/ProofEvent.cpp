@@ -18,7 +18,7 @@ namespace kllvm {
 namespace {
 
 template <typename IRBuilder>
-llvm::Constant *createGlobalSortStringPtr(
+llvm::Constant *create_global_sort_string_ptr(
     IRBuilder &b, kore_composite_sort &sort, llvm::Module *mod) {
   return b.CreateGlobalStringPtr(
       ast_to_string(sort), fmt::format("{}_str", sort.get_name()), 0, mod);
@@ -32,7 +32,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
   auto b = llvm::IRBuilder(insert_at_end);
 
   auto cat = sort.get_category(definition_);
-  auto *sort_name_ptr = createGlobalSortStringPtr(b, sort, module_);
+  auto *sort_name_ptr = create_global_sort_string_ptr(b, sort, module_);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
@@ -45,7 +45,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
         void_ty, {i8_ptr_ty, block_ty, i8_ptr_ty, i1_ty}, false);
 
     auto *serialize
-        = getOrInsertFunction(module_, "serializeTermToFile", func_ty);
+        = get_or_insert_function(module_, "serialize_term_to_file", func_ty);
 
     return b.CreateCall(
         serialize,
@@ -61,7 +61,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
       void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty}, false);
 
   auto *serialize
-      = getOrInsertFunction(module_, "serializeRawTermToFile", func_ty);
+      = get_or_insert_function(module_, "serialize_raw_term_to_file", func_ty);
 
   return b.CreateCall(
       serialize,
@@ -79,7 +79,7 @@ llvm::CallInst *proof_event::emit_serialize_configuration(
   auto *func_ty = llvm::FunctionType::get(
       void_ty, {i8_ptr_ty, block_ty, i1_ty, i1_ty}, false);
   auto *serialize
-      = getOrInsertFunction(module_, "serializeConfigurationToFile", func_ty);
+      = get_or_insert_function(module_, "serialize_configuration_to_file", func_ty);
 
   return llvm::CallInst::Create(
       serialize,
@@ -88,7 +88,7 @@ llvm::CallInst *proof_event::emit_serialize_configuration(
       "", insert_at_end);
 }
 
-llvm::CallInst *proof_event::emit_write_u_int64(
+llvm::CallInst *proof_event::emit_write_uint64(
     llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end) {
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
@@ -96,7 +96,7 @@ llvm::CallInst *proof_event::emit_write_u_int64(
 
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ptr_ty}, false);
-  auto *func = getOrInsertFunction(module_, "writeUInt64ToFile", func_ty);
+  auto *func = get_or_insert_function(module_, "write_uint64_to_file", func_ty);
 
   auto *i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
 
@@ -114,7 +114,7 @@ llvm::CallInst *proof_event::emit_write_string(
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
 
-  auto *print = getOrInsertFunction(module_, "printVariableToFile", func_ty);
+  auto *print = get_or_insert_function(module_, "print_variable_to_file", func_ty);
 
   auto *varname = b.CreateGlobalStringPtr(str, "", 0, module_);
   return b.CreateCall(print, {output_file, varname});
@@ -176,7 +176,7 @@ llvm::BasicBlock *proof_event::hook_event_pre(
   auto [true_block, merge_block, outputFile]
       = event_prelude("hookpre", current_block);
 
-  emit_write_u_int64(outputFile, detail::word(0xAA), true_block);
+  emit_write_uint64(outputFile, detail::word(0xAA), true_block);
   emit_write_string(outputFile, name, true_block);
   emit_write_string(outputFile, location_stack, true_block);
 
@@ -194,7 +194,7 @@ llvm::BasicBlock *proof_event::hook_event_post(
   auto [true_block, merge_block, outputFile]
       = event_prelude("hookpost", current_block);
 
-  emit_write_u_int64(outputFile, detail::word(0xBB), true_block);
+  emit_write_uint64(outputFile, detail::word(0xBB), true_block);
 
   emit_serialize_term(*sort, outputFile, val, true_block);
 
@@ -234,9 +234,9 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
   auto [true_block, merge_block, outputFile]
       = event_prelude("rewrite_pre", current_block);
 
-  emit_write_u_int64(outputFile, detail::word(0x22), true_block);
-  emit_write_u_int64(outputFile, axiom->get_ordinal(), true_block);
-  emit_write_u_int64(outputFile, arity, true_block);
+  emit_write_uint64(outputFile, detail::word(0x22), true_block);
+  emit_write_uint64(outputFile, axiom->get_ordinal(), true_block);
+  emit_write_uint64(outputFile, arity, true_block);
   for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
     auto key = entry->getKey();
     auto *val = entry->getValue();
@@ -246,7 +246,7 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
 
     emit_write_string(outputFile, key.str(), true_block);
     emit_serialize_term(*sort, outputFile, val, true_block);
-    emit_write_u_int64(outputFile, detail::word(0xCC), true_block);
+    emit_write_uint64(outputFile, detail::word(0xCC), true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -266,9 +266,9 @@ llvm::BasicBlock *proof_event::rewrite_event_post(
   auto return_sort = std::dynamic_pointer_cast<kore_composite_sort>(
       axiom->get_right_hand_side()->get_sort());
 
-  emit_write_u_int64(output_file, detail::word(0xFF), true_block);
+  emit_write_uint64(output_file, detail::word(0xFF), true_block);
   emit_serialize_term(*return_sort, output_file, return_value, true_block);
-  emit_write_u_int64(output_file, detail::word(0xCC), true_block);
+  emit_write_uint64(output_file, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -288,7 +288,7 @@ llvm::BasicBlock *proof_event::function_event_pre(
   auto [true_block, merge_block, outputFile]
       = event_prelude("function_pre", current_block);
 
-  emit_write_u_int64(outputFile, detail::word(0xDD), true_block);
+  emit_write_uint64(outputFile, detail::word(0xDD), true_block);
   emit_write_string(
       outputFile, ast_to_string(*pattern->get_constructor()), true_block);
   emit_write_string(outputFile, location_stack, true_block);
@@ -306,7 +306,7 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
   auto [true_block, merge_block, outputFile]
       = event_prelude("function_post", current_block);
 
-  emit_write_u_int64(outputFile, detail::word(0x11), true_block);
+  emit_write_uint64(outputFile, detail::word(0x11), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 
@@ -326,9 +326,9 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
   size_t ordinal = axiom->get_ordinal();
   size_t arity = args.size();
 
-  emit_write_u_int64(outputFile, detail::word(0xEE), true_block);
-  emit_write_u_int64(outputFile, ordinal, true_block);
-  emit_write_u_int64(outputFile, arity, true_block);
+  emit_write_uint64(outputFile, detail::word(0xEE), true_block);
+  emit_write_uint64(outputFile, ordinal, true_block);
+  emit_write_uint64(outputFile, arity, true_block);
 
   kore_pattern *pattern = axiom->get_requires();
   std::map<std::string, kore_variable_pattern *> vars;
@@ -344,7 +344,7 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 
     emit_write_string(outputFile, var_name, true_block);
     emit_serialize_term(*sort, outputFile, val, true_block);
-    emit_write_u_int64(outputFile, detail::word(0xCC), true_block);
+    emit_write_uint64(outputFile, detail::word(0xCC), true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -367,10 +367,10 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
   auto check_result_sort = std::dynamic_pointer_cast<kore_composite_sort>(
       axiom->get_requires()->get_sort());
 
-  emit_write_u_int64(outputFile, detail::word(0x33), true_block);
-  emit_write_u_int64(outputFile, ordinal, true_block);
+  emit_write_uint64(outputFile, detail::word(0x33), true_block);
+  emit_write_uint64(outputFile, ordinal, true_block);
   emit_serialize_term(*check_result_sort, outputFile, check_result, true_block);
-  emit_write_u_int64(outputFile, detail::word(0xCC), true_block);
+  emit_write_uint64(outputFile, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 

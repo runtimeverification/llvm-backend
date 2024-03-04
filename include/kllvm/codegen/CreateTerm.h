@@ -82,34 +82,34 @@ std::string escape(std::string const &str);
 /* Creates a new llvm::Module with the predefined declarations common to all
    llvm modules in the llvm backend. */
 std::unique_ptr<llvm::Module>
-newModule(std::string const &name, llvm::LLVMContext &context);
+new_module(std::string const &name, llvm::LLVMContext &context);
 
-llvm::StructType *getBlockType(
+llvm::StructType *get_block_type(
     llvm::Module *module, kore_definition *definition, kore_symbol const *symbol);
-uint64_t getBlockHeaderVal(
+uint64_t get_block_header_val(
     llvm::Module *module, kore_symbol const *symbol, llvm::Type *block_type);
-llvm::Value *getBlockHeader(
+llvm::Value *get_block_header(
     llvm::Module *module, kore_definition *definition, kore_symbol const *symbol,
     llvm::Type *block_type);
 
 /* returns the llvm::Type corresponding to the type of the result of calling
    createTerm on the specified pattern. */
-value_type termType(
+value_type term_type(
     kore_pattern *pattern, llvm::StringMap<value_type> &substitution,
     kore_definition *definition);
 
 /** creates a function that applies the specified rule once it has matched, and
  * returns the name of the function. */
-void makeApplyRuleFunction(
+void make_apply_rule_function(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module, bool big_step = false);
-std::string makeApplyRuleFunction(
+std::string make_apply_rule_function(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module, std::vector<residual> const &residuals);
 /** creates a function that evaluates the side condition of the specified rule,
  * and returns the name of the function. Returns empty string if function has no
  * side condition. */
-std::string makeSideConditionFunction(
+std::string make_side_condition_function(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module);
 
@@ -124,25 +124,25 @@ extern std::string buffer_struct;
 extern std::string block_struct;
 extern std::string blockheader_struct;
 
-llvm::StructType *getBlockType(llvm::Module *module);
+llvm::StructType *get_block_type(llvm::Module *module);
 
-llvm::Type *getArgType(value_type cat, llvm::Module *mod);
+llvm::Type *get_arg_type(value_type cat, llvm::Module *mod);
 
 /* returns the llvm::Type corresponding to the specified KORE sort category */
 llvm::Type *getvalue_type(value_type sort, llvm::Module *module);
-llvm::Type *getParamType(value_type sort, llvm::Module *module);
+llvm::Type *get_param_type(value_type sort, llvm::Module *module);
 
-bool isCollectionSort(value_type cat);
-bool isInjectionSymbol(kore_pattern *p, kore_symbol *sym);
+bool is_collection_sort(value_type cat);
+bool is_injection_symbol(kore_pattern *p, kore_symbol *sym);
 
-void addAbort(llvm::BasicBlock *block, llvm::Module *module);
+void add_abort(llvm::BasicBlock *block, llvm::Module *module);
 
-llvm::Value *allocateTerm(
+llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::BasicBlock *block,
-    char const *alloc_fn = "koreAlloc");
-llvm::Value *allocateTerm(
+    char const *alloc_fn = "kore_alloc");
+llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
-    char const *alloc_fn = "koreAlloc");
+    char const *alloc_fn = "kore_alloc");
 } // namespace kllvm
 
 #endif // CREATE_TERM_H

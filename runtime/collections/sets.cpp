@@ -137,7 +137,7 @@ set set_map(set *s, block *(process)(block *)) {
   return tmp;
 }
 
-void printSet(
+void print_set(
     writer *file, set *set, char const *unit, char const *element,
     char const *concat, void *state) {
   size_t size = set->size();
@@ -146,8 +146,8 @@ void printSet(
     return;
   }
 
-  auto tag = getTagForSymbolName(element);
-  auto *arg_sorts = getArgumentSortsForTag(tag);
+  auto tag = get_tag_for_symbol_name(element);
+  auto *arg_sorts = get_argument_sorts_for_tag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
@@ -160,7 +160,7 @@ void printSet(
     }
 
     sfprintf(file, "%s(", element);
-    printConfigurationInternal(file, *iter, arg_sorts[0], false, state);
+    print_configuration_internal(file, *iter, arg_sorts[0], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

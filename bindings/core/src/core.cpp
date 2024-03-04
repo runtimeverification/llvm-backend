@@ -7,17 +7,17 @@ using namespace kllvm;
  * through any header files, so we pull them in manually here.
  */
 extern "C" {
-void *constructInitialConfiguration(kore_pattern const *);
+void *construct_initial_configuration(kore_pattern const *);
 }
 
 namespace kllvm::bindings {
 
 std::string return_sort_for_label(std::string const &label) {
-  auto tag = getTagForSymbolName(label.c_str());
-  return getReturnSortForTag(tag);
+  auto tag = get_tag_for_symbol_name(label.c_str());
+  return get_return_sort_for_tag(tag);
 }
 
-std::shared_ptr<kore_pattern> make_rawTerm(
+std::shared_ptr<kore_pattern> make_raw_term(
     std::shared_ptr<kore_pattern> const &term,
     std::shared_ptr<kore_sort> const &from,
     std::shared_ptr<kore_sort> const &to) {
@@ -47,11 +47,11 @@ std::shared_ptr<kore_pattern> make_injection(
 }
 
 block *construct_term(std::shared_ptr<kore_pattern> const &pattern) {
-  return static_cast<block *>(constructInitialConfiguration(pattern.get()));
+  return static_cast<block *>(construct_initial_configuration(pattern.get()));
 }
 
 std::shared_ptr<kore_pattern> term_to_pattern(block *term) {
-  return termToKorePattern(term);
+  return term_to_kore_pattern(term);
 }
 
 bool get_bool(block *term) {
@@ -75,7 +75,7 @@ block *simplify_to_term(
   if (is_sort_kitem(sort) || is_sort_k(sort)) {
     return construct_term(pattern);
   }
-  auto raw_term = make_rawTerm(pattern, sort, kitem_sort);
+  auto raw_term = make_raw_term(pattern, sort, kitem_sort);
   return construct_term(raw_term);
 }
 
@@ -93,11 +93,11 @@ evaluate_function(std::shared_ptr<kore_composite_pattern> const &term) {
   }
 
   auto label = ast_to_string(*term->get_constructor());
-  auto tag = getTagForSymbolName(label.c_str());
-  auto const *return_sort = getReturnSortForTag(tag);
-  auto *result = evaluateFunctionSymbol(tag, term_args.data());
+  auto tag = get_tag_for_symbol_name(label.c_str());
+  auto const *return_sort = get_return_sort_for_tag(tag);
+  auto *result = evaluate_function_symbol(tag, term_args.data());
 
-  return sortedTermToKorePattern(static_cast<block *>(result), return_sort);
+  return sorted_term_to_kore_pattern(static_cast<block *>(result), return_sort);
 }
 
 bool is_sort_kitem(std::shared_ptr<kore_sort> const &sort) {

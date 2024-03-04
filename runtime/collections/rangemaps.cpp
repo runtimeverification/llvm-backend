@@ -16,8 +16,8 @@ struct range {
 static struct blockheader range_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
-    hdr = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("LblRangemap'Coln'Range{}"));
+    hdr = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("LblRangemap'Coln'Range{}"));
   }
   return hdr;
 }
@@ -64,7 +64,7 @@ hook_RANGEMAP_lookupOrDefault(SortRangeMap m, SortKItem key, SortKItem def) {
 SortRange hook_RANGEMAP_find_range(SortRangeMap m, SortKItem key) {
   auto val = m->get_key_value(key);
   if (val.has_value()) {
-    auto *ptr = (range *)koreAlloc(sizeof(range));
+    auto *ptr = (range *)kore_alloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = val.value().first.start();
     ptr->end = val.value().first.end();
@@ -108,8 +108,8 @@ struct inj_range2kitem {
 static struct blockheader inj_range2kitem_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
-    hdr = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("inj{SortRange{}, SortKItem{}}"));
+    hdr = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("inj{SortRange{}, SortKItem{}}"));
   }
   return hdr;
 }
@@ -117,11 +117,11 @@ set hook_RANGEMAP_keys(SortRangeMap m) {
   auto tmp = hook_SET_unit();
   for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m);
        iter.has_next(); ++iter) {
-    auto *ptr = (range *)koreAlloc(sizeof(range));
+    auto *ptr = (range *)kore_alloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    auto *inj_ptr = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+    auto *inj_ptr = (inj_range2kitem *)kore_alloc(sizeof(inj_range2kitem));
     inj_ptr->h = inj_range2kitem_header();
     inj_ptr->child = ptr;
     auto elem = hook_SET_element((SortKItem)inj_ptr);
@@ -134,11 +134,11 @@ list hook_RANGEMAP_keys_list(SortRangeMap m) {
   auto tmp = list().transient();
   for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*m);
        iter.has_next(); ++iter) {
-    auto *ptr = (range *)koreAlloc(sizeof(range));
+    auto *ptr = (range *)kore_alloc(sizeof(range));
     ptr->h = range_header();
     ptr->start = iter->first.start();
     ptr->end = iter->first.end();
-    auto *inj_ptr = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+    auto *inj_ptr = (inj_range2kitem *)kore_alloc(sizeof(inj_range2kitem));
     inj_ptr->h = inj_range2kitem_header();
     inj_ptr->child = ptr;
     tmp.push_back((SortKItem)inj_ptr);
@@ -172,7 +172,7 @@ SortRange hook_RANGEMAP_choiceRng(SortRangeMap m) {
     KLLVM_HOOK_INVALID_ARGUMENT("Cannot choose from an empty range map");
   }
   auto pair = m->treemap().root_data();
-  auto *ptr = (range *)koreAlloc(sizeof(range));
+  auto *ptr = (range *)kore_alloc(sizeof(range));
   ptr->h = range_header();
   ptr->start = pair.first.start();
   ptr->end = pair.first.end();
@@ -250,7 +250,7 @@ rangemap rangemap_map(rangemap *map, block *(process)(block *)) {
   return tmp;
 }
 
-void printRangeMap(
+void print_range_map(
     writer *file, rangemap *map, char const *unit, char const *element,
     char const *concat, void *state) {
   size_t size = map->size();
@@ -259,8 +259,8 @@ void printRangeMap(
     return;
   }
 
-  auto tag = getTagForSymbolName(element);
-  auto *arg_sorts = getArgumentSortsForTag(tag);
+  auto tag = get_tag_for_symbol_name(element);
+  auto *arg_sorts = get_argument_sorts_for_tag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
@@ -276,13 +276,13 @@ void printRangeMap(
     sfprintf(file, "%s(", element);
     auto entry = *iter;
     sfprintf(file, "LblRangemap'Coln'Range{}(");
-    printConfigurationInternal(
+    print_configuration_internal(
         file, entry.first.start(), "SortKItem{}", false, state);
     sfprintf(file, ",");
-    printConfigurationInternal(
+    print_configuration_internal(
         file, entry.first.end(), "SortKItem{}", false, state);
     sfprintf(file, "),");
-    printConfigurationInternal(file, entry.second, arg_sorts[1], false, state);
+    print_configuration_internal(file, entry.second, arg_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

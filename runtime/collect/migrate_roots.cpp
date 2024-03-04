@@ -11,7 +11,7 @@ extern "C" {
 
 void migrate(block **block_ptr);
 
-void migrateRoots() {
+void migrate_roots() {
   auto &l1 = list_impl::empty_root();
   migrate_collection_node((void **)&l1);
   auto &l2 = list_impl::empty_tail();

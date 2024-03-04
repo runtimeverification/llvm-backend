@@ -27,7 +27,7 @@ sptr<kore_pattern> kore_pattern::load(std::string const &filename) {
   return parser::kore_parser(filename).pattern();
 }
 
-std::string kllvm::decodeKore(std::string kore) {
+std::string kllvm::decode_kore(std::string kore) {
   static std::unordered_map<std::string, char> codes;
   static bool once = true;
   if (once) {
@@ -412,7 +412,7 @@ static void newline(std::ostream &out) {
   at_new_line = true;
 }
 
-static void printIndent(std::ostream &out) {
+static void print_indent(std::ostream &out) {
   constexpr auto indent_size = 2;
 
   if (at_new_line) {
@@ -424,12 +424,12 @@ static void printIndent(std::ostream &out) {
 }
 
 static void append(std::ostream &out, char c) {
-  printIndent(out);
+  print_indent(out);
   out << c;
 }
 
 static void append(std::ostream &out, std::string const &str) {
-  printIndent(out);
+  print_indent(out);
   out << str;
 }
 
@@ -692,7 +692,7 @@ void kore_composite_sort::pretty_print(std::ostream &out) const {
 
 void kore_variable_pattern::pretty_print(
     std::ostream &out, pretty_print_data const &data) const {
-  append(out, decodeKore(get_name().substr(3)));
+  append(out, decode_kore(get_name().substr(3)));
   append(out, ':');
   sort_->pretty_print(out);
 }
@@ -1417,7 +1417,7 @@ void kore_composite_pattern::print(std::ostream &out, unsigned ind) const {
   out << ")";
 }
 
-static std::string escapeString(std::string const &str) {
+static std::string escape_string(std::string const &str) {
   auto result = std::string{};
 
   for (char c : str) {
@@ -1435,10 +1435,10 @@ static std::string escapeString(std::string const &str) {
 
 void kore_string_pattern::print(std::ostream &out, unsigned ind) const {
   auto indent = std::string(ind, ' ');
-  out << indent << "\"" << escapeString(contents_) << "\"";
+  out << indent << "\"" << escape_string(contents_) << "\"";
 }
 
-static void printAttributeList(
+static void print_attribute_list(
     std::ostream &out, attribute_set const &attributes, unsigned ind = 0) {
 
   auto indent = std::string(ind, ' ');
@@ -1473,7 +1473,7 @@ void kore_composite_sort_declaration::print(
   out << indent << (is_hooked_ ? "hooked-sort " : "sort ") << sort_name_;
   print_sort_variables(out);
   out << " ";
-  printAttributeList(out, attributes());
+  print_attribute_list(out, attributes());
 }
 
 void kore_symbol_declaration::print(std::ostream &out, unsigned ind) const {
@@ -1493,7 +1493,7 @@ void kore_symbol_declaration::print(std::ostream &out, unsigned ind) const {
   out << ") : ";
   get_symbol()->get_sort()->print(out);
   out << " ";
-  printAttributeList(out, attributes());
+  print_attribute_list(out, attributes());
 }
 
 void kore_alias_declaration::print(std::ostream &out, unsigned ind) const {
@@ -1516,7 +1516,7 @@ void kore_alias_declaration::print(std::ostream &out, unsigned ind) const {
   out << " := ";
   pattern_->print(out);
   out << " ";
-  printAttributeList(out, attributes());
+  print_attribute_list(out, attributes());
 }
 
 void kore_axiom_declaration::print(std::ostream &out, unsigned ind) const {
@@ -1525,7 +1525,7 @@ void kore_axiom_declaration::print(std::ostream &out, unsigned ind) const {
   print_sort_variables(out);
   pattern_->print(out);
   out << " ";
-  printAttributeList(out, attributes());
+  print_attribute_list(out, attributes());
 }
 
 void kore_module_import_declaration::print(
@@ -1533,7 +1533,7 @@ void kore_module_import_declaration::print(
   auto indent = std::string(ind, ' ');
   out << indent << "import " << module_name_;
   out << " ";
-  printAttributeList(out, attributes());
+  print_attribute_list(out, attributes());
 }
 
 void kore_module::print(std::ostream &out, unsigned ind) const {
@@ -1549,11 +1549,11 @@ void kore_module::print(std::ostream &out, unsigned ind) const {
     is_first = false;
   }
   out << indent << "endmodule\n";
-  printAttributeList(out, attributes(), ind);
+  print_attribute_list(out, attributes(), ind);
 }
 
 void kore_definition::print(std::ostream &out, unsigned ind) const {
-  printAttributeList(out, attributes(), indent);
+  print_attribute_list(out, attributes(), indent);
   out << "\n";
   for (auto const &module : modules_) {
     out << "\n";
@@ -1622,7 +1622,7 @@ void kore_variable::serialize_to(serializer &s) const {
   s.emit_string(name_);
 }
 
-void kllvm::readMultimap(
+void kllvm::read_multimap(
     std::string const &name, kore_symbol_declaration *decl,
     std::map<std::string, std::set<std::string>> &output,
     attribute_set::key att_name) {
@@ -1638,7 +1638,7 @@ void kllvm::readMultimap(
 // Normally, destruction of kore_pattern would call destructor
 // of all its subpatterns. This can sometimes exhaust all the stack space.
 // This function deallocates a pattern iteratively, without recursion.
-void kllvm::deallocateSPtrKorePattern(sptr<kore_pattern> pattern) {
+void kllvm::deallocate_s_ptr_kore_pattern(sptr<kore_pattern> pattern) {
   std::vector<sptr<kore_pattern>> vec;
   vec.push_back(std::move(pattern));
   while (!vec.empty()) {

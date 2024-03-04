@@ -47,15 +47,15 @@ bool hook_KEQUAL_lt(block *b1, block *b2) {
   return b1->h.hdr < b2->h.hdr;
 }
 
-void *koreAlloc(size_t requested) {
+void *kore_alloc(size_t requested) {
   return malloc(requested);
 }
 
-uint32_t getTagForSymbolName(char const *symbolName) {
+uint32_t get_tag_for_symbol_name(char const *symbolName) {
   return 0;
 }
 
-struct blockheader getBlockHeaderForSymbol(uint32_t tag) {
+struct blockheader get_block_header_for_symbol(uint32_t tag) {
   return {(uint64_t)tag};
 }
 
@@ -67,8 +67,8 @@ struct range {
 static struct blockheader range_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
-    hdr = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("LblRangemap'Coln'Range{}"));
+    hdr = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("LblRangemap'Coln'Range{}"));
   }
   return hdr;
 }
@@ -79,8 +79,8 @@ struct inj_range2kitem {
 static struct blockheader inj_range2kitem_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
-    hdr = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("inj{SortRange{}, SortKItem{}}"));
+    hdr = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("inj{SortRange{}, SortKItem{}}"));
   }
   return hdr;
 }
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_element) {
 }
 
 BOOST_AUTO_TEST_CASE(rangemap_hook_element_rng) {
-  range *ptr = (range *)koreAlloc(sizeof(range));
+  range *ptr = (range *)kore_alloc(sizeof(range));
   ptr->h = range_header();
   ptr->start = RDUMMY0;
   ptr->end = RDUMMY1;
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_update_rng) {
   BOOST_CHECK_EQUAL(result, RDUMMY0);
   auto result2 = hook_RANGEMAP_size_long(&map1);
   BOOST_CHECK_EQUAL(result2, 1);
-  range *ptr = (range *)koreAlloc(sizeof(range));
+  range *ptr = (range *)kore_alloc(sizeof(range));
   ptr->h = range_header();
   ptr->start = RDUMMY0;
   ptr->end = RDUMMY1;
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_remove_rng) {
   auto map1 = hook_RANGEMAP_update(&m1, RDUMMY0, RDUMMY1, RDUMMY1);
   auto result = hook_RANGEMAP_size_long(&map1);
   BOOST_CHECK_EQUAL(result, 2);
-  range *ptr = (range *)koreAlloc(sizeof(range));
+  range *ptr = (range *)kore_alloc(sizeof(range));
   ptr->h = range_header();
   ptr->start = RDUMMY0;
   ptr->end = RDUMMY1;
@@ -292,12 +292,12 @@ BOOST_AUTO_TEST_CASE(rangemap_hook_remove_all) {
   auto map2 = hook_RANGEMAP_removeAll(&map1, &set);
   auto result = hook_RANGEMAP_size_long(&map2);
   BOOST_CHECK_EQUAL(result, 1);
-  range *ptr = (range *)koreAlloc(sizeof(range));
+  range *ptr = (range *)kore_alloc(sizeof(range));
   ptr->h = range_header();
   ptr->start = RDUMMY0;
   ptr->end = RDUMMY1;
   inj_range2kitem *inj_ptr
-      = (inj_range2kitem *)koreAlloc(sizeof(inj_range2kitem));
+      = (inj_range2kitem *)kore_alloc(sizeof(inj_range2kitem));
   inj_ptr->h = inj_range2kitem_header();
   inj_ptr->child = ptr;
   auto elem = hook_SET_element((SortKItem)inj_ptr);

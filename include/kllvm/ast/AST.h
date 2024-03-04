@@ -36,7 +36,7 @@ using ptr = std::unique_ptr<T>;
 template <typename T>
 using sptr = std::shared_ptr<T>;
 
-std::string decodeKore(std::string);
+std::string decode_kore(std::string);
 
 /*
  * Helper function to avoid repeated call-site uses of ostringstream when we
@@ -520,7 +520,7 @@ private:
       , sort_(std::move(std::move(sort))) { }
 };
 
-void deallocateSPtrKorePattern(sptr<kore_pattern> pattern);
+void deallocate_s_ptr_kore_pattern(sptr<kore_pattern> pattern);
 
 class kore_composite_pattern : public kore_pattern {
 private:
@@ -589,7 +589,7 @@ private:
       std::set<size_t> &applied_rules,
       std::set<std::string> const &macro_symbols) override;
 
-  friend void ::kllvm::deallocateSPtrKorePattern(sptr<kore_pattern> pattern);
+  friend void ::kllvm::deallocate_s_ptr_kore_pattern(sptr<kore_pattern> pattern);
 
   kore_composite_pattern(ptr<kore_symbol> constructor)
       : constructor_(std::move(constructor)) { }
@@ -999,11 +999,11 @@ public:
   kore_symbol *get_inj_symbol() { return inj_symbol_; }
 };
 
-void readMultimap(
+void read_multimap(
     std::string const &, kore_symbol_declaration *,
     std::map<std::string, std::set<std::string>> &, attribute_set::key);
 
-sptr<kore_pattern> stripRawTerm(sptr<kore_pattern> const &term);
+sptr<kore_pattern> strip_raw_term(sptr<kore_pattern> const &term);
 
 namespace detail {
 

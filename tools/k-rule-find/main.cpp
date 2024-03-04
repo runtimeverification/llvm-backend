@@ -28,7 +28,7 @@ cl::opt<std::string> rule_location(
     cl::Positional, cl::desc("<filename.k:line[:column]>"), cl::Required,
     cl::cat(k_rule_cat));
 
-std::string getSource(kore_axiom_declaration *axiom) {
+std::string get_source(kore_axiom_declaration *axiom) {
   auto *source_att = axiom->attributes().get(attribute_set::key::Source).get();
   assert(source_att->get_arguments().size() == 1);
 
@@ -37,7 +37,7 @@ std::string getSource(kore_axiom_declaration *axiom) {
   return str_pattern->get_contents();
 }
 
-location getLocation(kore_axiom_declaration *axiom) {
+location get_location(kore_axiom_declaration *axiom) {
   auto *location_att
       = axiom->attributes().get(attribute_set::key::Location).get();
   assert(location_att->get_arguments().size() == 1);
@@ -65,7 +65,7 @@ location getLocation(kore_axiom_declaration *axiom) {
   return {location, start_line, end_line, start_column, end_column};
 }
 
-location parseLocation(std::string const &loc) {
+location parse_location(std::string const &loc) {
   size_t pos = loc.find(':');
   if (pos == std::string::npos) {
     std::cerr << "Rule's location must be in the format: "
@@ -89,7 +89,7 @@ location parseLocation(std::string const &loc) {
   return {loc.substr(0, pos), line, line, column, column};
 }
 
-bool checkRanges(
+bool check_ranges(
     location const &param, location const &file, bool check_column) {
   auto line
       = param.start_line >= file.start_line && param.end_line <= file.end_line;
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&k_rule_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto loc = parseLocation(rule_location);
+  auto loc = parse_location(rule_location);
   auto definition = kompiled_dir + "/definition.kore";
   std::vector<std::string> rule_labels;
 
@@ -113,10 +113,10 @@ int main(int argc, char **argv) {
   // Iterate through axioms.
   for (auto *axiom : kore_ast.get()->get_axioms()) {
     if (axiom->attributes().contains(attribute_set::key::Source)) {
-      auto source = getSource(axiom);
+      auto source = get_source(axiom);
       if (source.find(loc.filename) != std::string::npos) {
-        auto source_loc = getLocation(axiom);
-        if (checkRanges(loc, source_loc, loc.start_column != -1)) {
+        auto source_loc = get_location(axiom);
+        if (check_ranges(loc, source_loc, loc.start_column != -1)) {
           rule_labels.push_back(
               axiom->attributes().get_string(attribute_set::key::Label));
         }

@@ -118,7 +118,7 @@ public:
     return bindings_;
   }
   void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
-    bindings_.emplace_back(name, getParamType(type, mod));
+    bindings_.emplace_back(name, get_param_type(type, mod));
   }
   llvm::APInt get_literal() const { return literal_; }
   [[nodiscard]] decision_node *get_child() const { return child_; }
@@ -246,7 +246,7 @@ public:
     return bindings_;
   }
   void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
-    bindings_.push_back({{name, getParamType(type, mod)}, type});
+    bindings_.push_back({{name, get_param_type(type, mod)}, type});
   }
 
   void codegen(decision *d) override;
@@ -285,7 +285,7 @@ public:
     return bindings_;
   }
   void add_binding(std::string const &name, value_type type, llvm::Module *mod) {
-    bindings_.emplace_back(name, getParamType(type, mod));
+    bindings_.emplace_back(name, get_param_type(type, mod));
   }
   void set_child(decision_node *child) { this->child_ = child; }
 
@@ -452,20 +452,20 @@ public:
 /* construct the function that evaluates the specified function symbol
    according to the specified decision tree and returns the result of the
    function. */
-void makeEvalFunction(
+void make_eval_function(
     kore_symbol *function, kore_definition *definition, llvm::Module *module,
     decision_node *dt);
-void makeAnywhereFunction(
+void make_anywhere_function(
     kore_symbol *function, kore_definition *definition, llvm::Module *module,
     decision_node *dt);
 
-void makeStepFunction(
+void make_step_function(
     kore_definition *definition, llvm::Module *module, decision_node *dt,
     bool search);
-void makeStepFunction(
+void make_step_function(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module, partial_step res);
-void makeMatchReasonFunction(
+void make_match_reason_function(
     kore_definition *definition, llvm::Module *module,
     kore_axiom_declaration *axiom, decision_node *dt);
 

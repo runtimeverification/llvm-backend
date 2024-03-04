@@ -67,8 +67,8 @@ auto managed(kore_symbol *ptr) {
  */
 
 extern "C" {
-void initStaticObjects();
-void freeAllKoreMem();
+void init_static_objects();
+void free_all_kore_mem();
 bool hook_BYTES_mutableBytesEnabled();
 }
 
@@ -172,7 +172,7 @@ char *kore_pattern_pretty_print(kore_pattern const *pat) {
   }
 
   auto ss = std::stringstream{};
-  kllvm::printKORE(
+  kllvm::print_kore(
       ss, temp_dir_name, temp_path("pattern.kore"), false, false, true);
 
   fs::remove_all(temp_dir_name);
@@ -266,7 +266,7 @@ block *kore_pattern_construct(kore_pattern const *pat) {
 }
 
 char *kore_block_dump(block *term) {
-  auto *hooked_str = printConfigurationToString(term)->data;
+  auto *hooked_str = print_configuration_to_string(term)->data;
   auto len = std::strlen(hooked_str);
 
   auto *new_str = static_cast<char *>(malloc(len + 1));
@@ -302,7 +302,7 @@ void kore_simplify(
     char **data_out, size_t *size_out) {
   try {
     auto *block = kllvm::bindings::simplify_to_term(pattern->ptr, sort->ptr);
-    serializeConfiguration(
+    serialize_configuration(
         block, "SortKItem{}", data_out, size_out, true, true);
   } catch (std::exception &e) {
     if (err == nullptr) {
@@ -320,8 +320,8 @@ void kore_simplify_binary(
     auto sort_str = std::unique_ptr<char, decltype(std::free) *>(
         kore_sort_dump(sort), std::free);
 
-    auto *block = deserializeConfiguration(data_in, size_in);
-    serializeConfiguration(
+    auto *block = deserialize_configuration(data_in, size_in);
+    serialize_configuration(
         block, sort_str.get(), data_out, size_out, true, true);
   } catch (std::exception &e) {
     if (err == nullptr) {
@@ -423,11 +423,11 @@ void kore_symbol_add_formal_argument(kore_symbol *sym, kore_sort const *sort) {
 /* Memory management */
 
 void kllvm_init(void) {
-  initStaticObjects();
+  init_static_objects();
 }
 
 void kllvm_free_all_memory(void) {
-  freeAllKoreMem();
+  free_all_kore_mem();
 }
 
 bool kllvm_mutable_bytes_enabled(void) {

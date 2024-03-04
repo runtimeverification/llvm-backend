@@ -32,7 +32,7 @@ namespace kllvm {
 llvm::Constant *create_static_term::not_injection_case(
     kore_composite_pattern *constructor, llvm::Constant *val) {
   kore_symbol const *symbol = constructor->get_constructor();
-  llvm::StructType *block_type = getBlockType(module_, definition_, symbol);
+  llvm::StructType *block_type = get_block_type(module_, definition_, symbol);
 
   std::stringstream kore_string;
   constructor->print(kore_string);
@@ -46,7 +46,7 @@ llvm::Constant *create_static_term::not_injection_case(
     llvm::StructType *block_header_type = llvm::StructType::getTypeByName(
         module_->getContext(), blockheader_struct);
     uint64_t header_val
-        = getBlockHeaderVal(module_, symbol, block_type) | NOT_YOUNG_OBJECT_BIT;
+        = get_block_header_val(module_, symbol, block_type) | NOT_YOUNG_OBJECT_BIT;
     llvm::Constant *block_header = llvm::ConstantStruct::get(
         block_header_type,
         llvm::ConstantInt::get(

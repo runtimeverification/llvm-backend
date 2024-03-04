@@ -9,9 +9,9 @@
 namespace kllvm {
 
 sptr<kore_pattern>
-addBrackets(sptr<kore_pattern> const &, pretty_print_data const &);
+add_brackets(sptr<kore_pattern> const &, pretty_print_data const &);
 
-std::ostream &printKORE(
+std::ostream &print_kore(
     std::ostream &os, std::string const &definition_path,
     std::string const &pattern_path, bool has_color, bool filter_subst,
     bool pretty = true);

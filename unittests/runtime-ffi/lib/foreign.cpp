@@ -12,11 +12,11 @@ struct point2 {
 
 int x = 1;
 
-int timesTwo(int x) {
+int times_two(int x) {
   return x * 2;
 }
 
-unsigned int utimesTwo(unsigned int x) {
+unsigned int utimes_two(unsigned int x) {
   return x * 2;
 }
 
@@ -24,27 +24,27 @@ int times(int x, int y) {
   return x * y;
 }
 
-int getX(void) {
+int get_x(void) {
   return x;
 }
 
-void increaseX(void) {
+void increase_x(void) {
   x++;
 }
 
-int timesPoint(struct point p) {
+int times_point(struct point p) {
   return p.x * p.y;
 }
 
-int timesPoint2(struct point2 p) {
+int times_point2(struct point2 p) {
   return p.p.x * p.p.y;
 }
 
-struct point constructPoint(int x, int y) {
+struct point construct_point(int x, int y) {
   return {.x = x, .y = y};
 }
 
-int addInts(int n, ...) {
+int add_ints(int n, ...) {
   int sum = 0;
   va_list vl;
   va_start(vl, n);
@@ -58,7 +58,7 @@ int addInts(int n, ...) {
   return sum;
 }
 
-int pointerTest(int *x) {
+int pointer_test(int *x) {
   return x == 0 ? 0 : *x;
 }
 }

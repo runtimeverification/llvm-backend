@@ -16,34 +16,34 @@ REGISTER_ARENA(oldspace, OLDSPACE_ID);
 REGISTER_ARENA(alwaysgcspace, ALWAYSGCSPACE_ID);
 
 char *youngspace_ptr() {
-  return arenaStartPtr(&youngspace);
+  return arena_start_ptr(&youngspace);
 }
 
 char *oldspace_ptr() {
-  return arenaStartPtr(&oldspace);
+  return arena_start_ptr(&oldspace);
 }
 
 char **young_alloc_ptr() {
-  return arenaEndPtr(&youngspace);
+  return arena_end_ptr(&youngspace);
 }
 
 char **old_alloc_ptr() {
-  return arenaEndPtr(&oldspace);
+  return arena_end_ptr(&oldspace);
 }
 
 char youngspace_collection_id() {
-  return getArenaCollectionSemispaceID(&youngspace);
+  return get_arena_collection_semispace_id(&youngspace);
 }
 
 char oldspace_collection_id() {
-  return getArenaCollectionSemispaceID(&oldspace);
+  return get_arena_collection_semispace_id(&oldspace);
 }
 
 size_t youngspace_size(void) {
-  return arenaSize(&youngspace);
+  return arena_size(&youngspace);
 }
 
-bool youngspaceAlmostFull(size_t threshold) {
+bool youngspace_almost_full(size_t threshold) {
   char *next_block = *(char **)youngspace.block_start;
   if (next_block) {
     // not on the last block, so short circuit and assume that we can keep
@@ -56,45 +56,45 @@ bool youngspaceAlmostFull(size_t threshold) {
   return (total_bytes - free_bytes) * 100 > threshold * 95;
 }
 
-void koreAllocSwap(bool swap_old) {
-  arenaSwapAndClear(&youngspace);
-  arenaClear(&alwaysgcspace);
+void kore_alloc_swap(bool swap_old) {
+  arena_swap_and_clear(&youngspace);
+  arena_clear(&alwaysgcspace);
   if (swap_old) {
-    arenaSwapAndClear(&oldspace);
+    arena_swap_and_clear(&oldspace);
   }
 }
 
-void setKoreMemoryFunctionsForGMP() {
-  mp_set_memory_functions(koreAllocMP, koreReallocMP, koreFree);
+void set_kore_memory_functions_for_gmp() {
+  mp_set_memory_functions(kore_alloc_mp, kore_realloc_mp, kore_free);
 }
 
-__attribute__((always_inline)) void *koreAlloc(size_t requested) {
-  return koreArenaAlloc(&youngspace, requested);
+__attribute__((always_inline)) void *kore_alloc(size_t requested) {
+  return kore_arena_alloc(&youngspace, requested);
 }
 
-__attribute__((always_inline)) void *koreAllocToken(size_t requested) {
+__attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return koreArenaAlloc(&youngspace, size < 16 ? 16 : size);
+  return kore_arena_alloc(&youngspace, size < 16 ? 16 : size);
 }
 
-__attribute__((always_inline)) void *koreAllocOld(size_t requested) {
-  return koreArenaAlloc(&oldspace, requested);
+__attribute__((always_inline)) void *kore_alloc_old(size_t requested) {
+  return kore_arena_alloc(&oldspace, requested);
 }
 
-__attribute__((always_inline)) void *koreAllocTokenOld(size_t requested) {
+__attribute__((always_inline)) void *kore_alloc_token_old(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return koreArenaAlloc(&oldspace, size < 16 ? 16 : size);
+  return kore_arena_alloc(&oldspace, size < 16 ? 16 : size);
 }
 
-__attribute__((always_inline)) void *koreAllocAlwaysGC(size_t requested) {
-  return koreArenaAlloc(&alwaysgcspace, requested);
+__attribute__((always_inline)) void *kore_alloc_always_gc(size_t requested) {
+  return kore_arena_alloc(&alwaysgcspace, requested);
 }
 
-void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
+void *kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
 
-  if (oldptr != *arenaEndPtr(&youngspace) - last_size) {
+  if (oldptr != *arena_end_ptr(&youngspace) - last_size) {
     MEM_LOG(
         "May only reallocate last allocation. Tried to reallocate %p to %zd\n",
         oldptr, newrequest);
@@ -102,51 +102,51 @@ void *koreResizeLastAlloc(void *oldptr, size_t newrequest, size_t last_size) {
   }
 
   ssize_t increase = newrequest - last_size;
-  if (arenaResizeLastAlloc(&youngspace, increase)) {
+  if (arena_resize_last_alloc(&youngspace, increase)) {
     return oldptr;
   }
 
-  void *newptr = koreAlloc(newrequest);
+  void *newptr = kore_alloc(newrequest);
   memcpy(newptr, oldptr, last_size);
   return newptr;
 }
 
-void *koreAllocMP(size_t requested) {
-  auto *_new = (string *)koreAllocToken(sizeof(string) + requested);
+void *kore_alloc_mp(size_t requested) {
+  auto *_new = (string *)kore_alloc_token(sizeof(string) + requested);
   init_with_len(_new, requested);
   return _new->data;
 }
 
-void *koreReallocMP(void *ptr, size_t old_size, size_t new_size) {
-  auto *_new = (string *)koreAllocToken(sizeof(string) + new_size);
+void *kore_realloc_mp(void *ptr, size_t old_size, size_t new_size) {
+  auto *_new = (string *)kore_alloc_token(sizeof(string) + new_size);
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(_new->data, ptr, min);
   init_with_len(_new, new_size);
   return _new->data;
 }
 
-void koreFree(void *ptr, size_t size) { }
+void kore_free(void *ptr, size_t size) { }
 
-__attribute__((always_inline)) void *koreAllocInteger(size_t requested) {
-  auto *result = (mpz_hdr *)koreAlloc(sizeof(mpz_hdr));
+__attribute__((always_inline)) void *kore_alloc_integer(size_t requested) {
+  auto *result = (mpz_hdr *)kore_alloc(sizeof(mpz_hdr));
   init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
 }
 
-__attribute__((always_inline)) void *koreAllocFloating(size_t requested) {
-  auto *result = (floating_hdr *)koreAlloc(sizeof(floating_hdr));
+__attribute__((always_inline)) void *kore_alloc_floating(size_t requested) {
+  auto *result = (floating_hdr *)kore_alloc(sizeof(floating_hdr));
   init_with_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }
 
-__attribute__((always_inline)) void *koreAllocIntegerOld(size_t requested) {
-  auto *result = (mpz_hdr *)koreAllocOld(sizeof(mpz_hdr));
+__attribute__((always_inline)) void *kore_alloc_integer_old(size_t requested) {
+  auto *result = (mpz_hdr *)kore_alloc_old(sizeof(mpz_hdr));
   init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
 }
 
-__attribute__((always_inline)) void *koreAllocFloatingOld(size_t requested) {
-  auto *result = (floating_hdr *)koreAllocOld(sizeof(floating_hdr));
+__attribute__((always_inline)) void *kore_alloc_floating_old(size_t requested) {
+  auto *result = (floating_hdr *)kore_alloc_old(sizeof(floating_hdr));
   init_with_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }

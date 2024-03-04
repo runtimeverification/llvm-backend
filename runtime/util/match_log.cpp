@@ -5,18 +5,18 @@
 #include <cstdarg>
 #include <vector>
 
-extern "C" void *getStderr(void) {
+extern "C" void *get_stderr(void) {
   return stderr;
 }
 
 static std::vector<match_log> match_logs;
 
-void **getMatchFnArgs(match_log *log) {
+void **get_match_fn_args(match_log *log) {
   return log->args.data();
 }
 
 extern "C" {
-void resetMatchReason(void) {
+void reset_match_reason(void) {
   match_logs.clear();
 }
 
@@ -24,11 +24,11 @@ match_log *getmatch_log(void) {
   return match_logs.data();
 }
 
-size_t getmatch_logSize(void) {
+size_t getmatch_log_size(void) {
   return match_logs.size();
 }
 
-void addMatchSuccess(void) {
+void add_match_success(void) {
   match_logs.push_back(
       {match_log::SUCCESS,
        nullptr,
@@ -40,12 +40,12 @@ void addMatchSuccess(void) {
        nullptr});
 }
 
-void addMatchFailReason(void *subject, char const *pattern, char const *sort) {
+void add_match_fail_reason(void *subject, char const *pattern, char const *sort) {
   match_logs.push_back(
       {match_log::FAIL, nullptr, nullptr, nullptr, {}, pattern, subject, sort});
 }
 
-void addMatchFunction(
+void add_match_function(
     char const *debug_name, char const *function, void *result, ...) {
   // This function needs to use C variadic arguments because it's called from
   // generated LLVM IR.

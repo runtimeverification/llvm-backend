@@ -69,7 +69,7 @@ void k_hash(block *arg, void *h) {
       uint64_t arghdrcanon = arg->h.hdr & HDR_MASK;
       if (uint16_t arglayout = get_layout(arg)) {
         add_hash64(h, arghdrcanon);
-        layout *layout_ptr = getLayoutData(arglayout);
+        layout *layout_ptr = get_layout_data(arglayout);
         uint8_t length = layout_ptr->nargs;
         for (uint8_t i = 0; i < length; i++) {
           uint64_t offset = layout_ptr->args[i].offset;

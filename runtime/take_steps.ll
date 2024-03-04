@@ -5,9 +5,9 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare tailcc %block* @k_step(%block*)
-declare tailcc %block** @stepAll(%block*, i64*)
-declare void @serializeConfigurationToFile(i8*, %block*, i1, i1)
-declare void @writeUInt64ToFile(i8*, i64)
+declare tailcc %block** @step_all(%block*, i64*)
+declare void @serialize_configuration_to_file(i8*, %block*, i1, i1)
+declare void @write_uint64_to_file(i8*, i64)
 
 @proof_output = external global i1
 @output_file = external global i8*
@@ -50,9 +50,9 @@ define %block* @take_steps(i64 %depth, %block* %subject) {
   br i1 %proof_output, label %if, label %merge
 if:
   %output_file = load i8*, i8** @output_file
-  call void @writeUInt64ToFile(i8* %output_file, i64 18446744073709551615)
-  call void @serializeConfigurationToFile(i8* %output_file, %block* %subject, i1 1, i1 1)
-  call void @writeUInt64ToFile(i8* %output_file, i64 14757395258967641292)
+  call void @write_uint64_to_file(i8* %output_file, i64 18446744073709551615)
+  call void @serialize_configuration_to_file(i8* %output_file, %block* %subject, i1 1, i1 1)
+  call void @write_uint64_to_file(i8* %output_file, i64 14757395258967641292)
   br label %merge
 merge:
   store i64 %depth, i64* @depth
@@ -62,7 +62,7 @@ merge:
 
 define %block** @take_search_step(%block* %subject, i64* %count) {
   store i64 -1, i64* @depth
-  %result = call tailcc %block** @stepAll(%block* %subject, i64* %count)
+  %result = call tailcc %block** @step_all(%block* %subject, i64* %count)
   ret %block** %result
 }
 

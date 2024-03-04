@@ -7,7 +7,7 @@
 
 namespace kllvm {
 
-void emitConfigParserFunctions(
+void emit_config_parser_functions(
     kore_definition *definition, llvm::Module *module);
 
 }

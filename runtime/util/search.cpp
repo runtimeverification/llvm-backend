@@ -10,7 +10,7 @@ static std::vector<block *> step_results;
 
 extern "C" {
 
-void addSearchResult(block *result) {
+void add_search_result(block *result) {
   step_results.push_back(result);
 }
 
@@ -24,7 +24,7 @@ static std::unordered_set<block *, hash_block, k_eq> results;
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
-blockEnumerator() {
+block_enumerator() {
   // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
@@ -55,7 +55,7 @@ std::unordered_set<block *, hash_block, k_eq> take_search_steps(
     bool execute_to_branch, int64_t depth, int64_t bound, block *subject) {
   static int registered = -1;
   if (registered == -1) {
-    registerGCRootsEnumerator(blockEnumerator);
+    register_gc_roots_enumerator(block_enumerator);
   }
 
   states.clear();

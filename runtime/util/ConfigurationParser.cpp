@@ -20,14 +20,14 @@ static thread_local Cache cache;
 
 extern "C" {
 
-uint32_t getTagForSymbolNameInternal(char const *);
+uint32_t get_tag_for_symbol_name_internal(char const *);
 
 void init_float(floating *result, char const *c_str) {
   std::string contents = std::string(c_str);
   init_float2(result, contents);
 }
 
-uint32_t getTagForSymbolName(char const *name) {
+uint32_t get_tag_for_symbol_name(char const *name) {
   std::string s = name;
   // https://stackoverflow.com/a/101980/6209703
   auto lb = cache.lower_bound(s);
@@ -36,7 +36,7 @@ uint32_t getTagForSymbolName(char const *name) {
     return lb->second;
   }
 
-  uint32_t const tag = getTagForSymbolNameInternal(s.c_str());
+  uint32_t const tag = get_tag_for_symbol_name_internal(s.c_str());
 
   if (tag == ERROR_TAG) {
     auto error_message = fmt::format(
@@ -52,22 +52,22 @@ uint32_t getTagForSymbolName(char const *name) {
 }
 }
 
-static uint32_t getTagForSymbol(kore_symbol const &symbol) {
+static uint32_t get_tag_for_symbol(kore_symbol const &symbol) {
   auto name = ast_to_string(symbol);
-  return getTagForSymbolName(name.c_str());
+  return get_tag_for_symbol_name(name.c_str());
 }
 
-void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
-  if (isSymbolAFunction(tag)) {
-    return evaluateFunctionSymbol(tag, arguments.data());
+void *construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
+  if (is_symbol_a_function(tag)) {
+    return evaluate_function_symbol(tag, arguments.data());
   }
 
-  struct blockheader header_val = getBlockHeaderForSymbol(tag);
+  struct blockheader header_val = get_block_header_for_symbol(tag);
   size_t size = size_hdr(header_val.hdr);
 
   if (tag >= FIRST_INJ_TAG && tag <= LAST_INJ_TAG) {
     uint16_t layout_code = layout_hdr(header_val.hdr);
-    layout *data = getLayoutData(layout_code);
+    layout *data = get_layout_data(layout_code);
     if (data->args[0].cat == SYMBOL_LAYOUT) {
       auto *child = (block *)arguments[0];
       if (!is_leaf_block(child) && get_layout(child) != 0) {
@@ -79,11 +79,11 @@ void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
     }
   }
 
-  auto *new_block = (block *)koreAlloc(size);
+  auto *new_block = (block *)kore_alloc(size);
   new_block->h = header_val;
 
-  storeSymbolChildren(new_block, arguments.data());
-  if (isSymbolABinder(tag)) {
+  store_symbol_children(new_block, arguments.data());
+  if (is_symbol_a_binder(tag)) {
     new_block = debruijnize(new_block);
   }
 
@@ -96,7 +96,7 @@ struct construction {
 };
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
+extern "C" void *construct_initial_configuration(kore_pattern const *initial) {
   std::vector<std::variant<kore_pattern const *, construction>> work_list{
       initial};
   std::vector<void *> output;
@@ -120,15 +120,15 @@ extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
         auto *const str_pattern = dynamic_cast<kore_string_pattern *>(
             constructor->get_arguments()[0].get());
         std::string contents = str_pattern->get_contents();
-        output.push_back(getToken(
+        output.push_back(get_token(
             sort->get_name().c_str(), contents.size(), contents.c_str()));
         continue;
       }
 
-      uint32_t tag = getTagForSymbol(*symbol);
+      uint32_t tag = get_tag_for_symbol(*symbol);
 
-      if (isSymbolAFunction(tag) && constructor->get_arguments().empty()) {
-        output.push_back(evaluateFunctionSymbol(tag, nullptr));
+      if (is_symbol_a_function(tag) && constructor->get_arguments().empty()) {
+        output.push_back(evaluate_function_symbol(tag, nullptr));
         continue;
       }
       if (constructor->get_arguments().empty()) {
@@ -151,7 +151,7 @@ extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
         output.pop_back();
       }
 
-      output.push_back(constructCompositePattern(tag, arguments));
+      output.push_back(construct_composite_pattern(tag, arguments));
     }
   }
 
@@ -161,7 +161,7 @@ extern "C" void *constructInitialConfiguration(kore_pattern const *initial) {
 // NOLINTBEGIN(*-cognitive-complexity)
 template <typename It>
 static void *
-deserializeInitialConfiguration(It ptr, It end, binary_version version) {
+deserialize_initial_configuration(It ptr, It end, binary_version version) {
   using namespace kllvm::detail;
   auto begin = ptr;
 
@@ -190,17 +190,17 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
         auto const &token = token_stack.back();
 
         output.push_back(
-            getToken(sort->get_name().c_str(), token.size(), token.c_str()));
+            get_token(sort->get_name().c_str(), token.size(), token.c_str()));
 
         token_stack.pop_back();
         break;
       }
 
-      uint32_t tag = getTagForSymbol(*symbol);
+      uint32_t tag = get_tag_for_symbol(*symbol);
       symbol = nullptr;
 
-      if (isSymbolAFunction(tag) && arity == 0) {
-        output.push_back(evaluateFunctionSymbol(tag, nullptr));
+      if (is_symbol_a_function(tag) && arity == 0) {
+        output.push_back(evaluate_function_symbol(tag, nullptr));
         break;
       }
       if (arity == 0) {
@@ -217,7 +217,7 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
       }
       std::reverse(arguments.begin(), arguments.end());
 
-      output.push_back(constructCompositePattern(tag, arguments));
+      output.push_back(construct_composite_pattern(tag, arguments));
       break;
     }
 
@@ -257,21 +257,21 @@ deserializeInitialConfiguration(It ptr, It end, binary_version version) {
 }
 // NOLINTEND(*-cognitive-complexity)
 
-block *parseConfiguration(char const *filename) {
+block *parse_configuration(char const *filename) {
   if (has_binary_kore_header(filename)) {
     auto data = file_contents(filename);
-    return deserializeConfiguration(data.data(), data.size());
+    return deserialize_configuration(data.data(), data.size());
   }
   auto initial_configuration = parser::kore_parser(filename).pattern();
   // InitialConfiguration->print(std::cout);
 
   // Allocate the llvm KORE datastructures for the configuration
-  auto *b = (block *)constructInitialConfiguration(initial_configuration.get());
-  deallocateSPtrKorePattern(std::move(initial_configuration));
+  auto *b = (block *)construct_initial_configuration(initial_configuration.get());
+  deallocate_s_ptr_kore_pattern(std::move(initial_configuration));
   return b;
 }
 
-block *deserializeConfiguration(char *data, size_t size) {
+block *deserialize_configuration(char *data, size_t size) {
   auto *ptr = data;
   auto *end = data + size;
 
@@ -287,5 +287,5 @@ block *deserializeConfiguration(char *data, size_t size) {
   }
 
   return static_cast<block *>(
-      deserializeInitialConfiguration(ptr, end, version));
+      deserialize_initial_configuration(ptr, end, version));
 }

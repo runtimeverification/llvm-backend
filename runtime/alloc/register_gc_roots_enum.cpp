@@ -5,6 +5,6 @@
 
 std::vector<BlockEnumerator> block_enumerators;
 
-void registerGCRootsEnumerator(BlockEnumerator f) {
+void register_gc_roots_enumerator(BlockEnumerator f) {
   block_enumerators.push_back(f);
 }

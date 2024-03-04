@@ -7,9 +7,9 @@
 void migrate_collection_node(void **node_ptr) {
   string *curr_block = STRUCT_BASE(string, data, *node_ptr);
   if (youngspace_collection_id()
-          != getArenaSemispaceIDOfObject((void *)curr_block)
+          != get_arena_semispace_id_of_object((void *)curr_block)
       && oldspace_collection_id()
-             != getArenaSemispaceIDOfObject((void *)curr_block)) {
+             != get_arena_semispace_id_of_object((void *)curr_block)) {
     return;
   }
   uint64_t const hdr = curr_block->h.hdr;
@@ -18,12 +18,12 @@ void migrate_collection_node(void **node_ptr) {
   if (!hasForwardingAddress) {
     string *new_block = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
-      new_block = (string *)koreAllocOld(len_in_bytes);
+      new_block = (string *)kore_alloc_old(len_in_bytes);
     } else {
-      new_block = (string *)koreAlloc(len_in_bytes);
+      new_block = (string *)kore_alloc(len_in_bytes);
     }
 #ifdef GC_DBG
-    numBytesLiveAtCollection[oldAge] += lenInBytes;
+    numBytesLiveAtCollection[oldAge] += len_in_bytes;
 #endif
     memcpy(new_block, curr_block, len_in_bytes);
     MIGRATE_HEADER(new_block);

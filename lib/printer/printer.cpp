@@ -36,7 +36,7 @@ std::string trim(std::string const &s) {
   return rtrim(ltrim(s));
 }
 
-std::map<std::string, std::string> getFormats() {
+std::map<std::string, std::string> get_formats() {
   static std::map<std::string, std::string> formats;
   static bool once = true;
 
@@ -67,7 +67,7 @@ std::map<std::string, std::string> getFormats() {
   return formats;
 }
 
-std::map<std::string, std::string> getTerminals() {
+std::map<std::string, std::string> get_terminals() {
   static std::map<std::string, std::string> terminals;
   static bool once = true;
 
@@ -98,7 +98,7 @@ std::map<std::string, std::string> getTerminals() {
   return terminals;
 }
 
-std::set<std::string> getAssocs() {
+std::set<std::string> get_assocs() {
   static std::set<std::string> assocs;
   static bool once = true;
 
@@ -112,7 +112,7 @@ std::set<std::string> getAssocs() {
   return assocs;
 }
 
-std::set<std::string> getComms() {
+std::set<std::string> get_comms() {
   static std::set<std::string> comms;
   static bool once = true;
 
@@ -125,7 +125,7 @@ std::set<std::string> getComms() {
   return comms;
 }
 
-std::map<std::string, std::set<std::string>> getLeftAssocs() {
+std::map<std::string, std::set<std::string>> get_left_assocs() {
   static std::map<std::string, std::set<std::string>> left_assocs;
   static bool once = true;
 
@@ -141,7 +141,7 @@ std::map<std::string, std::set<std::string>> getLeftAssocs() {
   return left_assocs;
 }
 
-std::map<std::string, std::set<std::string>> getRightAssocs() {
+std::map<std::string, std::set<std::string>> get_right_assocs() {
   static std::map<std::string, std::set<std::string>> right_assocs;
   static bool once = true;
 
@@ -153,7 +153,7 @@ std::map<std::string, std::set<std::string>> getRightAssocs() {
   return right_assocs;
 }
 
-std::map<std::string, std::set<std::string>> getPriorities() {
+std::map<std::string, std::set<std::string>> get_priorities() {
   static std::map<std::string, std::set<std::string>> priorities;
   static bool once = true;
 
@@ -208,7 +208,7 @@ std::map<std::string, std::set<std::string>> getPriorities() {
   return priorities;
 }
 
-ptr<kore_definition> const &getDefinition(std::string const &kompiled_dir) {
+ptr<kore_definition> const &get_definition(std::string const &kompiled_dir) {
   static std::map<std::string, ptr<kore_definition>> cache;
 
   if (cache.find(kompiled_dir) == cache.end()) {
@@ -220,7 +220,7 @@ ptr<kore_definition> const &getDefinition(std::string const &kompiled_dir) {
 }
 
 std::vector<ptr<kore_declaration>> const &
-getAxioms(std::string const &kompiled_dir) {
+get_axioms(std::string const &kompiled_dir) {
   static std::map<std::string, std::vector<ptr<kore_declaration>>> cache;
 
   if (cache.find(kompiled_dir) == cache.end()) {
@@ -237,16 +237,16 @@ struct preprocessed_print_data {
 };
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-preprocessed_print_data getPrintData(
+preprocessed_print_data get_print_data(
     ptr<kore_definition> const &def,
     std::vector<ptr<kore_declaration>> const &axioms, bool has_color) {
-  auto formats = getFormats();
-  auto terminals = getTerminals();
-  auto assocs = getAssocs();
-  auto comms = getComms();
-  auto left_assoc = getLeftAssocs();
-  auto right_assoc = getRightAssocs();
-  auto priorities = getPriorities();
+  auto formats = get_formats();
+  auto terminals = get_terminals();
+  auto assocs = get_assocs();
+  auto comms = get_comms();
+  auto left_assoc = get_left_assocs();
+  auto right_assoc = get_right_assocs();
+  auto priorities = get_priorities();
 
   BracketMap brackets;
 
@@ -295,9 +295,9 @@ preprocessed_print_data getPrintData(
             entry.second->get_symbol());
       }
 
-      readMultimap(name, entry.second, left_assoc, attribute_set::key::Left);
-      readMultimap(name, entry.second, right_assoc, attribute_set::key::Right);
-      readMultimap(
+      read_multimap(name, entry.second, left_assoc, attribute_set::key::Left);
+      read_multimap(name, entry.second, right_assoc, attribute_set::key::Right);
+      read_multimap(
           name, entry.second, priorities, attribute_set::key::Priorities);
     }
   }
@@ -323,18 +323,18 @@ namespace kllvm {
 
 using namespace parser;
 
-std::ostream &printKORE(
+std::ostream &print_kore(
     std::ostream &os, std::string const &definition_path,
     std::string const &pattern_path, bool has_color, bool filter_subst,
     bool pretty) {
   static std::map<std::string, preprocessed_print_data> cache;
 
-  auto const &def = getDefinition(definition_path);
-  auto const &axioms = getAxioms(definition_path);
+  auto const &def = get_definition(definition_path);
+  auto const &axioms = get_axioms(definition_path);
 
   auto get_print_data_or_cached = [&] {
     if (cache.find(definition_path) == cache.end()) {
-      cache[definition_path] = getPrintData(def, axioms, has_color);
+      cache[definition_path] = get_print_data(def, axioms, has_color);
     }
     return cache.at(definition_path);
   };
@@ -372,7 +372,7 @@ std::ostream &printKORE(
     filtered = sorted;
   }
 
-  sptr<kore_pattern> with_brackets = addBrackets(filtered, data);
+  sptr<kore_pattern> with_brackets = add_brackets(filtered, data);
   if (pretty) {
     with_brackets->pretty_print(os, data);
   } else {

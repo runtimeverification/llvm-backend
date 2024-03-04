@@ -35,14 +35,14 @@ int32_t get_exit_code(block *);
   }
 
   if (statistics) {
-    printStatistics(output_file, steps);
+    print_statistics(output_file, steps);
   }
 
   if (!proof_output) {
     if (binary_output) {
-      serializeConfigurationToFile(output_file, subject, true, true);
+      serialize_configuration_to_file(output_file, subject, true, true);
     } else {
-      printConfiguration(output_file, subject);
+      print_configuration(output_file, subject);
     }
   }
 

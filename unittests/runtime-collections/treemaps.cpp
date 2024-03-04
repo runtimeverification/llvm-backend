@@ -6,7 +6,7 @@
 #include <ctime>
 #include <iostream>
 
-void hugeTest(std::vector<int> &v) {
+void huge_test(std::vector<int> &v) {
   std::vector<rb_tree::RBTree<int, int>> trees;
   trees.push_back(rb_tree::RBTree<int, int>());
   for (int i : v) {
@@ -47,7 +47,7 @@ void hugeTest(std::vector<int> &v) {
   trees[0].assert_BST_invariant();
 }
 
-void makeTestVectors(
+void make_test_vectors(
     int n, std::vector<int> &asc, std::vector<int> &desc,
     std::vector<int> &rnd) {
   asc.clear();
@@ -65,10 +65,10 @@ BOOST_AUTO_TEST_SUITE(TreeMapTest)
 
 BOOST_AUTO_TEST_CASE(hugetest) {
   std::vector<int> a, d, r;
-  makeTestVectors(500, a, d, r);
-  hugeTest(a);
-  hugeTest(d);
-  hugeTest(r);
+  make_test_vectors(500, a, d, r);
+  huge_test(a);
+  huge_test(d);
+  huge_test(r);
 }
 
 BOOST_AUTO_TEST_CASE(treemap_test_element) {

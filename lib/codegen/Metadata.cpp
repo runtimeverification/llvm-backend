@@ -14,7 +14,7 @@ std::string kompiled_dir = "kompiled_directory";
 std::string strict_bytes = "enable_mutable_bytes";
 std::string safe_partial = "safe_partial";
 
-void addBooleanFlag(
+void add_boolean_flag(
     llvm::Module &mod, std::string const &name, bool enabled, bool debug) {
   auto &ctx = mod.getContext();
 
@@ -29,13 +29,13 @@ void addBooleanFlag(
   }
 
   if (debug) {
-    initDebugGlobal(strict_bytes, getBoolDebugType(), global_var);
+    init_debug_global(strict_bytes, get_bool_debug_type(), global_var);
   }
 }
 
 } // namespace
 
-void addKompiledDirSymbol(
+void add_kompiled_dir_symbol(
     llvm::Module &mod, std::string const &dir, bool debug) {
   auto &ctx = mod.getContext();
 
@@ -49,16 +49,16 @@ void addKompiledDirSymbol(
   }
 
   if (debug) {
-    initDebugGlobal(kompiled_dir, getCharDebugType(), global_var);
+    init_debug_global(kompiled_dir, get_char_debug_type(), global_var);
   }
 }
 
-void addMutableBytesFlag(llvm::Module &mod, bool enabled, bool debug) {
-  addBooleanFlag(mod, strict_bytes, enabled, debug);
+void add_mutable_bytes_flag(llvm::Module &mod, bool enabled, bool debug) {
+  add_boolean_flag(mod, strict_bytes, enabled, debug);
 }
 
-void addSafePartialFlag(llvm::Module &mod, bool enabled, bool debug) {
-  addBooleanFlag(mod, safe_partial, enabled, debug);
+void add_safe_partial_flag(llvm::Module &mod, bool enabled, bool debug) {
+  add_boolean_flag(mod, safe_partial, enabled, debug);
 }
 
 } // namespace kllvm

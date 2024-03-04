@@ -23,7 +23,7 @@ extern "C" {
   static uint64_t tag_type_##NAME() {                                          \
     static uint64_t tag = -1;                                                  \
     if (tag == -1) {                                                           \
-      tag = (uint64_t)leaf_block(getTagForSymbolName(TYPETAG(NAME)));          \
+      tag = (uint64_t)leaf_block(get_tag_for_symbol_name(TYPETAG(NAME)));      \
     }                                                                          \
     return tag;                                                                \
   }
@@ -61,7 +61,7 @@ TAG_TYPE(complexdouble)
 TAG_TYPE(complexlongdouble)
 #endif
 
-char *getTerminatedString(string *str);
+char *get_terminated_string(string *str);
 
 size_t hook_LIST_size_long(list *l);
 block *hook_LIST_get_long(list *l, ssize_t idx);
@@ -81,7 +81,7 @@ static void *so_lib_handle() {
 }
 
 // NOLINTBEGIN(*-else-after-return,*-cognitive-complexity)
-static ffi_type *getTypeFromBlock(block *elem) {
+static ffi_type *get_type_from_block(block *elem) {
   if (is_leaf_block(elem)) {
     auto symbol = (uint64_t)elem;
 
@@ -141,7 +141,8 @@ static ffi_type *getTypeFromBlock(block *elem) {
     }
 #endif
   } else if (
-      tag_hdr(elem->h.hdr) == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
+      tag_hdr(elem->h.hdr)
+      == (uint64_t)get_tag_for_symbol_name(TYPETAG(struct))) {
     list *elements = (list *)*elem->children;
     size_t num_fields = hook_LIST_size_long(elements);
     block *struct_field = nullptr;
@@ -157,12 +158,13 @@ static ffi_type *getTypeFromBlock(block *elem) {
       struct_field = hook_LIST_get_long(elements, j);
 
       if (tag_hdr(struct_field->h.hdr)
-          != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
+          != (uint64_t)get_tag_for_symbol_name(
+              "inj{SortFFIType{}, SortKItem{}}")) {
         KLLVM_HOOK_INVALID_ARGUMENT("Struct list contains invalid FFI type");
       }
 
       struct_type->elements[j]
-          = getTypeFromBlock((block *)*(struct_field->children));
+          = get_type_from_block((block *)*(struct_field->children));
     }
 
     struct_type->elements[num_fields] = nullptr;
@@ -178,7 +180,7 @@ static ffi_type *getTypeFromBlock(block *elem) {
 // NOLINTEND(*-else-after-return,*-cognitive-complexity)
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-string *ffiCall(
+string *k_ffi_call(
     bool is_variadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
     block *ret) {
   ffi_cif cif;
@@ -187,7 +189,7 @@ string *ffiCall(
   void (*address)() = nullptr;
 
   if (!mpz_fits_ulong_p(addr)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", intToString(addr));
+    KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", int_to_string(addr));
   }
 
   address = (void (*)())mpz_get_ui(addr);
@@ -212,34 +214,36 @@ string *ffiCall(
   for (int i = 0; i < nfixtypes; i++) {
     elem = hook_LIST_get_long(fixtypes, i);
     if (tag_hdr(elem->h.hdr)
-        != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
+        != (uint64_t)get_tag_for_symbol_name(
+            "inj{SortFFIType{}, SortKItem{}}")) {
       KLLVM_HOOK_INVALID_ARGUMENT("Fix types list contains invalid FFI type");
     }
 
-    argtypes[i] = getTypeFromBlock((block *)*elem->children);
+    argtypes[i] = get_type_from_block((block *)*elem->children);
   }
 
   for (int i = 0; i < nvartypes; i++) {
     elem = hook_LIST_get_long(vartypes, i);
     if (tag_hdr(elem->h.hdr)
-        != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
+        != (uint64_t)get_tag_for_symbol_name(
+            "inj{SortFFIType{}, SortKItem{}}")) {
       KLLVM_HOOK_INVALID_ARGUMENT("Var types list contains invalid FFI type");
     }
 
-    argtypes[i + nfixtypes] = getTypeFromBlock((block *)*elem->children);
+    argtypes[i + nfixtypes] = get_type_from_block((block *)*elem->children);
   }
 
   void **avalues = (void **)malloc(sizeof(void *) * nargs);
   for (int i = 0; i < nargs; i++) {
     elem = hook_LIST_get_long(args, i);
     if (tag_hdr(elem->h.hdr)
-        != (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}")) {
+        != (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}")) {
       KLLVM_HOOK_INVALID_ARGUMENT("Args list contains non-bytes type");
     }
     avalues[i] = ((string *)*elem->children)->data;
   }
 
-  rtype = getTypeFromBlock(ret);
+  rtype = get_type_from_block(ret);
 
   ffi_status status = FFI_OK;
   if (is_variadic) {
@@ -266,7 +270,7 @@ string *ffiCall(
   }
 
   auto *rvalue
-      = static_cast<string *>(koreAllocToken(sizeof(string) + rtype->size));
+      = static_cast<string *>(kore_alloc_token(sizeof(string) + rtype->size));
   ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
   free(argtypes);
@@ -285,16 +289,16 @@ string *ffiCall(
 
 SortBytes
 hook_FFI_call(SortInt addr, SortList args, SortList types, SortFFIType ret) {
-  return ffiCall(false, addr, args, types, nullptr, ret);
+  return k_ffi_call(false, addr, args, types, nullptr, ret);
 }
 
 SortBytes hook_FFI_call_variadic(
     SortInt addr, SortList args, SortList fixtypes, SortList vartypes,
     SortFFIType ret) {
-  return ffiCall(true, addr, args, fixtypes, vartypes, ret);
+  return k_ffi_call(true, addr, args, fixtypes, vartypes, ret);
 }
 
-static std::map<std::string, void *> getPrivateSymbols() {
+static std::map<std::string, void *> get_private_symbols() {
   std::map<std::string, void *> m;
   m["atexit"] = (void *)atexit;
 #ifndef __APPLE__
@@ -317,11 +321,11 @@ static std::map<std::string, void *> getPrivateSymbols() {
 }
 
 SortInt hook_FFI_address(SortString fn) {
-  char *func = getTerminatedString(fn);
+  char *func = get_terminated_string(fn);
 
   std::string func_str = func;
   static std::map<std::string, void *> const private_symbols
-      = getPrivateSymbols();
+      = get_private_symbols();
 
   void *address = nullptr;
   if (auto it = private_symbols.find(func_str); it != private_symbols.end()) {
@@ -338,7 +342,7 @@ SortInt hook_FFI_address(SortString fn) {
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
-firstBlockEnumerator() {
+first_block_enumerator() {
   // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
@@ -354,7 +358,7 @@ firstBlockEnumerator() {
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
-secondBlockEnumerator() {
+second_block_enumerator() {
   // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
@@ -372,17 +376,17 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
   static int registered = -1;
 
   if (registered == -1) {
-    registerGCRootsEnumerator(firstBlockEnumerator);
-    registerGCRootsEnumerator(secondBlockEnumerator);
+    register_gc_roots_enumerator(first_block_enumerator);
+    register_gc_roots_enumerator(second_block_enumerator);
     registered = 0;
   }
 
   if (!mpz_fits_ulong_p(size)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Size is too large: {}", intToString(size));
+    KLLVM_HOOK_INVALID_ARGUMENT("Size is too large: {}", int_to_string(size));
   }
   if (!mpz_fits_ulong_p(align)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Alignment is too large: {}", intToString(align));
+        "Alignment is too large: {}", int_to_string(align));
   }
 
   size_t a = mpz_get_ui(align);

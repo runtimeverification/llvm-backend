@@ -28,16 +28,16 @@ bool during_gc() {
   return false;
 }
 
-void *koreAllocToken(size_t requested) {
+void *kore_alloc_token(size_t requested) {
   return malloc(requested);
 }
 size_t const BLOCK_SIZE = -1;
 
-char const **getArgumentSortsForTag(uint32_t tag) {
+char const **get_argument_sorts_for_tag(uint32_t tag) {
   return nullptr;
 }
 
-void printConfigurationInternal(
+void print_configuration_internal(
     writer *file, block *subject, char const *sort, bool, void *) { }
 
 SortStringBuffer

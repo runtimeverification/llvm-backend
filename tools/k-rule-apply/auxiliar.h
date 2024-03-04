@@ -14,16 +14,16 @@
 using namespace kllvm;
 
 extern "C" {
-void *constructInitialConfiguration(kore_pattern const *);
-void resetMatchReason();
+void *construct_initial_configuration(kore_pattern const *);
+void reset_match_reason();
 match_log *getmatch_log();
-size_t getmatch_logSize();
-void printMatchResult(std::ostream &, match_log *, size_t, std::string const &);
-void initStaticObjects();
+size_t getmatch_log_size();
+void print_match_result(std::ostream &, match_log *, size_t, std::string const &);
+void init_static_objects();
 }
 
-void *constructInitialConfiguration(kore_pattern const *pattern, void *handle) {
-  void *funcPtr = dlsym(handle, "constructInitialConfiguration");
+void *construct_initial_configuration(kore_pattern const *pattern, void *handle) {
+  void *funcPtr = dlsym(handle, "construct_initial_configuration");
   if (funcPtr == NULL) {
     return NULL;
   }
@@ -31,8 +31,8 @@ void *constructInitialConfiguration(kore_pattern const *pattern, void *handle) {
   return f(pattern);
 }
 
-void *resetMatchReason(void *handle) {
-  void *funcPtr = dlsym(handle, "resetMatchReason");
+void *reset_match_reason(void *handle) {
+  void *funcPtr = dlsym(handle, "reset_match_reason");
   if (funcPtr == NULL) {
     return NULL;
   }
@@ -49,8 +49,8 @@ match_log *getmatch_log(void *handle) {
   return f();
 }
 
-size_t getmatch_logSize(void *handle) {
-  void *funcPtr = dlsym(handle, "getmatch_logSize");
+size_t getmatch_log_size(void *handle) {
+  void *funcPtr = dlsym(handle, "getmatch_log_size");
   if (funcPtr == NULL) {
     return -1;
   }
@@ -58,10 +58,10 @@ size_t getmatch_logSize(void *handle) {
   return f();
 }
 
-void *printMatchResult(
+void *print_match_result(
     std::ostream &os, match_log *log, size_t logSize, std::string const &dir,
     void *handle) {
-  void *funcPtr = dlsym(handle, "printMatchResult");
+  void *funcPtr = dlsym(handle, "print_match_result");
   if (funcPtr == NULL) {
     return NULL;
   }
@@ -71,8 +71,8 @@ void *printMatchResult(
   return f(os, log, logSize, dir);
 }
 
-void *initStaticObjects(void *handle) {
-  void *funcPtr = dlsym(handle, "initStaticObjects");
+void *init_static_objects(void *handle) {
+  void *funcPtr = dlsym(handle, "init_static_objects");
   if (funcPtr == NULL) {
     return NULL;
   }

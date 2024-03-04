@@ -125,9 +125,9 @@ void initialize_llvm() {
 
 void emit_metadata(llvm::Module &mod) {
   auto kompiled_dir = fs::absolute(definition_path.getValue()).parent_path();
-  addKompiledDirSymbol(mod, kompiled_dir, debug);
-  addMutableBytesFlag(mod, mutable_bytes, debug);
-  addSafePartialFlag(mod, safe_partial, debug);
+  add_kompiled_dir_symbol(mod, kompiled_dir, debug);
+  add_mutable_bytes_flag(mod, mutable_bytes, debug);
+  add_safe_partial_flag(mod, safe_partial, debug);
 }
 
 } // namespace
@@ -146,53 +146,53 @@ int main(int argc, char **argv) {
   definition->preprocess();
 
   llvm::LLVMContext context;
-  std::unique_ptr<llvm::Module> mod = newModule("definition", context);
+  std::unique_ptr<llvm::Module> mod = new_module("definition", context);
 
   emit_metadata(*mod);
 
   if (debug) {
-    initDebugInfo(mod.get(), definition_path);
+    init_debug_info(mod.get(), definition_path);
   }
 
   for (auto *axiom : definition->get_axioms()) {
-    makeSideConditionFunction(axiom, definition.get(), mod.get());
+    make_side_condition_function(axiom, definition.get(), mod.get());
     if (!axiom->is_top_axiom()) {
-      makeApplyRuleFunction(axiom, definition.get(), mod.get());
+      make_apply_rule_function(axiom, definition.get(), mod.get());
     } else {
       auto dt_filename
           = dt_dir() / fmt::format("dt_{}.yaml", axiom->get_ordinal());
       if (fs::exists(dt_filename) && !proof_hint_instrumentation) {
-        auto residuals = parseYamlSpecialdecisionTree(
+        auto residuals = parse_yaml_specialdecision_tree(
             mod.get(), dt_filename, definition->get_all_symbols(),
             definition->get_hooked_sorts());
-        makeApplyRuleFunction(
+        make_apply_rule_function(
             axiom, definition.get(), mod.get(), residuals.residuals);
-        makeStepFunction(axiom, definition.get(), mod.get(), residuals);
+        make_step_function(axiom, definition.get(), mod.get(), residuals);
       } else {
-        makeApplyRuleFunction(axiom, definition.get(), mod.get(), true);
+        make_apply_rule_function(axiom, definition.get(), mod.get(), true);
       }
 
       auto match_filename
           = dt_dir() / fmt::format("match_{}.yaml", axiom->get_ordinal());
       if (fs::exists(match_filename)) {
-        auto *dt = parseYamldecisionTree(
+        auto *dt = parse_yamldecision_tree(
             mod.get(), match_filename, definition->get_all_symbols(),
             definition->get_hooked_sorts());
-        makeMatchReasonFunction(definition.get(), mod.get(), axiom, dt);
+        make_match_reason_function(definition.get(), mod.get(), axiom, dt);
       }
     }
   }
 
-  emitConfigParserFunctions(definition.get(), mod.get());
+  emit_config_parser_functions(definition.get(), mod.get());
 
-  auto *dt = parseYamldecisionTree(
+  auto *dt = parse_yamldecision_tree(
       mod.get(), decision_tree, definition->get_all_symbols(),
       definition->get_hooked_sorts());
-  makeStepFunction(definition.get(), mod.get(), dt, false);
-  auto *dt_search = parseYamldecisionTree(
+  make_step_function(definition.get(), mod.get(), dt, false);
+  auto *dt_search = parse_yamldecision_tree(
       mod.get(), dt_dir() / "dt-search.yaml", definition->get_all_symbols(),
       definition->get_hooked_sorts());
-  makeStepFunction(definition.get(), mod.get(), dt_search, true);
+  make_step_function(definition.get(), mod.get(), dt_search, true);
 
   auto index = read_index_file();
   for (auto const &entry : definition->get_symbols()) {
@@ -201,24 +201,24 @@ int main(int argc, char **argv) {
     if (decl->attributes().contains(attribute_set::key::Function)
         && !decl->is_hooked()) {
       auto filename = get_indexed_filename(index, decl);
-      auto *func_dt = parseYamldecisionTree(
+      auto *func_dt = parse_yamldecision_tree(
           mod.get(), filename, definition->get_all_symbols(),
           definition->get_hooked_sorts());
-      makeEvalFunction(decl->get_symbol(), definition.get(), mod.get(), func_dt);
+      make_eval_function(decl->get_symbol(), definition.get(), mod.get(), func_dt);
     } else if (decl->is_anywhere()) {
       auto filename = get_indexed_filename(index, decl);
-      auto *func_dt = parseYamldecisionTree(
+      auto *func_dt = parse_yamldecision_tree(
           mod.get(), filename, definition->get_all_symbols(),
           definition->get_hooked_sorts());
 
-      makeAnywhereFunction(
+      make_anywhere_function(
           definition->get_all_symbols().at(ast_to_string(*decl->get_symbol())),
           definition.get(), mod.get(), func_dt);
     }
   }
 
   if (debug) {
-    finalizeDebugInfo();
+    finalize_debug_info();
   }
 
   if (!no_optimize) {

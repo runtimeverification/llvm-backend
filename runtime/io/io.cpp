@@ -26,10 +26,10 @@ extern "C" {
 
 extern char kompiled_directory;
 
-char *getTerminatedString(string *str);
+char *get_terminated_string(string *str);
 
 static blockheader kseq_header
-    = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
+    = {get_block_header_for_symbol((uint64_t)get_tag_for_symbol_name("kseq{}"))};
 
 static std::map<std::string, std::string> log_files;
 
@@ -109,9 +109,9 @@ static block *block_errno() {
   case EOVERFLOW: err_str = GETTAG(EOVERFLOW); break;
   default:
     auto *ret_block
-        = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
-    ret_block->h = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("Lbl'Hash'unknownIOError{}"));
+        = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(mpz_ptr)));
+    ret_block->h = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("Lbl'Hash'unknownIOError{}"));
     mpz_t err;
     mpz_init_set_si(err, errno);
     mpz_ptr p = move_int(err);
@@ -119,15 +119,15 @@ static block *block_errno() {
     return ret_block;
   }
 
-  return leaf_block(getTagForSymbolName(err_str));
+  return leaf_block(get_tag_for_symbol_name(err_str));
 }
 
 static blockheader header_int() {
   static blockheader header = {(uint64_t)-1};
 
   if (header.hdr == -1) {
-    header = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("inj{SortInt{}, SortIOInt{}}"));
+    header = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("inj{SortInt{}, SortIOInt{}}"));
   }
 
   return header;
@@ -137,8 +137,8 @@ blockheader header_err() {
   static blockheader header = {(uint64_t)-1};
 
   if (header.hdr == -1) {
-    header = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("inj{SortIOError{}, SortKItem{}}"));
+    header = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("inj{SortIOError{}, SortKItem{}}"));
   }
 
   return header;
@@ -148,18 +148,18 @@ static blockheader header_string() {
   static blockheader header = {(uint64_t)-1};
 
   if (header.hdr == -1) {
-    header = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("inj{SortString{}, SortIOString{}}"));
+    header = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("inj{SortString{}, SortIOString{}}"));
   }
 
   return header;
 }
 
-static inline block *getKSeqErrorBlock() {
+static inline block *get_k_seq_error_block() {
   block *err = block_errno();
   auto *ret_block
-      = static_cast<block *>(koreAlloc(sizeof(block) + 2 * sizeof(block *)));
-  auto *inj = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + 2 * sizeof(block *)));
+  auto *inj = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
   ret_block->h = kseq_header;
   inj->h = header_err();
   memcpy(inj->children, &err, sizeof(block *));
@@ -170,10 +170,10 @@ static inline block *getKSeqErrorBlock() {
   return ret_block;
 }
 
-static inline block *getInjErrorBlock() {
+static inline block *get_inj_error_block() {
   block *p = block_errno();
   auto *ret_block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
   ret_block->h = header_err();
   memcpy(ret_block->children, &p, sizeof(block *));
   return ret_block;
@@ -187,7 +187,7 @@ static inline block *getInjErrorBlock() {
 #define MODE_B 32
 #define MODE_P 64
 
-static int getFileModes(string *modes) {
+static int get_file_modes(string *modes) {
   int flags = 0;
   int length = len(modes);
 
@@ -218,7 +218,7 @@ static int getFileModes(string *modes) {
 SortIOInt hook_IO_open(SortString filename, SortString control) {
   int flags = 0;
   int access = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-  int modes = getFileModes(control);
+  int modes = get_file_modes(control);
   int fd = 0;
   mpz_t result;
 
@@ -246,7 +246,7 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
     if (modes & MODE_B) {
     }
 
-    char *f = getTerminatedString(filename);
+    char *f = get_terminated_string(filename);
     fd = open(f, flags, access); // NOLINT(*-vararg)
   } else {
     errno = EINVAL;
@@ -254,11 +254,11 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
   }
 
   if (-1 == fd) {
-    return getInjErrorBlock();
+    return get_inj_error_block();
   }
 
   auto *ret_block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(mpz_ptr)));
   ret_block->h = header_int();
   mpz_init_set_si(result, fd);
   mpz_ptr p = move_int(result);
@@ -268,18 +268,18 @@ SortIOInt hook_IO_open(SortString filename, SortString control) {
 
 SortIOInt hook_IO_tell(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", int_to_string(i));
   }
 
   int fd = mpz_get_si(i);
   off_t loc = lseek(fd, 0, SEEK_CUR);
 
   if (-1 == loc) {
-    return getInjErrorBlock();
+    return get_inj_error_block();
   }
 
   auto *ret_block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(mpz_ptr)));
   ret_block->h = header_int();
   mpz_t result;
   mpz_init_set_si(result, (long)loc);
@@ -290,7 +290,7 @@ SortIOInt hook_IO_tell(SortInt i) {
 
 SortIOInt hook_IO_getc(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", int_to_string(i));
   }
 
   int fd = mpz_get_si(i);
@@ -298,20 +298,20 @@ SortIOInt hook_IO_getc(SortInt i) {
   ssize_t ret = read(fd, &c, sizeof(char));
 
   if (ret == 0) {
-    block *p = leaf_block(getTagForSymbolName(GETTAG(EOF)));
+    block *p = leaf_block(get_tag_for_symbol_name(GETTAG(EOF)));
     auto *ret_block
-        = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
+        = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
     ret_block->h = header_err();
     memcpy(ret_block->children, &p, sizeof(block *));
     return ret_block;
   }
 
   if (ret == -1) {
-    return getInjErrorBlock();
+    return get_inj_error_block();
   }
 
   auto *ret_block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(mpz_ptr)));
   ret_block->h = header_int();
   mpz_t result;
   mpz_init_set_si(result, (int)c);
@@ -323,23 +323,23 @@ SortIOInt hook_IO_getc(SortInt i) {
 SortIOString hook_IO_read(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_ulong_p(len)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Arg too large: i={}, len={}", intToString(i), intToString(len));
+        "Arg too large: i={}, len={}", int_to_string(i), int_to_string(len));
   }
 
   int fd = mpz_get_si(i);
   size_t length = mpz_get_ui(len);
 
-  auto *result = static_cast<string *>(koreAllocToken(sizeof(string) + length));
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + length));
   int bytes = read(fd, &(result->data), length);
 
   if (-1 == bytes) {
-    return getInjErrorBlock();
+    return get_inj_error_block();
   }
 
-  result = static_cast<string *>(koreResizeLastAlloc(
+  result = static_cast<string *>(kore_resize_last_alloc(
       result, sizeof(string) + bytes, sizeof(string) + length));
   auto *ret_block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
   ret_block->h = header_string();
   init_with_len(result, bytes);
   memcpy(ret_block->children, &result, sizeof(string *));
@@ -348,14 +348,14 @@ SortIOString hook_IO_read(SortInt i, SortInt len) {
 
 SortK hook_IO_close(SortInt i) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", int_to_string(i));
   }
 
   int fd = mpz_get_si(i);
   int ret = close(fd);
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
@@ -364,7 +364,7 @@ SortK hook_IO_close(SortInt i) {
 SortK hook_IO_seek(SortInt i, SortInt loc) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Arg too large: i={}, loc={}", intToString(i), intToString(loc));
+        "Arg too large: i={}, loc={}", int_to_string(i), int_to_string(loc));
   }
 
   int fd = mpz_get_si(i);
@@ -372,7 +372,7 @@ SortK hook_IO_seek(SortInt i, SortInt loc) {
   int ret = lseek(fd, l, SEEK_SET);
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
@@ -381,7 +381,7 @@ SortK hook_IO_seek(SortInt i, SortInt loc) {
 SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(loc)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Arg too large: i={}, loc={}", intToString(i), intToString(loc));
+        "Arg too large: i={}, loc={}", int_to_string(i), int_to_string(loc));
   }
 
   int fd = mpz_get_si(i);
@@ -389,7 +389,7 @@ SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
   int ret = lseek(fd, l, SEEK_END);
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
@@ -398,7 +398,7 @@ SortK hook_IO_seekEnd(SortInt i, SortInt loc) {
 SortK hook_IO_putc(SortInt i, SortInt c) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_sint_p(c)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Arg too large: i={}, c={}", intToString(i), intToString(c));
+        "Arg too large: i={}, c={}", int_to_string(i), int_to_string(c));
   }
 
   int fd = mpz_get_si(i);
@@ -406,7 +406,7 @@ SortK hook_IO_putc(SortInt i, SortInt c) {
   int ret = write(fd, &ch, 1);
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
@@ -414,14 +414,14 @@ SortK hook_IO_putc(SortInt i, SortInt c) {
 
 SortK hook_IO_write(SortInt i, SortString str) {
   if (!mpz_fits_sint_p(i)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", intToString(i));
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large for int: {}", int_to_string(i));
   }
 
   int fd = mpz_get_si(i);
   int ret = write(fd, str->data, len(str));
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
@@ -430,7 +430,7 @@ SortK hook_IO_write(SortInt i, SortString str) {
 SortK hook_IO_lock(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Arg too large: i={}, len={}", intToString(i), intToString(len));
+        "Arg too large: i={}, len={}", int_to_string(i), int_to_string(len));
   }
 
   int fd = mpz_get_si(i);
@@ -444,7 +444,7 @@ SortK hook_IO_lock(SortInt i, SortInt len) {
   int ret = fcntl(fd, F_SETLKW, &lockp); // NOLINT(*-vararg)
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
@@ -453,7 +453,7 @@ SortK hook_IO_lock(SortInt i, SortInt len) {
 SortK hook_IO_unlock(SortInt i, SortInt len) {
   if (!mpz_fits_sint_p(i) || !mpz_fits_slong_p(len)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Arg too large: i={}, len={}", intToString(i), intToString(len));
+        "Arg too large: i={}, len={}", int_to_string(i), int_to_string(len));
   }
 
   int fd = mpz_get_si(i);
@@ -467,18 +467,18 @@ SortK hook_IO_unlock(SortInt i, SortInt len) {
   int ret = fcntl(fd, F_SETLKW, &lockp); // NOLINT(*-vararg)
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
 }
 
 SortK hook_IO_remove(SortString path) {
-  char *p = getTerminatedString(path);
+  char *p = get_terminated_string(path);
 
   int ret = unlink(p);
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
@@ -486,18 +486,18 @@ SortK hook_IO_remove(SortString path) {
 
 SortIOInt hook_IO_accept(SortInt sock) {
   if (!mpz_fits_sint_p(sock)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large: {}", intToString(sock));
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large: {}", int_to_string(sock));
   }
 
   int fd = mpz_get_si(sock);
   int clientsock = accept(fd, nullptr, nullptr);
 
   if (clientsock == -1) {
-    return getInjErrorBlock();
+    return get_inj_error_block();
   }
 
   auto *ret_block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(mpz_ptr)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(mpz_ptr)));
   ret_block->h = header_int();
 
   mpz_t result;
@@ -509,20 +509,20 @@ SortIOInt hook_IO_accept(SortInt sock) {
 
 SortK hook_IO_shutdownWrite(SortInt sock) {
   if (!mpz_fits_sint_p(sock)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large: {}", intToString(sock));
+    KLLVM_HOOK_INVALID_ARGUMENT("Arg too large: {}", int_to_string(sock));
   }
 
   int fd = mpz_get_si(sock);
   int ret = shutdown(fd, SHUT_WR);
 
   if (ret == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   return dot_k();
 }
 
-void flush_IO_logs() {
+void flush_io_logs() {
   std::string pid = std::to_string(getpid());
   for (auto const &log : log_files) {
     std::string path_str = log.first;
@@ -557,12 +557,12 @@ void flush_IO_logs() {
 }
 
 SortK hook_IO_log(SortString path, SortString msg) {
-  char *p = getTerminatedString(path);
-  char *m = getTerminatedString(msg);
+  char *p = get_terminated_string(path);
+  char *m = get_terminated_string(msg);
 
   static bool flush_registered = false;
   if (!flush_registered) {
-    atexit(&flush_IO_logs);
+    atexit(&flush_io_logs);
     flush_registered = true;
   }
 
@@ -572,7 +572,7 @@ SortK hook_IO_log(SortString path, SortString msg) {
 }
 
 SortK hook_IO_logString(SortString msg) {
-  char *m = getTerminatedString(msg);
+  char *m = get_terminated_string(msg);
   std::cerr << m << std::endl;
   return dot_k();
 }
@@ -604,7 +604,7 @@ block *hook_KREFLECTION_fresh(string *str) {
 string *hook_KREFLECTION_kompiledDir(void) {
   auto *str_ptr = &kompiled_directory;
   auto len = strlen(str_ptr);
-  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+  auto *ret = static_cast<string *>(kore_alloc_token(sizeof(string) + len));
   memcpy(ret->data, str_ptr, len);
   init_with_len(ret, len);
   return ret;
@@ -626,9 +626,9 @@ list hook_KREFLECTION_argv() {
         buf, llvm_backend_argv[i], strlen(llvm_backend_argv[i]));
     SortString str = hook_BUFFER_toString(buf);
     auto *b
-        = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(SortString)));
-    b->h = getBlockHeaderForSymbol(
-        (uint64_t)getTagForSymbolName("inj{SortString{}, SortKItem{}}"));
+        = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(SortString)));
+    b->h = get_block_header_for_symbol(
+        (uint64_t)get_tag_for_symbol_name("inj{SortString{}, SortKItem{}}"));
     memcpy(b->children, &str, sizeof(SortString));
     l = l.push_back(k_elem(b));
   }
@@ -637,28 +637,28 @@ list hook_KREFLECTION_argv() {
 }
 
 SortIOFile hook_IO_mkstemp(SortString filename) {
-  char *temp = getTerminatedString(filename);
+  char *temp = get_terminated_string(filename);
   int ret = mkstemp(temp);
 
   if (ret == -1) {
-    return getInjErrorBlock();
+    return get_inj_error_block();
   }
 
   auto *ret_block = static_cast<block *>(
-      koreAlloc(sizeof(block) + sizeof(string *) + sizeof(mpz_ptr)));
+      kore_alloc(sizeof(block) + sizeof(string *) + sizeof(mpz_ptr)));
 
   mpz_t result;
   mpz_init_set_si(result, ret);
   mpz_ptr p = move_int(result);
   size_t length = len(filename);
   auto *ret_string = static_cast<string *>(
-      koreAllocToken(sizeof(string) + sizeof(char) * length));
+      kore_alloc_token(sizeof(string) + sizeof(char) * length));
   memcpy(ret_string->data, temp, sizeof(char) * length);
   init_with_len(ret_string, length);
   memcpy(ret_block->children, &ret_string, sizeof(string *));
   memcpy(ret_block->children + 1, &p, sizeof(mpz_ptr));
-  ret_block->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName(GETTAG(tempFile)));
+  ret_block->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name(GETTAG(tempFile)));
 
   return ret_block;
 }
@@ -675,7 +675,7 @@ SortKItem hook_IO_system(SortString cmd) {
 
   // NOLINTNEXTLINE(*-assignment-in-if-condition)
   if (pipe(out) == -1 || pipe(err) == -1 || (pid = fork()) == -1) {
-    return getKSeqErrorBlock();
+    return get_k_seq_error_block();
   }
 
   if (pid == 0) {
@@ -687,7 +687,7 @@ SortKItem hook_IO_system(SortString cmd) {
     close(err[1]);
 
     if (len(cmd) > 0) {
-      char *command = getTerminatedString(cmd);
+      char *command = get_terminated_string(cmd);
 
       // NOLINTNEXTLINE(*-vararg)
       ret = execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
@@ -712,12 +712,12 @@ SortKItem hook_IO_system(SortString cmd) {
   while (done < 2) {
     ready_fds = read_fds;
     if (select(FD_SETSIZE, &ready_fds, nullptr, nullptr, nullptr) == -1) {
-      return getKSeqErrorBlock();
+      return get_k_seq_error_block();
     }
     if (FD_ISSET(out[0], &ready_fds)) {
       int nread = read(out[0], buf, IOBUFSIZE);
       if (nread == -1) {
-        return getKSeqErrorBlock();
+        return get_k_seq_error_block();
       }
 
       if (nread == 0) {
@@ -730,7 +730,7 @@ SortKItem hook_IO_system(SortString cmd) {
     if (FD_ISSET(err[0], &ready_fds)) {
       int nread = read(err[0], buf, IOBUFSIZE);
       if (nread == -1) {
-        return getKSeqErrorBlock();
+        return get_k_seq_error_block();
       }
 
       if (nread == 0) {
@@ -745,7 +745,7 @@ SortKItem hook_IO_system(SortString cmd) {
   waitpid(pid, &ret, 0);
   ret = WEXITSTATUS(ret);
 
-  auto *ret_block = static_cast<block *>(koreAlloc(
+  auto *ret_block = static_cast<block *>(kore_alloc(
       sizeof(block) + sizeof(mpz_ptr) + sizeof(string *) + sizeof(string *)));
 
   mpz_t result;
@@ -753,8 +753,8 @@ SortKItem hook_IO_system(SortString cmd) {
   mpz_ptr p = move_int(result);
   memcpy(ret_block->children, &p, sizeof(mpz_ptr));
 
-  ret_block->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName(GETTAG(systemResult)));
+  ret_block->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name(GETTAG(systemResult)));
   string *out_str = nullptr;
   string *err_str = nullptr;
   out_str = hook_BUFFER_toString(out_buffer);

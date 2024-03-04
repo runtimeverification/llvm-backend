@@ -32,7 +32,7 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
       } // arglayout != 0
       // Both arg1 and arg2 are blocks.
       auto arglayoutshort = (uint16_t)arglayout;
-      layout *layout_ptr = getLayoutData(arglayoutshort);
+      layout *layout_ptr = get_layout_data(arglayoutshort);
       uint8_t length = layout_ptr->nargs;
       for (uint8_t i = 0; i < length; i++) {
         uint64_t offset = layout_ptr->args[i].offset;
@@ -174,7 +174,7 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
     return arg1tag < arg2tag;
   }
   assert(arg1layout == arg2layout);
-  layout *layout_ptr = getLayoutData(arg1layout);
+  layout *layout_ptr = get_layout_data(arg1layout);
   uint8_t length = layout_ptr->nargs;
   for (uint8_t i = 0; i < length; i++) {
     uint64_t offset = layout_ptr->args[i].offset;

@@ -7,7 +7,7 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
-std::string floatToString(floating const *f, char const *suffix) {
+std::string float_to_string(floating const *f, char const *suffix) {
   if (mpfr_nan_p(f->f)) {
     return "NaN" + std::string(suffix);
   }
@@ -20,7 +20,7 @@ std::string floatToString(floating const *f, char const *suffix) {
   mpfr_exp_t printed_exp = 0;
   char *str = mpfr_get_str(nullptr, &printed_exp, 10, 0, f->f, MPFR_RNDN);
   size_t len = strlen(str);
-  auto *newstr = (string *)koreAllocToken(sizeof(string) + len + 2);
+  auto *newstr = (string *)kore_alloc_token(sizeof(string) + len + 2);
   init_with_len(newstr, len + 2);
   size_t idx = 0;
   if (str[0] == '-') {
@@ -34,7 +34,7 @@ std::string floatToString(floating const *f, char const *suffix) {
   return std::string(newstr->data) + "e" + std::to_string(printed_exp) + suffix;
 }
 
-std::string floatToString(floating const *f) {
+std::string float_to_string(floating const *f) {
   uint64_t prec = mpfr_get_prec(f->f);
   uint64_t exp = f->exp;
 
@@ -50,10 +50,10 @@ std::string floatToString(floating const *f) {
     return fmt::sprintf("p%" PRIu64 "x%" PRIu64, prec, exp);
   }();
 
-  return floatToString(f, suffix.c_str());
+  return float_to_string(f, suffix.c_str());
 }
 
-std::string intToStringInBase(mpz_t i, uint64_t base) {
+std::string int_to_string_in_base(mpz_t i, uint64_t base) {
   char *tmp = mpz_get_str(nullptr, base, i);
   auto ret = std::string(tmp);
 
@@ -64,6 +64,6 @@ std::string intToStringInBase(mpz_t i, uint64_t base) {
   return ret;
 }
 
-std::string intToString(mpz_t i) {
-  return intToStringInBase(i, 10);
+std::string int_to_string(mpz_t i) {
+  return int_to_string_in_base(i, 10);
 }

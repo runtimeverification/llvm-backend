@@ -29,7 +29,7 @@ static unsigned dbg_column;
 
 #define DWARF_VERSION 4
 
-void initDebugInfo(llvm::Module *module, std::string const &filename) {
+void init_debug_info(llvm::Module *module, std::string const &filename) {
   dbg = new llvm::DIBuilder(*module);
   dbg_file = dbg->createFile(filename, ".");
 
@@ -53,11 +53,11 @@ void initDebugInfo(llvm::Module *module, std::string const &filename) {
       llvm::DICompileUnit::DebugNameTableKind::None);
 }
 
-void finalizeDebugInfo() {
+void finalize_debug_info() {
   dbg->finalize();
 }
 
-void initDebugFunction(
+void init_debug_function(
     std::string const &name, std::string const &linkage_name,
     llvm::DISubroutineType *type, kore_definition *definition,
     llvm::Function *func) {
@@ -72,14 +72,14 @@ void initDebugFunction(
   func->setSubprogram(dbg_sp);
 }
 
-void initDebugParam(
+void init_debug_param(
     llvm::Function *func, unsigned arg_no, std::string const &name,
     value_type type, std::string const &type_name) {
   if (!dbg) {
     return;
   }
   llvm::DILocalVariable *dbg_var = dbg->createParameterVariable(
-      dbg_sp, name, arg_no + 1, dbg_file, dbg_line, getDebugType(type, type_name),
+      dbg_sp, name, arg_no + 1, dbg_file, dbg_line, get_debug_type(type, type_name),
       true);
   dbg->insertDbgValueIntrinsic(
       func->arg_begin() + arg_no, dbg_var, dbg->createExpression(),
@@ -87,23 +87,23 @@ void initDebugParam(
       &func->getEntryBlock());
 }
 
-void initDebugGlobal(
+void init_debug_global(
     std::string const &name, llvm::DIType *type, llvm::GlobalVariable *var) {
   if (!dbg) {
     return;
   }
-  resetDebugLoc();
+  reset_debug_loc();
   auto *dbg_exp = dbg->createGlobalVariableExpression(
       dbg_cu, name, name, dbg_file, dbg_line, type, false);
   var->addDebugInfo(dbg_exp);
 }
 
-void initDebugAxiom(attribute_set const &att) {
+void init_debug_axiom(attribute_set const &att) {
   if (!dbg) {
     return;
   }
   if (!att.contains(attribute_set::key::Source)) {
-    resetDebugLoc();
+    reset_debug_loc();
     return;
   }
   kore_composite_pattern *source_att = att.get(attribute_set::key::Source).get();
@@ -112,7 +112,7 @@ void initDebugAxiom(attribute_set const &att) {
       = dynamic_cast<kore_string_pattern *>(source_att->get_arguments()[0].get());
   std::string source = str_pattern->get_contents();
   if (!att.contains(attribute_set::key::Location)) {
-    resetDebugLoc();
+    reset_debug_loc();
     return;
   }
   kore_composite_pattern *location_att
@@ -130,7 +130,7 @@ void initDebugAxiom(attribute_set const &att) {
   dbg_file = dbg->createFile(source, dbg_file->getDirectory());
 }
 
-void resetDebugLoc() {
+void reset_debug_loc() {
   if (!dbg) {
     return;
   }
@@ -139,7 +139,7 @@ void resetDebugLoc() {
   dbg_file = dbg_cu->getFile();
 }
 
-llvm::DIType *getForwardDecl(std::string const &name) {
+llvm::DIType *get_forward_decl(std::string const &name) {
   if (!dbg) {
     return nullptr;
   }
@@ -157,7 +157,7 @@ static std::string float_struct = "floating";
 static std::string buffer_struct = "stringbuffer";
 static std::string block_struct = "block";
 
-llvm::DIType *getDebugType(value_type type, std::string const &type_name) {
+llvm::DIType *get_debug_type(value_type type, std::string const &type_name) {
   if (!dbg) {
     return nullptr;
   }
@@ -177,31 +177,31 @@ llvm::DIType *getDebugType(value_type type, std::string const &type_name) {
   }
   switch (type.cat) {
   case sort_category::Map:
-    map = getPointerDebugType(getForwardDecl(map_struct), type_name);
+    map = get_pointer_debug_type(get_forward_decl(map_struct), type_name);
     types[type_name] = map;
     return map;
   case sort_category::RangeMap:
-    rangemap = getPointerDebugType(getForwardDecl(rangemap_struct), type_name);
+    rangemap = get_pointer_debug_type(get_forward_decl(rangemap_struct), type_name);
     types[type_name] = rangemap;
     return rangemap;
   case sort_category::List:
-    list = getPointerDebugType(getForwardDecl(list_struct), type_name);
+    list = get_pointer_debug_type(get_forward_decl(list_struct), type_name);
     types[type_name] = list;
     return list;
   case sort_category::Set:
-    set = getPointerDebugType(getForwardDecl(set_struct), type_name);
+    set = get_pointer_debug_type(get_forward_decl(set_struct), type_name);
     types[type_name] = set;
     return set;
   case sort_category::Int:
-    integer = getPointerDebugType(getForwardDecl(int_struct), type_name);
+    integer = get_pointer_debug_type(get_forward_decl(int_struct), type_name);
     types[type_name] = integer;
     return integer;
   case sort_category::Float:
-    floating = getPointerDebugType(getForwardDecl(float_struct), type_name);
+    floating = get_pointer_debug_type(get_forward_decl(float_struct), type_name);
     types[type_name] = floating;
     return floating;
   case sort_category::StringBuffer:
-    buffer = getPointerDebugType(getForwardDecl(buffer_struct), type_name);
+    buffer = get_pointer_debug_type(get_forward_decl(buffer_struct), type_name);
     types[type_name] = buffer;
     return buffer;
   case sort_category::Bool:
@@ -215,39 +215,39 @@ llvm::DIType *getDebugType(value_type type, std::string const &type_name) {
     return mint;
   case sort_category::Symbol:
   case sort_category::Variable:
-    symbol = getPointerDebugType(getForwardDecl(block_struct), type_name);
+    symbol = get_pointer_debug_type(get_forward_decl(block_struct), type_name);
     types[type_name] = symbol;
     return symbol;
   case sort_category::Uncomputed: abort();
   }
 }
 
-llvm::DIType *getIntDebugType() {
+llvm::DIType *get_int_debug_type() {
   if (!dbg) {
     return nullptr;
   }
   return dbg->createBasicType("uint32_t", 32, llvm::dwarf::DW_ATE_unsigned);
 }
 
-llvm::DIType *getLongDebugType() {
+llvm::DIType *get_long_debug_type() {
   if (!dbg) {
     return nullptr;
   }
   return dbg->createBasicType("uint64_t", 64, llvm::dwarf::DW_ATE_unsigned);
 }
 
-llvm::DIType *getBoolDebugType() {
+llvm::DIType *get_bool_debug_type() {
   if (!dbg) {
     return nullptr;
   }
   return dbg->createBasicType("bool", 8, llvm::dwarf::DW_ATE_boolean);
 }
 
-llvm::DIType *getVoidDebugType() {
+llvm::DIType *get_void_debug_type() {
   return nullptr;
 }
 
-llvm::DIType *getCharPtrDebugType() {
+llvm::DIType *get_char_ptr_debug_type() {
   if (!dbg) {
     return nullptr;
   }
@@ -256,7 +256,7 @@ llvm::DIType *getCharPtrDebugType() {
       sizeof(size_t) * 8);
 }
 
-llvm::DIType *getCharDebugType() {
+llvm::DIType *get_char_debug_type() {
   if (!dbg) {
     return nullptr;
   }
@@ -264,7 +264,7 @@ llvm::DIType *getCharDebugType() {
 }
 
 llvm::DIType *
-getPointerDebugType(llvm::DIType *ty, std::string const &type_name) {
+get_pointer_debug_type(llvm::DIType *ty, std::string const &type_name) {
   if (!dbg) {
     return nullptr;
   }
@@ -273,7 +273,7 @@ getPointerDebugType(llvm::DIType *ty, std::string const &type_name) {
 }
 
 llvm::DIType *
-getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align) {
+get_array_debug_type(llvm::DIType *ty, size_t len, llvm::Align align) {
   if (!dbg) {
     return nullptr;
   }
@@ -282,14 +282,14 @@ getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align) {
   return dbg->createArrayType(len, align.value(), ty, arr);
 }
 
-llvm::DIType *getShortDebugType() {
+llvm::DIType *get_short_debug_type() {
   if (!dbg) {
     return nullptr;
   }
   return dbg->createBasicType("uint16_t", 16, llvm::dwarf::DW_ATE_unsigned);
 }
 
-llvm::DISubroutineType *getDebugFunctionType(
+llvm::DISubroutineType *get_debug_function_type(
     llvm::Metadata *return_type, std::vector<llvm::Metadata *> arg_types) {
   if (!dbg) {
     return nullptr;
@@ -298,7 +298,7 @@ llvm::DISubroutineType *getDebugFunctionType(
   return dbg->createSubroutineType(dbg->getOrCreateTypeArray(arg_types));
 }
 
-void setDebugLoc(llvm::Instruction *instr) {
+void set_debug_loc(llvm::Instruction *instr) {
   if (!dbg) {
     return;
   }

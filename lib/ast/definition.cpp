@@ -10,7 +10,7 @@ namespace {
 
 template <typename Elem, typename Hash, typename Equal>
 std::unordered_map<Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
-transitiveClosure(std::unordered_map<
+transitive_closure(std::unordered_map<
                   Elem *, std::unordered_set<Elem *, Hash, Equal>, Hash, Equal>
                       relations) {
   bool dirty = false;
@@ -91,7 +91,7 @@ SubsortMap kore_definition::get_subsorts() const {
     }
   }
 
-  return transitiveClosure(subsorts);
+  return transitive_closure(subsorts);
 }
 
 SymbolMap kore_definition::get_overloads() const {
@@ -111,7 +111,7 @@ SymbolMap kore_definition::get_overloads() const {
     }
   }
 
-  return transitiveClosure(overloads);
+  return transitive_closure(overloads);
 }
 
 // NOLINTNEXTLINE(*-function-cognitive-complexity)

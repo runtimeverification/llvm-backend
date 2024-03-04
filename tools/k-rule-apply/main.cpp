@@ -20,7 +20,7 @@ cl::opt<std::string> kore_pattern_filename(
 cl::opt<std::string> shared_lib_path(
     cl::Positional, cl::desc("<path_to_shared_lib>"), cl::cat(k_rule_cat));
 
-std::optional<std::string> getMatchFunctionName() {
+std::optional<std::string> get_match_function_name() {
   auto definition = kompiled_dir + "/definition.kore";
   // Parse the definition.kore to get the AST.
   parser::kore_parser parser(definition);
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   parser::kore_parser parser(kore_pattern_filename.getValue());
   auto initial_configuration = parser.pattern();
 
-  auto match_function_name = getMatchFunctionName();
+  auto match_function_name = get_match_function_name();
   if (!match_function_name.has_value()) {
     std::cerr << "Rule with label " << rule_label << " does not exist.\n";
     return EXIT_FAILURE;
@@ -78,9 +78,9 @@ int main(int argc, char **argv) {
   // NOLINTNEXTLINE(*-reinterpret-cast)
   auto match_function = reinterpret_cast<void (*)(block *)>(match_function_ptr);
 
-  resetMatchReason(handle);
-  initStaticObjects(handle);
-  auto *b = constructInitialConfiguration(initial_configuration.get(), handle);
+  reset_match_reason(handle);
+  init_static_objects(handle);
+  auto *b = construct_initial_configuration(initial_configuration.get(), handle);
   if (b == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
@@ -93,13 +93,13 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  size_t log_size = getmatch_logSize(handle);
+  size_t log_size = getmatch_log_size(handle);
   if (log_size == -1) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
-  printMatchResult(std::cout, (match_log *)log, log_size, kompiled_dir, handle);
+  print_match_result(std::cout, (match_log *)log, log_size, kompiled_dir, handle);
 
   dlclose(handle);
   return 0;

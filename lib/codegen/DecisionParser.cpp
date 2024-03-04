@@ -134,7 +134,7 @@ public:
     auto *child = (*this)(get(node, "next"));
 
     auto *result = function_node::create(
-        binding, function, child, cat, getParamType(cat, mod_));
+        binding, function, child, cat, get_param_type(cat, mod_));
 
     yaml_node_t *vars = get(node, "args");
     for (auto *iter = vars->data.sequence.items.start;
@@ -165,7 +165,7 @@ public:
         name = str(o);
       }
       value_type hook = kore_composite_sort::get_category(str(get(node, "hook")));
-      uses.emplace_back(name, getParamType(hook, mod_));
+      uses.emplace_back(name, get_param_type(hook, mod_));
       return kore_variable_pattern::create(name, sorts_.at(hook));
     }
 
@@ -207,7 +207,7 @@ public:
 
   decision_node *make_pattern(yaml_node_t *node) {
     std::string name = to_string(vec(get(node, "occurrence")));
-    llvm::Type *type = getParamType(
+    llvm::Type *type = get_param_type(
         kore_composite_sort::get_category(str(get(node, "sort"))), mod_);
 
     std::vector<std::pair<std::string, llvm::Type *>> uses;
@@ -221,7 +221,7 @@ public:
 
   decision_node *make_iterator(yaml_node_t *node) {
     auto collection = to_string(vec(get(node, "collection")));
-    auto *type = getParamType(
+    auto *type = get_param_type(
         kore_composite_sort::get_category(str(get(node, "sort"))), mod_);
     auto hook_name = str(get(node, "function"));
     auto *child = (*this)(get(node, "next"));
@@ -236,7 +236,7 @@ public:
   decision_node *iter_next(yaml_node_t *node) {
     auto iterator = to_string(vec(get(node, "iterator"))) + "_iter";
     auto binding = to_string(vec(get(node, "binding")));
-    auto *type = getParamType(
+    auto *type = get_param_type(
         kore_composite_sort::get_category(str(get(node, "sort"))), mod_);
     auto function = str(get(node, "function"));
     auto *child = (*this)(get(node, "next"));
@@ -252,7 +252,7 @@ public:
     yaml_node_t *list = get(node, "specializations");
     auto occurrence = vec(get(node, "occurrence"));
     std::string name = to_string(occurrence);
-    llvm::Type *type = getParamType(
+    llvm::Type *type = get_param_type(
         kore_composite_sort::get_category(str(get(node, "sort"))), mod_);
     auto *result = switch_node::create(name, type, kind == CheckNull);
     for (auto *iter = list->data.sequence.items.start;
@@ -275,7 +275,7 @@ public:
           std::string binding = to_string(new_occurrence);
           std::string hook = str(get(get(_case, 2), i));
           bindings.emplace_back(
-              binding, getParamType(kore_composite_sort::get_category(hook), mod_));
+              binding, get_param_type(kore_composite_sort::get_category(hook), mod_));
         }
       }
       decision_node *child = (*this)(get(_case, 1));
@@ -365,7 +365,7 @@ public:
   }
 };
 
-decision_node *parseYamldecisionTreeFromString(
+decision_node *parse_yamldecision_tree_from_string(
     llvm::Module *mod, std::string const &yaml,
     std::map<std::string, kore_symbol *> const &syms,
     std::map<value_type, sptr<kore_composite_sort>> const &sorts) {
@@ -386,7 +386,7 @@ decision_node *parseYamldecisionTreeFromString(
   return result;
 }
 
-decision_node *parseYamldecisionTree(
+decision_node *parse_yamldecision_tree(
     llvm::Module *mod, std::string const &filename,
     std::map<std::string, kore_symbol *> const &syms,
     std::map<value_type, sptr<kore_composite_sort>> const &sorts) {
@@ -408,7 +408,7 @@ decision_node *parseYamldecisionTree(
   return result;
 }
 
-partial_step parseYamlSpecialdecisionTree(
+partial_step parse_yaml_specialdecision_tree(
     llvm::Module *mod, std::string const &filename,
     std::map<std::string, kore_symbol *> const &syms,
     std::map<value_type, sptr<kore_composite_sort>> const &sorts) {

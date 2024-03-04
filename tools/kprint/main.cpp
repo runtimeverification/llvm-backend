@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
   bool has_color = arg_color == "true" || (arg_color == "auto" && isatty(1));
 
-  printKORE(
+  print_kore(
       std::cout, definition_filename, pattern_filename, has_color, filter_subst,
       !print_as_kore);
 }
