@@ -121,7 +121,7 @@ private:
       : name_(std::move(name)) { }
 };
 
-enum class SortCategory {
+enum class sort_category {
   Uncomputed,
   Map,
   List,
@@ -139,7 +139,7 @@ enum class SortCategory {
 // represents the syntactic category of an LLVM backend term at runtime
 struct value_type {
   // fundamental category of the term
-  SortCategory cat;
+  sort_category cat;
   // if this is an MInt, the number of bits in the MInt
   uint64_t bits;
 
@@ -159,7 +159,7 @@ private:
 
 public:
   static sptr<kore_composite_sort> create(
-      std::string const &name, value_type cat = {SortCategory::Uncomputed, 0}) {
+      std::string const &name, value_type cat = {sort_category::Uncomputed, 0}) {
     return sptr<kore_composite_sort>(new kore_composite_sort(name, cat));
   }
 

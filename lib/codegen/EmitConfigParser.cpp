@@ -196,8 +196,8 @@ static void emitDataForSymbol(
     uint32_t tag = entry.first;
     auto *symbol = entry.second;
     auto *decl = definition->get_symbol_declarations().at(symbol->get_name());
-    bool isFunc = decl->attributes().contains(attribute_set::key::function)
-                  || decl->attributes().contains(attribute_set::key::anywhere);
+    bool isFunc = decl->attributes().contains(attribute_set::key::Function)
+                  || decl->attributes().contains(attribute_set::key::Anywhere);
     if (is_eval && !isFunc) {
       continue;
     }
@@ -235,8 +235,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getFunction(
     kore_definition *def, llvm::Module *mod, kore_symbol *symbol,
     llvm::Instruction *inst) {
   auto *decl = def->get_symbol_declarations().at(symbol->get_name());
-  bool res = decl->attributes().contains(attribute_set::key::function)
-             || decl->attributes().contains(attribute_set::key::anywhere);
+  bool res = decl->attributes().contains(attribute_set::key::Function)
+             || decl->attributes().contains(attribute_set::key::Anywhere);
   return std::make_pair(
       llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res),
       inst->getParent());
@@ -251,7 +251,7 @@ static void emitIsSymbolAFunction(kore_definition *def, llvm::Module *mod) {
 static llvm::Constant *
 getBinder(kore_definition *def, llvm::Module *mod, kore_symbol *symbol) {
   auto *decl = def->get_symbol_declarations().at(symbol->get_name());
-  bool res = decl->attributes().contains(attribute_set::key::binder);
+  bool res = decl->attributes().contains(attribute_set::key::Binder);
   return llvm::ConstantInt::get(llvm::Type::getInt1Ty(mod->getContext()), res);
 }
 
@@ -311,8 +311,8 @@ static llvm::Value *getArgValue(
   llvm::Value *arg = new llvm::LoadInst(i8_ptr_ty, addr, "", case_block);
 
   switch (cat.cat) {
-  case SortCategory::Bool:
-  case SortCategory::MInt: {
+  case sort_category::Bool:
+  case sort_category::MInt: {
     auto *val_ty = getvalue_type(cat, mod);
     auto *cast = new llvm::BitCastInst(
         arg, llvm::PointerType::getUnqual(val_ty), "", case_block);
@@ -320,22 +320,22 @@ static llvm::Value *getArgValue(
     arg = load;
     break;
   }
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set:
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set:
     arg = new llvm::BitCastInst(
         arg, llvm::PointerType::getUnqual(getvalue_type(cat, mod)), "",
         case_block);
     break;
-  case SortCategory::Int:
-  case SortCategory::Float:
-  case SortCategory::StringBuffer:
-  case SortCategory::Symbol:
-  case SortCategory::Variable:
+  case sort_category::Int:
+  case sort_category::Float:
+  case sort_category::StringBuffer:
+  case sort_category::Symbol:
+  case sort_category::Variable:
     arg = new llvm::BitCastInst(arg, getvalue_type(cat, mod), "", case_block);
     break;
-  case SortCategory::Uncomputed: abort();
+  case sort_category::Uncomputed: abort();
   }
   return arg;
 }
@@ -365,20 +365,20 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
   value_type cat = dynamic_cast<kore_composite_sort *>(symbol->get_sort().get())
                        ->get_category(def);
   switch (cat.cat) {
-  case SortCategory::Int:
-  case SortCategory::Float:
-  case SortCategory::StringBuffer:
-  case SortCategory::Symbol:
-  case SortCategory::Variable:
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set:
+  case sort_category::Int:
+  case sort_category::Float:
+  case sort_category::StringBuffer:
+  case sort_category::Symbol:
+  case sort_category::Variable:
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set:
     retval = new llvm::BitCastInst(
         result, llvm::Type::getInt8PtrTy(Ctx), "", creator.get_current_block());
     break;
-  case SortCategory::Bool:
-  case SortCategory::MInt: {
+  case sort_category::Bool:
+  case sort_category::MInt: {
     llvm::Instruction *Malloc = llvm::CallInst::CreateMalloc(
         creator.get_current_block(), llvm::Type::getInt64Ty(Ctx),
         result->getType(), llvm::ConstantExpr::getSizeOf(result->getType()),
@@ -389,7 +389,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> getEval(
         Malloc, llvm::Type::getInt8PtrTy(Ctx), "", creator.get_current_block());
     break;
   }
-  case SortCategory::Uncomputed: abort();
+  case sort_category::Uncomputed: abort();
   }
   inst->insertAfter(&creator.get_current_block()->back());
   return std::make_pair(retval, creator.get_current_block());
@@ -491,7 +491,7 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
     }
     auto sort = kore_composite_sort::create(name);
     value_type cat = sort->get_category(definition);
-    if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
+    if (cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable) {
       continue;
     }
     CurrentBlock->insertInto(func);
@@ -514,16 +514,16 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
     auto *CaseBlock = llvm::BasicBlock::Create(Ctx, name, func);
     llvm::BranchInst::Create(CaseBlock, FalseBlock, icmp, CurrentBlock);
     switch (cat.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
-    case SortCategory::StringBuffer:
-    case SortCategory::MInt:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
+    case sort_category::StringBuffer:
+    case sort_category::MInt:
       // TODO: tokens
       addAbort(CaseBlock, module);
       break;
-    case SortCategory::Bool: {
+    case sort_category::Bool: {
       auto *Str = llvm::ConstantDataArray::getString(Ctx, "true", false);
       auto *global = module->getOrInsertGlobal("bool_true", Str->getType());
       auto *globalVar = llvm::dyn_cast<llvm::GlobalVariable>(global);
@@ -548,7 +548,7 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
       llvm::BranchInst::Create(MergeBlock, CaseBlock);
       break;
     }
-    case SortCategory::Float: {
+    case sort_category::Float: {
       llvm::Type *Float
           = llvm::StructType::getTypeByName(module->getContext(), float_struct);
       llvm::Value *Term = allocateTerm(Float, CaseBlock, "koreAllocFloating");
@@ -563,7 +563,7 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
       llvm::BranchInst::Create(MergeBlock, CaseBlock);
       break;
     }
-    case SortCategory::Int: {
+    case sort_category::Int: {
       auto const &thirdArg = func->arg_begin() + 2;
       llvm::Value *FirstChar = new llvm::LoadInst(
           llvm::Type::getInt8Ty(Ctx), thirdArg, "", CaseBlock);
@@ -607,9 +607,9 @@ static void emitGetToken(kore_definition *definition, llvm::Module *module) {
       Phi->addIncoming(cast, CaseBlock);
       break;
     }
-    case SortCategory::Variable:
-    case SortCategory::Symbol: break;
-    case SortCategory::Uncomputed: abort();
+    case sort_category::Variable:
+    case sort_category::Symbol: break;
+    case sort_category::Uncomputed: abort();
     }
     CurrentBlock = FalseBlock;
   }
@@ -701,30 +701,30 @@ makePackedVisitorStructureType(llvm::LLVMContext &ctx, llvm::Module *module) {
   if (types.find(&ctx) == types.end()) {
     auto elementTypes = std::vector<llvm::Type *>{
         {makeVisitorType(
-             ctx, file, getvalue_type({SortCategory::Symbol, 0}, module), 1, 1),
+             ctx, file, getvalue_type({sort_category::Symbol, 0}, module), 1, 1),
          makeVisitorType(
              ctx, file,
              llvm::PointerType::getUnqual(
-                 getvalue_type({SortCategory::Map, 0}, module)),
+                 getvalue_type({sort_category::Map, 0}, module)),
              3, 0),
          makeVisitorType(
              ctx, file,
              llvm::PointerType::getUnqual(
-                 getvalue_type({SortCategory::List, 0}, module)),
+                 getvalue_type({sort_category::List, 0}, module)),
              3, 0),
          makeVisitorType(
              ctx, file,
              llvm::PointerType::getUnqual(
-                 getvalue_type({SortCategory::Set, 0}, module)),
+                 getvalue_type({sort_category::Set, 0}, module)),
              3, 0),
          makeVisitorType(
-             ctx, file, getvalue_type({SortCategory::Int, 0}, module), 1, 0),
+             ctx, file, getvalue_type({sort_category::Int, 0}, module), 1, 0),
          makeVisitorType(
-             ctx, file, getvalue_type({SortCategory::Float, 0}, module), 1, 0),
+             ctx, file, getvalue_type({sort_category::Float, 0}, module), 1, 0),
          makeVisitorType(
-             ctx, file, getvalue_type({SortCategory::Bool, 0}, module), 1, 0),
+             ctx, file, getvalue_type({sort_category::Bool, 0}, module), 1, 0),
          makeVisitorType(
-             ctx, file, getvalue_type({SortCategory::StringBuffer, 0}, module),
+             ctx, file, getvalue_type({sort_category::StringBuffer, 0}, module),
              1, 0),
          llvm::PointerType::getUnqual(llvm::FunctionType::get(
              llvm::Type::getVoidTy(ctx),
@@ -737,7 +737,7 @@ makePackedVisitorStructureType(llvm::LLVMContext &ctx, llvm::Module *module) {
          makeVisitorType(
              ctx, file,
              llvm::PointerType::getUnqual(
-                 getvalue_type({SortCategory::RangeMap, 0}, module)),
+                 getvalue_type({sort_category::RangeMap, 0}, module)),
              3, 0)}};
 
     auto *structTy = llvm::StructType::create(ctx, elementTypes, name);
@@ -878,9 +878,9 @@ static void visitCollection(
   auto *sortDecl
       = definition->get_sort_declarations().at(composite_sort->get_name());
   llvm::Constant *concatPtr = nullptr;
-  if (sortDecl->attributes().contains(attribute_set::key::concat)) {
+  if (sortDecl->attributes().contains(attribute_set::key::Concat)) {
     auto *concat = (kore_composite_pattern *)sortDecl->attributes()
-                       .get(attribute_set::key::concat)
+                       .get(attribute_set::key::Concat)
                        ->get_arguments()[0]
                        .get();
     concatPtr = getSymbolNamePtr(concat->get_constructor(), nullptr, module);
@@ -888,12 +888,12 @@ static void visitCollection(
     concatPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(Ctx));
   }
   auto *unit = (kore_composite_pattern *)sortDecl->attributes()
-                   .get(attribute_set::key::unit)
+                   .get(attribute_set::key::Unit)
                    ->get_arguments()[0]
                    .get();
   auto *unitPtr = getSymbolNamePtr(unit->get_constructor(), nullptr, module);
   auto *element = (kore_composite_pattern *)sortDecl->attributes()
-                      .get(attribute_set::key::element)
+                      .get(attribute_set::key::Element)
                       ->get_arguments()[0]
                       .get();
   auto *elementPtr
@@ -949,8 +949,8 @@ static void getVisitor(
     llvm::Constant *CharPtr = llvm::ConstantExpr::getInBoundsGetElementPtr(
         Str->getType(), global, indices);
     switch (cat.cat) {
-    case SortCategory::Variable:
-    case SortCategory::Symbol:
+    case sort_category::Variable:
+    case sort_category::Symbol:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
@@ -960,11 +960,11 @@ static void getVisitor(
           callbacks.at(0),
           {func->arg_begin() + 1, Child, CharPtr,
            llvm::ConstantInt::get(
-               llvm::Type::getInt1Ty(Ctx), cat.cat == SortCategory::Variable),
+               llvm::Type::getInt1Ty(Ctx), cat.cat == sort_category::Variable),
            state_ptr},
           "", case_block);
       break;
-    case SortCategory::Int:
+    case sort_category::Int:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
@@ -974,7 +974,7 @@ static void getVisitor(
           callbacks.at(4), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
           "", case_block);
       break;
-    case SortCategory::Float:
+    case sort_category::Float:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
@@ -984,7 +984,7 @@ static void getVisitor(
           callbacks.at(5), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
           "", case_block);
       break;
-    case SortCategory::Bool:
+    case sort_category::Bool:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
@@ -994,7 +994,7 @@ static void getVisitor(
           callbacks.at(6), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
           "", case_block);
       break;
-    case SortCategory::StringBuffer:
+    case sort_category::StringBuffer:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(Ctx),
@@ -1004,7 +1004,7 @@ static void getVisitor(
           callbacks.at(7), {func->arg_begin() + 1, Child, CharPtr, state_ptr},
           "", case_block);
       break;
-    case SortCategory::MInt: {
+    case sort_category::MInt: {
       llvm::Value *mint = new llvm::LoadInst(
           getArgType(cat, module), ChildPtr, "mint", case_block);
       size_t nwords = (cat.bits + 63) / 64;
@@ -1060,28 +1060,28 @@ static void getVisitor(
       }
       break;
     }
-    case SortCategory::Map:
+    case sort_category::Map:
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, case_block,
           callbacks.at(1), state_ptr);
       break;
-    case SortCategory::RangeMap:
+    case sort_category::RangeMap:
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, case_block,
           callbacks.at(10), state_ptr);
       break;
-    case SortCategory::Set:
+    case sort_category::Set:
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, case_block,
           callbacks.at(3), state_ptr);
       break;
-    case SortCategory::List: {
+    case sort_category::List: {
       visitCollection(
           definition, module, compositeSort, func, ChildPtr, case_block,
           callbacks.at(2), state_ptr);
       break;
     }
-    case SortCategory::Uncomputed: abort();
+    case sort_category::Uncomputed: abort();
     }
     if (i != symbol->get_arguments().size() - 1) {
       llvm::CallInst::Create(

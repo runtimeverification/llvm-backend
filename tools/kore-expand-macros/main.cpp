@@ -35,9 +35,9 @@ int main(int argc, char **argv) {
       axioms.begin(), axioms.end(),
       [](ptr<kore_declaration> const &l, ptr<kore_declaration> const &r) {
         std::string lStr
-            = l->attributes().get_string(attribute_set::key::priority);
+            = l->attributes().get_string(attribute_set::key::Priority);
         std::string rStr
-            = r->attributes().get_string(attribute_set::key::priority);
+            = r->attributes().get_string(attribute_set::key::Priority);
         int lInt = std::stoi(lStr);
         int rInt = std::stoi(rStr);
         return lInt < rInt;

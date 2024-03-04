@@ -31,7 +31,7 @@ private:
   yaml_document_t *doc_;
   llvm::Module *mod_;
 
-  enum Kind {
+  enum kind {
     Switch,
     SwitchLiteral,
     CheckNull,
@@ -43,7 +43,7 @@ private:
     Fail
   };
 
-  Kind get_kind(yaml_node_t *node) {
+  kind get_kind(yaml_node_t *node) {
     if (node->type == YAML_SCALAR_NODE) {
       return Fail;
     }
@@ -248,7 +248,7 @@ public:
         binding, type, function, child);
   }
 
-  decision_node *switch_case(Kind kind, yaml_node_t *node) {
+  decision_node *switch_case(kind kind, yaml_node_t *node) {
     yaml_node_t *list = get(node, "specializations");
     auto occurrence = vec(get(node, "occurrence"));
     std::string name = to_string(occurrence);
@@ -330,7 +330,7 @@ public:
     if (unique) {
       return unique;
     }
-    Kind kind = get_kind(node);
+    kind kind = get_kind(node);
     decision_node *ret = nullptr;
     switch (kind) {
     case Fail: ret = fail_node::get(); break;

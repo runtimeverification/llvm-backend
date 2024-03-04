@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&kore_arity_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto s = kllvm::serializer(kllvm::serializer::DROP_HEADER);
+  auto s = kllvm::serializer(kllvm::serializer::DropHeader);
   s.emit_length(arity);
 
   for (auto b : s.data()) {

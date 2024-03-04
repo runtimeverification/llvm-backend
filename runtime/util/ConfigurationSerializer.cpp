@@ -421,7 +421,7 @@ void serializeConfiguration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern) {
   auto state = serialization_state(
-      use_intern ? serializer::flags::NONE : serializer::flags::NO_INTERN);
+      use_intern ? serializer::flags::NONE : serializer::flags::NoIntern);
 
   writer w = {nullptr, nullptr};
   serializeConfigurationInternal(&w, subject, sort, false, &state);

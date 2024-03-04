@@ -259,22 +259,22 @@ preprocessed_print_data getPrintData(
   for (auto const &entry : def->get_symbol_declarations()) {
     std::string name = entry.first;
 
-    if (entry.second->attributes().contains(attribute_set::key::format)) {
+    if (entry.second->attributes().contains(attribute_set::key::Format)) {
       formats[name]
-          = entry.second->attributes().get_string(attribute_set::key::format);
+          = entry.second->attributes().get_string(attribute_set::key::Format);
       terminals[name] = entry.second->attributes().get_string(
-          attribute_set::key::terminals);
+          attribute_set::key::Terminals);
 
-      if (entry.second->attributes().contains(attribute_set::key::assoc)) {
+      if (entry.second->attributes().contains(attribute_set::key::Assoc)) {
         assocs.insert(name);
       }
-      if (entry.second->attributes().contains(attribute_set::key::comm)) {
+      if (entry.second->attributes().contains(attribute_set::key::Comm)) {
         comms.insert(name);
       }
 
-      if (entry.second->attributes().contains(attribute_set::key::colors)) {
+      if (entry.second->attributes().contains(attribute_set::key::Colors)) {
         std::string colorAtt
-            = entry.second->attributes().get_string(attribute_set::key::colors);
+            = entry.second->attributes().get_string(attribute_set::key::Colors);
         std::vector<std::string> color;
         size_t idx = 0;
         do {
@@ -290,23 +290,23 @@ preprocessed_print_data getPrintData(
         colors[name] = color;
       }
 
-      if (entry.second->attributes().contains(attribute_set::key::bracket)) {
+      if (entry.second->attributes().contains(attribute_set::key::Bracket)) {
         brackets[entry.second->get_symbol()->get_sort().get()].push_back(
             entry.second->get_symbol());
       }
 
-      readMultimap(name, entry.second, leftAssoc, attribute_set::key::left);
-      readMultimap(name, entry.second, rightAssoc, attribute_set::key::right);
+      readMultimap(name, entry.second, leftAssoc, attribute_set::key::Left);
+      readMultimap(name, entry.second, rightAssoc, attribute_set::key::Right);
       readMultimap(
-          name, entry.second, priorities, attribute_set::key::priorities);
+          name, entry.second, priorities, attribute_set::key::Priorities);
     }
   }
 
   for (auto const &entry : def->get_sort_declarations()) {
     std::string name = entry.first;
-    if (entry.second->attributes().contains(attribute_set::key::hook)) {
+    if (entry.second->attributes().contains(attribute_set::key::Hook)) {
       hooks[name]
-          = entry.second->attributes().get_string(attribute_set::key::hook);
+          = entry.second->attributes().get_string(attribute_set::key::Hook);
     }
   }
 

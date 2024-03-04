@@ -29,7 +29,7 @@ cl::opt<std::string> rule_location(
     cl::cat(k_rule_cat));
 
 std::string getSource(kore_axiom_declaration *axiom) {
-  auto *sourceAtt = axiom->attributes().get(attribute_set::key::source).get();
+  auto *sourceAtt = axiom->attributes().get(attribute_set::key::Source).get();
   assert(sourceAtt->get_arguments().size() == 1);
 
   auto *strPattern
@@ -39,7 +39,7 @@ std::string getSource(kore_axiom_declaration *axiom) {
 
 location getLocation(kore_axiom_declaration *axiom) {
   auto *locationAtt
-      = axiom->attributes().get(attribute_set::key::location).get();
+      = axiom->attributes().get(attribute_set::key::Location).get();
   assert(locationAtt->get_arguments().size() == 1);
 
   auto *strPattern
@@ -112,13 +112,13 @@ int main(int argc, char **argv) {
 
   // Iterate through axioms.
   for (auto *axiom : kore_ast.get()->get_axioms()) {
-    if (axiom->attributes().contains(attribute_set::key::source)) {
+    if (axiom->attributes().contains(attribute_set::key::Source)) {
       auto source = getSource(axiom);
       if (source.find(loc.filename) != std::string::npos) {
         auto source_loc = getLocation(axiom);
         if (checkRanges(loc, source_loc, loc.start_column != -1)) {
           rule_labels.push_back(
-              axiom->attributes().get_string(attribute_set::key::label));
+              axiom->attributes().get_string(attribute_set::key::Label));
         }
       }
     }

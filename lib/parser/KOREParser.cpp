@@ -49,7 +49,7 @@ static std::string str(token tok) {
   case token::COLONEQUAL: return ":=";
   case token::ID: return "<identifier>";
   case token::STRING: return "<string>";
-  case token::TOKEN_EOF: return "<EOF>";
+  case token::TokenEof: return "<EOF>";
   default: abort();
   }
 }
@@ -85,13 +85,13 @@ ptr<kore_definition> kore_parser::definition() {
   attributes(result.get());
   consume(token::RIGHTBRACKET);
   modules(result.get());
-  consume(token::TOKEN_EOF);
+  consume(token::TokenEof);
   return result;
 }
 
 sptr<kore_pattern> kore_parser::pattern() {
   auto result = pattern_internal();
-  consume(token::TOKEN_EOF);
+  consume(token::TokenEof);
   return result;
 }
 
@@ -143,7 +143,7 @@ void kore_parser::sentences(kore_module *node) {
 
 std::vector<ptr<kore_declaration>> kore_parser::declarations() {
   std::vector<ptr<kore_declaration>> decls;
-  while (peek() != token::TOKEN_EOF) {
+  while (peek() != token::TokenEof) {
     auto decl = sentence();
     decls.push_back(std::move(decl));
   }

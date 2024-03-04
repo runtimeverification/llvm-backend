@@ -103,7 +103,7 @@ yyin = in_;
   if(YYSTATE != INITIAL)
     error(*loc, "Either a comment or string hasn't been closed\n");
 
-  return token::TOKEN_EOF;
+  return token::TokenEof;
 }
 
 <*>. { error(*loc, std::string("Unknown token \"") + yytext + std::string("\"\n")); }
@@ -185,7 +185,7 @@ int kore_scanner::scan() {
     default:
       lexeme = yyget_text(scanner_);
     }
-  } while (token != token::TOKEN_EOF);
+  } while (token != token::TokenEof);
 
   return 0;
 }

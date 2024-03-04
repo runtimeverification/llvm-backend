@@ -107,11 +107,11 @@ create_static_term::operator()(kore_pattern *pattern) {
     }
     kore_symbol_declaration *symbolDecl
         = definition_->get_symbol_declarations().at(symbol->get_name());
-    if (symbolDecl->attributes().contains(attribute_set::key::sort_injection)
+    if (symbolDecl->attributes().contains(attribute_set::key::SortInjection)
         && dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get())
                    ->get_category(definition_)
                    .cat
-               == SortCategory::Symbol) {
+               == sort_category::Symbol) {
       std::pair<llvm::Constant *, bool> val
           = (*this)(constructor->get_arguments()[0].get());
       if (val.second) {
@@ -135,12 +135,12 @@ create_static_term::operator()(kore_pattern *pattern) {
 llvm::Constant *
 create_static_term::create_token(value_type sort, std::string contents) {
   switch (sort.cat) {
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set:
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set:
     assert(false && "cannot create tokens of collection category");
-  case SortCategory::Int: {
+  case sort_category::Int: {
     llvm::Constant *global = module_->getOrInsertGlobal(
         "int_" + contents, llvm::StructType::getTypeByName(
                                module_->getContext(), int_wrapper_struct));
@@ -194,7 +194,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
             module_->getContext(), int_wrapper_struct),
         globalVar, Idxs);
   }
-  case SortCategory::Float: {
+  case sort_category::Float: {
     llvm::Constant *global = module_->getOrInsertGlobal(
         "float_" + contents, llvm::StructType::getTypeByName(
                                  module_->getContext(), float_wrapper_struct));
@@ -290,20 +290,20 @@ create_static_term::create_token(value_type sort, std::string contents) {
             module_->getContext(), float_wrapper_struct),
         globalVar, Idxs);
   }
-  case SortCategory::StringBuffer:
+  case sort_category::StringBuffer:
     assert(false && "not implemented yet: tokens");
-  case SortCategory::MInt: {
+  case sort_category::MInt: {
     size_t idx = contents.find_first_of("pP");
     assert(idx != std::string::npos);
     uint64_t bits = std::stoi(contents.substr(idx + 1));
     return llvm::ConstantInt::get(
         llvm::IntegerType::get(ctx_, bits), contents.substr(0, idx), 10);
   }
-  case SortCategory::Bool:
+  case sort_category::Bool:
     return llvm::ConstantInt::get(
         llvm::Type::getInt1Ty(ctx_), contents == "true");
-  case SortCategory::Variable:
-  case SortCategory::Symbol: {
+  case sort_category::Variable:
+  case sort_category::Symbol: {
     llvm::StructType *StringType = llvm::StructType::get(
         ctx_,
         {llvm::StructType::getTypeByName(
@@ -329,7 +329,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
         global, llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
                     module_->getContext(), block_struct)));
   }
-  case SortCategory::Uncomputed: abort();
+  case sort_category::Uncomputed: abort();
   }
 }
 // NOLINTEND(*-cognitive-complexity)

@@ -51,7 +51,7 @@ void decision::operator()(decision_node *entry) {
   if (entry == fail_node::get()) {
     if (fail_pattern_) {
       llvm::Value *val = load(std::make_pair(
-          "_1", getvalue_type({SortCategory::Symbol, 0}, module_)));
+          "_1", getvalue_type({sort_category::Symbol, 0}, module_)));
       fail_subject_->addIncoming(
           new llvm::BitCastInst(
               val, llvm::Type::getInt8PtrTy(ctx_), "", current_block_),
@@ -256,10 +256,10 @@ void switch_node::codegen(decision *d) {
                        ->get_category(d->definition_);
 
         switch (cat.cat) {
-        case SortCategory::Map:
-        case SortCategory::RangeMap:
-        case SortCategory::List:
-        case SortCategory::Set: Child = ChildPtr; break;
+        case sort_category::Map:
+        case sort_category::RangeMap:
+        case sort_category::List:
+        case sort_category::Set: Child = ChildPtr; break;
         default:
           Child = new llvm::LoadInst(
               getvalue_type(cat, d->module_), ChildPtr,
@@ -269,7 +269,7 @@ void switch_node::codegen(decision *d) {
         auto *BlockPtr
             = llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
                 d->module_->getContext(), block_struct));
-        if (symbolDecl->attributes().contains(attribute_set::key::binder)) {
+        if (symbolDecl->attributes().contains(attribute_set::key::Binder)) {
           if (offset == 0) {
             Renamed = llvm::CallInst::Create(
                 getOrInsertFunction(
@@ -389,21 +389,21 @@ void make_pattern_node::codegen(decision *d) {
  */
 static std::string legacy_value_type_to_string(value_type sort) {
   switch (sort.cat) {
-  case SortCategory::Int: return "%mpz*";
-  case SortCategory::Bool: return "i1";
-  case SortCategory::Float: return "%floating*";
-  case SortCategory::Symbol:
-  case SortCategory::Variable: return "%block*";
+  case sort_category::Int: return "%mpz*";
+  case sort_category::Bool: return "i1";
+  case sort_category::Float: return "%floating*";
+  case sort_category::Symbol:
+  case sort_category::Variable: return "%block*";
 
   // Cases below are deliberately not implemented; the return values are
   // placeholders to help with debugging only.
-  case SortCategory::Map: return "<map>";
-  case SortCategory::RangeMap: return "<rangemap>";
-  case SortCategory::List: return "<list>";
-  case SortCategory::Set: return "<set>";
-  case SortCategory::StringBuffer: return "<stringbuffer>";
-  case SortCategory::MInt: return "<mint>";
-  case SortCategory::Uncomputed: abort();
+  case sort_category::Map: return "<map>";
+  case sort_category::RangeMap: return "<rangemap>";
+  case sort_category::List: return "<list>";
+  case sort_category::Set: return "<set>";
+  case sort_category::StringBuffer: return "<stringbuffer>";
+  case sort_category::MInt: return "<mint>";
+  case sort_category::Uncomputed: abort();
   }
 }
 
@@ -458,9 +458,9 @@ void function_node::codegen(decision *d) {
       size_t ordinal = std::stoll(function_.substr(15));
       kore_axiom_declaration *axiom
           = d->definition_->get_axiom_by_ordinal(ordinal);
-      if (axiom->attributes().contains(attribute_set::key::label)) {
+      if (axiom->attributes().contains(attribute_set::key::Label)) {
         debugName
-            = axiom->attributes().get_string(attribute_set::key::label) + ".sc";
+            = axiom->attributes().get_string(attribute_set::key::Label) + ".sc";
       }
     }
     std::vector<llvm::Value *> functionArgs;
@@ -545,7 +545,7 @@ void iter_next_node::codegen(decision *d) {
   llvm::Value *arg = d->load(std::make_pair(iterator_, iterator_type_));
 
   llvm::FunctionType *funcType = llvm::FunctionType::get(
-      getvalue_type({SortCategory::Symbol, 0}, d->module_), {arg->getType()},
+      getvalue_type({sort_category::Symbol, 0}, d->module_), {arg->getType()},
       false);
   llvm::Function *func = getOrInsertFunction(d->module_, hook_name_, funcType);
   auto *Call = llvm::CallInst::Create(
@@ -636,7 +636,7 @@ llvm::Value *decision::get_tag(llvm::Value *val) {
   auto *res = llvm::CallInst::Create(
       getOrInsertFunction(
           module_, "getTag", llvm::Type::getInt32Ty(ctx_),
-          getvalue_type({SortCategory::Symbol, 0}, module_)),
+          getvalue_type({sort_category::Symbol, 0}, module_)),
       val, "tag", current_block_);
   setDebugLoc(res);
   return res;
@@ -755,10 +755,10 @@ void makeEvalOrAnywhereFunction(
                    ->get_category(definition);
     debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
       args.push_back(llvm::PointerType::getUnqual(getvalue_type(cat, module)));
       cats.push_back(cat);
       break;
@@ -823,7 +823,7 @@ void abortWhenStuck(
         llvm::ConstantInt::get(
             llvm::Type::getInt64Ty(Ctx),
             ((uint64_t)symbol->get_tag() << 32 | 1)),
-        getvalue_type({SortCategory::Symbol, 0}, module));
+        getvalue_type({sort_category::Symbol, 0}, module));
   } else {
     llvm::Value *BlockHeader = getBlockHeader(module, d, symbol, BlockType);
     llvm::Value *Block = allocateTerm(BlockType, current_block);
@@ -937,27 +937,27 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   std::vector<llvm::Value *> roots;
   for (auto type : types) {
     switch (type.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
       nroots++;
       ptrTypes.push_back(
           llvm::PointerType::getUnqual(getvalue_type(type, module)));
       roots.push_back(args[i]);
       break;
-    case SortCategory::Int:
-    case SortCategory::Float:
-    case SortCategory::StringBuffer:
-    case SortCategory::Symbol:
-    case SortCategory::Variable:
+    case sort_category::Int:
+    case sort_category::Float:
+    case sort_category::StringBuffer:
+    case sort_category::Symbol:
+    case sort_category::Variable:
       nroots++;
       ptrTypes.push_back(getvalue_type(type, module));
       roots.push_back(args[i]);
       break;
-    case SortCategory::Bool:
-    case SortCategory::MInt: break;
-    case SortCategory::Uncomputed: abort();
+    case sort_category::Bool:
+    case sort_category::MInt: break;
+    case sort_category::Uncomputed: abort();
     }
     i++;
   }
@@ -982,15 +982,15 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   i = 0;
   for (auto cat : types) {
     switch (cat.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
-    case SortCategory::StringBuffer:
-    case SortCategory::Symbol:
-    case SortCategory::Variable:
-    case SortCategory::Int:
-    case SortCategory::Float:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
+    case sort_category::StringBuffer:
+    case sort_category::Symbol:
+    case sort_category::Variable:
+    case sort_category::Int:
+    case sort_category::Float:
       elements.push_back(llvm::ConstantStruct::get(
           llvm::StructType::getTypeByName(
               module->getContext(), layoutitem_struct),
@@ -1000,9 +1000,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
               llvm::Type::getInt16Ty(module->getContext()),
               (int)cat.cat + cat.bits)));
       break;
-    case SortCategory::Bool:
-    case SortCategory::MInt: break;
-    case SortCategory::Uncomputed: abort();
+    case sort_category::Bool:
+    case sort_category::MInt: break;
+    case sort_category::Uncomputed: abort();
     }
   }
   auto *layoutArr = llvm::ConstantArray::get(
@@ -1049,15 +1049,15 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
   std::vector<llvm::Value *> results;
   for (auto type : types) {
     switch (type.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
-    case SortCategory::StringBuffer:
-    case SortCategory::Symbol:
-    case SortCategory::Variable:
-    case SortCategory::Int:
-    case SortCategory::Float: results.push_back(phis[rootIdx++]); break;
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
+    case sort_category::StringBuffer:
+    case sort_category::Symbol:
+    case sort_category::Variable:
+    case sort_category::Int:
+    case sort_category::Float: results.push_back(phis[rootIdx++]); break;
     default: results.push_back(args[i]);
     }
     i++;
@@ -1068,9 +1068,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> stepFunctionHeader(
 void makeStepFunction(
     kore_definition *definition, llvm::Module *module, decision_node *dt,
     bool search) {
-  auto *blockType = getvalue_type({SortCategory::Symbol, 0}, module);
+  auto *blockType = getvalue_type({sort_category::Symbol, 0}, module);
   auto *debugType
-      = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
+      = getDebugType({sort_category::Symbol, 0}, "SortGeneratedTopCell{}");
   llvm::FunctionType *funcType = nullptr;
   std::string name;
   if (search) {
@@ -1120,16 +1120,16 @@ void makeStepFunction(
         block);
   }
   initDebugParam(
-      matchFunc, 0, "subject", {SortCategory::Symbol, 0},
+      matchFunc, 0, "subject", {sort_category::Symbol, 0},
       "SortGeneratedTopCell{}");
   llvm::BranchInst::Create(stuck, pre_stuck);
   auto result = stepFunctionHeader(
-      0, module, definition, block, stuck, {val}, {{SortCategory::Symbol, 0}});
+      0, module, definition, block, stuck, {val}, {{sort_category::Symbol, 0}});
   auto *collectedVal = result.first[0];
   collectedVal->setName("_1");
   decision codegen(
       definition, result.second, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, HasSearchResults);
+      {sort_category::Symbol, 0}, nullptr, nullptr, nullptr, HasSearchResults);
   codegen.store(
       std::make_pair(collectedVal->getName().str(), collectedVal->getType()),
       collectedVal);
@@ -1149,19 +1149,19 @@ void makeStepFunction(
 void makeMatchReasonFunctionWrapper(
     kore_definition *definition, llvm::Module *module,
     kore_axiom_declaration *axiom, std::string const &name) {
-  auto *blockType = getvalue_type({SortCategory::Symbol, 0}, module);
+  auto *blockType = getvalue_type({sort_category::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(
       llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   std::string wrapperName = "match_" + std::to_string(axiom->get_ordinal());
   llvm::Function *matchFunc
       = getOrInsertFunction(module, wrapperName, funcType);
   std::string debugName = name;
-  if (axiom->attributes().contains(attribute_set::key::label)) {
-    debugName = axiom->attributes().get_string(attribute_set::key::label)
+  if (axiom->attributes().contains(attribute_set::key::Label)) {
+    debugName = axiom->attributes().get_string(attribute_set::key::Label)
                 + "_tailcc_" + ".match";
   }
   auto *debugType
-      = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
+      = getDebugType({sort_category::Symbol, 0}, "SortGeneratedTopCell{}");
   resetDebugLoc();
   initDebugFunction(
       debugName, debugName,
@@ -1181,18 +1181,18 @@ void makeMatchReasonFunctionWrapper(
 void makeMatchReasonFunction(
     kore_definition *definition, llvm::Module *module,
     kore_axiom_declaration *axiom, decision_node *dt) {
-  auto *blockType = getvalue_type({SortCategory::Symbol, 0}, module);
+  auto *blockType = getvalue_type({sort_category::Symbol, 0}, module);
   llvm::FunctionType *funcType = llvm::FunctionType::get(
       llvm::Type::getVoidTy(module->getContext()), {blockType}, false);
   std::string name = "intern_match_" + std::to_string(axiom->get_ordinal());
   llvm::Function *matchFunc = getOrInsertFunction(module, name, funcType);
   std::string debugName = name;
-  if (axiom->attributes().contains(attribute_set::key::label)) {
+  if (axiom->attributes().contains(attribute_set::key::Label)) {
     debugName
-        = axiom->attributes().get_string(attribute_set::key::label) + ".match";
+        = axiom->attributes().get_string(attribute_set::key::Label) + ".match";
   }
   auto *debugType
-      = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
+      = getDebugType({sort_category::Symbol, 0}, "SortGeneratedTopCell{}");
   resetDebugLoc();
   initDebugFunction(
       debugName, debugName,
@@ -1231,13 +1231,13 @@ void makeMatchReasonFunction(
       dt, module, block, pre_stuck, fail, &choiceBuffer, &choiceDepth, &jump);
 
   initDebugParam(
-      matchFunc, 0, "subject", {SortCategory::Symbol, 0},
+      matchFunc, 0, "subject", {sort_category::Symbol, 0},
       "SortGeneratedTopCell{}");
   llvm::BranchInst::Create(stuck, pre_stuck);
   val->setName("_1");
   decision codegen(
       definition, block, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, FailSubject, FailPattern, FailSort, nullptr);
+      {sort_category::Symbol, 0}, FailSubject, FailPattern, FailSort, nullptr);
   codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
   llvm::ReturnInst::Create(module->getContext(), stuck);
 
@@ -1279,7 +1279,7 @@ kore_pattern *makePartialTerm(
 void makeStepFunction(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module, partial_step res) {
-  auto *blockType = getvalue_type({SortCategory::Symbol, 0}, module);
+  auto *blockType = getvalue_type({sort_category::Symbol, 0}, module);
   std::vector<llvm::Type *> argTypes;
   std::vector<llvm::Metadata *> debugTypes;
   for (auto const &res : res.residuals) {
@@ -1288,10 +1288,10 @@ void makeStepFunction(
     auto cat = argSort->get_category(definition);
     debugTypes.push_back(getDebugType(cat, ast_to_string(*argSort)));
     switch (cat.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
       argTypes.push_back(
           llvm::PointerType::getUnqual(getvalue_type(cat, module)));
       break;
@@ -1299,7 +1299,7 @@ void makeStepFunction(
     }
   }
   auto *blockDebugType
-      = getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}");
+      = getDebugType({sort_category::Symbol, 0}, "SortGeneratedTopCell{}");
   llvm::FunctionType *funcType
       = llvm::FunctionType::get(blockType, argTypes, false);
   std::string name = "step_" + std::to_string(axiom->get_ordinal());
@@ -1351,7 +1351,7 @@ void makeStepFunction(
   i = 0;
   decision codegen(
       definition, header.second, fail, jump, choiceBuffer, choiceDepth, module,
-      {SortCategory::Symbol, 0}, nullptr, nullptr, nullptr, nullptr);
+      {sort_category::Symbol, 0}, nullptr, nullptr, nullptr, nullptr);
   for (auto *val : header.first) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
     codegen.store(std::make_pair(val->getName().str(), val->getType()), val);

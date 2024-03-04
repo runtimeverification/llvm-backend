@@ -155,7 +155,7 @@ sptr<kore_sort> kore_composite_sort::substitute(substitution const &subst) {
 }
 
 value_type kore_composite_sort::get_category(kore_definition *definition) {
-  if (category_.cat != SortCategory::Uncomputed) {
+  if (category_.cat != sort_category::Uncomputed) {
     return category_;
   }
   std::string name = get_hook(definition);
@@ -164,7 +164,7 @@ value_type kore_composite_sort::get_category(kore_definition *definition) {
       auto const &att = definition->get_sort_declarations()
                             .at(param->get_name())
                             ->attributes();
-      auto const &natAtt = att.get(attribute_set::key::nat);
+      auto const &natAtt = att.get(attribute_set::key::Nat);
       assert(natAtt->get_arguments().size() == 1);
       auto *strPattern = dynamic_cast<kore_string_pattern *>(
           natAtt->get_arguments()[0].get());
@@ -181,10 +181,10 @@ value_type kore_composite_sort::get_category(kore_definition *definition) {
 std::string kore_composite_sort::get_hook(kore_definition *definition) const {
   auto const &att
       = definition->get_sort_declarations().at(this->get_name())->attributes();
-  if (!att.contains(attribute_set::key::hook)) {
+  if (!att.contains(attribute_set::key::Hook)) {
     return "STRING.String";
   }
-  auto const &hookAtt = att.get(attribute_set::key::hook);
+  auto const &hookAtt = att.get(attribute_set::key::Hook);
   assert(hookAtt->get_arguments().size() == 1);
   auto *strPattern
       = dynamic_cast<kore_string_pattern *>(hookAtt->get_arguments()[0].get());
@@ -192,33 +192,33 @@ std::string kore_composite_sort::get_hook(kore_definition *definition) const {
 }
 
 value_type kore_composite_sort::get_category(std::string const &hook_name) {
-  SortCategory category = SortCategory::Uncomputed;
+  sort_category category = sort_category::Uncomputed;
   uint64_t bits = 0;
   if (hook_name == "MAP.Map") {
-    category = SortCategory::Map;
+    category = sort_category::Map;
   } else if (hook_name == "RANGEMAP.RangeMap") {
-    category = SortCategory::RangeMap;
+    category = sort_category::RangeMap;
   } else if (hook_name == "LIST.List") {
-    category = SortCategory::List;
+    category = sort_category::List;
   } else if (hook_name == "SET.Set") {
-    category = SortCategory::Set;
+    category = sort_category::Set;
   } else if (hook_name == "INT.Int") {
-    category = SortCategory::Int;
+    category = sort_category::Int;
   } else if (hook_name == "FLOAT.Float") {
-    category = SortCategory::Float;
+    category = sort_category::Float;
   } else if (hook_name == "BUFFER.StringBuffer") {
-    category = SortCategory::StringBuffer;
+    category = sort_category::StringBuffer;
   } else if (hook_name == "BOOL.Bool") {
-    category = SortCategory::Bool;
+    category = sort_category::Bool;
   } else if (hook_name == "KVAR.KVar") {
-    category = SortCategory::Variable;
+    category = sort_category::Variable;
     // we expect the "hook" of a MInt to be of the form "MINT.MInt N" for some
     // bitwidth N
   } else if (hook_name.substr(0, 10) == "MINT.MInt ") {
-    category = SortCategory::MInt;
+    category = sort_category::MInt;
     bits = std::stoi(hook_name.substr(10));
   } else {
-    category = SortCategory::Symbol;
+    category = sort_category::Symbol;
   }
   return {category, bits};
 }
@@ -253,19 +253,19 @@ std::string kore_symbol::layout_string(kore_definition *definition) const {
     auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
     value_type cat = sort->get_category(definition);
     switch (cat.cat) {
-    case SortCategory::Map: result.push_back('1'); break;
-    case SortCategory::RangeMap: result.push_back('b'); break;
-    case SortCategory::List: result.push_back('2'); break;
-    case SortCategory::Set: result.push_back('3'); break;
-    case SortCategory::Int: result.push_back('4'); break;
-    case SortCategory::Float: result.push_back('5'); break;
-    case SortCategory::StringBuffer: result.push_back('6'); break;
-    case SortCategory::Bool: result.push_back('7'); break;
-    case SortCategory::Variable: result.push_back('8'); break;
-    case SortCategory::MInt:
+    case sort_category::Map: result.push_back('1'); break;
+    case sort_category::RangeMap: result.push_back('b'); break;
+    case sort_category::List: result.push_back('2'); break;
+    case sort_category::Set: result.push_back('3'); break;
+    case sort_category::Int: result.push_back('4'); break;
+    case sort_category::Float: result.push_back('5'); break;
+    case sort_category::StringBuffer: result.push_back('6'); break;
+    case sort_category::Bool: result.push_back('7'); break;
+    case sort_category::Variable: result.push_back('8'); break;
+    case sort_category::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");
-    case SortCategory::Symbol: result.push_back('0'); break;
-    case SortCategory::Uncomputed: abort();
+    case sort_category::Symbol: result.push_back('0'); break;
+    case sort_category::Uncomputed: abort();
     }
   }
   return result;
@@ -1132,8 +1132,8 @@ sptr<kore_pattern> kore_composite_pattern::expand_macros(
 
   size_t i = 0;
   for (auto const &decl : macros) {
-    if ((decl->attributes().contains(attribute_set::key::macro)
-         || decl->attributes().contains(attribute_set::key::macro_rec))
+    if ((decl->attributes().contains(attribute_set::key::Macro)
+         || decl->attributes().contains(attribute_set::key::MacroRec))
         && reverse) {
       i++;
       continue;
@@ -1146,8 +1146,8 @@ sptr<kore_pattern> kore_composite_pattern::expand_macros(
     substitution subst;
     bool matches = lhs->matches(subst, subsorts, overloads, applied);
     if (matches
-        && (decl->attributes().contains(attribute_set::key::macro_rec)
-            || decl->attributes().contains(attribute_set::key::alias_rec)
+        && (decl->attributes().contains(attribute_set::key::MacroRec)
+            || decl->attributes().contains(attribute_set::key::AliasRec)
             || !applied_rules.contains(i))) {
       std::set<size_t> oldAppliedRules = applied_rules;
       applied_rules.insert(i);
@@ -1275,12 +1275,12 @@ void kore_axiom_declaration::add_pattern(sptr<kore_pattern> pattern) {
 
 bool kore_axiom_declaration::is_required() const {
   constexpr auto keys_to_drop = std::array{
-      attribute_set::key::assoc,          attribute_set::key::comm,
-      attribute_set::key::idem,           attribute_set::key::unit,
-      attribute_set::key::functional,     attribute_set::key::constructor,
-      attribute_set::key::total,          attribute_set::key::subsort,
-      attribute_set::key::ceil,           attribute_set::key::non_executable,
-      attribute_set::key::simplification,
+      attribute_set::key::Assoc,          attribute_set::key::Comm,
+      attribute_set::key::Idem,           attribute_set::key::Unit,
+      attribute_set::key::Functional,     attribute_set::key::Constructor,
+      attribute_set::key::Total,          attribute_set::key::Subsort,
+      attribute_set::key::Ceil,           attribute_set::key::NonExecutable,
+      attribute_set::key::Simplification,
   };
 
   return std::none_of(
@@ -1337,7 +1337,7 @@ kore_alias_declaration::get_substitution(kore_composite_pattern *subject) {
 }
 
 bool kore_symbol_declaration::is_anywhere() const {
-  return attributes().contains(attribute_set::key::anywhere);
+  return attributes().contains(attribute_set::key::Anywhere);
 }
 
 void kore_module::add_declaration(sptr<kore_declaration> declaration) {

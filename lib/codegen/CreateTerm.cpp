@@ -144,10 +144,10 @@ std::string blockheader_struct = "blockheader";
 llvm::Type *getParamType(value_type sort, llvm::Module *module) {
   llvm::Type *type = getvalue_type(sort, module);
   switch (sort.cat) {
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set: type = llvm::PointerType::getUnqual(type); break;
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set: type = llvm::PointerType::getUnqual(type); break;
   default: break;
   }
   return type;
@@ -159,32 +159,32 @@ llvm::StructType *getBlockType(llvm::Module *module) {
 
 llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
   switch (sort.cat) {
-  case SortCategory::Map:
+  case sort_category::Map:
     return llvm::StructType::getTypeByName(module->getContext(), map_struct);
-  case SortCategory::RangeMap:
+  case sort_category::RangeMap:
     return llvm::StructType::getTypeByName(
         module->getContext(), rangemap_struct);
-  case SortCategory::List:
+  case sort_category::List:
     return llvm::StructType::getTypeByName(module->getContext(), list_struct);
-  case SortCategory::Set:
+  case sort_category::Set:
     return llvm::StructType::getTypeByName(module->getContext(), set_struct);
-  case SortCategory::Int:
+  case sort_category::Int:
     return llvm::PointerType::getUnqual(
         llvm::StructType::getTypeByName(module->getContext(), int_struct));
-  case SortCategory::Float:
+  case sort_category::Float:
     return llvm::PointerType::getUnqual(
         llvm::StructType::getTypeByName(module->getContext(), float_struct));
-  case SortCategory::StringBuffer:
+  case sort_category::StringBuffer:
     return llvm::PointerType::getUnqual(
         llvm::StructType::getTypeByName(module->getContext(), buffer_struct));
-  case SortCategory::Bool: return llvm::Type::getInt1Ty(module->getContext());
-  case SortCategory::MInt:
+  case sort_category::Bool: return llvm::Type::getInt1Ty(module->getContext());
+  case sort_category::MInt:
     return llvm::IntegerType::get(module->getContext(), sort.bits);
-  case SortCategory::Symbol:
-  case SortCategory::Variable:
+  case sort_category::Symbol:
+  case sort_category::Variable:
     return llvm::PointerType::getUnqual(
         llvm::StructType::getTypeByName(module->getContext(), block_struct));
-  case SortCategory::Uncomputed: abort();
+  case sort_category::Uncomputed: abort();
   }
 }
 
@@ -456,7 +456,7 @@ llvm::Value *create_term::create_hook(
     size_t nwords = (cat.bits + 63) / 64;
     if (nwords == 0) {
       auto *staticTerm = new create_static_term(definition_, module_);
-      return staticTerm->create_token({SortCategory::Int, 0}, "0");
+      return staticTerm->create_token({sort_category::Int, 0}, "0");
     }
     auto *Ptr = allocateTerm(
         llvm::Type::getInt64Ty(ctx_),
@@ -490,7 +490,7 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         getOrInsertFunction(
             module_, "hook_MINT_import",
-            getvalue_type({SortCategory::Int, 0}, module_),
+            getvalue_type({sort_category::Int, 0}, module_),
             llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
             llvm::Type::getInt1Ty(ctx_)),
         {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
@@ -508,7 +508,7 @@ llvm::Value *create_term::create_hook(
     size_t nwords = (cat.bits + 63) / 64;
     if (nwords == 0) {
       auto *staticTerm = new create_static_term(definition_, module_);
-      return staticTerm->create_token({SortCategory::Int, 0}, "0");
+      return staticTerm->create_token({sort_category::Int, 0}, "0");
     }
     auto *Ptr = allocateTerm(
         llvm::Type::getInt64Ty(ctx_),
@@ -542,7 +542,7 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         getOrInsertFunction(
             module_, "hook_MINT_import",
-            getvalue_type({SortCategory::Int, 0}, module_),
+            getvalue_type({sort_category::Int, 0}, module_),
             llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
             llvm::Type::getInt1Ty(ctx_)),
         {Ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
@@ -560,7 +560,7 @@ llvm::Value *create_term::create_hook(
     llvm::Instruction *Ptr = llvm::CallInst::Create(
         getOrInsertFunction(
             module_, "hook_MINT_export", llvm::Type::getInt64PtrTy(ctx_),
-            getvalue_type({SortCategory::Int, 0}, module_),
+            getvalue_type({sort_category::Int, 0}, module_),
             llvm::Type::getInt64Ty(ctx_)),
         {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits)},
         "ptr", current_block_);
@@ -676,10 +676,10 @@ llvm::Value *create_term::create_function_call(
     llvm::Value *arg = alloc_arg(pattern, i, location_stack);
     i++;
     switch (concreteSort->get_category(definition_).cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set: {
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set: {
       if (!arg->getType()->isPointerTy()) {
         auto *AllocCollection
             = new llvm::AllocaInst(arg->getType(), 0, "", current_block_);
@@ -708,10 +708,10 @@ llvm::Value *create_term::create_function_call(
   std::vector<llvm::Type *> types;
   bool collection = false;
   switch (return_cat.cat) {
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set: collection = true; break;
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set: collection = true; break;
   default: sret = false; break;
   }
   llvm::Value *AllocSret = nullptr;
@@ -805,7 +805,7 @@ llvm::Value *create_term::not_injection_case(
   auto *BlockPtr = llvm::PointerType::getUnqual(
       llvm::StructType::getTypeByName(module_->getContext(), block_struct));
   auto *bitcast = new llvm::BitCastInst(Block, BlockPtr, "", current_block_);
-  if (symbolDecl->attributes().contains(attribute_set::key::binder)) {
+  if (symbolDecl->attributes().contains(attribute_set::key::Binder)) {
     auto *call = llvm::CallInst::Create(
         getOrInsertFunction(module_, "debruijnize", BlockPtr, BlockPtr),
         bitcast, "withIndices", current_block_);
@@ -834,8 +834,8 @@ bool create_term::populate_static_set(kore_pattern *pattern) {
     if (symbol->get_name() != "\\dv") {
       kore_symbol_declaration *symbolDecl
           = definition_->get_symbol_declarations().at(symbol->get_name());
-      if (symbolDecl->attributes().contains(attribute_set::key::function)
-          || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
+      if (symbolDecl->attributes().contains(attribute_set::key::Function)
+          || (symbolDecl->attributes().contains(attribute_set::key::Anywhere)
               && !is_anywhere_owise_)) {
         can_be_static = false;
       }
@@ -873,15 +873,15 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
     assert(symbol->is_concrete() && "not supported yet: sort variables");
     kore_symbol_declaration *symbolDecl
         = definition_->get_symbol_declarations().at(symbol->get_name());
-    if (symbolDecl->attributes().contains(attribute_set::key::function)
-        || (symbolDecl->attributes().contains(attribute_set::key::anywhere)
+    if (symbolDecl->attributes().contains(attribute_set::key::Function)
+        || (symbolDecl->attributes().contains(attribute_set::key::Anywhere)
             && !is_anywhere_owise_)) {
-      if (symbolDecl->attributes().contains(attribute_set::key::hook)) {
+      if (symbolDecl->attributes().contains(attribute_set::key::Hook)) {
         auto *sort
             = dynamic_cast<kore_composite_sort *>(constructor->get_sort().get());
         auto *strPattern = dynamic_cast<kore_string_pattern *>(
             symbolDecl->attributes()
-                .get(attribute_set::key::hook)
+                .get(attribute_set::key::Hook)
                 ->get_arguments()[0]
                 .get());
         std::string name = strPattern->get_contents();
@@ -889,7 +889,7 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
         proof_event p(definition_, module_);
         current_block_ = p.hook_event_pre(name, current_block_, location_stack);
         llvm::Value *val = create_hook(
-            symbolDecl->attributes().get(attribute_set::key::hook).get(),
+            symbolDecl->attributes().get(attribute_set::key::Hook).get(),
             constructor, location_stack);
         current_block_ = p.hook_event_post(val, sort, current_block_);
 
@@ -904,15 +904,15 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
         = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get())
               ->get_category(definition_)
               .cat;
-        symbolDecl->attributes().contains(attribute_set::key::sort_injection)
-        && (cat == SortCategory::Symbol)) {
+        symbolDecl->attributes().contains(attribute_set::key::SortInjection)
+        && (cat == sort_category::Symbol)) {
       std::pair<llvm::Value *, bool> val = create_allocation(
           constructor->get_arguments()[0].get(), location_stack);
       if (val.second) {
         llvm::Instruction *Tag = llvm::CallInst::Create(
             getOrInsertFunction(
                 module_, "getTag", llvm::Type::getInt32Ty(ctx_),
-                getvalue_type({SortCategory::Symbol, 0}, module_)),
+                getvalue_type({sort_category::Symbol, 0}, module_)),
             val.first, "tag", current_block_);
         setDebugLoc(Tag);
         auto *inj = definition_->get_inj_symbol();
@@ -1000,10 +1000,10 @@ bool makeFunction(
     llvm::Type *paramType = getvalue_type(cat, module);
     debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
       paramType = llvm::PointerType::getUnqual(paramType);
       break;
     default: break;
@@ -1016,10 +1016,10 @@ bool makeFunction(
   value_type returnCat = termType(pattern, params, definition);
   auto *returnType = getvalue_type(returnCat, module);
   switch (returnCat.cat) {
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set:
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set:
     returnType = llvm::PointerType::getUnqual(returnType);
     break;
   default: break;
@@ -1029,9 +1029,9 @@ bool makeFunction(
   llvm::Function *applyRule = getOrInsertFunction(module, name, funcType);
   initDebugAxiom(axiom->attributes());
   std::string debugName = name;
-  if (axiom->attributes().contains(attribute_set::key::label)) {
+  if (axiom->attributes().contains(attribute_set::key::Label)) {
     debugName
-        = axiom->attributes().get_string(attribute_set::key::label) + postfix;
+        = axiom->attributes().get_string(attribute_set::key::Label) + postfix;
   }
   initDebugFunction(
       debugName, debugName,
@@ -1065,7 +1065,7 @@ bool makeFunction(
   }
 
   if (big_step) {
-    llvm::Type *blockType = getvalue_type({SortCategory::Symbol, 0}, module);
+    llvm::Type *blockType = getvalue_type({sort_category::Symbol, 0}, module);
     llvm::Function *step = getOrInsertFunction(
         module, "k_step",
         llvm::FunctionType::get(blockType, {blockType}, false));
@@ -1119,10 +1119,10 @@ std::string makeApplyRuleFunction(
     llvm::Type *paramType = getvalue_type(cat, module);
     debugArgs.push_back(getDebugType(cat, ast_to_string(*sort)));
     switch (cat.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
       paramType = llvm::PointerType::getUnqual(paramType);
       break;
     default: break;
@@ -1133,7 +1133,7 @@ std::string makeApplyRuleFunction(
     paramNames.push_back(entry.first);
   }
   llvm::FunctionType *funcType = llvm::FunctionType::get(
-      getvalue_type({SortCategory::Symbol, 0}, module), paramTypes, false);
+      getvalue_type({sort_category::Symbol, 0}, module), paramTypes, false);
   std::string name = "apply_rule_" + std::to_string(axiom->get_ordinal());
 
   makeFunction(
@@ -1145,7 +1145,7 @@ std::string makeApplyRuleFunction(
   initDebugFunction(
       name, name,
       getDebugFunctionType(
-          getDebugType({SortCategory::Symbol, 0}, "SortGeneratedTopCell{}"),
+          getDebugType({sort_category::Symbol, 0}, "SortGeneratedTopCell{}"),
           debugArgs),
       definition, applyRule);
   applyRule->setCallingConv(llvm::CallingConv::Tail);
@@ -1171,10 +1171,10 @@ std::string makeApplyRuleFunction(
         residual.pattern->get_sort().get());
     auto cat = sort->get_category(definition);
     switch (cat.cat) {
-    case SortCategory::Map:
-    case SortCategory::RangeMap:
-    case SortCategory::List:
-    case SortCategory::Set:
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
       if (!arg->getType()->isPointerTy()) {
         auto *ptr = allocateTerm(
             arg->getType(), creator.get_current_block(), "koreAllocAlwaysGC");
@@ -1187,7 +1187,7 @@ std::string makeApplyRuleFunction(
     args.push_back(arg);
     types.push_back(arg->getType());
   }
-  llvm::Type *blockType = getvalue_type({SortCategory::Symbol, 0}, module);
+  llvm::Type *blockType = getvalue_type({sort_category::Symbol, 0}, module);
   llvm::Function *step = getOrInsertFunction(
       module, "step_" + std::to_string(axiom->get_ordinal()),
       llvm::FunctionType::get(blockType, types, false));
@@ -1219,26 +1219,26 @@ std::string makeSideConditionFunction(
 
 llvm::Type *getArgType(value_type cat, llvm::Module *mod) {
   switch (cat.cat) {
-  case SortCategory::Bool:
-  case SortCategory::MInt:
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set: {
+  case sort_category::Bool:
+  case sort_category::MInt:
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set: {
     return getvalue_type(cat, mod);
   }
-  case SortCategory::Int:
+  case sort_category::Int:
     return llvm::StructType::getTypeByName(mod->getContext(), int_struct);
-  case SortCategory::Float:
+  case sort_category::Float:
     return llvm::StructType::getTypeByName(mod->getContext(), float_struct);
-  case SortCategory::StringBuffer:
+  case sort_category::StringBuffer:
     return llvm::StructType::getTypeByName(mod->getContext(), buffer_struct);
-  case SortCategory::Symbol:
-  case SortCategory::Variable: {
+  case sort_category::Symbol:
+  case sort_category::Variable: {
     return getBlockType(mod);
   }
 
-  case SortCategory::Uncomputed:
+  case sort_category::Uncomputed:
   default: {
     abort();
   }
@@ -1247,10 +1247,10 @@ llvm::Type *getArgType(value_type cat, llvm::Module *mod) {
 
 bool isCollectionSort(value_type cat) {
   switch (cat.cat) {
-  case SortCategory::Map:
-  case SortCategory::RangeMap:
-  case SortCategory::List:
-  case SortCategory::Set: return true;
+  case sort_category::Map:
+  case sort_category::RangeMap:
+  case sort_category::List:
+  case sort_category::Set: return true;
   default: return false;
   }
 }

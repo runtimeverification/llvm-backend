@@ -21,9 +21,9 @@ using namespace kllvm;
 using namespace kllvm::parser;
 
 enum kore_file_format {
-  detect,
-  text,
-  binary,
+  Detect,
+  Text,
+  Binary,
 };
 
 cl::OptionCategory kore_convert_cat("kore-convert options");
@@ -35,9 +35,9 @@ cl::opt<std::string> input_filename(
 cl::opt<kore_file_format> input_format(
     "from", cl::desc("Specify input file format"),
     cl::values(
-        clEnumVal(detect, "Detect input format automatically"),
-        clEnumVal(text, "Textual KORE"), clEnumVal(binary, "Binary KORE")),
-    cl::init(detect), cl::cat(kore_convert_cat));
+        clEnumVal(Detect, "Detect input format automatically"),
+        clEnumVal(Text, "Textual KORE"), clEnumVal(Binary, "Binary KORE")),
+    cl::init(Detect), cl::cat(kore_convert_cat));
 
 cl::opt<std::string> output_filename(
     "o", cl::desc("Specify output filename"), cl::value_desc("filename"),
@@ -46,9 +46,9 @@ cl::opt<std::string> output_filename(
 cl::opt<kore_file_format> output_format(
     "to", cl::desc("Specify output file format"),
     cl::values(
-        clEnumVal(detect, "Convert binary <=> text"),
-        clEnumVal(text, "Textual KORE"), clEnumVal(binary, "Binary KORE")),
-    cl::init(detect), cl::cat(kore_convert_cat));
+        clEnumVal(Detect, "Convert binary <=> text"),
+        clEnumVal(Text, "Textual KORE"), clEnumVal(Binary, "Binary KORE")),
+    cl::init(Detect), cl::cat(kore_convert_cat));
 
 cl::opt<bool> force_binary(
     "F", cl::desc("Force binary output on stdout"), cl::cat(kore_convert_cat));
@@ -78,15 +78,15 @@ sptr<kore_pattern> get_input_pattern() {
   auto get_binary = [&]() { return deserialize_pattern(input_filename); };
 
   switch (input_format) {
-  case text: return get_text();
-  case binary: return get_binary();
+  case Text: return get_text();
+  case Binary: return get_binary();
 
-  case detect: {
+  case Detect: {
     if (has_binary_kore_header(input_filename)) {
-      input_format = binary;
+      input_format = Binary;
       return get_binary();
     }
-    input_format = text;
+    input_format = Text;
     return get_text();
 
     break;
@@ -109,11 +109,11 @@ serializer::flags get_flags() {
   auto ret = serializer::NONE;
 
   if (no_header) {
-    ret = static_cast<serializer::flags>(ret | serializer::DROP_HEADER);
+    ret = static_cast<serializer::flags>(ret | serializer::DropHeader);
   }
 
   if (no_arity) {
-    ret = static_cast<serializer::flags>(ret | serializer::DROP_ARITY);
+    ret = static_cast<serializer::flags>(ret | serializer::DropArity);
   }
 
   return ret;
@@ -129,34 +129,34 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if (output_format == detect) {
-    output_format = input_format == text ? binary : text;
+  if (output_format == Detect) {
+    output_format = input_format == Text ? Binary : Text;
   }
 
-  if (output_format == text && no_header) {
+  if (output_format == Text && no_header) {
     std::cerr << "-k only applies to binary output\n"
               << "use --to=binary for binary input\n";
     return 2;
   }
 
-  if (output_format == text && no_arity) {
+  if (output_format == Text && no_arity) {
     std::cerr << "-a only applies to binary output\n"
               << "use --to=binary for binary input\n";
     return 3;
   }
 
-  if (output_format == binary && output_filename == "-" && !force_binary) {
+  if (output_format == Binary && output_filename == "-" && !force_binary) {
     std::cerr << "Not outputting binary KORE to stdout\n"
               << "use -o to specify output file, or -F to force stdout\n";
     return 4;
   }
 
-  if (output_format == text) {
+  if (output_format == Text) {
     dump_text(input);
     return 0;
   }
 
-  if (output_format == binary) {
+  if (output_format == Binary) {
     auto s = serializer(get_flags());
     input->serialize_to(s);
 

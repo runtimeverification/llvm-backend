@@ -198,7 +198,7 @@ int main(int argc, char **argv) {
   for (auto const &entry : definition->get_symbols()) {
     auto *symbol = entry.second;
     auto *decl = definition->get_symbol_declarations().at(symbol->get_name());
-    if (decl->attributes().contains(attribute_set::key::function)
+    if (decl->attributes().contains(attribute_set::key::Function)
         && !decl->is_hooked()) {
       auto filename = get_indexed_filename(index, decl);
       auto *funcDt = parseYamldecisionTree(

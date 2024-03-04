@@ -219,25 +219,25 @@ void bind_ast(py::module_ &m) {
 
   /* Data Types */
 
-  py::enum_<SortCategory>(ast, "SortCategory")
-      .value("Uncomputed", SortCategory::Uncomputed)
-      .value("Map", SortCategory::Map)
-      .value("RangeMap", SortCategory::RangeMap)
-      .value("List", SortCategory::List)
-      .value("Set", SortCategory::Set)
-      .value("Int", SortCategory::Int)
-      .value("Float", SortCategory::Float)
-      .value("StringBuffer", SortCategory::StringBuffer)
-      .value("Bool", SortCategory::Bool)
-      .value("Symbol", SortCategory::Symbol)
-      .value("Variable", SortCategory::Variable)
-      .value("MInt", SortCategory::MInt);
+  py::enum_<sort_category>(ast, "SortCategory")
+      .value("Uncomputed", sort_category::Uncomputed)
+      .value("Map", sort_category::Map)
+      .value("RangeMap", sort_category::RangeMap)
+      .value("List", sort_category::List)
+      .value("Set", sort_category::Set)
+      .value("Int", sort_category::Int)
+      .value("Float", sort_category::Float)
+      .value("StringBuffer", sort_category::StringBuffer)
+      .value("Bool", sort_category::Bool)
+      .value("Symbol", sort_category::Symbol)
+      .value("Variable", sort_category::Variable)
+      .value("MInt", sort_category::MInt);
 
   py::class_<value_type>(ast, "value_type")
-      .def(py::init([](SortCategory cat) {
+      .def(py::init([](sort_category cat) {
         return value_type{cat, 0};
       }))
-      .def(py::init([](SortCategory cat, uint64_t bits) {
+      .def(py::init([](sort_category cat, uint64_t bits) {
         return value_type{cat, bits};
       }));
 
@@ -267,7 +267,7 @@ void bind_ast(py::module_ &m) {
       ast, "CompositeSort", sort_base)
       .def(
           py::init(&kore_composite_sort::create), py::arg("name"),
-          py::arg("cat") = value_type{SortCategory::Uncomputed, 0})
+          py::arg("cat") = value_type{sort_category::Uncomputed, 0})
       .def_property_readonly("name", &kore_composite_sort::get_name)
       .def("add_argument", &kore_composite_sort::add_argument)
       .def_property_readonly("arguments", &kore_composite_sort::get_arguments);

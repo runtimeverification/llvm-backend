@@ -102,21 +102,21 @@ void initDebugAxiom(attribute_set const &att) {
   if (!dbg) {
     return;
   }
-  if (!att.contains(attribute_set::key::source)) {
+  if (!att.contains(attribute_set::key::Source)) {
     resetDebugLoc();
     return;
   }
-  kore_composite_pattern *sourceAtt = att.get(attribute_set::key::source).get();
+  kore_composite_pattern *sourceAtt = att.get(attribute_set::key::Source).get();
   assert(sourceAtt->get_arguments().size() == 1);
   auto *strPattern
       = dynamic_cast<kore_string_pattern *>(sourceAtt->get_arguments()[0].get());
   std::string source = strPattern->get_contents();
-  if (!att.contains(attribute_set::key::location)) {
+  if (!att.contains(attribute_set::key::Location)) {
     resetDebugLoc();
     return;
   }
   kore_composite_pattern *locationAtt
-      = att.get(attribute_set::key::location).get();
+      = att.get(attribute_set::key::Location).get();
   assert(locationAtt->get_arguments().size() == 1);
   auto *strPattern2
       = dynamic_cast<kore_string_pattern *>(locationAtt->get_arguments()[0].get());
@@ -176,49 +176,49 @@ llvm::DIType *getDebugType(value_type type, std::string const &type_name) {
     return types[type_name];
   }
   switch (type.cat) {
-  case SortCategory::Map:
+  case sort_category::Map:
     map = getPointerDebugType(getForwardDecl(map_struct), type_name);
     types[type_name] = map;
     return map;
-  case SortCategory::RangeMap:
+  case sort_category::RangeMap:
     rangemap = getPointerDebugType(getForwardDecl(rangemap_struct), type_name);
     types[type_name] = rangemap;
     return rangemap;
-  case SortCategory::List:
+  case sort_category::List:
     list = getPointerDebugType(getForwardDecl(list_struct), type_name);
     types[type_name] = list;
     return list;
-  case SortCategory::Set:
+  case sort_category::Set:
     set = getPointerDebugType(getForwardDecl(set_struct), type_name);
     types[type_name] = set;
     return set;
-  case SortCategory::Int:
+  case sort_category::Int:
     integer = getPointerDebugType(getForwardDecl(int_struct), type_name);
     types[type_name] = integer;
     return integer;
-  case SortCategory::Float:
+  case sort_category::Float:
     floating = getPointerDebugType(getForwardDecl(float_struct), type_name);
     types[type_name] = floating;
     return floating;
-  case SortCategory::StringBuffer:
+  case sort_category::StringBuffer:
     buffer = getPointerDebugType(getForwardDecl(buffer_struct), type_name);
     types[type_name] = buffer;
     return buffer;
-  case SortCategory::Bool:
+  case sort_category::Bool:
     boolean = dbg->createBasicType(type_name, 8, llvm::dwarf::DW_ATE_boolean);
     types[type_name] = boolean;
     return boolean;
-  case SortCategory::MInt:
+  case sort_category::MInt:
     mint = dbg->createBasicType(
         type_name, type.bits, llvm::dwarf::DW_ATE_unsigned);
     types[type_name] = mint;
     return mint;
-  case SortCategory::Symbol:
-  case SortCategory::Variable:
+  case sort_category::Symbol:
+  case sort_category::Variable:
     symbol = getPointerDebugType(getForwardDecl(block_struct), type_name);
     types[type_name] = symbol;
     return symbol;
-  case SortCategory::Uncomputed: abort();
+  case sort_category::Uncomputed: abort();
   }
 }
 

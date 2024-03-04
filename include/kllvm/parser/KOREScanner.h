@@ -29,7 +29,7 @@ enum class token {
   COLONEQUAL,
   ID,
   STRING,
-  TOKEN_EOF,
+  TokenEof,
 };
 
 class kore_scanner {

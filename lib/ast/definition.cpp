@@ -37,7 +37,7 @@ kore_definition::get_sorts_hooked_to(std::string const &hook_name) const {
 
   for (auto const &[name, decl] : get_sort_declarations()) {
     if (decl->is_hooked()) {
-      if (auto hook = decl->attributes().get_string(attribute_set::key::hook);
+      if (auto hook = decl->attributes().get_string(attribute_set::key::Hook);
           hook == hook_name) {
         ret.insert(name);
       }
@@ -83,8 +83,8 @@ SubsortMap kore_definition::get_subsorts() const {
   auto subsorts = SubsortMap{};
 
   for (auto *axiom : axioms_) {
-    if (axiom->attributes().contains(attribute_set::key::subsort)) {
-      auto const &att = axiom->attributes().get(attribute_set::key::subsort);
+    if (axiom->attributes().contains(attribute_set::key::Subsort)) {
+      auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
       auto const &innerSort = att->get_constructor()->get_formal_arguments()[0];
       auto const &outerSort = att->get_constructor()->get_formal_arguments()[1];
       subsorts[innerSort.get()].insert(outerSort.get());
@@ -98,9 +98,9 @@ SymbolMap kore_definition::get_overloads() const {
   auto overloads = SymbolMap{};
 
   for (auto *axiom : axioms_) {
-    if (axiom->attributes().contains(attribute_set::key::symbol_overload)) {
+    if (axiom->attributes().contains(attribute_set::key::SymbolOverload)) {
       auto const &att
-          = axiom->attributes().get(attribute_set::key::symbol_overload);
+          = axiom->attributes().get(attribute_set::key::SymbolOverload);
       auto *innerSymbol = std::dynamic_pointer_cast<kore_composite_pattern>(
                               att->get_arguments()[1])
                               ->get_constructor();
@@ -125,7 +125,7 @@ void kore_definition::preprocess() {
   unsigned nextOrdinal = 0;
   for (auto const &decl : symbol_declarations_) {
     if (decl.second->attributes().contains(
-            attribute_set::key::fresh_generator)) {
+            attribute_set::key::FreshGenerator)) {
       auto sort = decl.second->get_symbol()->get_sort();
       if (sort->is_concrete()) {
         fresh_functions_[dynamic_cast<kore_composite_sort *>(sort.get())->get_name()]
@@ -212,7 +212,7 @@ void kore_definition::preprocess() {
           symbol->first_tag_ = range.first;
           symbol->last_tag_ = range.second;
           auto *decl = symbol_declarations_.at(symbol->get_name());
-          if (decl->attributes().contains(attribute_set::key::sort_injection)) {
+          if (decl->attributes().contains(attribute_set::key::SortInjection)) {
             inj_symbol_ = symbol;
           }
         }

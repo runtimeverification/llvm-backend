@@ -12,7 +12,7 @@
 
 namespace kllvm {
 
-enum Fixity { EMPTY = 0, BARE_LEFT = 1, BARE_RIGHT = 2, BARE_BOTH = 3 };
+enum fixity { EMPTY = 0, BareLeft = 1, BareRight = 2, BareBoth = 3 };
 
 /**
  * Get the index of the Nth nonterminal within the list of all terminals and
@@ -72,17 +72,18 @@ bool hasTerminalAtIdx(std::string terminals, int position) {
  * nonterminal BARE_BOTH if there are not terminals on either side of this
  * nonterminal
  */
-Fixity getFixity(int position, kore_symbol *sym, pretty_print_data const &data) {
+fixity
+getFixity(int position, kore_symbol *sym, pretty_print_data const &data) {
   int result = EMPTY;
   std::string terminals = data.terminals.at(sym->get_name());
   int terminalPos = getNTPositionInProd(terminals, position);
   if (!hasTerminalAtIdx(terminals, terminalPos + 1)) {
-    result |= BARE_RIGHT;
+    result |= BareRight;
   }
   if (!hasTerminalAtIdx(terminals, terminalPos - 1)) {
-    result |= BARE_LEFT;
+    result |= BareLeft;
   }
-  return (Fixity)result;
+  return (fixity)result;
 }
 
 /**
@@ -99,16 +100,16 @@ Fixity getFixity(int position, kore_symbol *sym, pretty_print_data const &data) 
  * production BARE_BOTH if there are not terminals on either edge of this
  * production
  */
-Fixity getFixity(kore_symbol *sym, pretty_print_data const &data) {
+fixity getFixity(kore_symbol *sym, pretty_print_data const &data) {
   auto const &name = sym->get_name();
   int result = EMPTY;
   if (data.terminals.at(name)[0] == '0') {
-    result = result | BARE_LEFT;
+    result = result | BareLeft;
   }
   if (data.terminals.at(name)[data.terminals.at(name).size() - 1] == '0') {
-    result = result | BARE_RIGHT;
+    result = result | BareRight;
   }
-  return (Fixity)result;
+  return (fixity)result;
 }
 
 /**
@@ -134,10 +135,11 @@ Fixity getFixity(kore_symbol *sym, pretty_print_data const &data) {
  * returns: the left capture of the term, or NULL if no such term exists
  */
 kore_composite_pattern *getLeftCapture(
-    kore_composite_pattern *previous_left_capture, kore_composite_pattern *outer,
-    int position, pretty_print_data const &data) {
-  Fixity fixity = getFixity(outer->get_constructor(), data);
-  if (position == 0 && (fixity & BARE_LEFT)) {
+    kore_composite_pattern *previous_left_capture,
+    kore_composite_pattern *outer, int position,
+    pretty_print_data const &data) {
+  fixity fixity = getFixity(outer->get_constructor(), data);
+  if (position == 0 && (fixity & BareLeft)) {
     return previous_left_capture;
   }
 
@@ -168,10 +170,11 @@ kore_composite_pattern *getLeftCapture(
  */
 
 kore_composite_pattern *getRightCapture(
-    kore_composite_pattern *previous_right_capture, kore_composite_pattern *outer,
-    int position, pretty_print_data const &data) {
-  Fixity fixity = getFixity(outer->get_constructor(), data);
-  if (position == outer->get_arguments().size() - 1 && (fixity & BARE_RIGHT)) {
+    kore_composite_pattern *previous_right_capture,
+    kore_composite_pattern *outer, int position,
+    pretty_print_data const &data) {
+  fixity fixity = getFixity(outer->get_constructor(), data);
+  if (position == outer->get_arguments().size() - 1 && (fixity & BareRight)) {
     return previous_right_capture;
   }
 
@@ -285,9 +288,9 @@ bool isPriorityWrong(
   std::string innerName = inner->get_constructor()->get_name();
   kore_sort *innerSort = getReturnSort(inner).get();
   kore_sort *outerSort = getArgSort(
-                            outer->get_constructor(), position,
-                            outer->get_arguments()[0]->get_sort())
-                            .get();
+                             outer->get_constructor(), position,
+                             outer->get_arguments()[0]->get_sort())
+                             .get();
   if (!lessThanEq(data, innerSort, outerSort)) {
     return true;
   }
@@ -366,7 +369,7 @@ bool requiresBracketWithSimpleAlgorithm(
     if (innerName == "\\dv") {
       return false;
     }
-    Fixity fixity = getFixity(position, outer->get_constructor(), data);
+    auto fixity = getFixity(position, outer->get_constructor(), data);
     if (fixity == EMPTY) {
       return false;
     }
@@ -378,22 +381,23 @@ bool requiresBracketWithSimpleAlgorithm(
       return false;
     }
 
-    Fixity innerFixity = getFixity(composite->get_constructor(), data);
+    auto innerFixity = getFixity(composite->get_constructor(), data);
 
-    if ((innerFixity & BARE_RIGHT) && right_capture != nullptr) {
+    if ((innerFixity & BareRight) && right_capture != nullptr) {
       bool inversePriority = isPriorityWrong(
-          composite, right_capture, composite->get_arguments().size() - 1, data);
-      Fixity rightCaptureFixity
+          composite, right_capture, composite->get_arguments().size() - 1,
+          data);
+      auto rightCaptureFixity
           = getFixity(right_capture->get_constructor(), data);
-      if (!inversePriority && (rightCaptureFixity & BARE_LEFT)) {
+      if (!inversePriority && (rightCaptureFixity & BareLeft)) {
         return true;
       }
     }
 
-    if ((innerFixity & BARE_LEFT) && left_capture != nullptr) {
+    if ((innerFixity & BareLeft) && left_capture != nullptr) {
       bool inversePriority = isPriorityWrong(composite, left_capture, 0, data);
-      Fixity leftCaptureFixity = getFixity(left_capture->get_constructor(), data);
-      if (!inversePriority && (leftCaptureFixity & BARE_RIGHT)) {
+      auto leftCaptureFixity = getFixity(left_capture->get_constructor(), data);
+      if (!inversePriority && (leftCaptureFixity & BareRight)) {
         return true;
       }
     }
@@ -411,14 +415,15 @@ sptr<kore_pattern> addBrackets(
       = dynamic_cast<kore_composite_pattern *>(inner.get())) {
     if (innerComposite->get_constructor()->get_name() == "inj") {
       return addBrackets(
-          innerComposite->get_arguments()[0], outer, left_capture, right_capture,
-          position, data);
+          innerComposite->get_arguments()[0], outer, left_capture,
+          right_capture, position, data);
     }
   }
   if (requiresBracketWithSimpleAlgorithm(
           outer, left_capture, right_capture, inner.get(), position, data)) {
     sptr<kore_sort> outerSort = getArgSort(
-        outer->get_constructor(), position, outer->get_arguments()[0]->get_sort());
+        outer->get_constructor(), position,
+        outer->get_arguments()[0]->get_sort());
     sptr<kore_sort> innerSort = getReturnSort(inner.get());
     for (auto const &entry : data.brackets) {
       bool isCorrectOuterSort = lessThanEq(data, entry.first, outerSort.get());
@@ -427,14 +432,16 @@ sptr<kore_pattern> addBrackets(
           bool isCorrectInnerSort = lessThanEq(
               data, innerSort.get(), getArgSort(s, 0, nullptr).get());
           if (isCorrectInnerSort) {
-            sptr<kore_composite_pattern> result = kore_composite_pattern::create(s);
+            sptr<kore_composite_pattern> result
+                = kore_composite_pattern::create(s);
             result->add_argument(inner);
             return result;
           }
         }
       }
     }
-    sptr<kore_composite_pattern> result = kore_composite_pattern::create("bracket");
+    sptr<kore_composite_pattern> result
+        = kore_composite_pattern::create("bracket");
     result->add_argument(inner);
     result->get_constructor()->add_sort(innerSort);
     return result;
@@ -444,7 +451,8 @@ sptr<kore_pattern> addBrackets(
 
 sptr<kore_pattern> addBrackets(
     sptr<kore_pattern> t, kore_composite_pattern *previous_left_capture,
-    kore_composite_pattern *previous_right_capture, pretty_print_data const &data) {
+    kore_composite_pattern *previous_right_capture,
+    pretty_print_data const &data) {
   if (auto *outer = dynamic_cast<kore_composite_pattern *>(t.get())) {
     if (outer->get_constructor()->get_name() == "\\dv") {
       return t;
