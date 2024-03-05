@@ -43,12 +43,12 @@ int main(int argc, char **argv) {
       mpz_init(i);
     }
   }
-  int lowerBound = 0;
-  int upperBound = 0;
+  int lower_bound = 0;
+  int upper_bound = 0;
   mpz_t size;
   if (generation) {
-    lowerBound = atoi(argv[3]);
-    upperBound = atoi(argv[4]);
+    lower_bound = atoi(argv[3]);
+    upper_bound = atoi(argv[4]);
     mpz_init(size);
   }
   while (true) {
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
       }
     } else if (generation) {
       mpz_set_ui(size, 0);
-      for (int i = lowerBound; i <= upperBound; i++) {
+      for (int i = lower_bound; i <= upper_bound; i++) {
         if (i == 0) {
           mpz_add_ui(size, size, frame[0]);
           mpz_sub_ui(size, size, frame[1]);

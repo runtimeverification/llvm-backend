@@ -16,24 +16,24 @@ auto top = R"(\top)"_p;
 auto X = subject(any);
 
 /*
- * getPatterns(\top()) = []
- * getPatterns(\and(\in(_, X), Y)) = X : getPatterns(Y)
+ * get_patterns(\top()) = []
+ * get_patterns(\and(\in(_, X), Y)) = X : get_patterns(Y)
  */
-std::vector<KOREPattern *>
-getPatternsImpl(KOREPattern *pat, std::vector<KOREPattern *> &result) {
-  if (auto *composite = dynamic_cast<KORECompositePattern *>(pat)) {
-    if (composite->getConstructor()->getName() == "\\top"
-        && composite->getArguments().empty()) {
+std::vector<kore_pattern *>
+get_patterns_impl(kore_pattern *pat, std::vector<kore_pattern *> &result) {
+  if (auto *composite = dynamic_cast<kore_composite_pattern *>(pat)) {
+    if (composite->get_constructor()->get_name() == "\\top"
+        && composite->get_arguments().empty()) {
       return result;
     }
-    if (composite->getConstructor()->getName() == "\\and"
-        && composite->getArguments().size() == 2) {
-      if (auto *firstChild = dynamic_cast<KORECompositePattern *>(
-              composite->getArguments()[0].get())) {
-        if (firstChild->getConstructor()->getName() == "\\in"
-            && firstChild->getArguments().size() == 2) {
-          result.push_back(firstChild->getArguments()[1].get());
-          return getPatternsImpl(composite->getArguments()[1].get(), result);
+    if (composite->get_constructor()->get_name() == "\\and"
+        && composite->get_arguments().size() == 2) {
+      if (auto *first_child = dynamic_cast<kore_composite_pattern *>(
+              composite->get_arguments()[0].get())) {
+        if (first_child->get_constructor()->get_name() == "\\in"
+            && first_child->get_arguments().size() == 2) {
+          result.push_back(first_child->get_arguments()[1].get());
+          return get_patterns_impl(composite->get_arguments()[1].get(), result);
         }
       }
     }
@@ -42,44 +42,44 @@ getPatternsImpl(KOREPattern *pat, std::vector<KOREPattern *> &result) {
   abort();
 }
 
-std::optional<std::vector<KOREPattern *>>
-getPatterns(std::shared_ptr<KOREPattern> const &term) {
-  auto result = std::vector<KOREPattern *>{};
-  return getPatternsImpl(term.get(), result);
+std::optional<std::vector<kore_pattern *>>
+get_patterns(std::shared_ptr<kore_pattern> const &term) {
+  auto result = std::vector<kore_pattern *>{};
+  return get_patterns_impl(term.get(), result);
 }
 
 /*
- * getBuiltin(_(X, Y)) = if X is not a builtin then X else Y
+ * get_builtin(_(X, Y)) = if X is not a builtin then X else Y
  */
-std::optional<std::shared_ptr<KOREPattern>>
-getBuiltin(std::shared_ptr<KOREPattern> const &term) {
-  auto comp = std::dynamic_pointer_cast<KORECompositePattern>(term);
+std::optional<std::shared_ptr<kore_pattern>>
+get_builtin(std::shared_ptr<kore_pattern> const &term) {
+  auto comp = std::dynamic_pointer_cast<kore_composite_pattern>(term);
   if (!comp) {
     return std::nullopt;
   }
 
-  auto lhs = std::dynamic_pointer_cast<KORECompositePattern>(
-      comp->getArguments()[0]);
+  auto lhs = std::dynamic_pointer_cast<kore_composite_pattern>(
+      comp->get_arguments()[0]);
   if (!lhs) {
     return std::nullopt;
   }
 
-  if (!lhs->getConstructor()->isBuiltin()) {
+  if (!lhs->get_constructor()->is_builtin()) {
     return lhs;
   }
-  return comp->getArguments()[1];
+  return comp->get_arguments()[1];
 }
 
-[[maybe_unused]] std::optional<std::vector<KOREPattern *>>
-getSingleton(std::shared_ptr<KOREPattern> const &term) {
+[[maybe_unused]] std::optional<std::vector<kore_pattern *>>
+get_singleton(std::shared_ptr<kore_pattern> const &term) {
   return std::vector{term.get()};
 }
 
-std::optional<std::vector<KOREPattern *>>
-getArguments(std::shared_ptr<KOREPattern> const &term) {
-  if (auto comp = std::dynamic_pointer_cast<KORECompositePattern>(term)) {
-    auto result = std::vector<KOREPattern *>{};
-    for (auto const &arg : comp->getArguments()) {
+std::optional<std::vector<kore_pattern *>>
+get_arguments(std::shared_ptr<kore_pattern> const &term) {
+  if (auto comp = std::dynamic_pointer_cast<kore_composite_pattern>(term)) {
+    auto result = std::vector<kore_pattern *>{};
+    for (auto const &arg : comp->get_arguments()) {
       result.push_back(arg.get());
     }
     return result;
@@ -98,14 +98,14 @@ getArguments(std::shared_ptr<KOREPattern> const &term) {
  *  4: lhs(\rewrites(\and(\not(_), \and(\equals(_, _), X)), _)) = [X]
  *  5: lhs(\rewrites(\and(\not(_), \and(\top(), X)), _)) = [X]
  *  6: lhs(\equals(_(Xs), _)) = Xs
- *  7: lhs(\implies(\and(\equals(_, _), X), _)) = getPatterns(X)
- *  8: lhs(\implies(\and(\top(), X), _)) = getPatterns(X)
- *  9: lhs(\implies(\and(\not(_), \and(\equals(_, _), X)), _)) = getPatterns(X)
- * 10: lhs(\implies(\and(\not(_), \and(\top(), X)), _)) = getPatterns(X)
+ *  7: lhs(\implies(\and(\equals(_, _), X), _)) = get_patterns(X)
+ *  8: lhs(\implies(\and(\top(), X), _)) = get_patterns(X)
+ *  9: lhs(\implies(\and(\not(_), \and(\equals(_, _), X)), _)) = get_patterns(X)
+ * 10: lhs(\implies(\and(\not(_), \and(\top(), X)), _)) = get_patterns(X)
  * 11: lhs(\implies(\top(), \equals(_(Xs), _))) = Xs
  * 12: lhs(\implies(\equals(_, _), \equals(_(Xs), _))) = Xs
  */
-std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
+std::vector<kore_pattern *> kore_axiom_declaration::get_left_hand_side() const {
   auto p0 = rewrites(and_(equals_(any, any), X), any);
   auto p1 = rewrites(and_(X, equals_(any, any)), any);
   auto p2 = rewrites(and_(top(), X), any);
@@ -121,13 +121,13 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
   auto p12 = implies(equals_(any, any), equals_(X, any));
 
   auto patterns = match_first(
-      map(p0, getSingleton), map(p1, getSingleton), map(p2, getSingleton),
-      map(p3, getSingleton), map(p4, getSingleton), map(p5, getSingleton),
-      map(p6, getArguments), map(p7, getPatterns), map(p8, getPatterns),
-      map(p9, getPatterns), map(p10, getPatterns), map(p11, getArguments),
-      map(p12, getArguments));
+      map(p0, get_singleton), map(p1, get_singleton), map(p2, get_singleton),
+      map(p3, get_singleton), map(p4, get_singleton), map(p5, get_singleton),
+      map(p6, get_arguments), map(p7, get_patterns), map(p8, get_patterns),
+      map(p9, get_patterns), map(p10, get_patterns), map(p11, get_arguments),
+      map(p12, get_arguments));
 
-  auto [any_match, result] = patterns.match(pattern);
+  auto [any_match, result] = patterns.match(pattern_);
 
   if (result) {
     return *result;
@@ -140,15 +140,15 @@ std::vector<KOREPattern *> KOREAxiomDeclaration::getLeftHandSide() const {
 /*
  * 0: rhs(\implies(_, \equals(_, \and(X, _)))) = X
  * 1: rhs(\equals(_, X)) = X
- * 2: rhs(\rewrites(_, \and(X, Y))) = getBuiltin(\and(X, Y))
+ * 2: rhs(\rewrites(_, \and(X, Y))) = get_builtin(\and(X, Y))
  */
-KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
+kore_pattern *kore_axiom_declaration::get_right_hand_side() const {
   auto p0 = implies(any, equals_(any, and_(X, any)));
   auto p1 = equals_(any, X);
   auto p2 = rewrites(any, subject(and_(any, any)));
 
-  auto patterns = match_first(p0, p1, map(p2, getBuiltin));
-  auto [any_match, result] = patterns.match(pattern);
+  auto patterns = match_first(p0, p1, map(p2, get_builtin));
+  auto [any_match, result] = patterns.match(pattern_);
 
   if (result) {
     return result->get();
@@ -171,7 +171,7 @@ KOREPattern *KOREAxiomDeclaration::getRightHandSide() const {
  *  9: requires(\rewrites(\and(_, \equals(X, _)), _)) = X
  * 10: requires(\rewrites(\and(_, \top()), _)) = nullptr
  */
-KOREPattern *KOREAxiomDeclaration::getRequires() const {
+kore_pattern *kore_axiom_declaration::get_requires() const {
   auto p0 = implies(and_(not_(any), and_(top(), any)), any);
   auto p1 = implies(and_(not_(any), and_(equals_(X, any), any)), any);
   auto p2 = implies(and_(top(), any), any);
@@ -185,7 +185,7 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
   auto p10 = rewrites(and_(any, top()), any);
 
   auto patterns = match_first(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
-  auto [any_match, result] = patterns.match(pattern);
+  auto [any_match, result] = patterns.match(pattern_);
 
   if (result) {
     return result->get();
@@ -202,7 +202,7 @@ KOREPattern *KOREAxiomDeclaration::getRequires() const {
 /*
  * strip(rawTerm{}(inj{S, SortKItem{}}(X))) = X
  */
-sptr<KOREPattern> kllvm::stripRawTerm(sptr<KOREPattern> const &term) {
+sptr<kore_pattern> kllvm::strip_raw_term(sptr<kore_pattern> const &term) {
   auto [success, inner] = "rawTerm"_p("inj"_p(subject(any))).match(term);
   if (success && inner) {
     return inner;

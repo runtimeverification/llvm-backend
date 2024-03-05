@@ -17,39 +17,40 @@
 
 namespace kllvm {
 
-void initDebugInfo(llvm::Module *module, std::string const &filename);
-void finalizeDebugInfo();
+void init_debug_info(llvm::Module *module, std::string const &filename);
+void finalize_debug_info();
 
-void initDebugFunction(
-    std::string const &name, std::string const &linkageName,
-    llvm::DISubroutineType *type, KOREDefinition *definition,
+void init_debug_function(
+    std::string const &name, std::string const &linkage_name,
+    llvm::DISubroutineType *type, kore_definition *definition,
     llvm::Function *func);
 
-void initDebugAxiom(attribute_set const &att);
-void initDebugParam(
-    llvm::Function *func, unsigned argNo, std::string const &name,
-    ValueType type, std::string const &typeName);
-void initDebugGlobal(
+void init_debug_axiom(attribute_set const &att);
+void init_debug_param(
+    llvm::Function *func, unsigned arg_no, std::string const &name,
+    value_type type, std::string const &type_name);
+void init_debug_global(
     std::string const &name, llvm::DIType *type, llvm::GlobalVariable *var);
 
-llvm::DIType *getDebugType(ValueType type, std::string const &typeName);
-llvm::DIType *getIntDebugType();
-llvm::DIType *getLongDebugType();
-llvm::DIType *getVoidDebugType();
-llvm::DIType *getBoolDebugType();
-llvm::DIType *getShortDebugType();
-llvm::DIType *getPointerDebugType(llvm::DIType *, std::string const &typeName);
+llvm::DIType *get_debug_type(value_type type, std::string const &type_name);
+llvm::DIType *get_int_debug_type();
+llvm::DIType *get_long_debug_type();
+llvm::DIType *get_void_debug_type();
+llvm::DIType *get_bool_debug_type();
+llvm::DIType *get_short_debug_type();
 llvm::DIType *
-getArrayDebugType(llvm::DIType *ty, size_t len, llvm::Align align);
-llvm::DIType *getCharPtrDebugType();
-llvm::DIType *getCharDebugType();
-llvm::DIType *getForwardDecl(std::string const &name);
+get_pointer_debug_type(llvm::DIType *, std::string const &type_name);
+llvm::DIType *
+get_array_debug_type(llvm::DIType *ty, size_t len, llvm::Align align);
+llvm::DIType *get_char_ptr_debug_type();
+llvm::DIType *get_char_debug_type();
+llvm::DIType *get_forward_decl(std::string const &name);
 
 llvm::DISubroutineType *
-getDebugFunctionType(llvm::Metadata *, std::vector<llvm::Metadata *>);
+get_debug_function_type(llvm::Metadata *, std::vector<llvm::Metadata *>);
 
-void setDebugLoc(llvm::Instruction *instr);
-void resetDebugLoc();
+void set_debug_loc(llvm::Instruction *instr);
+void reset_debug_loc();
 
 } // namespace kllvm
 #endif

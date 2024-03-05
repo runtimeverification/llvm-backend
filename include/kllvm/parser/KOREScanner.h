@@ -6,59 +6,59 @@
 namespace kllvm::parser {
 
 enum class token {
-  EMPTY,
-  MODULE,
-  ENDMODULE,
-  IMPORT,
-  SORT,
-  SYMBOL,
-  WHERE,
-  ALIAS,
-  AXIOM,
-  CLAIM,
-  HOOKEDSORT,
-  HOOKEDSYMBOL,
-  COLON,
-  LEFTBRACE,
-  RIGHTBRACE,
-  LEFTBRACKET,
-  RIGHTBRACKET,
-  LEFTPAREN,
-  RIGHTPAREN,
-  COMMA,
-  COLONEQUAL,
-  ID,
-  STRING,
-  TOKEN_EOF,
+  Empty,
+  Module,
+  EndModule,
+  Import,
+  Sort,
+  Symbol,
+  Where,
+  Alias,
+  Axiom,
+  Claim,
+  HookedSort,
+  HookedSymbol,
+  Colon,
+  LeftBrace,
+  RightBrace,
+  LeftBracket,
+  RightBracket,
+  LeftParen,
+  RightParen,
+  Comma,
+  ColonEqual,
+  Id,
+  String,
+  TokenEof,
 };
 
-class KOREScanner {
+class kore_scanner {
 public:
-  KOREScanner(std::string filename);
-  ~KOREScanner();
+  kore_scanner(std::string filename);
+  ~kore_scanner();
   int scan();
 
-  friend class KOREParser;
+  friend class kore_parser;
 
   using yyscan_t = void *;
 
-  KOREScanner(KOREScanner const &other) = delete;
-  KOREScanner &operator=(KOREScanner const &other) = delete;
+  kore_scanner(kore_scanner const &other) = delete;
+  kore_scanner &operator=(kore_scanner const &other) = delete;
 
-  KOREScanner(KOREScanner &&other) = delete;
-  KOREScanner &operator=(KOREScanner &&other) = delete;
+  kore_scanner(kore_scanner &&other) = delete;
+  kore_scanner &operator=(kore_scanner &&other) = delete;
 
 private:
-  yyscan_t scanner;
+  yyscan_t scanner_;
   token yylex(std::string *lval, location *loc, yyscan_t yyscanner);
   token yylex(std::string *lval, location *loc) {
-    return yylex(lval, loc, scanner);
+    return yylex(lval, loc, scanner_);
   }
   void error(location const &loc, std::string const &err_message);
   std::string codepoint_to_utf8(unsigned long int code, location const &loc);
 
-  FILE *in;
-  std::string stringBuffer;
+  FILE *in_;
+  std::string string_buffer_;
 };
 
 } // namespace kllvm::parser

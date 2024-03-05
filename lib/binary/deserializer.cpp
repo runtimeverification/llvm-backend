@@ -32,7 +32,7 @@ bool has_binary_kore_header(std::string const &filename) {
   return std::equal(reference.begin(), reference.end(), first_bytes.begin());
 }
 
-sptr<KOREPattern> deserialize_pattern(std::string const &filename) {
+sptr<kore_pattern> deserialize_pattern(std::string const &filename) {
   auto data = file_contents(filename);
   return deserialize_pattern(data.begin(), data.end());
 }

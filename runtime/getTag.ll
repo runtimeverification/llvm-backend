@@ -4,7 +4,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-define i32 @getTag(%block* %arg) {
+define i32 @get_tag(%block* %arg) {
   %intptr = ptrtoint %block* %arg to i64
   %isConstant = trunc i64 %intptr to i1
   br i1 %isConstant, label %constant, label %block

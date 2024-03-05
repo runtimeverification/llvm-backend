@@ -23,7 +23,7 @@ string *bytes2string(string *, size_t);
 string *hook_BYTES_concat(string *a, string *b);
 mpz_ptr hook_BYTES_length(string *a);
 string *hook_BYTES_substr(string *a, mpz_t start, mpz_t end);
-char *getTerminatedString(string *str);
+char *get_terminated_string(string *str);
 
 bool hook_STRING_gt(SortString a, SortString b) {
   auto res = memcmp(a->data, b->data, std::min(len(a), len(b)));
@@ -82,7 +82,7 @@ SortString hook_STRING_chr(SortInt ord) {
     KLLVM_HOOK_INVALID_ARGUMENT("Ord must be <= 255: {}", uord);
   }
   auto *ret
-      = static_cast<string *>(koreAllocToken(sizeof(string) + sizeof(char)));
+      = static_cast<string *>(kore_alloc_token(sizeof(string) + sizeof(char)));
   init_with_len(ret, 1);
   ret->data[0] = static_cast<char>(uord);
   return ret;
@@ -175,20 +175,20 @@ hook_STRING_rfindChar(SortString haystack, SortString needle, SortInt pos) {
   return move_int(result);
 }
 
-string *makeString(char const *input, ssize_t len = -1) {
+string *make_string(char const *input, ssize_t len = -1) {
   if (len == -1) {
     len = strlen(input);
   }
-  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + len));
+  auto *ret = static_cast<string *>(kore_alloc_token(sizeof(string) + len));
   memcpy(ret->data, input, len);
   init_with_len(ret, len);
   return ret;
 }
 
-char *getTerminatedString(string *str) {
+char *get_terminated_string(string *str) {
   int length = len(str);
   auto *buf
-      = static_cast<string *>(koreAllocToken(sizeof(string) + (length + 1)));
+      = static_cast<string *>(kore_alloc_token(sizeof(string) + (length + 1)));
   memcpy(buf->data, str->data, length);
   init_with_len(buf, length + 1);
   buf->data[length] = '\0';
@@ -196,36 +196,36 @@ char *getTerminatedString(string *str) {
 }
 
 SortString hook_STRING_base2string_long(SortInt input, uint64_t base) {
-  auto str = intToStringInBase(input, base);
+  auto str = int_to_string_in_base(input, base);
 
   // Include the null terminator in size calculations relating to allocation,
   // but not when setting the length of the string object itself. Any minus
   // signs will have been accounted for already by the intToString call.
   auto str_len = str.size() + 1;
   auto *result
-      = static_cast<string *>(koreAllocToken(sizeof(string) + str_len));
+      = static_cast<string *>(kore_alloc_token(sizeof(string) + str_len));
   strncpy(result->data, str.c_str(), str_len);
   init_with_len(result, str.size());
 
-  return static_cast<string *>(koreResizeLastAlloc(
+  return static_cast<string *>(kore_resize_last_alloc(
       result, sizeof(string) + len(result), sizeof(string) + str_len));
 }
 
 SortInt hook_STRING_string2base_long(SortString input, uint64_t base) {
   mpz_t result;
   size_t length = 0;
-  char const *dataStart = nullptr;
+  char const *data_start = nullptr;
 
   if (*(input->data) == '+') {
     length = len(input) - 1;
-    dataStart = input->data + 1;
+    data_start = input->data + 1;
   } else {
     length = len(input);
-    dataStart = input->data;
+    data_start = input->data;
   }
 
-  auto *copy = static_cast<char *>(koreAllocToken(length + 1));
-  memcpy(copy, dataStart, length);
+  auto *copy = static_cast<char *>(kore_alloc_token(length + 1));
+  memcpy(copy, data_start, length);
   copy[length] = 0;
   if (mpz_init_set_str(result, copy, base)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -253,8 +253,8 @@ SortString hook_STRING_base2string(SortInt input, SortInt base) {
 }
 
 SortString hook_STRING_float2string(SortFloat input) {
-  std::string result = floatToString(input);
-  return makeString(result.c_str());
+  std::string result = float_to_string(input);
+  return make_string(result.c_str());
 }
 
 SortFloat hook_STRING_string2float(SortString input) {
@@ -304,7 +304,7 @@ inline SortString hook_STRING_replace(
   }
   auto diff = len(needle) - len(replacer);
   size_t new_len = len(haystack) - i * diff;
-  auto *ret = static_cast<string *>(koreAllocToken(sizeof(string) + new_len));
+  auto *ret = static_cast<string *>(kore_alloc_token(sizeof(string) + new_len));
   init_with_len(ret, new_len);
   int m = 0;
   for (size_t r = 0, h = 0; r < new_len;) {
@@ -362,9 +362,10 @@ hook_STRING_countAllOccurrences(SortString haystack, SortString needle) {
 }
 
 SortString hook_STRING_transcode(
-    SortString input, SortString inputCharset, SortString outputCharset) {
+    SortString input, SortString input_charset, SortString output_charset) {
   iconv_t converter = iconv_open(
-      getTerminatedString(outputCharset), getTerminatedString(inputCharset));
+      get_terminated_string(output_charset),
+      get_terminated_string(input_charset));
   char *inbuf = input->data;
   size_t inbytesleft = len(input);
   size_t outbytesleft = inbytesleft * 4;
@@ -376,7 +377,7 @@ SortString hook_STRING_transcode(
     KLLVM_HOOK_INVALID_ARGUMENT("transcoding failed: STRING.transcode");
   }
   *outbuf = 0;
-  return makeString(buf, len(input) * 4 - outbytesleft);
+  return make_string(buf, len(input) * 4 - outbytesleft);
 }
 
 string *hook_STRING_uuid() {
@@ -396,10 +397,10 @@ string *hook_STRING_floatFormat(string *str, string *fmt) {
 }
 
 SortStringBuffer hook_BUFFER_empty() {
-  auto *result = static_cast<stringbuffer *>(koreAlloc(sizeof(stringbuffer)));
+  auto *result = static_cast<stringbuffer *>(kore_alloc(sizeof(stringbuffer)));
   init_with_len(result, sizeof(stringbuffer) - sizeof(blockheader));
   result->strlen = 0;
-  auto *str = static_cast<string *>(koreAllocToken(sizeof(string) + 16));
+  auto *str = static_cast<string *>(kore_alloc_token(sizeof(string) + 16));
   init_with_len(str, 16);
   result->contents = str;
   return result;
@@ -411,29 +412,29 @@ SortStringBuffer hook_BUFFER_concat(SortStringBuffer buf, SortString s) {
 
 stringbuffer *
 hook_BUFFER_concat_raw(stringbuffer *buf, char const *data, uint64_t n) {
-  uint64_t newCapacity = len(buf->contents);
-  uint64_t minCapacity = buf->strlen + n;
-  uint64_t notYoungObjectBit = buf->h.hdr & NOT_YOUNG_OBJECT_BIT;
-  if (newCapacity < minCapacity) {
-    newCapacity = len(buf->contents) * 2 + 2;
-    if (newCapacity < minCapacity) {
-      newCapacity = minCapacity;
+  uint64_t new_capacity = len(buf->contents);
+  uint64_t min_capacity = buf->strlen + n;
+  uint64_t not_young_object_bit = buf->h.hdr & NOT_YOUNG_OBJECT_BIT;
+  if (new_capacity < min_capacity) {
+    new_capacity = len(buf->contents) * 2 + 2;
+    if (new_capacity < min_capacity) {
+      new_capacity = min_capacity;
     }
     string *new_contents = nullptr;
-    if (notYoungObjectBit) {
+    if (not_young_object_bit) {
       assert(buf->h.hdr & AGE_MASK);
       new_contents = static_cast<string *>(
-          koreAllocTokenOld(sizeof(string) + newCapacity));
+          kore_alloc_token_old(sizeof(string) + new_capacity));
     } else {
-      new_contents
-          = static_cast<string *>(koreAllocToken(sizeof(string) + newCapacity));
+      new_contents = static_cast<string *>(
+          kore_alloc_token(sizeof(string) + new_capacity));
     }
     memcpy(new_contents->data, buf->contents->data, buf->strlen);
     buf->contents = new_contents;
   }
   memcpy(buf->contents->data + buf->strlen, data, n);
   buf->strlen += n;
-  init_with_len(buf->contents, newCapacity);
+  init_with_len(buf->contents, new_capacity);
   return buf;
 }
 
@@ -464,16 +465,16 @@ void init_float2(floating *result, std::string contents) {
   }
   result->exp = exp;
   mpfr_init2(result->f, prec);
-  int retValue = 0;
+  int ret_value = 0;
   if (contents == "+Infinity" || contents == "-Infinity"
       || contents == "Infinity") {
-    retValue = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);
+    ret_value = mpfr_set_str(result->f, contents.c_str(), 10, MPFR_RNDN);
   } else {
     size_t last = contents.find_last_of("fFdDpP");
     std::string str_value = contents.substr(0, last);
-    retValue = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
+    ret_value = mpfr_set_str(result->f, str_value.c_str(), 10, MPFR_RNDN);
   }
-  if (retValue != 0) {
+  if (ret_value != 0) {
     KLLVM_HOOK_INVALID_ARGUMENT("Can't convert to float: {}", contents);
   }
 }

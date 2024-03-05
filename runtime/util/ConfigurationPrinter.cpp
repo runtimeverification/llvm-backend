@@ -21,13 +21,13 @@
 #include "runtime/alloc.h"
 #include "runtime/header.h"
 
-struct StringHash {
+struct string_hash {
   size_t operator()(string *const &k) const {
     return std::hash<std::string>{}(std::string(k->data, len(k)));
   }
 };
 
-struct StringEq {
+struct string_eq {
   bool operator()(string *const &lhs, string *const &rhs) const {
     return hook_STRING_eq(lhs, rhs);
   }
@@ -46,65 +46,65 @@ struct print_state {
 
   ~print_state() = default;
 
-  std::vector<block *> boundVariables;
-  std::unordered_map<string *, std::string, StringHash, StringEq> varNames;
-  std::set<std::string> usedVarNames;
-  uint64_t varCounter{0};
+  std::vector<block *> bound_variables;
+  std::unordered_map<string *, std::string, string_hash, string_eq> var_names;
+  std::set<std::string> used_var_names;
+  uint64_t var_counter{0};
 };
 
-void printInt(writer *file, mpz_t i, char const *sort, void *state) {
-  auto str = intToString(i);
+void print_int(writer *file, mpz_t i, char const *sort, void *state) {
+  auto str = int_to_string(i);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
-void printFloat(writer *file, floating *f, char const *sort, void *state) {
-  std::string str = floatToString(f);
+void print_float(writer *file, floating *f, char const *sort, void *state) {
+  std::string str = float_to_string(f);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
-void printBool(writer *file, bool b, char const *sort, void *state) {
+void print_bool(writer *file, bool b, char const *sort, void *state) {
   char const *str = b ? "true" : "false";
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str);
 }
 
-void printStringBuffer(
+void print_string_buffer(
     writer *file, stringbuffer *b, char const *sort, void *state) {
   std::string str(b->contents->data, b->strlen);
   sfprintf(file, R"(\dv{%s}("%s"))", sort, str.c_str());
 }
 
-void printMInt(
+void print_m_int(
     writer *file, size_t *i, size_t bits, char const *sort, void *state) {
   if (i == nullptr) {
     sfprintf(file, R"(\dv{%s}("0p%zd"))", sort, bits);
   } else {
     mpz_ptr z = hook_MINT_import(i, bits, false);
-    auto str = intToString(z);
+    auto str = int_to_string(z);
     sfprintf(file, R"(\dv{%s}("%sp%zd"))", sort, str.c_str(), bits);
   }
 }
 
-void printComma(writer *file, void *state) {
+void print_comma(writer *file, void *state) {
   sfprintf(file, ",");
 }
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-void printConfigurationInternal(
-    writer *file, block *subject, char const *sort, bool isVar,
+void print_configuration_internal(
+    writer *file, block *subject, char const *sort, bool is_var,
     void *state_ptr) {
   auto &state = *static_cast<print_state *>(state_ptr);
 
-  uint8_t isConstant = ((uintptr_t)subject) & 3;
-  if (isConstant) {
+  uint8_t is_constant = ((uintptr_t)subject) & 3;
+  if (is_constant) {
     uint32_t tag = ((uintptr_t)subject) >> 32;
-    if (isConstant == 3) {
+    if (is_constant == 3) {
       // bound variable
-      printConfigurationInternal(
-          file, state.boundVariables[state.boundVariables.size() - 1 - tag],
+      print_configuration_internal(
+          file, state.bound_variables[state.bound_variables.size() - 1 - tag],
           sort, true, state_ptr);
       return;
     }
-    char const *symbol = getSymbolNameForTag(tag);
+    char const *symbol = get_symbol_name_for_tag(tag);
     sfprintf(file, "%s()", symbol);
     return;
   }
@@ -131,67 +131,67 @@ void printConfigurationInternal(
         break;
       }
     }
-    if (isVar && !state.varNames.contains(str)) {
-      std::string stdStr = std::string(str->data, len(str));
+    if (is_var && !state.var_names.contains(str)) {
+      std::string std_str = std::string(str->data, len(str));
       std::string suffix;
-      while (state.usedVarNames.contains(stdStr + suffix)) {
-        suffix = std::to_string(state.varCounter++);
+      while (state.used_var_names.contains(std_str + suffix)) {
+        suffix = std::to_string(state.var_counter++);
       }
-      stdStr = stdStr + suffix;
+      std_str = std_str + suffix;
       sfprintf(file, "%s", suffix.c_str());
-      state.usedVarNames.insert(stdStr);
-      state.varNames[str] = suffix;
-    } else if (isVar) {
-      sfprintf(file, "%s", state.varNames[str].c_str());
+      state.used_var_names.insert(std_str);
+      state.var_names[str] = suffix;
+    } else if (is_var) {
+      sfprintf(file, "%s", state.var_names[str].c_str());
     }
     sfprintf(file, "\")");
     return;
   }
   uint32_t tag = tag_hdr(subject->h.hdr);
-  bool isBinder = isSymbolABinder(tag);
-  if (isBinder) {
-    state.boundVariables.push_back(
+  bool is_binder = is_symbol_a_binder(tag);
+  if (is_binder) {
+    state.bound_variables.push_back(
         *(block **)(((char *)subject) + sizeof(blockheader)));
   }
-  char const *symbol = getSymbolNameForTag(tag);
-  std::string symbolStr(symbol);
-  if (symbolStr.rfind("inj{", 0) == 0) {
-    std::string prefix = symbolStr.substr(0, symbolStr.find_first_of(','));
+  char const *symbol = get_symbol_name_for_tag(tag);
+  std::string symbol_str(symbol);
+  if (symbol_str.rfind("inj{", 0) == 0) {
+    std::string prefix = symbol_str.substr(0, symbol_str.find_first_of(','));
     sfprintf(file, "%s, %s}(", prefix.c_str(), sort);
   } else {
     sfprintf(file, "%s(", symbol);
   }
 
   visitor callbacks
-      = {printConfigurationInternal,
-         printMap,
-         printList,
-         printSet,
-         printInt,
-         printFloat,
-         printBool,
-         printStringBuffer,
-         printMInt,
-         printComma,
-         printRangeMap};
+      = {print_configuration_internal,
+         print_map,
+         print_list,
+         print_set,
+         print_int,
+         print_float,
+         print_bool,
+         print_string_buffer,
+         print_m_int,
+         print_comma,
+         print_range_map};
 
-  visitChildren(subject, file, &callbacks, state_ptr);
+  visit_children(subject, file, &callbacks, state_ptr);
 
-  if (isBinder) {
-    state.boundVariables.pop_back();
+  if (is_binder) {
+    state.bound_variables.pop_back();
   }
   sfprintf(file, ")");
 }
 
-void printStatistics(FILE *file, uint64_t steps) {
+void print_statistics(FILE *file, uint64_t steps) {
   fmt::print(file, "{}\n", steps - 1); // off by one adjustment
 }
 
-void printConfiguration(FILE *file, block *subject) {
+void print_configuration(FILE *file, block *subject) {
   auto state = print_state();
 
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, nullptr, false, &state);
+  print_configuration_internal(&w, subject, nullptr, false, &state);
 }
 
 // If the parameter `results` is passed by reference, the ordering induced by
@@ -199,8 +199,8 @@ void printConfiguration(FILE *file, block *subject) {
 // expected output. We therefore just pass the results by value for now as this
 // code is not on a hot path.
 // NOLINTBEGIN(performance-unnecessary-value-param)
-void printConfigurations(
-    FILE *file, std::unordered_set<block *, HashBlock, KEq> results) {
+void print_configurations(
+    FILE *file, std::unordered_set<block *, hash_block, k_eq> results) {
   auto state = print_state();
 
   writer w = {file, nullptr};
@@ -211,7 +211,7 @@ void printConfigurations(
     sfprintf(&w, "\\or{SortGeneratedTopCell{}}(");
     size_t j = 0;
     for (auto const &subject : results) {
-      printConfigurationInternal(&w, subject, nullptr, false, &state);
+      print_configuration_internal(&w, subject, nullptr, false, &state);
       if (++j != results.size()) {
         sfprintf(&w, ",");
       }
@@ -229,82 +229,84 @@ string *debug_print_term(block *subject, char const *sort) {
   char const *print_sort = nullptr;
 
   if (sort) {
-    subject = constructKItemInj(subject, sort, false);
+    subject = construct_k_item_inj(subject, sort, false);
     print_sort = "SortKItem{}";
   }
 
-  printConfigurationInternal(&w, subject, print_sort, false, &state);
+  print_configuration_internal(&w, subject, print_sort, false, &state);
   return hook_BUFFER_toString(buf);
 }
 
-string *printConfigurationToString(block *subject) {
+string *print_configuration_to_string(block *subject) {
   auto state = print_state();
   stringbuffer *buf = hook_BUFFER_empty();
   writer w = {nullptr, buf};
-  printConfigurationInternal(&w, subject, nullptr, false, &state);
+  print_configuration_internal(&w, subject, nullptr, false, &state);
   return hook_BUFFER_toString(buf);
 }
 
-void printSortedConfigurationToFile(
+void print_sorted_configuration_to_file(
     FILE *file, block *subject, char const *sort) {
   auto state = print_state();
   writer w = {file, nullptr};
-  printConfigurationInternal(&w, subject, sort, false, &state);
+  print_configuration_internal(&w, subject, sort, false, &state);
 }
 
-extern "C" void printMatchResult(
-    std::ostream &os, MatchLog *matchLog, size_t logSize,
-    std::string const &definitionPath) {
+extern "C" void print_match_result(
+    std::ostream &os, match_log *match_log, size_t log_size,
+    std::string const &definition_path) {
   auto subject_file = temporary_file("subject_XXXXXX");
   auto *subject = subject_file.file_pointer("w");
   auto pattern_file = temporary_file("pattern_XXXXXX");
 
-  for (int i = 0; i < logSize; i++) {
-    if (matchLog[i].kind == MatchLog::SUCCESS) {
+  for (int i = 0; i < log_size; i++) {
+    if (match_log[i].kind == match_log::Success) {
       os << "Match succeeds\n";
-    } else if (matchLog[i].kind == MatchLog::FAIL) {
+    } else if (match_log[i].kind == match_log::Fail) {
       os << "Subject:\n";
       if (i == 0) {
-        printSortedConfigurationToFile(
-            subject, (block *)matchLog[i].subject, matchLog[i].sort);
+        print_sorted_configuration_to_file(
+            subject, (block *)match_log[i].subject, match_log[i].sort);
       } else {
-        auto *subjectSort
-            = debug_print_term((block *)matchLog[i].subject, matchLog[i].sort);
-        auto strSubjectSort = std::string(subjectSort->data, len(subjectSort));
-        subject_file.ofstream() << strSubjectSort << std::endl;
+        auto *subject_sort = debug_print_term(
+            (block *)match_log[i].subject, match_log[i].sort);
+        auto str_subject_sort
+            = std::string(subject_sort->data, len(subject_sort));
+        subject_file.ofstream() << str_subject_sort << std::endl;
       }
-      kllvm::printKORE(
-          os, definitionPath, subject_file.filename(), false, true);
+      kllvm::print_kore(
+          os, definition_path, subject_file.filename(), false, true);
       os << "does not match pattern: \n";
-      pattern_file.ofstream() << matchLog[i].pattern << std::endl;
-      kllvm::printKORE(
-          os, definitionPath, pattern_file.filename(), false, true);
-    } else if (matchLog[i].kind == MatchLog::FUNCTION) {
-      os << matchLog[i].debugName << "(";
+      pattern_file.ofstream() << match_log[i].pattern << std::endl;
+      kllvm::print_kore(
+          os, definition_path, pattern_file.filename(), false, true);
+    } else if (match_log[i].kind == match_log::Function) {
+      os << match_log[i].debug_name << "(";
 
-      for (int j = 0; j < matchLog[i].args.size(); j += 2) {
-        auto *typeName = static_cast<char *>(matchLog[i].args[j + 1]);
-        printValueOfType(os, definitionPath, matchLog[i].args[j], typeName);
-        if (j + 2 != matchLog[i].args.size()) {
+      for (int j = 0; j < match_log[i].args.size(); j += 2) {
+        auto *type_name = static_cast<char *>(match_log[i].args[j + 1]);
+        print_value_of_type(
+            os, definition_path, match_log[i].args[j], type_name);
+        if (j + 2 != match_log[i].args.size()) {
           os << ", ";
         }
       }
-      os << ") => " << *static_cast<bool *>(matchLog[i].result) << "\n";
+      os << ") => " << *static_cast<bool *>(match_log[i].result) << "\n";
     }
   }
 }
 
-void printValueOfType(
-    std::ostream &os, std::string const &definitionPath, void *value,
+void print_value_of_type(
+    std::ostream &os, std::string const &definition_path, void *value,
     std::string const &type) {
   if (type == "%mpz*") {
     os << static_cast<mpz_ptr>(value);
   } else if (type == "%block*") {
     if ((((uintptr_t)value) & 3) == 1) {
       auto f = temporary_file("subject_XXXXXX");
-      string *s = printConfigurationToString(static_cast<block *>(value));
+      string *s = print_configuration_to_string(static_cast<block *>(value));
       f.ofstream() << std::string(s->data, len(s)) << std::endl;
-      kllvm::printKORE(os, definitionPath, f.filename(), false, true);
+      kllvm::print_kore(os, definition_path, f.filename(), false, true);
     } else if ((((uintptr_t)value) & 1) == 0) {
       auto *s = static_cast<string *>(value);
       os << std::string(s->data, len(s));
@@ -312,7 +314,7 @@ void printValueOfType(
       os << "Error: " << type << " not implemented!";
     }
   } else if (type == "%floating*") {
-    os << floatToString(static_cast<floating *>(value));
+    os << float_to_string(static_cast<floating *>(value));
   } else if (type == "i1") {
     os << *static_cast<bool *>(value);
   } else {
@@ -320,7 +322,7 @@ void printValueOfType(
   }
 }
 
-void printVariableToFile(FILE *file, char const *varname) {
+void print_variable_to_file(FILE *file, char const *varname) {
   fmt::print(file, "{}", varname);
   char n = 0;
   fwrite(&n, 1, 1, file);

@@ -12,11 +12,11 @@ using namespace rapidjson;
 extern "C" {
 floating *move_float(floating *);
 string *hook_STRING_int2string(mpz_t);
-string *makeString(char const *input, ssize_t len = -1);
-char *getTerminatedString(string *);
+string *make_string(char const *input, ssize_t len = -1);
+char *get_terminated_string(string *);
 }
 
-std::string floatToString(floating const *f, char const *suffix);
+std::string float_to_string(floating const *f, char const *suffix);
 
 struct zinj {
   blockheader h;
@@ -55,15 +55,15 @@ struct jsonmember {
   block *val;
 };
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
-static blockheader kseqHeader
-    = {getBlockHeaderForSymbol((uint64_t)getTagForSymbolName("kseq{}"))};
+static blockheader kseq_header = {
+    get_block_header_for_symbol((uint64_t)get_tag_for_symbol_name("kseq{}"))};
 
 #define GET_HEADER(name, symbol)                                               \
   static struct blockheader name() {                                           \
     static struct blockheader hdr = {(uint64_t)-1};                            \
     if (hdr.hdr == -1) {                                                       \
-      hdr = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(symbol));    \
+      hdr = get_block_header_for_symbol(                                       \
+          (uint64_t)get_tag_for_symbol_name(symbol));                          \
     }                                                                          \
     return hdr;                                                                \
   }
@@ -81,7 +81,7 @@ GET_HEADER(listWrapHdr, "LblJSONList{}");
   static block *name() {                                                       \
     static uint64_t tag = (uint64_t)-1;                                        \
     if (tag == -1) {                                                           \
-      tag = (uint64_t)leaf_block(getTagForSymbolName(symbol));                 \
+      tag = (uint64_t)leaf_block(get_tag_for_symbol_name(symbol));             \
     }                                                                          \
     return (block *)tag;                                                       \
   }
@@ -89,7 +89,7 @@ GET_HEADER(listWrapHdr, "LblJSONList{}");
 GET_BLOCK(dotList, "Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}");
 GET_BLOCK(null, "LblJSONnull{}");
 
-struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
+struct kore_handler : BaseReaderHandler<UTF8<>, kore_handler> {
   block *result = nullptr;
   std::vector<block *> stack;
 
@@ -98,7 +98,7 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
     return true;
   }
   bool Bool(bool b) {
-    auto *inj = (boolinj *)koreAlloc(sizeof(boolinj));
+    auto *inj = (boolinj *)kore_alloc(sizeof(boolinj));
     inj->h = boolHdr();
     inj->data = b;
     result = (block *)inj;
@@ -110,7 +110,7 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
     mpz_t z;
     int status = mpz_init_set_str(z, str, 10);
     if (status == 0) {
-      zinj *inj = (zinj *)koreAlloc(sizeof(zinj));
+      zinj *inj = (zinj *)kore_alloc(sizeof(zinj));
       inj->h = intHdr();
       inj->data = move_int(z);
       result = (block *)inj;
@@ -123,7 +123,7 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
     mpfr_init2(f->f, 53);
     f->exp = 11;
     mpfr_set_str(f->f, str, 9, MPFR_RNDN);
-    auto *inj = (floatinj *)koreAlloc(sizeof(floatinj));
+    auto *inj = (floatinj *)kore_alloc(sizeof(floatinj));
     inj->h = floatHdr();
     inj->data = move_float(f);
     result = (block *)inj;
@@ -132,9 +132,9 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
   }
 
   bool String(char const *str, SizeType len, bool copy) {
-    auto *inj = (stringinj *)koreAlloc(sizeof(stringinj));
+    auto *inj = (stringinj *)kore_alloc(sizeof(stringinj));
     inj->h = strHdr();
-    auto *token = (string *)koreAllocToken(sizeof(string) + len);
+    auto *token = (string *)kore_alloc_token(sizeof(string) + len);
     init_with_len(token, len);
     memcpy(token->data, str, len);
     inj->data = token;
@@ -149,22 +149,22 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
     return String(str, len, copy);
   }
 
-  bool EndObject(SizeType memberCount) {
+  bool EndObject(SizeType member_count) {
     result = dotList();
-    for (int i = 0; i < memberCount; i++) {
-      auto *member = (jsonmember *)koreAlloc(sizeof(jsonmember));
+    for (int i = 0; i < member_count; i++) {
+      auto *member = (jsonmember *)kore_alloc(sizeof(jsonmember));
       member->h = membHdr();
       member->val = stack.back();
       stack.pop_back();
       member->key = stack.back();
       stack.pop_back();
-      auto *list = (jsonlist *)koreAlloc(sizeof(jsonlist));
+      auto *list = (jsonlist *)kore_alloc(sizeof(jsonlist));
       list->h = listHdr();
       list->hd = (block *)member;
       list->tl = (jsonlist *)result;
       result = (block *)list;
     }
-    json *wrap = (json *)koreAlloc(sizeof(json));
+    json *wrap = (json *)kore_alloc(sizeof(json));
     wrap->h = objHdr();
     wrap->data = (jsonlist *)result;
     stack.push_back((block *)wrap);
@@ -173,17 +173,17 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
 
   static bool StartArray() { return true; }
 
-  bool EndArray(SizeType elementCount) {
+  bool EndArray(SizeType element_count) {
     result = dotList();
-    for (int i = 0; i < elementCount; i++) {
-      auto *list = (jsonlist *)koreAlloc(sizeof(jsonlist));
+    for (int i = 0; i < element_count; i++) {
+      auto *list = (jsonlist *)kore_alloc(sizeof(jsonlist));
       list->h = listHdr();
       list->hd = stack.back();
       stack.pop_back();
       list->tl = (jsonlist *)result;
       result = (block *)list;
     }
-    json *wrap = (json *)koreAlloc(sizeof(json));
+    json *wrap = (json *)kore_alloc(sizeof(json));
     wrap->h = listWrapHdr();
     wrap->data = (jsonlist *)result;
     stack.push_back((block *)wrap);
@@ -192,8 +192,8 @@ struct KoreHandler : BaseReaderHandler<UTF8<>, KoreHandler> {
 };
 
 template <typename Stream>
-struct KoreWriter : Writer<Stream> {
-  bool RawNumber(
+struct kore_writer : Writer<Stream> {
+  bool raw_number(
       typename Writer<Stream>::Ch const *str, rapidjson::SizeType length,
       bool copy = false) {
     (void)copy;
@@ -201,12 +201,12 @@ struct KoreWriter : Writer<Stream> {
     return Writer<Stream>::EndValue(Writer<Stream>::WriteRawValue(str, length));
   }
 
-  KoreWriter(Stream &os)
+  kore_writer(Stream &os)
       : Writer<Stream>(os) { }
 };
 
 template <typename Stream>
-static bool write_json(KoreWriter<Stream> &writer, block *data) {
+static bool write_json(kore_writer<Stream> &writer, block *data) {
   bool return_value = true;
   if (data != dotList()) {
     if (data == null()) {
@@ -217,11 +217,11 @@ static bool write_json(KoreWriter<Stream> &writer, block *data) {
     } else if (tag_hdr(data->h.hdr) == tag_hdr(intHdr().hdr)) {
       zinj *inj = (zinj *)data;
       string *str = hook_STRING_int2string(inj->data);
-      writer.RawNumber(str->data, len(str), false);
+      writer.raw_number(str->data, len(str), false);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(floatHdr().hdr)) {
       auto *inj = (floatinj *)data;
-      std::string str = floatToString(inj->data, "");
-      writer.RawNumber(str.c_str(), str.length(), false);
+      std::string str = float_to_string(inj->data, "");
+      writer.raw_number(str.c_str(), str.length(), false);
     } else if (tag_hdr(data->h.hdr) == tag_hdr(strHdr().hdr)) {
       auto *inj = (stringinj *)data;
       writer.String(inj->data->data, len(inj->data), false);
@@ -255,17 +255,17 @@ extern "C" {
 
 SortString hook_JSON_json2string(SortJSON json) {
   StringBuffer buffer;
-  KoreWriter<StringBuffer> writer(buffer);
+  kore_writer<StringBuffer> writer(buffer);
   if (!write_json(writer, json)) {
     abort();
   }
-  return makeString(buffer.GetString());
+  return make_string(buffer.GetString());
 }
 
 SortJSON hook_JSON_string2json(SortString str) {
-  char *cstr = getTerminatedString(str);
+  char *cstr = get_terminated_string(str);
   StringStream s(cstr);
-  KoreHandler handler;
+  kore_handler handler;
   Reader reader;
   bool result = reader.Parse<kParseNumbersAsStringsFlag>(s, handler);
   if (result) {

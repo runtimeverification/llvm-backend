@@ -28,10 +28,10 @@ class serializer {
 public:
   enum flags {
     NONE = 0,
-    DROP_HEADER = 1,
-    DROP_ARITY = 2,
-    DROP_BOTH = 3,
-    NO_INTERN = 4,
+    DropHeader = 1,
+    DropArity = 2,
+    DropBoth = 3,
+    NoIntern = 4,
   };
 
   static constexpr auto magic_header = std::array{'\x7f', 'K', 'O', 'R', 'E'};

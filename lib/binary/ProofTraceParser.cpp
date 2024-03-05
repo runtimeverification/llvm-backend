@@ -6,120 +6,122 @@ namespace kllvm {
 
 constexpr auto indent_size = 2U;
 
-LLVMFunctionEvent::LLVMFunctionEvent(
-    std::string _name, std::string _relativePosition)
-    : name(std::move(_name))
-    , relativePosition(std::move(_relativePosition)) { }
+llvm_function_event::llvm_function_event(
+    std::string name, std::string relative_position)
+    : name_(std::move(name))
+    , relative_position_(std::move(relative_position)) { }
 
-std::vector<LLVMEvent> const &LLVMFunctionEvent::getArguments() const {
-  return arguments;
+std::vector<llvm_event> const &llvm_function_event::get_arguments() const {
+  return arguments_;
 }
 
-void LLVMFunctionEvent::addArgument(LLVMEvent const &argument) {
-  arguments.push_back(argument);
+void llvm_function_event::add_argument(llvm_event const &argument) {
+  arguments_.push_back(argument);
 }
 
-LLVMHookEvent::LLVMHookEvent(std::string _name, std::string _relativePosition)
-    : name(std::move(_name))
-    , relativePosition(std::move(_relativePosition))
-    , korePattern(nullptr) { }
+llvm_hook_event::llvm_hook_event(
+    std::string name, std::string relative_position)
+    : name_(std::move(name))
+    , relative_position_(std::move(relative_position))
+    , kore_pattern_(nullptr) { }
 
-void LLVMHookEvent::addArgument(LLVMEvent const &argument) {
-  arguments.push_back(argument);
+void llvm_hook_event::add_argument(llvm_event const &argument) {
+  arguments_.push_back(argument);
 }
 
-void LLVMRewriteEvent::printSubstitution(
-    std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * indent_size, ' ');
-  for (auto const &p : substitution) {
-    Out << fmt::format("{}{} = kore[{}]\n", Indent, p.first, p.second.second);
+void llvm_rewrite_event::print_substitution(
+    std::ostream &out, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  for (auto const &p : substitution_) {
+    out << fmt::format("{}{} = kore[{}]\n", indent, p.first, p.second.second);
   }
 }
 
-void LLVMRuleEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * indent_size, ' ');
-  Out << fmt::format(
-      "{}rule: {} {}\n", Indent, getRuleOrdinal(), getSubstitution().size());
-  printSubstitution(Out, indent + 1U);
+void llvm_rule_event::print(std::ostream &out, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format(
+      "{}rule: {} {}\n", indent, get_rule_ordinal(), get_substitution().size());
+  print_substitution(out, ind + 1U);
 }
 
-void LLVMSideConditionEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * indent_size, ' ');
-  Out << fmt::format(
-      "{}side condition entry: {} {}\n", Indent, getRuleOrdinal(),
-      getSubstitution().size());
-  printSubstitution(Out, indent + 1U);
+void llvm_side_condition_event::print(std::ostream &out, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format(
+      "{}side condition entry: {} {}\n", indent, get_rule_ordinal(),
+      get_substitution().size());
+  print_substitution(out, ind + 1U);
 }
 
-void LLVMSideConditionEndEvent::print(
-    std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * indent_size, ' ');
-  Out << fmt::format(
-      "{}side condition exit: {} kore[{}]\n", Indent, ruleOrdinal,
-      patternLength);
+void llvm_side_condition_end_event::print(
+    std::ostream &out, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format(
+      "{}side condition exit: {} kore[{}]\n", indent, rule_ordinal_,
+      pattern_length_);
 }
 
-void LLVMFunctionEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * indent_size, ' ');
-  Out << fmt::format("{}function: {} ({})\n", Indent, name, relativePosition);
-  for (auto const &arg : arguments) {
-    arg.print(Out, true, indent + 1U);
+void llvm_function_event::print(std::ostream &out, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format(
+      "{}function: {} ({})\n", indent, name_, relative_position_);
+  for (auto const &arg : arguments_) {
+    arg.print(out, true, ind + 1U);
   }
 }
 
-void LLVMHookEvent::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * indent_size, ' ');
-  Out << fmt::format("{}hook: {} ({})\n", Indent, name, relativePosition);
-  for (auto const &arg : arguments) {
-    arg.print(Out, true, indent + 1U);
+void llvm_hook_event::print(std::ostream &out, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format("{}hook: {} ({})\n", indent, name_, relative_position_);
+  for (auto const &arg : arguments_) {
+    arg.print(out, true, ind + 1U);
   }
-  Out << fmt::format("{}hook result: kore[{}]\n", Indent, patternLength);
+  out << fmt::format("{}hook result: kore[{}]\n", indent, pattern_length_);
 }
 
-void LLVMEvent::print(std::ostream &Out, bool isArg, unsigned indent) const {
-  if (isStepEvent) {
-    stepEvent->print(Out, indent);
+void llvm_event::print(std::ostream &out, bool is_arg, unsigned ind) const {
+  if (is_step_event_) {
+    step_event_->print(out, ind);
   } else {
-    std::string Indent(indent * indent_size, ' ');
-    Out << fmt::format(
-        "{}{}: kore[{}]\n", Indent, isArg ? "arg" : "config", patternLength);
+    std::string indent(ind * indent_size, ' ');
+    out << fmt::format(
+        "{}{}: kore[{}]\n", indent, is_arg ? "arg" : "config", pattern_length_);
   }
 }
 
-void LLVMRewriteTrace::print(std::ostream &Out, unsigned indent) const {
-  std::string Indent(indent * indent_size, ' ');
-  Out << fmt::format("{}version: {}\n", Indent, version);
-  for (auto const &pre_trace_event : preTrace) {
-    pre_trace_event.print(Out, false, indent);
+void llvm_rewrite_trace::print(std::ostream &out, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format("{}version: {}\n", indent, version_);
+  for (auto const &pre_trace_event : pre_trace_) {
+    pre_trace_event.print(out, false, ind);
   }
-  initialConfig.print(Out, false, indent);
-  for (auto const &trace_event : trace) {
-    trace_event.print(Out, false, indent);
+  initial_config_.print(out, false, ind);
+  for (auto const &trace_event : trace_) {
+    trace_event.print(out, false, ind);
   }
 }
 
-ProofTraceParser::ProofTraceParser(bool _verbose)
-    : verbose(_verbose) { }
+proof_trace_parser::proof_trace_parser(bool verbose)
+    : verbose_(verbose) { }
 
-std::optional<LLVMRewriteTrace>
-ProofTraceParser::parse_proof_trace(std::string const &data) {
+std::optional<llvm_rewrite_trace>
+proof_trace_parser::parse_proof_trace(std::string const &data) {
   auto ptr = data.begin();
-  LLVMRewriteTrace trace;
+  llvm_rewrite_trace trace;
   bool result = parse_trace(ptr, data.end(), trace);
 
   if (!result || ptr != data.end()) {
     return std::nullopt;
   }
 
-  if (verbose) {
+  if (verbose_) {
     trace.print(std::cout);
   }
 
   return trace;
 }
 
-std::optional<LLVMRewriteTrace>
-ProofTraceParser::parse_proof_trace_from_file(std::string const &filename) {
+std::optional<llvm_rewrite_trace>
+proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
   auto data = file_contents(filename);
   return parse_proof_trace(data);
 }

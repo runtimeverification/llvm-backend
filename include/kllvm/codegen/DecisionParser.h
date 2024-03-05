@@ -11,30 +11,30 @@
 
 namespace kllvm {
 
-class DecisionNode;
+class decision_node;
 
-struct Residual {
+struct residual {
   std::string occurrence;
-  KOREPattern *pattern{};
+  kore_pattern *pattern{};
 };
 
-struct PartialStep {
-  DecisionNode *dt{};
-  std::vector<Residual> residuals;
+struct partial_step {
+  decision_node *dt{};
+  std::vector<residual> residuals;
 };
 
-DecisionNode *parseYamlDecisionTreeFromString(
+decision_node *parse_yamldecision_tree_from_string(
     llvm::Module *, std::string const &yaml,
-    std::map<std::string, KORESymbol *> const &syms,
-    std::map<ValueType, sptr<KORECompositeSort>> const &sorts);
-DecisionNode *parseYamlDecisionTree(
+    std::map<std::string, kore_symbol *> const &syms,
+    std::map<value_type, sptr<kore_composite_sort>> const &sorts);
+decision_node *parse_yamldecision_tree(
     llvm::Module *, std::string const &filename,
-    std::map<std::string, KORESymbol *> const &syms,
-    std::map<ValueType, sptr<KORECompositeSort>> const &sorts);
-PartialStep parseYamlSpecialDecisionTree(
+    std::map<std::string, kore_symbol *> const &syms,
+    std::map<value_type, sptr<kore_composite_sort>> const &sorts);
+partial_step parse_yaml_specialdecision_tree(
     llvm::Module *, std::string const &filename,
-    std::map<std::string, KORESymbol *> const &syms,
-    std::map<ValueType, sptr<KORECompositeSort>> const &sorts);
+    std::map<std::string, kore_symbol *> const &syms,
+    std::map<value_type, sptr<kore_composite_sort>> const &sorts);
 
 } // namespace kllvm
 

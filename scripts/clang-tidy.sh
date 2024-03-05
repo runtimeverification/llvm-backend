@@ -21,11 +21,11 @@ source_dirs=(
   tools
 )
 
-mapfile -t inputs < <(find "${source_dirs[@]}" -name '*.cpp' -or -name '*.h')
+mapfile -t inputs < <(find "${source_dirs[@]}" -name '*.cpp')
 
 "${driver}"                           \
   "${inputs[@]}"                      \
-  -header-filter 'include/(kllvm|runtime)/'              \
+  -header-filter '(include/kllvm/)|(include/runtime/*.h)'              \
   -clang-tidy-binary "${clang_tidy}"  \
   -j "$(nproc)"                       \
   -p "${BUILD_DIR}" "$@"              \

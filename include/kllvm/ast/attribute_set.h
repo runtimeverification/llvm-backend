@@ -8,7 +8,7 @@
 
 namespace kllvm {
 
-class KORECompositePattern;
+class kore_composite_pattern;
 
 /**
  * Type-safe wrapper around a set of KORE attribute patterns.
@@ -29,46 +29,46 @@ class KORECompositePattern;
  */
 class attribute_set {
 public:
-  using storage_t
-      = std::unordered_map<std::string, std::shared_ptr<KORECompositePattern>>;
+  using storage_t = std::unordered_map<
+      std::string, std::shared_ptr<kore_composite_pattern>>;
 
   enum class key {
-    alias,
-    alias_rec,
-    anywhere,
-    assoc,
-    binder,
-    bracket,
-    ceil,
-    colors,
-    comm,
-    concat,
-    constructor,
-    element,
-    format,
-    fresh_generator,
-    function,
-    functional,
-    hook,
-    idem,
-    label,
-    left,
-    location,
-    macro,
-    macro_rec,
-    nat,
-    non_executable,
-    priorities,
-    priority,
-    right,
-    simplification,
-    sort_injection,
-    source,
-    subsort,
-    symbol_overload,
-    terminals,
-    total,
-    unit,
+    Alias,
+    AliasRec,
+    Anywhere,
+    Assoc,
+    Binder,
+    Bracket,
+    Ceil,
+    Colors,
+    Comm,
+    Concat,
+    Constructor,
+    Element,
+    Format,
+    FreshGenerator,
+    Function,
+    Functional,
+    Hook,
+    Idem,
+    Label,
+    Left,
+    Location,
+    Macro,
+    MacroRec,
+    Nat,
+    NonExecutable,
+    Priorities,
+    Priority,
+    Right,
+    Simplification,
+    SortInjection,
+    Source,
+    Subsort,
+    SymbolOverload,
+    Terminals,
+    Total,
+    Unit,
   };
 
   attribute_set() = default;
@@ -83,7 +83,7 @@ public:
    * unknown attribute), `std::nullopt` is returned.
    */
   std::optional<attribute_set::key>
-  add(std::shared_ptr<KORECompositePattern> att);
+  add(std::shared_ptr<kore_composite_pattern> att);
 
   /**
    * Returns true if there is any attribute with the given key; the arguments of
@@ -97,7 +97,7 @@ public:
    * This lookup is unchecked; use `.contains(k)` first if the attribute may not
    * be present.
    */
-  [[nodiscard]] std::shared_ptr<KORECompositePattern> const &get(key k) const;
+  [[nodiscard]] std::shared_ptr<kore_composite_pattern> const &get(key k) const;
 
   /**
    * Look up an attribute with the specified key that has the form:

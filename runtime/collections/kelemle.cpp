@@ -32,13 +32,13 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
       } // arglayout != 0
       // Both arg1 and arg2 are blocks.
       auto arglayoutshort = (uint16_t)arglayout;
-      layout *layoutPtr = getLayoutData(arglayoutshort);
-      uint8_t length = layoutPtr->nargs;
+      layout *layout_ptr = get_layout_data(arglayoutshort);
+      uint8_t length = layout_ptr->nargs;
       for (uint8_t i = 0; i < length; i++) {
-        uint64_t offset = layoutPtr->args[i].offset;
+        uint64_t offset = layout_ptr->args[i].offset;
         uint64_t child1intptr = arg1intptr + offset;
         uint64_t child2intptr = arg2intptr + offset;
-        uint16_t cat = layoutPtr->args[i].cat;
+        uint16_t cat = layout_ptr->args[i].cat;
         switch (cat) {
         case MAP_LAYOUT: {
           map *map1ptr = (map *)(child1intptr);
@@ -174,11 +174,11 @@ bool hook_KEQUAL_lt(block *arg1, block *arg2) {
     return arg1tag < arg2tag;
   }
   assert(arg1layout == arg2layout);
-  layout *layoutPtr = getLayoutData(arg1layout);
-  uint8_t length = layoutPtr->nargs;
+  layout *layout_ptr = get_layout_data(arg1layout);
+  uint8_t length = layout_ptr->nargs;
   for (uint8_t i = 0; i < length; i++) {
-    uint64_t offset = layoutPtr->args[i].offset;
-    uint16_t cat = layoutPtr->args[i].cat;
+    uint64_t offset = layout_ptr->args[i].offset;
+    uint16_t cat = layout_ptr->args[i].cat;
     switch (cat) {
     case INT_LAYOUT: {
       auto *int1ptrptr = (mpz_ptr *)(arg1intptr + offset);

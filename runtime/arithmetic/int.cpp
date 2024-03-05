@@ -13,7 +13,7 @@ SortInt hook_INT_tmod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Modulus by zero: {} % {}", intToString(a), intToString(b));
+        "Modulus by zero: {} % {}", int_to_string(a), int_to_string(b));
   }
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
@@ -24,7 +24,7 @@ SortInt hook_INT_emod(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Modulus by zero: {} % {}", intToString(a), intToString(b));
+        "Modulus by zero: {} % {}", int_to_string(a), int_to_string(b));
   }
   mpz_init(result);
   mpz_tdiv_r(result, a, b);
@@ -90,7 +90,7 @@ SortInt hook_INT_tdiv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Division by zero: {} / {}", intToString(a), intToString(b));
+        "Division by zero: {} / {}", int_to_string(a), int_to_string(b));
   }
   mpz_init(result);
   mpz_tdiv_q(result, a, b);
@@ -101,7 +101,7 @@ SortInt hook_INT_ediv(SortInt a, SortInt b) {
   mpz_t result;
   if (mpz_sgn(b) == 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Division by zero: {} / {}", intToString(a), intToString(b));
+        "Division by zero: {} / {}", int_to_string(a), int_to_string(b));
   }
   mpz_init(result);
   if (mpz_sgn(b) >= 0) {
@@ -116,8 +116,8 @@ SortInt hook_INT_shl(SortInt a, SortInt b) {
   mpz_t result;
   if (!mpz_fits_ulong_p(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Left shift amount out of range: {} << {}", intToString(a),
-        intToString(b));
+        "Left shift amount out of range: {} << {}", int_to_string(a),
+        int_to_string(b));
   }
   mpz_init(result);
   unsigned long blong = mpz_get_ui(b);
@@ -139,8 +139,8 @@ SortInt hook_INT_shr(SortInt a, SortInt b) {
   if (!mpz_fits_ulong_p(b)) {
     if (mpz_sgn(b) < 0) {
       KLLVM_HOOK_INVALID_ARGUMENT(
-          "Negative right shift amount: {} >> {}", intToString(a),
-          intToString(b));
+          "Negative right shift amount: {} >> {}", int_to_string(a),
+          int_to_string(b));
     }
     if (mpz_sgn(a) < 0) {
       mpz_set_si(result, -1);
@@ -160,7 +160,7 @@ SortInt hook_INT_pow(SortInt a, SortInt b) {
   mpz_t result;
   if (!mpz_fits_ulong_p(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Exponent out of range: {} ^ {}", intToString(a), intToString(b));
+        "Exponent out of range: {} ^ {}", int_to_string(a), int_to_string(b));
   }
   mpz_init(result);
   unsigned long blong = mpz_get_ui(b);
@@ -176,8 +176,8 @@ SortInt hook_INT_powmod(SortInt a, SortInt b, SortInt mod) {
     if (mpz_cmp_ui(result, 1) != 0) {
       mpz_clear(result);
       KLLVM_HOOK_INVALID_ARGUMENT(
-          "Modular inverse not defined: {} ^ {} % {}", intToString(a),
-          intToString(b), intToString(mod));
+          "Modular inverse not defined: {} ^ {} % {}", int_to_string(a),
+          int_to_string(b), int_to_string(mod));
     }
   }
   mpz_powm(result, a, b, mod);
@@ -238,7 +238,7 @@ SortInt hook_INT_log2(SortInt a) {
   mpz_t result;
   if (mpz_sgn(a) <= 0) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Logarithm of nonpositive integer: log2({})", intToString(a));
+        "Logarithm of nonpositive integer: log2({})", int_to_string(a));
   }
   mpz_init(result);
   size_t log = mpz_sizeinbase(a, 2) - 1;
@@ -294,12 +294,12 @@ SortInt hook_INT_bitRange(SortInt i, SortInt off, SortInt len) {
     return move_int(result);
   }
   if (!mpz_fits_ulong_p(len)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", intToString(len));
+    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", int_to_string(len));
   }
   unsigned long lenlong = mpz_get_ui(len);
   if (!mpz_fits_ulong_p(off)) {
     if (mpz_sgn(off) < 0) {
-      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", intToString(off));
+      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", int_to_string(off));
     }
     mpz_init(result);
     if (mpz_sgn(i) < 0) {
@@ -341,7 +341,7 @@ SortInt hook_INT_signExtendBitRange(SortInt i, SortInt off, SortInt len) {
   mpz_t result;
   if (!mpz_fits_ulong_p(off)) {
     if (mpz_sgn(off) < 0) {
-      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", intToString(off));
+      KLLVM_HOOK_INVALID_ARGUMENT("Negative offset: {}", int_to_string(off));
     }
     mpz_init(result);
     if (mpz_sgn(i) < 0) {
@@ -350,7 +350,7 @@ SortInt hook_INT_signExtendBitRange(SortInt i, SortInt off, SortInt len) {
     return move_int(result);
   }
   if (!mpz_fits_ulong_p(len)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", intToString(len));
+    KLLVM_HOOK_INVALID_ARGUMENT("Length out of range: {}", int_to_string(len));
   }
   unsigned long offlong = mpz_get_ui(off);
   unsigned long lenlong = mpz_get_ui(len);
@@ -373,30 +373,28 @@ void int_hash(mpz_t i, void *hasher) {
   }
 }
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
-
-gmp_randstate_t kllvm_randState;
-bool kllvm_randStateInitialized = false;
+gmp_randstate_t kllvm_rand_state;
+bool kllvm_rand_state_initialized = false;
 
 SortK hook_INT_srand(SortInt seed) {
-  if (!kllvm_randStateInitialized) {
-    gmp_randinit_default(kllvm_randState);
+  if (!kllvm_rand_state_initialized) {
+    gmp_randinit_default(kllvm_rand_state);
   }
-  gmp_randseed(kllvm_randState, seed);
-  kllvm_randStateInitialized = true;
-  return dotK;
+  gmp_randseed(kllvm_rand_state, seed);
+  kllvm_rand_state_initialized = true;
+  return dot_k();
 }
 
-SortInt hook_INT_rand(SortInt upperBound) {
+SortInt hook_INT_rand(SortInt upper_bound) {
   mpz_t result;
   mpz_init(result);
-  if (!kllvm_randStateInitialized) {
-    gmp_randinit_default(kllvm_randState);
+  if (!kllvm_rand_state_initialized) {
+    gmp_randinit_default(kllvm_rand_state);
     mpz_set_si(result, time(nullptr));
-    gmp_randseed(kllvm_randState, result);
-    kllvm_randStateInitialized = true;
+    gmp_randseed(kllvm_rand_state, result);
+    kllvm_rand_state_initialized = true;
   }
-  mpz_urandomm(result, kllvm_randState, upperBound);
+  mpz_urandomm(result, kllvm_rand_state, upper_bound);
   return move_int(result);
 }
 
@@ -415,7 +413,7 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   }
   uint64_t alloccount = nwords > count ? nwords : count;
   size_t allocsize = alloccount * sizeof(size_t);
-  auto *allocptr = (size_t *)koreAllocAlwaysGC(allocsize);
+  auto *allocptr = (size_t *)kore_alloc_always_gc(allocsize);
   memset(allocptr, 0, allocsize);
   size_t *exportptr = nwords > count ? allocptr + nwords - count : allocptr;
   size_t actualcount = 0;
@@ -428,7 +426,7 @@ size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   return resultptr;
 }
 
-mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
+mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool is_signed) {
   mpz_t result;
   mpz_t twos;
   mpz_init(twos);
@@ -437,7 +435,7 @@ mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned) {
   uint64_t nwords = (bits + 63) / 64;
   mpz_import(twos, nwords, -1, sizeof(size_t), 0, 0, i);
 
-  if (isSigned) {
+  if (is_signed) {
     signed_extract(result, twos, 0, bits);
     return move_int(result);
   }
