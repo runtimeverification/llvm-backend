@@ -648,11 +648,11 @@ def kllvm_lookup_function(val):
                 kind = t.tag
             else:
                 kind = t.name
-            if kind[0:11] == 'immer::list':
+            if kind.startswith('immer::list'):
                 return termPrinter(val.address, "list", "SortList{}")
-            elif kind[0:10] == 'immer::set':
+            elif kind.startswith('immer::set'):
                 return termPrinter(val.address, "set", "SortSet{}")
-            elif kind[0:10] == 'immer::map':
+            elif kind.startswith('immer::map'):
                 return termPrinter(val.address, "map", "SortMap{}")
             return None
         s = t.target()
