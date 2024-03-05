@@ -26,7 +26,7 @@
 #include <unordered_set>
 
 struct match_log {
-  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
+  enum { Success = 0, Function, Fail } kind;
 
   char const *function{};
   char const *debug_name{};

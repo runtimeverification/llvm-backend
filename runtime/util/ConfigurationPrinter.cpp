@@ -260,9 +260,9 @@ extern "C" void print_match_result(
   auto pattern_file = temporary_file("pattern_XXXXXX");
 
   for (int i = 0; i < log_size; i++) {
-    if (match_log[i].kind == match_log::SUCCESS) {
+    if (match_log[i].kind == match_log::Success) {
       os << "Match succeeds\n";
-    } else if (match_log[i].kind == match_log::FAIL) {
+    } else if (match_log[i].kind == match_log::Fail) {
       os << "Subject:\n";
       if (i == 0) {
         print_sorted_configuration_to_file(
@@ -280,7 +280,7 @@ extern "C" void print_match_result(
       pattern_file.ofstream() << match_log[i].pattern << std::endl;
       kllvm::print_kore(
           os, definition_path, pattern_file.filename(), false, true);
-    } else if (match_log[i].kind == match_log::FUNCTION) {
+    } else if (match_log[i].kind == match_log::Function) {
       os << match_log[i].debug_name << "(";
 
       for (int j = 0; j < match_log[i].args.size(); j += 2) {

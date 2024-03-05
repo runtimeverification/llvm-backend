@@ -26,29 +26,29 @@ void kore_parser::error(location const &loc, std::string const &err_message) {
 
 static std::string str(token tok) {
   switch (tok) {
-  case token::EMPTY: abort();
-  case token::MODULE: return "module";
-  case token::ENDMODULE: return "endmodule";
-  case token::IMPORT: return "import";
-  case token::SORT: return "sort";
-  case token::SYMBOL: return "symbol";
-  case token::WHERE: return "where";
-  case token::ALIAS: return "alias";
-  case token::AXIOM: return "axiom";
-  case token::CLAIM: return "claim";
-  case token::HOOKEDSORT: return "hooked-sort";
-  case token::HOOKEDSYMBOL: return "hooked-symbol";
-  case token::COLON: return ":";
-  case token::LEFTBRACE: return "{";
-  case token::RIGHTBRACE: return "}";
-  case token::LEFTBRACKET: return "[";
-  case token::RIGHTBRACKET: return "]";
-  case token::LEFTPAREN: return "(";
-  case token::RIGHTPAREN: return ")";
-  case token::COMMA: return ",";
-  case token::COLONEQUAL: return ":=";
-  case token::ID: return "<identifier>";
-  case token::STRING: return "<string>";
+  case token::Empty: abort();
+  case token::Module: return "module";
+  case token::EndModule: return "endmodule";
+  case token::Import: return "import";
+  case token::Sort: return "sort";
+  case token::Symbol: return "symbol";
+  case token::Where: return "where";
+  case token::Alias: return "alias";
+  case token::Axiom: return "axiom";
+  case token::Claim: return "claim";
+  case token::HookedSort: return "hooked-sort";
+  case token::HookedSymbol: return "hooked-symbol";
+  case token::Colon: return ":";
+  case token::LeftBrace: return "{";
+  case token::RightBrace: return "}";
+  case token::LeftBracket: return "[";
+  case token::RightBracket: return "]";
+  case token::LeftParen: return "(";
+  case token::RightParen: return ")";
+  case token::Comma: return ",";
+  case token::ColonEqual: return ":=";
+  case token::Id: return "<identifier>";
+  case token::String: return "<string>";
   case token::TokenEof: return "<EOF>";
   default: abort();
   }
@@ -56,13 +56,13 @@ static std::string str(token tok) {
 
 std::string kore_parser::consume(token next) {
   std::string data;
-  token actual = token::EMPTY;
-  if (buffer_.tok == token::EMPTY) {
+  token actual = token::Empty;
+  if (buffer_.tok == token::Empty) {
     actual = scanner_.yylex(&data, &loc_);
   } else {
     actual = buffer_.tok;
     data = buffer_.data;
-    buffer_.tok = token::EMPTY;
+    buffer_.tok = token::Empty;
   }
   if (actual == next) {
     return data;
@@ -72,7 +72,7 @@ std::string kore_parser::consume(token next) {
 
 token kore_parser::peek() {
   std::string data;
-  if (buffer_.tok == token::EMPTY) {
+  if (buffer_.tok == token::Empty) {
     buffer_.tok = scanner_.yylex(&data, &loc_);
     buffer_.data = data;
   }
@@ -80,10 +80,10 @@ token kore_parser::peek() {
 }
 
 ptr<kore_definition> kore_parser::definition() {
-  consume(token::LEFTBRACKET);
+  consume(token::LeftBracket);
   auto result = kore_definition::create();
   attributes(result.get());
-  consume(token::RIGHTBRACKET);
+  consume(token::RightBracket);
   modules(result.get());
   consume(token::TokenEof);
   return result;
@@ -97,7 +97,7 @@ sptr<kore_pattern> kore_parser::pattern() {
 
 template <typename Node>
 void kore_parser::attributes(Node *node) {
-  if (peek() == token::ID) {
+  if (peek() == token::Id) {
     attributes_ne(node);
   }
 }
@@ -106,8 +106,8 @@ template <typename Node>
 void kore_parser::attributes_ne(Node *node) {
   auto pat = application_pattern_internal();
   node->attributes().add(std::move(pat));
-  while (peek() == token::COMMA) {
-    consume(token::COMMA);
+  while (peek() == token::Comma) {
+    consume(token::Comma);
     pat = application_pattern_internal();
     node->attributes().add(std::move(pat));
   }
@@ -116,26 +116,26 @@ void kore_parser::attributes_ne(Node *node) {
 void kore_parser::modules(kore_definition *node) {
   auto mod = module();
   node->add_module(std::move(mod));
-  while (peek() == token::MODULE) {
+  while (peek() == token::Module) {
     mod = module();
     node->add_module(std::move(mod));
   }
 }
 
 ptr<kore_module> kore_parser::module() {
-  consume(token::MODULE);
-  std::string name = consume(token::ID);
+  consume(token::Module);
+  std::string name = consume(token::Id);
   auto mod = kore_module::create(name);
   sentences(mod.get());
-  consume(token::ENDMODULE);
-  consume(token::LEFTBRACKET);
+  consume(token::EndModule);
+  consume(token::LeftBracket);
   attributes(mod.get());
-  consume(token::RIGHTBRACKET);
+  consume(token::RightBracket);
   return mod;
 }
 
 void kore_parser::sentences(kore_module *node) {
-  while (peek() != token::ENDMODULE) {
+  while (peek() != token::EndModule) {
     auto decl = sentence();
     node->add_declaration(std::move(decl));
   }
@@ -154,85 +154,85 @@ ptr<kore_declaration> kore_parser::sentence() {
   std::string name;
   token current = peek();
   switch (current) {
-  case token::IMPORT: {
-    consume(token::IMPORT);
-    name = consume(token::ID);
+  case token::Import: {
+    consume(token::Import);
+    name = consume(token::Id);
     auto import = kore_module_import_declaration::create(name);
-    consume(token::LEFTBRACKET);
+    consume(token::LeftBracket);
     attributes(import.get());
-    consume(token::RIGHTBRACKET);
+    consume(token::RightBracket);
     return import;
   }
-  case token::SORT:
-  case token::HOOKEDSORT: {
+  case token::Sort:
+  case token::HookedSort: {
     consume(current);
-    name = consume(token::ID);
-    consume(token::LEFTBRACE);
+    name = consume(token::Id);
+    consume(token::LeftBrace);
     auto sort_decl = kore_composite_sort_declaration::create(
-        name, current == token::HOOKEDSORT);
+        name, current == token::HookedSort);
     sort_variables(sort_decl.get());
-    consume(token::RIGHTBRACE);
-    consume(token::LEFTBRACKET);
+    consume(token::RightBrace);
+    consume(token::LeftBracket);
     attributes(sort_decl.get());
-    consume(token::RIGHTBRACKET);
+    consume(token::RightBracket);
     return sort_decl;
   }
-  case token::SYMBOL:
-  case token::HOOKEDSYMBOL: {
+  case token::Symbol:
+  case token::HookedSymbol: {
     consume(current);
-    name = consume(token::ID);
-    consume(token::LEFTBRACE);
+    name = consume(token::Id);
+    consume(token::LeftBrace);
     auto symbol
-        = kore_symbol_declaration::create(name, current == token::HOOKEDSYMBOL);
+        = kore_symbol_declaration::create(name, current == token::HookedSymbol);
     sort_variables(symbol.get());
-    consume(token::RIGHTBRACE);
-    consume(token::LEFTPAREN);
+    consume(token::RightBrace);
+    consume(token::LeftParen);
     sorts(symbol->get_symbol());
-    consume(token::RIGHTPAREN);
-    consume(token::COLON);
+    consume(token::RightParen);
+    consume(token::Colon);
     auto return_sort = sort();
     symbol->get_symbol()->add_sort(std::move(return_sort));
-    consume(token::LEFTBRACKET);
+    consume(token::LeftBracket);
     attributes(symbol.get());
-    consume(token::RIGHTBRACKET);
+    consume(token::RightBracket);
     return symbol;
   }
-  case token::ALIAS: {
-    consume(token::ALIAS);
-    name = consume(token::ID);
-    consume(token::LEFTBRACE);
+  case token::Alias: {
+    consume(token::Alias);
+    name = consume(token::Id);
+    consume(token::LeftBrace);
     auto alias = kore_alias_declaration::create(name);
     sort_variables(alias.get());
-    consume(token::RIGHTBRACE);
-    consume(token::LEFTPAREN);
+    consume(token::RightBrace);
+    consume(token::LeftParen);
     sorts(alias->get_symbol());
-    consume(token::RIGHTPAREN);
-    consume(token::COLON);
+    consume(token::RightParen);
+    consume(token::Colon);
     auto return_sort = sort();
     alias->get_symbol()->add_sort(std::move(return_sort));
-    consume(token::WHERE);
+    consume(token::Where);
     auto variables = application_pattern_internal();
     alias->add_variables(std::move(variables));
-    consume(token::COLONEQUAL);
+    consume(token::ColonEqual);
     auto pat = pattern_internal();
     alias->add_pattern(std::move(pat));
-    consume(token::LEFTBRACKET);
+    consume(token::LeftBracket);
     attributes(alias.get());
-    consume(token::RIGHTBRACKET);
+    consume(token::RightBracket);
     return alias;
   }
-  case token::AXIOM:
-  case token::CLAIM: {
+  case token::Axiom:
+  case token::Claim: {
     consume(current);
-    consume(token::LEFTBRACE);
-    auto axiom = kore_axiom_declaration::create(current == token::CLAIM);
+    consume(token::LeftBrace);
+    auto axiom = kore_axiom_declaration::create(current == token::Claim);
     sort_variables(axiom.get());
-    consume(token::RIGHTBRACE);
+    consume(token::RightBrace);
     auto pat = pattern_internal();
     axiom->add_pattern(std::move(pat));
-    consume(token::LEFTBRACKET);
+    consume(token::LeftBracket);
     attributes(axiom.get());
-    consume(token::RIGHTBRACKET);
+    consume(token::RightBracket);
     return axiom;
   }
   default:
@@ -244,18 +244,18 @@ ptr<kore_declaration> kore_parser::sentence() {
 }
 
 void kore_parser::sort_variables(kore_declaration *node) {
-  if (peek() == token::ID) {
+  if (peek() == token::Id) {
     sort_variables_ne(node);
   }
 }
 
 void kore_parser::sort_variables_ne(kore_declaration *node) {
-  std::string name = consume(token::ID);
+  std::string name = consume(token::Id);
   auto var = kore_sort_variable::create(name);
   node->add_object_sort_variable(var);
-  while (peek() == token::COMMA) {
-    consume(token::COMMA);
-    name = consume(token::ID);
+  while (peek() == token::Comma) {
+    consume(token::Comma);
+    name = consume(token::Id);
     var = kore_sort_variable::create(name);
     node->add_object_sort_variable(var);
   }
@@ -263,7 +263,7 @@ void kore_parser::sort_variables_ne(kore_declaration *node) {
 
 template <typename Node>
 void kore_parser::sorts(Node *node) {
-  if (peek() == token::ID) {
+  if (peek() == token::Id) {
     sorts_ne(node);
   }
 }
@@ -272,8 +272,8 @@ template <typename Node>
 void kore_parser::sorts_ne(Node *node) {
   auto s = sort();
   node->add_argument(std::move(s));
-  while (peek() == token::COMMA) {
-    consume(token::COMMA);
+  while (peek() == token::Comma) {
+    consume(token::Comma);
     s = sort();
     node->add_argument(std::move(s));
   }
@@ -283,29 +283,29 @@ std::pair<std::string, std::vector<sptr<kore_sort>>>
 kore_parser::symbol_sort_list() {
   auto ret = std::vector<sptr<kore_sort>>{};
 
-  auto id = consume(token::ID);
-  consume(token::LEFTBRACE);
+  auto id = consume(token::Id);
+  consume(token::LeftBrace);
 
-  if (peek() == token::ID) {
+  if (peek() == token::Id) {
     ret.push_back(sort());
 
-    while (peek() == token::COMMA) {
-      consume(token::COMMA);
+    while (peek() == token::Comma) {
+      consume(token::Comma);
       ret.push_back(sort());
     }
   }
 
-  consume(token::RIGHTBRACE);
+  consume(token::RightBrace);
   return {id, ret};
 }
 
 sptr<kore_sort> kore_parser::sort() {
-  std::string name = consume(token::ID);
-  if (peek() == token::LEFTBRACE) {
-    consume(token::LEFTBRACE);
+  std::string name = consume(token::Id);
+  if (peek() == token::LeftBrace) {
+    consume(token::LeftBrace);
     auto sort = kore_composite_sort::create(name);
     sorts(sort.get());
-    consume(token::RIGHTBRACE);
+    consume(token::RightBrace);
     return sort;
   }
   return kore_sort_variable::create(name);
@@ -314,46 +314,46 @@ sptr<kore_sort> kore_parser::sort() {
 sptr<kore_pattern> kore_parser::pattern_internal() {
   token current = peek();
   switch (current) {
-  case token::ID: {
-    std::string name = consume(token::ID);
+  case token::Id: {
+    std::string name = consume(token::Id);
     current = peek();
     switch (current) {
-    case token::COLON:
-      consume(token::COLON);
+    case token::Colon:
+      consume(token::Colon);
       return kore_variable_pattern::create(name, sort());
-    case token::LEFTBRACE: return application_pattern(name);
+    case token::LeftBrace: return application_pattern(name);
     default: error(loc_, "Expected: [:, {] Actual: " + str(current));
     }
   }
-  case token::STRING:
-    return kore_string_pattern::create(consume(token::STRING));
+  case token::String:
+    return kore_string_pattern::create(consume(token::String));
   default: error(loc_, "Expected: [<id>, <string>] Actual: " + str(current));
   }
 }
 
 sptr<kore_pattern> kore_parser::application_pattern() {
-  return application_pattern(consume(token::ID));
+  return application_pattern(consume(token::Id));
 }
 ptr<kore_composite_pattern> kore_parser::application_pattern_internal() {
-  return application_pattern_internal(consume(token::ID));
+  return application_pattern_internal(consume(token::Id));
 }
 
 sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
   if (name == "\\left-assoc" || name == "\\right-assoc") {
-    consume(token::LEFTBRACE);
-    consume(token::RIGHTBRACE);
-    consume(token::LEFTPAREN);
-    std::string symbol = consume(token::ID);
-    consume(token::LEFTBRACE);
+    consume(token::LeftBrace);
+    consume(token::RightBrace);
+    consume(token::LeftParen);
+    std::string symbol = consume(token::Id);
+    consume(token::LeftBrace);
     auto pat = kore_composite_pattern::create(symbol);
     sorts(pat->get_constructor());
     pat->get_constructor()->init_pattern_arguments();
-    consume(token::RIGHTBRACE);
-    consume(token::LEFTPAREN);
+    consume(token::RightBrace);
+    consume(token::LeftParen);
     std::vector<sptr<kore_pattern>> pats;
     patterns(pats);
-    consume(token::RIGHTPAREN);
-    consume(token::RIGHTPAREN);
+    consume(token::RightParen);
+    consume(token::RightParen);
     if (name == "\\left-assoc") {
       sptr<kore_pattern> accum = pats[0];
       for (auto i = 1U; i < pats.size(); i++) {
@@ -404,19 +404,19 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
 
 ptr<kore_composite_pattern>
 kore_parser::application_pattern_internal(std::string const &name) {
-  consume(token::LEFTBRACE);
+  consume(token::LeftBrace);
   auto pat = kore_composite_pattern::create(name);
   sorts(pat->get_constructor());
   pat->get_constructor()->init_pattern_arguments();
-  consume(token::RIGHTBRACE);
-  consume(token::LEFTPAREN);
+  consume(token::RightBrace);
+  consume(token::LeftParen);
   patterns(pat.get());
-  consume(token::RIGHTPAREN);
+  consume(token::RightParen);
   return pat;
 }
 
 void kore_parser::patterns(kore_composite_pattern *node) {
-  if (peek() == token::RIGHTPAREN) {
+  if (peek() == token::RightParen) {
     return;
   }
   patterns_ne(node);
@@ -425,15 +425,15 @@ void kore_parser::patterns(kore_composite_pattern *node) {
 void kore_parser::patterns_ne(kore_composite_pattern *node) {
   auto pat = pattern_internal();
   node->add_argument(pat);
-  while (peek() == token::COMMA) {
-    consume(token::COMMA);
+  while (peek() == token::Comma) {
+    consume(token::Comma);
     pat = pattern_internal();
     node->add_argument(pat);
   }
 }
 
 void kore_parser::patterns(std::vector<sptr<kore_pattern>> &node) {
-  if (peek() == token::RIGHTPAREN) {
+  if (peek() == token::RightParen) {
     return;
   }
   patterns_ne(node);
@@ -442,8 +442,8 @@ void kore_parser::patterns(std::vector<sptr<kore_pattern>> &node) {
 void kore_parser::patterns_ne(std::vector<sptr<kore_pattern>> &node) {
   auto pat = pattern_internal();
   node.push_back(pat);
-  while (peek() == token::COMMA) {
-    consume(token::COMMA);
+  while (peek() == token::Comma) {
+    consume(token::Comma);
     pat = pattern_internal();
     node.push_back(pat);
   }

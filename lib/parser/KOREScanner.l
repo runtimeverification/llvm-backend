@@ -40,36 +40,36 @@ yyin = in_;
 "\n"    { loc->lines(); }
 [ \t\r] { /* nothing */ }
 
-"module"        { return token::MODULE;       }
-"endmodule"     { return token::ENDMODULE;    }
-"import"        { return token::IMPORT;       }
-"sort"          { return token::SORT;         }
-"symbol"        { return token::SYMBOL;       }
-"where"         { return token::WHERE;        }
-"alias"         { return token::ALIAS;        }
-"axiom"         { return token::AXIOM;        }
-"claim"         { return token::CLAIM;        }
-"hooked-sort"   { return token::HOOKEDSORT;   }
-"hooked-symbol" { return token::HOOKEDSYMBOL; }
+"module"        { return token::Module;       }
+"endmodule"     { return token::EndModule;    }
+"import"        { return token::Import;       }
+"sort"          { return token::Sort;         }
+"symbol"        { return token::Symbol;       }
+"where"         { return token::Where;        }
+"alias"         { return token::Alias;        }
+"axiom"         { return token::Axiom;        }
+"claim"         { return token::Claim;        }
+"hooked-sort"   { return token::HookedSort;   }
+"hooked-symbol" { return token::HookedSymbol; }
 
-":"  { return token::COLON;   }
-"{"  { return token::LEFTBRACE;   }
-"}"  { return token::RIGHTBRACE;   }
-"["  { return token::LEFTBRACKET;   }
-"]"  { return token::RIGHTBRACKET;   }
-"("  { return token::LEFTPAREN;    }
-")"  { return token::RIGHTPAREN;    }
-","  { return token::COMMA; }
-":=" { return token::COLONEQUAL; }
+":"  { return token::Colon;   }
+"{"  { return token::LeftBrace;   }
+"}"  { return token::RightBrace;   }
+"["  { return token::LeftBracket;   }
+"]"  { return token::RightBracket;   }
+"("  { return token::LeftParen;    }
+")"  { return token::RightParen;    }
+","  { return token::Comma; }
+":=" { return token::ColonEqual; }
 
 {ident} {
   *lval = std::string(yytext, yyleng);
-  return token::ID;
+  return token::Id;
 }
 
 "\\"{ident} {
   *lval = std::string(yytext, yyleng);
-  return token::ID;
+  return token::Id;
 }
 
 "\""            { string_buffer_.clear(); BEGIN(STR);           }
@@ -87,7 +87,7 @@ yyin = in_;
 <STR>"\""       {
   BEGIN(INITIAL);
   *lval = string_buffer_;
-  return token::STRING;
+  return token::String;
 }
 
 "/*"           { BEGIN(COMM);    }
@@ -178,8 +178,8 @@ int kore_scanner::scan() {
     token = yylex(&sem, &loc, scanner_);
     std::string lexeme;
     switch (token) {
-    case token::ID:
-    case token::STRING:
+    case token::Id:
+    case token::String:
       lexeme = sem;
       break;
     default:

@@ -71,7 +71,7 @@ private:
   struct {
     std::string data;
     token tok;
-  } buffer_ = {"", token::EMPTY};
+  } buffer_ = {"", token::Empty};
 };
 
 } // namespace kllvm::parser

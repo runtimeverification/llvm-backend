@@ -30,7 +30,7 @@ size_t getmatch_log_size(void) {
 
 void add_match_success(void) {
   match_logs.push_back(
-      {match_log::SUCCESS,
+      {match_log::Success,
        nullptr,
        nullptr,
        nullptr,
@@ -43,7 +43,7 @@ void add_match_success(void) {
 void add_match_fail_reason(
     void *subject, char const *pattern, char const *sort) {
   match_logs.push_back(
-      {match_log::FAIL, nullptr, nullptr, nullptr, {}, pattern, subject, sort});
+      {match_log::Fail, nullptr, nullptr, nullptr, {}, pattern, subject, sort});
 }
 
 void add_match_function(
@@ -64,7 +64,7 @@ void add_match_function(
   }
 
   match_logs.push_back(
-      {match_log::FUNCTION, function, debug_name, result, args, nullptr,
+      {match_log::Function, function, debug_name, result, args, nullptr,
        nullptr, nullptr});
 
   va_end(ap);
