@@ -19,6 +19,7 @@ case class Empty() extends Constructor {
     f.sortInfo.category match {
       case SetS() => SetP(Seq(), None, symbol, SymbolP(symbol, Seq()))
       case MapS() => MapP(Seq(), Seq(), None, symbol, SymbolP(symbol, Seq()))
+      case _      => ???
     }
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -118,6 +119,7 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
             concat(element(key, value), child)
           )
         }
+      case _ => ???
     }
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -166,6 +168,7 @@ case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) ex
             concat(element(wildcard, wildcard), child)
           )
         }
+      case _ => ???
     }
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)

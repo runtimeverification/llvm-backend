@@ -5,7 +5,6 @@ import org.kframework.kore.K
 import org.kframework.parser.kore
 import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
 import org.kframework.parser.kore.SymbolOrAlias
-import scala.math.min
 
 sealed trait Pattern[T] {
   def signature(clause: Clause): Seq[Constructor]
@@ -370,6 +369,7 @@ case class MapP[T] private (
       case (HasNoKey(_, Some(p)), _)  => !keys.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => keys.nonEmpty && clause.action.priority <= maxPriority
       case (HasNoKey(_, None), _)     => keys.nonEmpty && clause.action.priority > maxPriority
+      case _                          => ???
     }
   def score(
       h: Heuristic,
@@ -424,6 +424,7 @@ case class MapP[T] private (
         } else {
           Seq(keys.head, values.head, MapP(keys.tail, values.tail, frame, ctr, orig))
         }
+      case _ => ???
     }
   def expandOr: Seq[Pattern[T]] = {
     val withKeys = keys.indices.foldLeft(Seq(this))((accum, ix) =>
@@ -598,6 +599,7 @@ case class SetP[T] private (
       case (HasNoKey(_, Some(p)), _)  => !elements.map(_.canonicalize(clause)).contains(p)
       case (HasKey(_, _, None), None) => elements.nonEmpty && clause.action.priority <= maxPriority
       case (HasNoKey(_, None), _)     => elements.nonEmpty && clause.action.priority > maxPriority
+      case _                          => ???
     }
   def score(
       h: Heuristic,
@@ -645,6 +647,7 @@ case class SetP[T] private (
         } else {
           Seq(elements.head, SetP(elements.tail, frame, ctr, orig))
         }
+      case _ => ???
     }
   def expandOr: Seq[Pattern[T]] = {
     val withElements = elements.indices.foldLeft(Seq(this))((accum, ix) =>
