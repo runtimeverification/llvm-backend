@@ -4,17 +4,17 @@
 #include "runtime/header.h"
 
 extern "C" {
-void initStaticObjects(void);
+void init_static_objects(void);
 uint64_t get_steps(void);
 }
 
-std::unordered_set<block *, HashBlock, KEq> take_search_steps(
+std::unordered_set<block *, hash_block, k_eq> take_search_steps(
     bool executeToBranch, int64_t depth, int64_t bound, block *subject);
-void printConfigurations(
-    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
+void print_configurations(
+    FILE *file, std::unordered_set<block *, hash_block, k_eq> results);
 
-void serializeConfigurations(
-    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
+void serialize_configurations(
+    FILE *file, std::unordered_set<block *, hash_block, k_eq> results);
 
 static bool hasStatistics = false;
 static bool binaryOutput = false;
@@ -46,19 +46,19 @@ int main(int argc, char **argv) {
 
   parse_flags(argc, argv);
 
-  initStaticObjects();
+  init_static_objects();
 
-  block *input = parseConfiguration(filename);
-  std::unordered_set<block *, HashBlock, KEq> results
+  block *input = parse_configuration(filename);
+  std::unordered_set<block *, hash_block, k_eq> results
       = take_search_steps(executeToBranch, depth, bound, input);
   FILE *file = fopen(output, "w");
   if (hasStatistics) {
-    printStatistics(file, get_steps());
+    print_statistics(file, get_steps());
   }
   if (binaryOutput) {
-    serializeConfigurations(file, results);
+    serialize_configurations(file, results);
   } else {
-    printConfigurations(file, results);
+    print_configurations(file, results);
   }
   fclose(file);
   return 0;

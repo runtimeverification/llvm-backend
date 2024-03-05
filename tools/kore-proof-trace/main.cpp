@@ -7,24 +7,24 @@
 using namespace llvm;
 using namespace kllvm;
 
-cl::OptionCategory KoreProofTraceCat("kore-proof-trace options");
+cl::OptionCategory kore_proof_trace_cat("kore-proof-trace options");
 
-cl::opt<std::string> InputFilename(
+cl::opt<std::string> input_filename(
     cl::Positional, cl::desc("<input file>"), cl::Required,
-    cl::cat(KoreProofTraceCat));
+    cl::cat(kore_proof_trace_cat));
 
-cl::opt<bool> VerboseOutput(
+cl::opt<bool> verbose_output(
     "verbose",
     llvm::cl::desc("Print verbose information about the input proof trace"),
-    llvm::cl::cat(KoreProofTraceCat));
+    llvm::cl::cat(kore_proof_trace_cat));
 
 int main(int argc, char **argv) {
-  cl::HideUnrelatedOptions({&KoreProofTraceCat});
+  cl::HideUnrelatedOptions({&kore_proof_trace_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  ProofTraceParser Parser(VerboseOutput);
-  auto Trace = Parser.parse_proof_trace_from_file(InputFilename);
-  if (Trace.has_value()) {
+  proof_trace_parser parser(verbose_output);
+  auto trace = parser.parse_proof_trace_from_file(input_filename);
+  if (trace.has_value()) {
     return 0;
   }
 

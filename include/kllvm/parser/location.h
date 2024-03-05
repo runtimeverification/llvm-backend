@@ -14,14 +14,14 @@ public:
   void lines(int count = 1) {
     if (count) {
       column = 1;
-      line = add_(line, count, 1);
+      line = add(line, count, 1);
     }
   }
 
-  void columns(int count = 1) { column = add_(column, count, 1); }
+  void columns(int count = 1) { column = add(column, count, 1); }
 
 private:
-  static unsigned add_(unsigned lhs, int rhs, int min) {
+  static unsigned add(unsigned lhs, int rhs, int min) {
     return static_cast<unsigned>(std::max(min, static_cast<int>(lhs) + rhs));
   }
 };

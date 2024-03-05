@@ -9,7 +9,7 @@
 #define KCHAR char
 extern "C" {
 
-uint32_t getTagForSymbolName(char const *s) {
+uint32_t get_tag_for_symbol_name(char const *s) {
   return 0;
 }
 
@@ -31,13 +31,13 @@ string *hook_BYTES_padRight(string *b, mpz_t len, mpz_t v);
 string *hook_BYTES_padLeft(string *b, mpz_t len, mpz_t v);
 string *hook_BYTES_reverse(string *b);
 string *hook_BYTES_concat(string *b1, string *);
-string *makeString(const KCHAR *, int64_t len = -1);
+string *make_string(const KCHAR *, int64_t len = -1);
 }
 
 BOOST_AUTO_TEST_SUITE(BytesTest)
 
 BOOST_AUTO_TEST_CASE(bytes2int) {
-  auto empty = makeString("");
+  auto empty = make_string("");
   BOOST_CHECK_EQUAL(
       0, mpz_cmp_si(
              hook_BYTES_bytes2int(empty, tag_big_endian(), tag_unsigned()), 0));
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(bytes2int) {
       0, mpz_cmp_si(hook_BYTES_bytes2int(empty, tag_big_endian(), 2), 0));
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(empty, 2, 2), 0));
 
-  auto ff = makeString("\xff");
+  auto ff = make_string("\xff");
   BOOST_CHECK_EQUAL(
       0, mpz_cmp_si(
              hook_BYTES_bytes2int(ff, tag_big_endian(), tag_unsigned()), 255));
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(bytes2int) {
       0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 2, tag_unsigned()), 255));
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff, 2, 2), -1));
 
-  auto _00ff = makeString("\x00\xff", 2);
+  auto _00ff = make_string("\x00\xff", 2);
   BOOST_CHECK_EQUAL(
       0,
       mpz_cmp_si(
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(bytes2int) {
   BOOST_CHECK_EQUAL(
       0, mpz_cmp_si(hook_BYTES_bytes2int(_00ff, tag_big_endian(), 2), 255));
 
-  auto ff00 = makeString("\xff\x00", 2);
+  auto ff00 = make_string("\xff\x00", 2);
   BOOST_CHECK_EQUAL(0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 2, 2), 255));
   BOOST_CHECK_EQUAL(
       0, mpz_cmp_si(hook_BYTES_bytes2int(ff00, 2, tag_unsigned()), 255));
@@ -159,12 +159,12 @@ BOOST_AUTO_TEST_CASE(int2bytes) {
 }
 
 BOOST_AUTO_TEST_CASE(bytes2string) {
-  auto empty = makeString("");
+  auto empty = make_string("");
   auto res = hook_BYTES_bytes2string(empty);
   BOOST_CHECK(res != empty);
   BOOST_CHECK_EQUAL(len(empty), 0);
 
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   res = hook_BYTES_bytes2string(_1234);
   BOOST_CHECK(res != _1234);
   BOOST_CHECK_EQUAL(len(_1234), 4);
@@ -172,12 +172,12 @@ BOOST_AUTO_TEST_CASE(bytes2string) {
 }
 
 BOOST_AUTO_TEST_CASE(string2bytes) {
-  auto empty = makeString("");
+  auto empty = make_string("");
   auto res = hook_BYTES_string2bytes(empty);
   BOOST_CHECK(res != empty);
   BOOST_CHECK_EQUAL(len(empty), 0);
 
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   res = hook_BYTES_string2bytes(_1234);
   BOOST_CHECK(res != _1234);
   BOOST_CHECK_EQUAL(len(_1234), 4);
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(string2bytes) {
 }
 
 BOOST_AUTO_TEST_CASE(substr) {
-  auto catAll = makeString("hellohehf");
+  auto catAll = make_string("hellohehf");
 
   mpz_t _2, _9, _6, _0, _4, _7, _40, _8, _10, _1024, _4096;
   mpz_init_set_si(_2, 2);
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE(substr) {
 }
 
 BOOST_AUTO_TEST_CASE(update) {
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   mpz_t _0, _2;
   mpz_init_set_ui(_0, '0');
   mpz_init_set_ui(_2, 2);
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(update) {
 }
 
 BOOST_AUTO_TEST_CASE(memset) {
-  auto _12345 = makeString("12345");
+  auto _12345 = make_string("12345");
   mpz_t _0, _1, _3;
   mpz_init_set_si(_0, '0');
   mpz_init_set_ui(_1, 1);
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(memset) {
 }
 
 BOOST_AUTO_TEST_CASE(get) {
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   mpz_t _0;
   mpz_init_set_ui(_0, 0);
 
@@ -267,8 +267,8 @@ BOOST_AUTO_TEST_CASE(get) {
 }
 
 BOOST_AUTO_TEST_CASE(replaceAt) {
-  auto _1234 = makeString("1234");
-  auto _2 = makeString("2");
+  auto _1234 = make_string("1234");
+  auto _2 = make_string("2");
   mpz_t _0;
   mpz_init_set_ui(_0, 0);
 
@@ -277,16 +277,16 @@ BOOST_AUTO_TEST_CASE(replaceAt) {
   BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "2234", 4));
 
-  auto _23 = makeString("23");
-  _1234 = makeString("1234");
+  auto _23 = make_string("23");
+  _1234 = make_string("1234");
 
   res = hook_BYTES_replaceAt(_1234, _0, _23);
   BOOST_CHECK_EQUAL(_1234, res);
   BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "2334", 4));
 
-  auto empty = makeString("");
-  _1234 = makeString("1234");
+  auto empty = make_string("");
+  _1234 = make_string("1234");
 
   res = hook_BYTES_replaceAt(_1234, _0, empty);
   BOOST_CHECK_EQUAL(_1234, res);
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE(replaceAt) {
 
   mpz_t _1;
   mpz_init_set_ui(_1, 1);
-  auto _12 = makeString("12");
+  auto _12 = make_string("12");
 
   res = hook_BYTES_replaceAt(_1234, _1, _12);
   BOOST_CHECK_EQUAL(_1234, res);
@@ -304,15 +304,15 @@ BOOST_AUTO_TEST_CASE(replaceAt) {
 }
 
 BOOST_AUTO_TEST_CASE(length) {
-  auto empty = makeString("");
+  auto empty = make_string("");
   BOOST_CHECK_EQUAL(0, mpz_get_ui(hook_BYTES_length(empty)));
 
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   BOOST_CHECK_EQUAL(4, mpz_get_ui(hook_BYTES_length(_1234)));
 }
 
 BOOST_AUTO_TEST_CASE(padRight) {
-  auto empty = makeString("");
+  auto empty = make_string("");
   mpz_t _0;
   mpz_init_set_ui(_0, 0);
 
@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(padRight) {
   BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "aaaa", 4));
 
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   mpz_t _8;
   mpz_init_set_ui(_8, 8);
 
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(padRight) {
 }
 
 BOOST_AUTO_TEST_CASE(padLeft) {
-  auto empty = makeString("");
+  auto empty = make_string("");
   mpz_t _0;
   mpz_init_set_ui(_0, 0);
 
@@ -354,7 +354,7 @@ BOOST_AUTO_TEST_CASE(padLeft) {
   BOOST_CHECK_EQUAL(4, len(res));
   BOOST_CHECK_EQUAL(0, memcmp(res->data, "aaaa", 4));
 
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   mpz_t _8;
   mpz_init_set_ui(_8, 8);
 
@@ -364,12 +364,12 @@ BOOST_AUTO_TEST_CASE(padLeft) {
 }
 
 BOOST_AUTO_TEST_CASE(reverse) {
-  auto empty = makeString("");
+  auto empty = make_string("");
   auto res = hook_BYTES_reverse(empty);
   BOOST_CHECK_EQUAL(empty, res);
   BOOST_CHECK_EQUAL(len(empty), 0);
 
-  auto _1234 = makeString("1234");
+  auto _1234 = make_string("1234");
   res = hook_BYTES_reverse(_1234);
   BOOST_CHECK_EQUAL(_1234, res);
   BOOST_CHECK_EQUAL(len(_1234), 4);
@@ -377,10 +377,10 @@ BOOST_AUTO_TEST_CASE(reverse) {
 }
 
 BOOST_AUTO_TEST_CASE(concat) {
-  auto a = makeString("hello");
-  auto b = makeString("he");
-  auto c = makeString("hf");
-  auto d = makeString("");
+  auto a = make_string("hello");
+  auto b = make_string("he");
+  auto c = make_string("hf");
+  auto d = make_string("");
 
   auto emptyCatR = hook_BYTES_concat(a, d);
   BOOST_CHECK_EQUAL(0, memcmp(emptyCatR->data, a->data, len(emptyCatR)));
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(concat) {
   BOOST_CHECK_EQUAL(len(emptyCatL), len(a));
 
   auto catAll = hook_BYTES_concat(hook_BYTES_concat(a, b), c);
-  auto expected = makeString("hellohehf");
+  auto expected = make_string("hellohehf");
   BOOST_CHECK_EQUAL(0, memcmp(catAll->data, expected->data, len(catAll)));
   BOOST_CHECK_EQUAL(len(catAll), len(expected));
 }

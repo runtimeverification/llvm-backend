@@ -17,9 +17,9 @@ serializer::serializer()
     : serializer(NONE) { }
 
 serializer::serializer(flags f)
-    : use_header_(!(f & DROP_HEADER))
-    , use_arity_(!(f & DROP_ARITY))
-    , use_intern_(!(f & NO_INTERN))
+    : use_header_(!(f & DropHeader))
+    , use_arity_(!(f & DropArity))
+    , use_intern_(!(f & NoIntern))
     , direct_string_prefix_{0x01}
     , backref_string_prefix_{0x02}
     , next_idx_(0) {

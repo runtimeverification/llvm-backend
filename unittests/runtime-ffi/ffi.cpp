@@ -14,7 +14,8 @@
 #define KCHAR char
 #define TYPETAG(type) "Lbl'Hash'ffi'Unds'" #type "{}"
 
-void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments) {
+void *
+construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments) {
   return nullptr;
 }
 
@@ -40,16 +41,16 @@ char const *symbols[NUM_SYMBOLS]
        "inj{SortBytes{}, SortKItem{}}",
        "inj{SortFFIType{}, SortKItem{}}"};
 
-char const **getArgumentSortsForTag(uint32_t tag) {
+char const **get_argument_sorts_for_tag(uint32_t tag) {
   return nullptr;
 }
 
-uint32_t const first_inj_tag = 4;
-uint32_t const last_inj_tag = 5;
+uint32_t const FIRST_INJ_TAG = 4;
+uint32_t const LAST_INJ_TAG = 5;
 
-char *getTerminatedString(string *str);
+char *get_terminated_string(string *str);
 
-uint32_t getTagForSymbolName(char const *s) {
+uint32_t get_tag_for_symbol_name(char const *s) {
   for (int i = 0; i < NUM_SYMBOLS; i++) {
     if (0 == strcmp(symbols[i], s)) {
       return i + 1;
@@ -59,7 +60,7 @@ uint32_t getTagForSymbolName(char const *s) {
   return 0;
 }
 
-struct blockheader getBlockHeaderForSymbol(uint32_t tag) {
+struct blockheader get_block_header_for_symbol(uint32_t tag) {
   return blockheader{tag};
 }
 
@@ -81,7 +82,7 @@ bool during_gc() {
   return false;
 }
 
-void printConfigurationInternal(
+void print_configuration_internal(
     writer *file, block *subject, char const *sort, bool, void *) { }
 void sfprintf(writer *, char const *, ...) { }
 
@@ -101,7 +102,7 @@ block *hook_FFI_bytes_ref(string *bytes);
 string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align);
 bool hook_FFI_allocated(block *kitem);
 
-string *makeString(const KCHAR *, int64_t len = -1);
+string *make_string(const KCHAR *, int64_t len = -1);
 
 list hook_LIST_element(block *value);
 list hook_LIST_concat(list *l1, list *l2);
@@ -125,66 +126,66 @@ block D1 = {{1}};
 block *DUMMY1 = &D1;
 }
 
-struct FfiTestFixture {
+struct ffi_test_fixture {
 
-  ~FfiTestFixture() { hook_FFI_freeAll(); }
+  ~ffi_test_fixture() { hook_FFI_freeAll(); }
 };
 
-BOOST_FIXTURE_TEST_SUITE(FfiTest, FfiTestFixture)
+BOOST_FIXTURE_TEST_SUITE(FfiTest, ffi_test_fixture)
 
 BOOST_AUTO_TEST_CASE(address) {
-  string *fn = makeString("timesTwo");
+  string *fn = make_string("times_two");
   mpz_ptr addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
-  fn = makeString("utimesTwo");
+  fn = make_string("utimes_two");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
-  fn = makeString("times");
+  fn = make_string("times");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
-  fn = makeString("getX");
+  fn = make_string("get_x");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
-  fn = makeString("increaseX");
+  fn = make_string("increase_x");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
-  fn = makeString("timesPoint");
+  fn = make_string("times_point");
   addr = hook_FFI_address(fn);
   BOOST_CHECK(0 < mpz_cmp_ui(addr, 0));
 
-  fn = makeString("fakeFunction");
+  fn = make_string("fake_function");
   addr = hook_FFI_address(fn);
   BOOST_CHECK_EQUAL(0, mpz_cmp_ui(addr, 0));
 }
 
 BOOST_AUTO_TEST_CASE(call) {
-  /* int timesTwo(int x) */
+  /* int times_two(int x) */
   int x = -3;
-  string *xargstr = makeString((char *)&x, sizeof(int));
+  string *xargstr = make_string((char *)&x, sizeof(int));
 
   block *xarg
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  xarg->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
+  xarg->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}"));
   memcpy(xarg->children, &xargstr, sizeof(string *));
 
   list args = hook_LIST_element(xarg);
-  block *type_sint = leaf_block(getTagForSymbolName(TYPETAG(sint)));
+  block *type_sint = leaf_block(get_tag_for_symbol_name(TYPETAG(sint)));
 
   block *argtype
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  argtype->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
+  argtype->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(argtype->children, &type_sint, sizeof(block *));
 
   list types = hook_LIST_element(argtype);
 
-  string *fn = makeString("timesTwo");
+  string *fn = make_string("times_two");
   mpz_ptr addr = hook_FFI_address(fn);
 
   string *bytes = hook_FFI_call(addr, &args, &types, type_sint);
@@ -195,19 +196,19 @@ BOOST_AUTO_TEST_CASE(call) {
 
   BOOST_CHECK_EQUAL(ret, x * 2);
 
-  /* unsigned int utimesTwo(unsigned int x) */
+  /* unsigned int utimes_two(unsigned int x) */
   x = 4;
-  xargstr = makeString((char *)&x, sizeof(int));
+  xargstr = make_string((char *)&x, sizeof(int));
 
   memcpy(xarg->children, &xargstr, sizeof(string *));
 
   args = hook_LIST_element(xarg);
-  block *type_uint = leaf_block(getTagForSymbolName(TYPETAG(uint)));
+  block *type_uint = leaf_block(get_tag_for_symbol_name(TYPETAG(uint)));
   memcpy(argtype->children, &type_uint, sizeof(block *));
 
   types = hook_LIST_element(argtype);
 
-  fn = makeString("utimesTwo");
+  fn = make_string("utimes_two");
   addr = hook_FFI_address(fn);
 
   bytes = hook_FFI_call(addr, &args, &types, type_uint);
@@ -220,14 +221,14 @@ BOOST_AUTO_TEST_CASE(call) {
 
   /* int times(int x, int y) */
   int y = 4;
-  string *yargstr = makeString((char *)&y, sizeof(int));
+  string *yargstr = make_string((char *)&y, sizeof(int));
 
   memcpy(argtype->children, &type_sint, sizeof(block *));
 
   block *yarg
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  yarg->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
+  yarg->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}"));
   memcpy(yarg->children, &yargstr, sizeof(string *));
 
   list yargs = hook_LIST_element(yarg);
@@ -235,27 +236,27 @@ BOOST_AUTO_TEST_CASE(call) {
   args = hook_LIST_concat(&args, &yargs);
   types = hook_LIST_concat(&types, &types);
 
-  fn = makeString("times");
+  fn = make_string("times");
   addr = hook_FFI_address(fn);
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
   ret = *(int *)bytes->data;
 
   BOOST_CHECK_EQUAL(ret, x * y);
 
-  /* struct point constructPoint(int x, int y) */
+  /* struct point construct_point(int x, int y) */
   block *structType
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  structType->h
-      = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
+  structType->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name(TYPETAG(struct)));
 
-  list *structFields = static_cast<list *>(koreAlloc(sizeof(list)));
+  list *structFields = static_cast<list *>(kore_alloc(sizeof(list)));
   list tmp = hook_LIST_element(argtype);
   tmp = hook_LIST_concat(&tmp, &tmp);
   memcpy(structFields, &tmp, sizeof(list));
 
   memcpy(structType->children, &structFields, sizeof(list *));
 
-  fn = makeString("constructPoint");
+  fn = make_string("construct_point");
   addr = hook_FFI_address(fn);
   bytes = hook_FFI_call(addr, &args, &types, structType);
 
@@ -263,21 +264,21 @@ BOOST_AUTO_TEST_CASE(call) {
   BOOST_CHECK_EQUAL(p.x, x);
   BOOST_CHECK_EQUAL(p.y, y);
 
-  /* int getX(void) */
-  fn = makeString("getX");
+  /* int get_x(void) */
+  fn = make_string("get_x");
   addr = hook_FFI_address(fn);
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
   ret = *(int *)bytes->data;
 
   BOOST_CHECK_EQUAL(ret, 1);
 
-  /* void increaseX(void) */
-  fn = makeString("increaseX");
+  /* void increase_x(void) */
+  fn = make_string("increase_x");
   addr = hook_FFI_address(fn);
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
 
-  /* int getX(void) */
-  fn = makeString("getX");
+  /* int get_x(void) */
+  fn = make_string("get_x");
   addr = hook_FFI_address(fn);
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
   ret = *(int *)bytes->data;
@@ -291,24 +292,24 @@ BOOST_AUTO_TEST_CASE(call) {
    *
    * int timesPoint(struct point p) */
   p = {.x = 2, .y = 5};
-  string *pargstr = makeString((char *)&p, sizeof(struct point));
+  string *pargstr = make_string((char *)&p, sizeof(struct point));
 
   block *parg
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  parg->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
+  parg->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}"));
   memcpy(parg->children, &pargstr, sizeof(string *));
 
   args = hook_LIST_element(parg);
 
   block *new_argtype
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  new_argtype->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
+  new_argtype->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(new_argtype->children, &structType, sizeof(block *));
   types = hook_LIST_element(new_argtype);
 
-  fn = makeString("timesPoint");
+  fn = make_string("times_point");
   addr = hook_FFI_address(fn);
 
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
@@ -322,24 +323,24 @@ BOOST_AUTO_TEST_CASE(call) {
    *
    * int timesPoint2(struct point2 p) */
   struct point2 p2 = {.p = p};
-  string *pargstr2 = makeString((char *)&p2, sizeof(struct point2));
+  string *pargstr2 = make_string((char *)&p2, sizeof(struct point2));
 
   memcpy(parg->children, &pargstr2, sizeof(string *));
 
   args = hook_LIST_element(parg);
 
   block *structType2
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  structType2->h
-      = getBlockHeaderForSymbol((uint64_t)getTagForSymbolName(TYPETAG(struct)));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
+  structType2->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name(TYPETAG(struct)));
 
   block *structArgType
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  structArgType->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
+  structArgType->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(structArgType->children, &structType, sizeof(block *));
 
-  list *structFields2 = static_cast<list *>(koreAlloc(sizeof(list)));
+  list *structFields2 = static_cast<list *>(kore_alloc(sizeof(list)));
   list tmp2 = hook_LIST_element(structArgType);
   memcpy(structFields2, &tmp2, sizeof(list));
 
@@ -348,7 +349,7 @@ BOOST_AUTO_TEST_CASE(call) {
   memcpy(new_argtype->children, &structType2, sizeof(block *));
   types = hook_LIST_element(new_argtype);
 
-  fn = makeString("timesPoint2");
+  fn = make_string("times_point2");
   addr = hook_FFI_address(fn);
 
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
@@ -373,22 +374,22 @@ BOOST_AUTO_TEST_CASE(call) {
   mpz_ptr addr1 = hook_FFI_bytes_address(b1);
   uintptr_t address1 = mpz_get_ui(addr1);
 
-  string *ptrargstr = makeString((char *)&address1, sizeof(uintptr_t *));
+  string *ptrargstr = make_string((char *)&address1, sizeof(uintptr_t *));
 
   block *ptrarg
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  ptrarg->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
+  ptrarg->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}"));
   memcpy(ptrarg->children, &ptrargstr, sizeof(string *));
 
   args = hook_LIST_element(ptrarg);
-  block *type_pointer = leaf_block(getTagForSymbolName(TYPETAG(pointer)));
+  block *type_pointer = leaf_block(get_tag_for_symbol_name(TYPETAG(pointer)));
 
   memcpy(argtype->children, &type_pointer, sizeof(block *));
 
   types = hook_LIST_element(argtype);
 
-  fn = makeString("pointerTest");
+  fn = make_string("pointer_test");
   addr = hook_FFI_address(fn);
 
   bytes = hook_FFI_call(addr, &args, &types, type_sint);
@@ -405,47 +406,47 @@ BOOST_AUTO_TEST_CASE(call) {
 BOOST_AUTO_TEST_CASE(call_variadic) {
   /* int addInts(int x, ...) */
   int n = 1;
-  string *nargstr = makeString((char *)&n, sizeof(int));
+  string *nargstr = make_string((char *)&n, sizeof(int));
 
   block *narg
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  narg->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
+  narg->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}"));
   memcpy(narg->children, &nargstr, sizeof(string *));
 
   list args = hook_LIST_element(narg);
 
   int arg1 = 1;
-  string *arg1str = makeString((char *)&arg1, sizeof(int));
+  string *arg1str = make_string((char *)&arg1, sizeof(int));
 
   block *arg1block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  arg1block->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
+  arg1block->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}"));
   memcpy(arg1block->children, &arg1str, sizeof(string *));
 
   list arg1list = hook_LIST_element(arg1block);
 
   args = hook_LIST_concat(&args, &arg1list);
 
-  block *type_sint = leaf_block(getTagForSymbolName(TYPETAG(sint)));
+  block *type_sint = leaf_block(get_tag_for_symbol_name(TYPETAG(sint)));
 
   block *fixargtype
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  fixargtype->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
+  fixargtype->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(fixargtype->children, &type_sint, sizeof(block *));
 
   block *varargtype
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(block *)));
-  varargtype->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(block *)));
+  varargtype->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortFFIType{}, SortKItem{}}"));
   memcpy(varargtype->children, &type_sint, sizeof(block *));
 
   list fixtypes = hook_LIST_element(fixargtype);
   list vartypes = hook_LIST_element(varargtype);
 
-  string *fn = makeString("addInts");
+  string *fn = make_string("add_ints");
   mpz_ptr addr = hook_FFI_address(fn);
 
   string *bytes
@@ -459,23 +460,23 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
 
   /* addInts with 2 var args */
   n = 2;
-  nargstr = makeString((char *)&n, sizeof(int));
+  nargstr = make_string((char *)&n, sizeof(int));
   memcpy(narg->children, &nargstr, sizeof(string *));
   args = hook_LIST_element(narg);
 
   arg1 = 20;
-  arg1str = makeString((char *)&arg1, sizeof(int));
+  arg1str = make_string((char *)&arg1, sizeof(int));
   memcpy(arg1block->children, &arg1str, sizeof(string *));
   arg1list = hook_LIST_element(arg1block);
   args = hook_LIST_concat(&args, &arg1list);
 
   int arg2 = 15;
-  string *arg2str = makeString((char *)&arg2, sizeof(int));
+  string *arg2str = make_string((char *)&arg2, sizeof(int));
 
   block *arg2block
-      = static_cast<block *>(koreAlloc(sizeof(block) + sizeof(string *)));
-  arg2block->h = getBlockHeaderForSymbol(
-      (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}"));
+      = static_cast<block *>(kore_alloc(sizeof(block) + sizeof(string *)));
+  arg2block->h = get_block_header_for_symbol(
+      (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}"));
   memcpy(arg2block->children, &arg2str, sizeof(string *));
 
   list arg2list = hook_LIST_element(arg2block);
@@ -495,7 +496,7 @@ BOOST_AUTO_TEST_CASE(call_variadic) {
 
   /* addInts with 0 var args */
   n = 0;
-  nargstr = makeString((char *)&n, sizeof(int));
+  nargstr = make_string((char *)&n, sizeof(int));
   memcpy(narg->children, &nargstr, sizeof(string *));
   args = hook_LIST_element(narg);
 

@@ -50,11 +50,10 @@ SortKItem hook_MAP_lookup(SortMap m, SortKItem key) {
   return res;
 }
 
-SortKItem
-hook_MAP_lookupOrDefault(SortMap m, SortKItem key, SortKItem _default) {
+SortKItem hook_MAP_lookupOrDefault(SortMap m, SortKItem key, SortKItem def) {
   auto *res = hook_MAP_lookup_null(m, key);
   if (!res) {
-    return _default;
+    return def;
   }
   return res;
 }
@@ -191,7 +190,7 @@ map map_map(map *map, block *(process)(block *)) {
   return tmp;
 }
 
-void printMap(
+void print_map(
     writer *file, map *map, char const *unit, char const *element,
     char const *concat, void *state) {
   size_t size = map->size();
@@ -200,8 +199,8 @@ void printMap(
     return;
   }
 
-  auto tag = getTagForSymbolName(element);
-  auto *arg_sorts = getArgumentSortsForTag(tag);
+  auto tag = get_tag_for_symbol_name(element);
+  auto *arg_sorts = get_argument_sorts_for_tag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
@@ -215,9 +214,10 @@ void printMap(
 
     sfprintf(file, "%s(", element);
     auto entry = *iter;
-    printConfigurationInternal(file, entry.first, arg_sorts[0], false, state);
+    print_configuration_internal(file, entry.first, arg_sorts[0], false, state);
     sfprintf(file, ",");
-    printConfigurationInternal(file, entry.second, arg_sorts[1], false, state);
+    print_configuration_internal(
+        file, entry.second, arg_sorts[1], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

@@ -21,7 +21,7 @@ class TestParser(unittest.TestCase):
             "Output", "test_proof_trace.py.tmp", "proof_trace.bin")
         with open(binary_proof_trace, 'rb') as f:
            data = f.read()
-           trace = kllvm.prooftrace.LLVMRewriteTrace.parse(data)
+           trace = kllvm.prooftrace.llvm_rewrite_trace.parse(data)
            self.assertFalse(trace is None)
 
            # check that there is a initial configuration

@@ -18,201 +18,206 @@ namespace kllvm {
 namespace {
 
 template <typename IRBuilder>
-llvm::Constant *createGlobalSortStringPtr(
-    IRBuilder &B, KORECompositeSort &sort, llvm::Module *mod) {
-  return B.CreateGlobalStringPtr(
-      ast_to_string(sort), fmt::format("{}_str", sort.getName()), 0, mod);
+llvm::Constant *create_global_sort_string_ptr(
+    IRBuilder &b, kore_composite_sort &sort, llvm::Module *mod) {
+  return b.CreateGlobalStringPtr(
+      ast_to_string(sort), fmt::format("{}_str", sort.get_name()), 0, mod);
 }
 
 } // namespace
 
-llvm::CallInst *ProofEvent::emitSerializeTerm(
-    KORECompositeSort &sort, llvm::Value *outputFile, llvm::Value *term,
-    llvm::BasicBlock *insertAtEnd) {
-  auto B = llvm::IRBuilder(insertAtEnd);
+llvm::CallInst *proof_event::emit_serialize_term(
+    kore_composite_sort &sort, llvm::Value *output_file, llvm::Value *term,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
 
-  auto cat = sort.getCategory(Definition);
-  auto *sort_name_ptr = createGlobalSortStringPtr(B, sort, Module);
+  auto cat = sort.get_category(definition_);
+  auto *sort_name_ptr = create_global_sort_string_ptr(b, sort, module_);
 
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
-  if (cat.cat == SortCategory::Symbol || cat.cat == SortCategory::Variable) {
-    auto *block_ty = getValueType({SortCategory::Symbol, 0}, Module);
+  if (cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable) {
+    auto *block_ty = getvalue_type({sort_category::Symbol, 0}, module_);
 
     auto *func_ty = llvm::FunctionType::get(
         void_ty, {i8_ptr_ty, block_ty, i8_ptr_ty, i1_ty}, false);
 
     auto *serialize
-        = getOrInsertFunction(Module, "serializeTermToFile", func_ty);
+        = get_or_insert_function(module_, "serialize_term_to_file", func_ty);
 
-    return B.CreateCall(
+    return b.CreateCall(
         serialize,
-        {outputFile, term, sort_name_ptr, llvm::ConstantInt::getFalse(Ctx)});
+        {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_)});
   }
   if (term->getType()->isIntegerTy()) {
-    term = B.CreateIntToPtr(term, i8_ptr_ty);
+    term = b.CreateIntToPtr(term, i8_ptr_ty);
   } else {
-    term = B.CreatePointerCast(term, i8_ptr_ty);
+    term = b.CreatePointerCast(term, i8_ptr_ty);
   }
 
   auto *func_ty = llvm::FunctionType::get(
       void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty}, false);
 
   auto *serialize
-      = getOrInsertFunction(Module, "serializeRawTermToFile", func_ty);
+      = get_or_insert_function(module_, "serialize_raw_term_to_file", func_ty);
 
-  return B.CreateCall(
+  return b.CreateCall(
       serialize,
-      {outputFile, term, sort_name_ptr, llvm::ConstantInt::getFalse(Ctx)});
+      {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_)});
 }
 
-llvm::CallInst *ProofEvent::emitSerializeConfiguration(
-    llvm::Value *outputFile, llvm::Value *config,
-    llvm::BasicBlock *insertAtEnd) {
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *block_ty = getValueType({SortCategory::Symbol, 0}, Module);
-  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
+llvm::CallInst *proof_event::emit_serialize_configuration(
+    llvm::Value *output_file, llvm::Value *config,
+    llvm::BasicBlock *insert_at_end) {
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *block_ty = getvalue_type({sort_category::Symbol, 0}, module_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
   auto *func_ty = llvm::FunctionType::get(
       void_ty, {i8_ptr_ty, block_ty, i1_ty, i1_ty}, false);
-  auto *serialize
-      = getOrInsertFunction(Module, "serializeConfigurationToFile", func_ty);
+  auto *serialize = get_or_insert_function(
+      module_, "serialize_configuration_to_file", func_ty);
 
   return llvm::CallInst::Create(
       serialize,
-      {outputFile, config, llvm::ConstantInt::getTrue(Ctx),
-       llvm::ConstantInt::getFalse(Ctx)},
-      "", insertAtEnd);
+      {output_file, config, llvm::ConstantInt::getTrue(ctx_),
+       llvm::ConstantInt::getFalse(ctx_)},
+      "", insert_at_end);
 }
 
-llvm::CallInst *ProofEvent::emitWriteUInt64(
-    llvm::Value *outputFile, uint64_t value, llvm::BasicBlock *insertAtEnd) {
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *i64_ptr_ty = llvm::Type::getInt64Ty(Ctx);
+llvm::CallInst *proof_event::emit_write_uint64(
+    llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end) {
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i64_ptr_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ptr_ty}, false);
-  auto *func = getOrInsertFunction(Module, "writeUInt64ToFile", func_ty);
+  auto *func = get_or_insert_function(module_, "write_uint64_to_file", func_ty);
 
   auto *i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
 
-  return llvm::CallInst::Create(func, {outputFile, i64_value}, "", insertAtEnd);
+  return llvm::CallInst::Create(
+      func, {output_file, i64_value}, "", insert_at_end);
 }
 
-llvm::CallInst *ProofEvent::emitWriteString(
-    llvm::Value *outputFile, std::string const &str,
-    llvm::BasicBlock *insertAtEnd) {
-  auto B = llvm::IRBuilder(insertAtEnd);
+llvm::CallInst *proof_event::emit_write_string(
+    llvm::Value *output_file, std::string const &str,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
 
-  auto *void_ty = llvm::Type::getVoidTy(Ctx);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
 
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
 
-  auto *print = getOrInsertFunction(Module, "printVariableToFile", func_ty);
+  auto *print
+      = get_or_insert_function(module_, "print_variable_to_file", func_ty);
 
-  auto *varname = B.CreateGlobalStringPtr(str, "", 0, Module);
-  return B.CreateCall(print, {outputFile, varname});
+  auto *varname = b.CreateGlobalStringPtr(str, "", 0, module_);
+  return b.CreateCall(print, {output_file, varname});
 }
 
-llvm::BinaryOperator *ProofEvent::emitNoOp(llvm::BasicBlock *insertAtEnd) {
-  auto *i8_ty = llvm::Type::getInt8Ty(Ctx);
+llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
+  auto *i8_ty = llvm::Type::getInt8Ty(ctx_);
   auto *zero = llvm::ConstantInt::get(i8_ty, 0);
 
   return llvm::BinaryOperator::Create(
-      llvm::Instruction::Add, zero, zero, "no-op", insertAtEnd);
+      llvm::Instruction::Add, zero, zero, "no-op", insert_at_end);
 }
 
 llvm::LoadInst *
-ProofEvent::emitGetOutputFileName(llvm::BasicBlock *insertAtEnd) {
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(Ctx);
-  auto *fileNamePointer = Module->getOrInsertGlobal("output_file", i8_ptr_ty);
-  return new llvm::LoadInst(i8_ptr_ty, fileNamePointer, "output", insertAtEnd);
+proof_event::emit_get_output_file_name(llvm::BasicBlock *insert_at_end) {
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *file_name_pointer
+      = module_->getOrInsertGlobal("output_file", i8_ptr_ty);
+  return new llvm::LoadInst(
+      i8_ptr_ty, file_name_pointer, "output", insert_at_end);
 }
 
-std::pair<llvm::BasicBlock *, llvm::BasicBlock *> ProofEvent::proofBranch(
-    std::string const &label, llvm::BasicBlock *insertAtEnd) {
-  auto *i1_ty = llvm::Type::getInt1Ty(Ctx);
+std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proof_branch(
+    std::string const &label, llvm::BasicBlock *insert_at_end) {
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
-  auto *proof_output_flag = Module->getOrInsertGlobal("proof_output", i1_ty);
+  auto *proof_output_flag = module_->getOrInsertGlobal("proof_output", i1_ty);
   auto *proof_output = new llvm::LoadInst(
-      i1_ty, proof_output_flag, "proof_output", insertAtEnd);
+      i1_ty, proof_output_flag, "proof_output", insert_at_end);
 
-  auto *f = insertAtEnd->getParent();
+  auto *f = insert_at_end->getParent();
   auto *true_block
-      = llvm::BasicBlock::Create(Ctx, fmt::format("if_{}", label), f);
+      = llvm::BasicBlock::Create(ctx_, fmt::format("if_{}", label), f);
   auto *merge_block
-      = llvm::BasicBlock::Create(Ctx, fmt::format("tail_{}", label), f);
+      = llvm::BasicBlock::Create(ctx_, fmt::format("tail_{}", label), f);
 
-  emitNoOp(merge_block);
+  emit_no_op(merge_block);
 
-  llvm::BranchInst::Create(true_block, merge_block, proof_output, insertAtEnd);
+  llvm::BranchInst::Create(
+      true_block, merge_block, proof_output, insert_at_end);
   return {true_block, merge_block};
 }
 
 std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
-ProofEvent::eventPrelude(
-    std::string const &label, llvm::BasicBlock *insertAtEnd) {
-  auto [true_block, merge_block] = proofBranch(label, insertAtEnd);
-  return {true_block, merge_block, emitGetOutputFileName(true_block)};
+proof_event::event_prelude(
+    std::string const &label, llvm::BasicBlock *insert_at_end) {
+  auto [true_block, merge_block] = proof_branch(label, insert_at_end);
+  return {true_block, merge_block, emit_get_output_file_name(true_block)};
 }
 
 /*
  * Hook Events
  */
 
-llvm::BasicBlock *ProofEvent::hookEvent_pre(
+llvm::BasicBlock *proof_event::hook_event_pre(
     std::string const &name, llvm::BasicBlock *current_block,
-    std::string const &locationStack) {
-  if (!ProofHintInstrumentation) {
+    std::string const &location_stack) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("hookpre", current_block);
+      = event_prelude("hookpre", current_block);
 
-  emitWriteUInt64(outputFile, detail::word(0xAA), true_block);
-  emitWriteString(outputFile, name, true_block);
-  emitWriteString(outputFile, locationStack, true_block);
+  emit_write_uint64(outputFile, detail::word(0xAA), true_block);
+  emit_write_string(outputFile, name, true_block);
+  emit_write_string(outputFile, location_stack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::hookEvent_post(
-    llvm::Value *val, KORECompositeSort *sort,
+llvm::BasicBlock *proof_event::hook_event_post(
+    llvm::Value *val, kore_composite_sort *sort,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("hookpost", current_block);
+      = event_prelude("hookpost", current_block);
 
-  emitWriteUInt64(outputFile, detail::word(0xBB), true_block);
+  emit_write_uint64(outputFile, detail::word(0xBB), true_block);
 
-  emitSerializeTerm(*sort, outputFile, val, true_block);
+  emit_serialize_term(*sort, outputFile, val, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::hookArg(
-    llvm::Value *val, KORECompositeSort *sort,
+llvm::BasicBlock *proof_event::hook_arg(
+    llvm::Value *val, kore_composite_sort *sort,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("hookarg", current_block);
+      = event_prelude("hookarg", current_block);
 
-  emitSerializeTerm(*sort, outputFile, val, true_block);
+  emit_serialize_term(*sort, outputFile, val, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -222,53 +227,53 @@ llvm::BasicBlock *ProofEvent::hookArg(
  * Rewrite Events
  */
 
-llvm::BasicBlock *ProofEvent::rewriteEvent_pre(
-    KOREAxiomDeclaration *axiom, uint64_t arity,
-    std::map<std::string, KOREVariablePattern *> vars,
+llvm::BasicBlock *proof_event::rewrite_event_pre(
+    kore_axiom_declaration *axiom, uint64_t arity,
+    std::map<std::string, kore_variable_pattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("rewrite_pre", current_block);
+      = event_prelude("rewrite_pre", current_block);
 
-  emitWriteUInt64(outputFile, detail::word(0x22), true_block);
-  emitWriteUInt64(outputFile, axiom->getOrdinal(), true_block);
-  emitWriteUInt64(outputFile, arity, true_block);
+  emit_write_uint64(outputFile, detail::word(0x22), true_block);
+  emit_write_uint64(outputFile, axiom->get_ordinal(), true_block);
+  emit_write_uint64(outputFile, arity, true_block);
   for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
     auto key = entry->getKey();
     auto *val = entry->getValue();
     auto *var = vars[key.str()];
 
-    auto sort = std::dynamic_pointer_cast<KORECompositeSort>(var->getSort());
+    auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->get_sort());
 
-    emitWriteString(outputFile, key.str(), true_block);
-    emitSerializeTerm(*sort, outputFile, val, true_block);
-    emitWriteUInt64(outputFile, detail::word(0xCC), true_block);
+    emit_write_string(outputFile, key.str(), true_block);
+    emit_serialize_term(*sort, outputFile, val, true_block);
+    emit_write_uint64(outputFile, detail::word(0xCC), true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::rewriteEvent_post(
-    KOREAxiomDeclaration *axiom, llvm::Value *return_value,
+llvm::BasicBlock *proof_event::rewrite_event_post(
+    kore_axiom_declaration *axiom, llvm::Value *return_value,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, output_file]
-      = eventPrelude("rewrite_post", current_block);
+      = event_prelude("rewrite_post", current_block);
 
-  auto return_sort = std::dynamic_pointer_cast<KORECompositeSort>(
-      axiom->getRightHandSide()->getSort());
+  auto return_sort = std::dynamic_pointer_cast<kore_composite_sort>(
+      axiom->get_right_hand_side()->get_sort());
 
-  emitWriteUInt64(output_file, detail::word(0xFF), true_block);
-  emitSerializeTerm(*return_sort, output_file, return_value, true_block);
-  emitWriteUInt64(output_file, detail::word(0xCC), true_block);
+  emit_write_uint64(output_file, detail::word(0xFF), true_block);
+  emit_serialize_term(*return_sort, output_file, return_value, true_block);
+  emit_write_uint64(output_file, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -278,73 +283,73 @@ llvm::BasicBlock *ProofEvent::rewriteEvent_post(
  * Function Events
  */
 
-llvm::BasicBlock *ProofEvent::functionEvent_pre(
-    llvm::BasicBlock *current_block, KORECompositePattern *pattern,
-    std::string const &locationStack) {
-  if (!ProofHintInstrumentation) {
+llvm::BasicBlock *proof_event::function_event_pre(
+    llvm::BasicBlock *current_block, kore_composite_pattern *pattern,
+    std::string const &location_stack) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("function_pre", current_block);
+      = event_prelude("function_pre", current_block);
 
-  emitWriteUInt64(outputFile, detail::word(0xDD), true_block);
-  emitWriteString(
-      outputFile, ast_to_string(*pattern->getConstructor()), true_block);
-  emitWriteString(outputFile, locationStack, true_block);
+  emit_write_uint64(outputFile, detail::word(0xDD), true_block);
+  emit_write_string(
+      outputFile, ast_to_string(*pattern->get_constructor()), true_block);
+  emit_write_string(outputFile, location_stack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
 }
 
 llvm::BasicBlock *
-ProofEvent::functionEvent_post(llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+proof_event::function_event_post(llvm::BasicBlock *current_block) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("function_post", current_block);
+      = event_prelude("function_post", current_block);
 
-  emitWriteUInt64(outputFile, detail::word(0x11), true_block);
+  emit_write_uint64(outputFile, detail::word(0x11), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::sideConditionEvent_pre(
-    KOREAxiomDeclaration *axiom, std::vector<llvm::Value *> const &args,
+llvm::BasicBlock *proof_event::side_condition_event_pre(
+    kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("side_condition_pre", current_block);
+      = event_prelude("side_condition_pre", current_block);
 
-  size_t ordinal = axiom->getOrdinal();
+  size_t ordinal = axiom->get_ordinal();
   size_t arity = args.size();
 
-  emitWriteUInt64(outputFile, detail::word(0xEE), true_block);
-  emitWriteUInt64(outputFile, ordinal, true_block);
-  emitWriteUInt64(outputFile, arity, true_block);
+  emit_write_uint64(outputFile, detail::word(0xEE), true_block);
+  emit_write_uint64(outputFile, ordinal, true_block);
+  emit_write_uint64(outputFile, arity, true_block);
 
-  KOREPattern *pattern = axiom->getRequires();
-  std::map<std::string, KOREVariablePattern *> vars;
-  pattern->markVariables(vars);
+  kore_pattern *pattern = axiom->get_requires();
+  std::map<std::string, kore_variable_pattern *> vars;
+  pattern->mark_variables(vars);
 
   int i = 0;
   for (auto entry = vars.begin(); entry != vars.end(); ++i, ++entry) {
-    auto varName = entry->first;
+    auto var_name = entry->first;
     auto *var = entry->second;
     auto *val = args[i];
 
-    auto sort = std::dynamic_pointer_cast<KORECompositeSort>(var->getSort());
+    auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->get_sort());
 
-    emitWriteString(outputFile, varName, true_block);
-    emitSerializeTerm(*sort, outputFile, val, true_block);
-    emitWriteUInt64(outputFile, detail::word(0xCC), true_block);
+    emit_write_string(outputFile, var_name, true_block);
+    emit_serialize_term(*sort, outputFile, val, true_block);
+    emit_write_uint64(outputFile, detail::word(0xCC), true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -352,25 +357,25 @@ llvm::BasicBlock *ProofEvent::sideConditionEvent_pre(
   return merge_block;
 }
 
-llvm::BasicBlock *ProofEvent::sideConditionEvent_post(
-    KOREAxiomDeclaration *axiom, llvm::Value *check_result,
+llvm::BasicBlock *proof_event::side_condition_event_post(
+    kore_axiom_declaration *axiom, llvm::Value *check_result,
     llvm::BasicBlock *current_block) {
-  if (!ProofHintInstrumentation) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = eventPrelude("side_condition_post", current_block);
+      = event_prelude("side_condition_post", current_block);
 
-  size_t ordinal = axiom->getOrdinal();
+  size_t ordinal = axiom->get_ordinal();
 
-  auto check_result_sort = std::dynamic_pointer_cast<KORECompositeSort>(
-      axiom->getRequires()->getSort());
+  auto check_result_sort = std::dynamic_pointer_cast<kore_composite_sort>(
+      axiom->get_requires()->get_sort());
 
-  emitWriteUInt64(outputFile, detail::word(0x33), true_block);
-  emitWriteUInt64(outputFile, ordinal, true_block);
-  emitSerializeTerm(*check_result_sort, outputFile, check_result, true_block);
-  emitWriteUInt64(outputFile, detail::word(0xCC), true_block);
+  emit_write_uint64(outputFile, detail::word(0x33), true_block);
+  emit_write_uint64(outputFile, ordinal, true_block);
+  emit_serialize_term(*check_result_sort, outputFile, check_result, true_block);
+  emit_write_uint64(outputFile, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 

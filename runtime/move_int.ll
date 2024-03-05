@@ -6,11 +6,11 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 ; helper function for int hooks
 define %mpz* @move_int(%mpz* %val) {
   %loaded = load %mpz, %mpz* %val
-  %malloccall = tail call i8* @koreAllocInteger(i64 0)
+  %malloccall = tail call i8* @kore_alloc_integer(i64 0)
   %ptr = bitcast i8* %malloccall to %mpz*
   store %mpz %loaded, %mpz* %ptr
   ret %mpz* %ptr
 }
 
-declare noalias i8* @koreAllocInteger(i64)
+declare noalias i8* @kore_alloc_integer(i64)
 

@@ -23,45 +23,45 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  KOREParser parser(argv[1] + std::string("/syntaxDefinition.kore"));
-  ptr<KOREDefinition> def = parser.definition();
+  kore_parser parser(argv[1] + std::string("/syntaxDefinition.kore"));
+  ptr<kore_definition> def = parser.definition();
 
-  auto subsorts = def->getSubsorts();
-  auto overloads = def->getOverloads();
+  auto subsorts = def->get_subsorts();
+  auto overloads = def->get_overloads();
 
-  KOREParser parser2(argv[1] + std::string("/macros.kore"));
-  std::vector<ptr<KOREDeclaration>> axioms = parser2.declarations();
+  kore_parser parser2(argv[1] + std::string("/macros.kore"));
+  std::vector<ptr<kore_declaration>> axioms = parser2.declarations();
   std::sort(
       axioms.begin(), axioms.end(),
-      [](ptr<KOREDeclaration> const &l, ptr<KOREDeclaration> const &r) {
-        std::string lStr
-            = l->attributes().get_string(attribute_set::key::priority);
-        std::string rStr
-            = r->attributes().get_string(attribute_set::key::priority);
-        int lInt = std::stoi(lStr);
-        int rInt = std::stoi(rStr);
-        return lInt < rInt;
+      [](ptr<kore_declaration> const &l, ptr<kore_declaration> const &r) {
+        std::string l_str
+            = l->attributes().get_string(attribute_set::key::Priority);
+        std::string r_str
+            = r->attributes().get_string(attribute_set::key::Priority);
+        int l_int = std::stoi(l_str);
+        int r_int = std::stoi(r_str);
+        return l_int < r_int;
       });
 
-  auto config = KOREPattern::load(argv[2]);
-  std::map<std::string, std::vector<KORESymbol *>> symbols;
-  config->markSymbols(symbols);
+  auto config = kore_pattern::load(argv[2]);
+  std::map<std::string, std::vector<kore_symbol *>> symbols;
+  config->mark_symbols(symbols);
   for (auto &decl : axioms) {
-    auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
-    axiom->getPattern()->markSymbols(symbols);
+    auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get());
+    axiom->get_pattern()->mark_symbols(symbols);
   }
 
   for (auto &entry : symbols) {
     for (auto *symbol : entry.second) {
-      auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-      symbol->instantiateSymbol(decl);
+      auto *decl = def->get_symbol_declarations().at(symbol->get_name());
+      symbol->instantiate_symbol(decl);
     }
   }
 
   auto expanded
       = axioms.empty()
             ? config
-            : config->expandMacros(subsorts, overloads, axioms, false);
+            : config->expand_macros(subsorts, overloads, axioms, false);
 
   expanded->print(std::cout);
   std::cout << std::endl;

@@ -16,13 +16,13 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  auto config = KOREPattern::load(argv[1]);
-  if (auto *composite = dynamic_cast<KORECompositePattern *>(config.get())) {
-    if (composite->getConstructor()->getName() != "\\or") {
+  auto config = kore_pattern::load(argv[1]);
+  if (auto *composite = dynamic_cast<kore_composite_pattern *>(config.get())) {
+    if (composite->get_constructor()->get_name() != "\\or") {
       std::cerr << "pattern must be an \\or" << std::endl;
       return 1;
     }
-    std::vector<sptr<KOREPattern>> args;
+    std::vector<sptr<kore_pattern>> args;
     flatten(composite, "\\or", args);
 
     for (unsigned i = 0; i < args.size(); i++) {

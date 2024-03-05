@@ -5,7 +5,7 @@
 
 extern "C" {
 
-void *koreAllocToken(size_t requested) {
+void *kore_alloc_token(size_t requested) {
   return malloc(requested);
 }
 size_t const BLOCK_SIZE = -1;
@@ -49,11 +49,11 @@ mpz_ptr move_int(mpz_t i) {
 
 void add_hash64(void *, uint64_t) { }
 
-uint32_t getTagForSymbolName(char const *) {
+uint32_t get_tag_for_symbol_name(char const *) {
   return 0;
 }
 
-void *koreAllocAlwaysGC(size_t size) {
+void *kore_alloc_always_gc(size_t size) {
   return malloc(size);
 }
 }

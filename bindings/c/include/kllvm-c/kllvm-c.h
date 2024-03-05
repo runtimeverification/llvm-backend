@@ -77,7 +77,7 @@ typedef struct kore_sort kore_sort;
 typedef struct kore_symbol kore_symbol;
 typedef struct block block;
 
-/* KOREPattern */
+/* kore_pattern */
 
 char *kore_pattern_dump(kore_pattern const *);
 
@@ -131,7 +131,7 @@ void kore_simplify_binary(
 
 block *take_steps(int64_t depth, block *term);
 
-/* KORESort */
+/* kore_sort */
 
 char *kore_sort_dump(kore_sort const *);
 
@@ -145,7 +145,7 @@ bool kore_sort_is_k(kore_sort const *);
 kore_sort *kore_composite_sort_new(char const *);
 void kore_composite_sort_add_argument(kore_sort const *, kore_sort const *);
 
-/* KORESymbol */
+/* kore_symbol */
 
 kore_symbol *kore_symbol_new(char const *);
 

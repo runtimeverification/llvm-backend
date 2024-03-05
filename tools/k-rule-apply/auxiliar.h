@@ -14,25 +14,27 @@
 using namespace kllvm;
 
 extern "C" {
-void *constructInitialConfiguration(KOREPattern const *);
-void resetMatchReason();
-MatchLog *getMatchLog();
-size_t getMatchLogSize();
-void printMatchResult(std::ostream &, MatchLog *, size_t, std::string const &);
-void initStaticObjects();
+void *construct_initial_configuration(kore_pattern const *);
+void reset_match_reason();
+match_log *getmatch_log();
+size_t getmatch_log_size();
+void print_match_result(
+    std::ostream &, match_log *, size_t, std::string const &);
+void init_static_objects();
 }
 
-void *constructInitialConfiguration(KOREPattern const *pattern, void *handle) {
-  void *funcPtr = dlsym(handle, "constructInitialConfiguration");
+void *
+construct_initial_configuration(kore_pattern const *pattern, void *handle) {
+  void *funcPtr = dlsym(handle, "construct_initial_configuration");
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<void *(*)(KOREPattern const *)>(funcPtr);
+  auto f = reinterpret_cast<void *(*)(kore_pattern const *)>(funcPtr);
   return f(pattern);
 }
 
-void *resetMatchReason(void *handle) {
-  void *funcPtr = dlsym(handle, "resetMatchReason");
+void *reset_match_reason(void *handle) {
+  void *funcPtr = dlsym(handle, "reset_match_reason");
   if (funcPtr == NULL) {
     return NULL;
   }
@@ -40,17 +42,17 @@ void *resetMatchReason(void *handle) {
   return f();
 }
 
-MatchLog *getMatchLog(void *handle) {
-  void *funcPtr = dlsym(handle, "getMatchLog");
+match_log *getmatch_log(void *handle) {
+  void *funcPtr = dlsym(handle, "getmatch_log");
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<MatchLog *(*)()>(funcPtr);
+  auto f = reinterpret_cast<match_log *(*)()>(funcPtr);
   return f();
 }
 
-size_t getMatchLogSize(void *handle) {
-  void *funcPtr = dlsym(handle, "getMatchLogSize");
+size_t getmatch_log_size(void *handle) {
+  void *funcPtr = dlsym(handle, "getmatch_log_size");
   if (funcPtr == NULL) {
     return -1;
   }
@@ -58,21 +60,21 @@ size_t getMatchLogSize(void *handle) {
   return f();
 }
 
-void *printMatchResult(
-    std::ostream &os, MatchLog *log, size_t logSize, std::string const &dir,
+void *print_match_result(
+    std::ostream &os, match_log *log, size_t logSize, std::string const &dir,
     void *handle) {
-  void *funcPtr = dlsym(handle, "printMatchResult");
+  void *funcPtr = dlsym(handle, "print_match_result");
   if (funcPtr == NULL) {
     return NULL;
   }
   auto f = reinterpret_cast<
-      void *(*)(std::ostream &, MatchLog *, size_t, std::string const &)>(
+      void *(*)(std::ostream &, match_log *, size_t, std::string const &)>(
       funcPtr);
   return f(os, log, logSize, dir);
 }
 
-void *initStaticObjects(void *handle) {
-  void *funcPtr = dlsym(handle, "initStaticObjects");
+void *init_static_objects(void *handle) {
+  void *funcPtr = dlsym(handle, "init_static_objects");
   if (funcPtr == NULL) {
     return NULL;
   }

@@ -27,7 +27,7 @@ using namespace llvm;
 namespace kllvm {
 
 CodeGenOpt::Level get_opt_level() {
-  switch (OptimizationLevel) {
+  switch (optimization_level) {
   case opt_level::O0: return CodeGenOpt::None;
   case opt_level::O1: return CodeGenOpt::Less;
   case opt_level::O2: return CodeGenOpt::Default;
@@ -45,7 +45,7 @@ void apply_kllvm_opt_passes(llvm::Module &mod) {
 }
 
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
-  if (KeepFramePointer) {
+  if (keep_frame_pointer) {
     mod.setFramePointer(FramePointerKind::All);
   } else {
     mod.setFramePointer(FramePointerKind::None);
