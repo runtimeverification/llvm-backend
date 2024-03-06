@@ -1,11 +1,11 @@
 package org.kframework.backend.llvm.matching
 
+import com.runtimeverification.k.kore._
+import com.runtimeverification.k.kore.parser.TextToKore
 import java.io.File
 import java.io.FileWriter
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
-import org.kframework.kore._
-import org.kframework.kore.parser.TextToKore
 
 object Matching {
   def writeDecisionTreeToFile(

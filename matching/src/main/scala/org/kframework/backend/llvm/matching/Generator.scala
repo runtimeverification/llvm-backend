@@ -1,5 +1,6 @@
 package org.kframework.backend.llvm.matching
 
+import com.runtimeverification.k.kore._
 import org.kframework.backend.llvm.matching.dt.DecisionTree
 import org.kframework.backend.llvm.matching.pattern.{ Pattern => P }
 import org.kframework.backend.llvm.matching.pattern.AsP
@@ -12,7 +13,6 @@ import org.kframework.backend.llvm.matching.pattern.SortCategory
 import org.kframework.backend.llvm.matching.pattern.SymbolP
 import org.kframework.backend.llvm.matching.pattern.VariableP
 import org.kframework.backend.llvm.matching.pattern.WildcardP
-import org.kframework.kore._
 
 object Generator {
 

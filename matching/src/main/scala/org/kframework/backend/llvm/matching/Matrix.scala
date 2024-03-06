@@ -1,15 +1,15 @@
 package org.kframework.backend.llvm.matching
 
+import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
+import com.runtimeverification.k.kore.CompoundSort
+import com.runtimeverification.k.kore.Sort
+import com.runtimeverification.k.kore.SymbolOrAlias
+import com.runtimeverification.k.kore.Variable
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.pattern._
-import org.kframework.kore.implementation.{ DefaultBuilders => B }
-import org.kframework.kore.CompoundSort
-import org.kframework.kore.Sort
-import org.kframework.kore.SymbolOrAlias
-import org.kframework.kore.Variable
 
 trait AbstractColumn {
   def column: Column

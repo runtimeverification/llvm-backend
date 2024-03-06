@@ -1,6 +1,6 @@
 package org.kframework.backend.llvm.matching;
 
-import org.kframework.kore.Pattern;
+import com.runtimeverification.k.kore.Pattern;
 
 import java.util.Optional;
 

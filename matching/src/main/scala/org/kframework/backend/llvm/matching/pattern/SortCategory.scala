@@ -1,11 +1,11 @@
 package org.kframework.backend.llvm.matching.pattern
 
+import com.runtimeverification.k.kore.CompoundSort
+import com.runtimeverification.k.kore.Sort
 import java.util.regex.{ Pattern => Regex }
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.MatchingException
-import org.kframework.kore.CompoundSort
-import org.kframework.kore.Sort
 import org.kframework.mpfr._
 
 sealed trait SortCategory {
