@@ -1087,9 +1087,10 @@ class Matrix private (
       kem(
         new MatchingException(
           MatchingException.Type.NON_EXHAUSTIVE_MATCH,
-          "Non exhaustive match detected: " + func,
+          "Non exhaustive match detected",
           source,
-          location
+          location,
+          func
         )
       )
     }

@@ -1,5 +1,7 @@
 package org.kframework.backend.llvm.matching;
 
+import org.kframework.kore.Pattern;
+
 import java.util.Optional;
 
 public final class MatchingException extends Throwable {
@@ -14,12 +16,23 @@ public final class MatchingException extends Throwable {
     String message;
     Optional<Source> source;
     Optional<Location> location;
+    Optional<Pattern> pattern;
 
-    public MatchingException(Type type, String message, Optional<Source> source, Optional<Location> location) {
+    private MatchingException(Type type, String message, Optional<Source> source, Optional<Location> location, Optional<Pattern> pattern) {
         this.type = type;
         this.message = message;
         this.source = source;
         this.location = location;
+        this.pattern = pattern;
+    }
+
+    public MatchingException(Type type, String message, Optional<Source> source, Optional<Location> location, Pattern pattern) {
+        this(type, message, source, location, Optional.of(pattern));
+    }
+
+
+    public MatchingException(Type type, String message, Optional<Source> source, Optional<Location> location) {
+        this(type, message, source, location, Optional.empty());
     }
 
     public MatchingException(Type type, String message, Source source, Location location) {
@@ -45,5 +58,9 @@ public final class MatchingException extends Throwable {
 
     public Optional<Location> getLocation() {
         return location;
+    }
+
+    public Optional<Pattern> getPattern() {
+        return pattern;
     }
 }
