@@ -5,14 +5,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.pattern._
-import org.kframework.kore.KORE.KApply
-import org.kframework.kore.KORE.KList
 import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
 import org.kframework.parser.kore.CompoundSort
 import org.kframework.parser.kore.Sort
 import org.kframework.parser.kore.SymbolOrAlias
 import org.kframework.parser.kore.Variable
-import org.kframework.unparser.ToKast
 
 trait AbstractColumn {
   def column: Column
@@ -1081,8 +1078,8 @@ class Matrix private (
             .mkString(" ")
         )
       }
-      val k          = fringe.zip(counterexample.get).map(t => t._2.toK(t._1))
-      val func       = KApply(symlib.koreToK(name), KList(k))
+      val k          = fringe.zip(counterexample.get).map(t => t._2.toKORE(t._1))
+      val func       = B.Application(name, k)
       val attributes = symlib.signatures(name)._3
       val location   = Parser.location(attributes)
       val source     = Parser.source(attributes)
@@ -1090,7 +1087,7 @@ class Matrix private (
       kem(
         new MatchingException(
           MatchingException.Type.NON_EXHAUSTIVE_MATCH,
-          "Non exhaustive match detected: " ++ ToKast(func),
+          "Non exhaustive match detected: " + func,
           source,
           location
         )

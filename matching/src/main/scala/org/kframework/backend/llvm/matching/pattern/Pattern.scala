@@ -1,7 +1,6 @@
 package org.kframework.backend.llvm.matching.pattern
 
 import org.kframework.backend.llvm.matching._
-import org.kframework.kore.K
 import org.kframework.parser.kore
 import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
 import org.kframework.parser.kore.SymbolOrAlias
@@ -58,10 +57,6 @@ sealed trait Pattern[T] {
   def isResidual(symlib: Parser.SymLib): Boolean
   def toShortString: String
   def toKORE(f: Fringe): kore.Pattern
-  def toK(f: Fringe): K = {
-    val kore = toKORE(f)
-    f.symlib.koreToK(kore)
-  }
 }
 
 object Pattern {
