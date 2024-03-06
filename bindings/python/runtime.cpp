@@ -40,10 +40,10 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, raw_ptr<T>, true);
  */
 
 extern "C" {
-void initStaticObjects(void);
-void freeAllKoreMem(void);
+void init_static_objects(void);
+void free_all_kore_mem(void);
 block *take_steps(int64_t, block *);
-void *constructInitialConfiguration(KOREPattern const *initial);
+void *construct_initial_configuration(kore_pattern const *initial);
 }
 
 void bind_runtime(py::module_ &m) {
@@ -59,31 +59,31 @@ void bind_runtime(py::module_ &m) {
 
   m.def("evaluate_function", bindings::evaluate_function);
 
-  m.def("init_static_objects", initStaticObjects);
-  m.def("free_all_gc_memory", freeAllKoreMem);
+  m.def("init_static_objects", init_static_objects);
+  m.def("free_all_gc_memory", free_all_kore_mem);
 
   // This class can't be used directly from Python; the mutability semantics
   // that we get from the Pybind wrappers make it really easy to break things.
   // We therefore have to wrap it up in some external Python code; see
   // package/kllvm/__init__.py for the details of the external class.
   py::class_<block, raw_ptr<block>>(m, "InternalTerm", py::module_local())
-      .def(py::init([](KOREPattern const *init) {
-        return static_cast<block *>(constructInitialConfiguration(init));
+      .def(py::init([](kore_pattern const *init) {
+        return static_cast<block *>(construct_initial_configuration(init));
       }))
       .def(
           "__str__",
           [](block *term) {
-            auto *k_str = printConfigurationToString(term);
+            auto *k_str = print_configuration_to_string(term);
             return std::string(k_str->data, len(k_str));
           })
       .def("step", [](block *term, int64_t n) { return take_steps(n, term); })
-      .def("to_pattern", [](block *term) { return termToKorePattern(term); })
+      .def("to_pattern", [](block *term) { return term_to_kore_pattern(term); })
       .def(
           "serialize",
           [](block *term, bool emit_size) {
             char *data = nullptr;
             size_t size = 0;
-            serializeConfiguration(
+            serialize_configuration(
                 term, nullptr, &data, &size, emit_size, true);
             return py::bytes(std::string(data, data + size));
           },
@@ -92,13 +92,13 @@ void bind_runtime(py::module_ &m) {
           "deserialize",
           [](py::bytes const &bytes) {
             auto str = std::string(bytes);
-            return deserializeConfiguration(str.data(), str.size());
+            return deserialize_configuration(str.data(), str.size());
           })
       .def(
           "_serialize_raw", [](block *term, std::string const &filename,
                                std::string const &sort) {
             FILE *file = fopen(filename.c_str(), "a");
-            serializeRawTermToFile(file, term, sort.c_str(), true);
+            serialize_raw_term_to_file(file, term, sort.c_str(), true);
             fclose(file);
           });
 }

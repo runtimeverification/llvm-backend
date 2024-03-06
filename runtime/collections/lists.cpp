@@ -40,7 +40,7 @@ bool hook_LIST_in(SortKItem value, SortList list) {
 bool hook_LIST_in_keys(SortInt index, SortList list) {
   if (!mpz_fits_ulong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Index is too large for in_keys: {}", intToString(index));
+        "Index is too large for in_keys: {}", int_to_string(index));
   }
   size_t idx = mpz_get_ui(index);
   return idx < list->size();
@@ -55,7 +55,7 @@ SortKItem hook_LIST_get_long(SortList list, ssize_t idx) {
 SortKItem hook_LIST_get(SortList list, SortInt index) {
   if (!mpz_fits_slong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Index is too large for get: {}", intToString(index));
+        "Index is too large for get: {}", int_to_string(index));
   }
   ssize_t idx = mpz_get_si(index);
   return hook_LIST_get_long(list, idx);
@@ -84,7 +84,7 @@ list hook_LIST_range(SortList list, SortInt from_front, SortInt from_back) {
   if (!mpz_fits_ulong_p(from_front) || !mpz_fits_ulong_p(from_back)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "Range index too large for range: front={}, back={}",
-        intToString(from_front), intToString(from_back));
+        int_to_string(from_front), int_to_string(from_back));
   }
 
   size_t front = mpz_get_ui(from_front);
@@ -106,7 +106,7 @@ SortInt hook_LIST_size(SortList list) {
 list hook_LIST_make(SortInt len, SortKItem value) {
   if (!mpz_fits_ulong_p(len)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Length is too large for make: {}", intToString(len));
+        "Length is too large for make: {}", int_to_string(len));
   }
 
   size_t length = mpz_get_ui(len);
@@ -116,7 +116,7 @@ list hook_LIST_make(SortInt len, SortKItem value) {
 list hook_LIST_update(SortList list, SortInt index, SortKItem value) {
   if (!mpz_fits_ulong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Length is too large for update: {}", intToString(index));
+        "Length is too large for update: {}", int_to_string(index));
   }
 
   size_t idx = mpz_get_ui(index);
@@ -131,7 +131,7 @@ list hook_LIST_update(SortList list, SortInt index, SortKItem value) {
 list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
   if (!mpz_fits_ulong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Length is too large for updateAll: {}", intToString(index));
+        "Length is too large for updateAll: {}", int_to_string(index));
   }
 
   size_t idx = mpz_get_ui(index);
@@ -167,12 +167,12 @@ list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
 list hook_LIST_fill(SortList l, SortInt index, SortInt len, SortKItem val) {
   if (!mpz_fits_ulong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Index is too large for fill: {}", intToString(index));
+        "Index is too large for fill: {}", int_to_string(index));
   }
 
   if (!mpz_fits_ulong_p(len)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Length is too large for fill: {}", intToString(len));
+        "Length is too large for fill: {}", int_to_string(len));
   }
 
   size_t idx = mpz_get_ui(index);
@@ -238,7 +238,7 @@ list list_push_back(list *list, block *value) {
   return list->push_back(value);
 }
 
-void printList(
+void print_list(
     writer *file, list *list, char const *unit, char const *element,
     char const *concat, void *state) {
   size_t size = list->size();
@@ -247,8 +247,8 @@ void printList(
     return;
   }
 
-  auto tag = getTagForSymbolName(element);
-  auto *arg_sorts = getArgumentSortsForTag(tag);
+  auto tag = get_tag_for_symbol_name(element);
+  auto *arg_sorts = get_argument_sorts_for_tag(tag);
 
   sfprintf(file, "\\left-assoc{}(%s(", concat);
 
@@ -260,7 +260,7 @@ void printList(
       sfprintf(file, ",");
     }
     sfprintf(file, "%s(", element);
-    printConfigurationInternal(file, *iter, arg_sorts[0], false, state);
+    print_configuration_internal(file, *iter, arg_sorts[0], false, state);
     sfprintf(file, ")");
   }
   sfprintf(file, "))");

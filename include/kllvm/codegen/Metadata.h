@@ -8,12 +8,12 @@
 
 namespace kllvm {
 
-void addKompiledDirSymbol(
+void add_kompiled_dir_symbol(
     llvm::Module &mod, std::string const &dir, bool debug);
 
-void addMutableBytesFlag(llvm::Module &mod, bool enabled, bool debug);
+void add_mutable_bytes_flag(llvm::Module &mod, bool enabled, bool debug);
 
-void addSafePartialFlag(llvm::Module &mod, bool enabled, bool debug);
+void add_safe_partial_flag(llvm::Module &mod, bool enabled, bool debug);
 
 } // namespace kllvm
 

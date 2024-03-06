@@ -4,16 +4,16 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %blockheader = type { i64 } 
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-declare %block* @parseConfiguration(i8*)
+declare %block* @parse_configuration(i8*)
 declare i64 @atol(i8*)
 declare i8* @fopen(i8*, i8*)
 
 declare %block* @take_steps(i64, %block*)
 declare void @finish_rewriting(%block*, i1) #0
 
-declare void @initStaticObjects()
+declare void @init_static_objects()
 
-declare void @printProofHintHeader(i8*)
+declare void @print_proof_hint_header(i8*)
 
 @statistics.flag = private constant [13 x i8] c"--statistics\00"
 @binary_out.flag = private constant [16 x i8] c"--binary-output\00"
@@ -94,15 +94,15 @@ entry:
   
   call void @parse_flags(i32 %argc, i8** %argv)
 
-  call void @initStaticObjects()
+  call void @init_static_objects()
 
   %proof_output = load i1, i1* @proof_output
   br i1 %proof_output, label %if, label %else
 if:
-  call void @printProofHintHeader(i8* %output_file)
+  call void @print_proof_hint_header(i8* %output_file)
   br label %else
 else:
-  %ret = call %block* @parseConfiguration(i8* %filename)
+  %ret = call %block* @parse_configuration(i8* %filename)
   %result = call %block* @take_steps(i64 %depth, %block* %ret)
   call void @finish_rewriting(%block* %result, i1 0)
   unreachable

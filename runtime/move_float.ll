@@ -7,12 +7,12 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 ; helper function for float hooks
 define %floating* @move_float(%floating* %val) {
   %loaded = load %floating, %floating* %val
-  %malloccall = tail call i8* @koreAllocFloating(i64 0)
+  %malloccall = tail call i8* @kore_alloc_floating(i64 0)
   %ptr = bitcast i8* %malloccall to %floating*
   store %floating %loaded, %floating* %ptr
   ret %floating* %ptr
 
 }
 
-declare noalias i8* @koreAllocFloating(i64)
+declare noalias i8* @kore_alloc_floating(i64)
 

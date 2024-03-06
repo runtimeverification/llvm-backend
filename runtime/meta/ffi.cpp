@@ -23,17 +23,16 @@ extern "C" {
   static uint64_t tag_type_##NAME() {                                          \
     static uint64_t tag = -1;                                                  \
     if (tag == -1) {                                                           \
-      tag = (uint64_t)leaf_block(getTagForSymbolName(TYPETAG(NAME)));          \
+      tag = (uint64_t)leaf_block(get_tag_for_symbol_name(TYPETAG(NAME)));      \
     }                                                                          \
     return tag;                                                                \
   }
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
+thread_local static std::vector<ffi_type *> struct_types;
 
-thread_local static std::vector<ffi_type *> structTypes;
-
-static std::unordered_map<block *, string *, HashBlock, KEq> allocatedKItemPtrs;
-static std::map<string *, block *> allocatedBytesRefs;
+static std::unordered_map<block *, string *, hash_block, k_eq>
+    allocated_k_item_ptrs;
+static std::map<string *, block *> allocated_bytes_refs;
 
 TAG_TYPE(void)
 TAG_TYPE(uint8)
@@ -62,7 +61,7 @@ TAG_TYPE(complexdouble)
 TAG_TYPE(complexlongdouble)
 #endif
 
-char *getTerminatedString(string *str);
+char *get_terminated_string(string *str);
 
 size_t hook_LIST_size_long(list *l);
 block *hook_LIST_get_long(list *l, ssize_t idx);
@@ -82,7 +81,7 @@ static void *so_lib_handle() {
 }
 
 // NOLINTBEGIN(*-else-after-return,*-cognitive-complexity)
-static ffi_type *getTypeFromBlock(block *elem) {
+static ffi_type *get_type_from_block(block *elem) {
   if (is_leaf_block(elem)) {
     auto symbol = (uint64_t)elem;
 
@@ -142,35 +141,37 @@ static ffi_type *getTypeFromBlock(block *elem) {
     }
 #endif
   } else if (
-      tag_hdr(elem->h.hdr) == (uint64_t)getTagForSymbolName(TYPETAG(struct))) {
+      tag_hdr(elem->h.hdr)
+      == (uint64_t)get_tag_for_symbol_name(TYPETAG(struct))) {
     list *elements = (list *)*elem->children;
-    size_t numFields = hook_LIST_size_long(elements);
-    block *structField = nullptr;
+    size_t num_fields = hook_LIST_size_long(elements);
+    block *struct_field = nullptr;
 
-    auto *structType = (ffi_type *)malloc(sizeof(ffi_type));
-    structType->size = 0;
-    structType->alignment = 0;
-    structType->type = FFI_TYPE_STRUCT;
-    structType->elements
-        = (ffi_type **)malloc(sizeof(ffi_type *) * (numFields + 1));
+    auto *struct_type = (ffi_type *)malloc(sizeof(ffi_type));
+    struct_type->size = 0;
+    struct_type->alignment = 0;
+    struct_type->type = FFI_TYPE_STRUCT;
+    struct_type->elements
+        = (ffi_type **)malloc(sizeof(ffi_type *) * (num_fields + 1));
 
-    for (int j = 0; j < numFields; j++) {
-      structField = hook_LIST_get_long(elements, j);
+    for (int j = 0; j < num_fields; j++) {
+      struct_field = hook_LIST_get_long(elements, j);
 
-      if (tag_hdr(structField->h.hdr)
-          != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
+      if (tag_hdr(struct_field->h.hdr)
+          != (uint64_t)get_tag_for_symbol_name(
+              "inj{SortFFIType{}, SortKItem{}}")) {
         KLLVM_HOOK_INVALID_ARGUMENT("Struct list contains invalid FFI type");
       }
 
-      structType->elements[j]
-          = getTypeFromBlock((block *)*(structField->children));
+      struct_type->elements[j]
+          = get_type_from_block((block *)*(struct_field->children));
     }
 
-    structType->elements[numFields] = nullptr;
+    struct_type->elements[num_fields] = nullptr;
 
-    structTypes.push_back(structType);
+    struct_types.push_back(struct_type);
 
-    return structType;
+    return struct_type;
   }
   // NOLINTEND(*-branch-clone)
 
@@ -179,8 +180,8 @@ static ffi_type *getTypeFromBlock(block *elem) {
 // NOLINTEND(*-else-after-return,*-cognitive-complexity)
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-string *ffiCall(
-    bool isVariadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
+string *k_ffi_call(
+    bool is_variadic, mpz_t addr, list *args, list *fixtypes, list *vartypes,
     block *ret) {
   ffi_cif cif;
   ffi_type **argtypes = nullptr;
@@ -188,7 +189,7 @@ string *ffiCall(
   void (*address)() = nullptr;
 
   if (!mpz_fits_ulong_p(addr)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", intToString(addr));
+    KLLVM_HOOK_INVALID_ARGUMENT("Addr is too large: {}", int_to_string(addr));
   }
 
   address = (void (*)())mpz_get_ui(addr);
@@ -197,7 +198,7 @@ string *ffiCall(
   size_t nfixtypes = hook_LIST_size_long(fixtypes);
   size_t nvartypes = 0;
 
-  if (isVariadic) {
+  if (is_variadic) {
     nvartypes = hook_LIST_size_long(vartypes);
   }
 
@@ -213,37 +214,39 @@ string *ffiCall(
   for (int i = 0; i < nfixtypes; i++) {
     elem = hook_LIST_get_long(fixtypes, i);
     if (tag_hdr(elem->h.hdr)
-        != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
+        != (uint64_t)get_tag_for_symbol_name(
+            "inj{SortFFIType{}, SortKItem{}}")) {
       KLLVM_HOOK_INVALID_ARGUMENT("Fix types list contains invalid FFI type");
     }
 
-    argtypes[i] = getTypeFromBlock((block *)*elem->children);
+    argtypes[i] = get_type_from_block((block *)*elem->children);
   }
 
   for (int i = 0; i < nvartypes; i++) {
     elem = hook_LIST_get_long(vartypes, i);
     if (tag_hdr(elem->h.hdr)
-        != (uint64_t)getTagForSymbolName("inj{SortFFIType{}, SortKItem{}}")) {
+        != (uint64_t)get_tag_for_symbol_name(
+            "inj{SortFFIType{}, SortKItem{}}")) {
       KLLVM_HOOK_INVALID_ARGUMENT("Var types list contains invalid FFI type");
     }
 
-    argtypes[i + nfixtypes] = getTypeFromBlock((block *)*elem->children);
+    argtypes[i + nfixtypes] = get_type_from_block((block *)*elem->children);
   }
 
   void **avalues = (void **)malloc(sizeof(void *) * nargs);
   for (int i = 0; i < nargs; i++) {
     elem = hook_LIST_get_long(args, i);
     if (tag_hdr(elem->h.hdr)
-        != (uint64_t)getTagForSymbolName("inj{SortBytes{}, SortKItem{}}")) {
+        != (uint64_t)get_tag_for_symbol_name("inj{SortBytes{}, SortKItem{}}")) {
       KLLVM_HOOK_INVALID_ARGUMENT("Args list contains non-bytes type");
     }
     avalues[i] = ((string *)*elem->children)->data;
   }
 
-  rtype = getTypeFromBlock(ret);
+  rtype = get_type_from_block(ret);
 
   ffi_status status = FFI_OK;
-  if (isVariadic) {
+  if (is_variadic) {
     status = ffi_prep_cif_var(
         &cif, FFI_DEFAULT_ABI, nfixtypes, nargs, rtype, argtypes);
   } else {
@@ -267,35 +270,35 @@ string *ffiCall(
   }
 
   auto *rvalue
-      = static_cast<string *>(koreAllocToken(sizeof(string) + rtype->size));
+      = static_cast<string *>(kore_alloc_token(sizeof(string) + rtype->size));
   ffi_call(&cif, address, (void *)(rvalue->data), avalues);
 
   free(argtypes);
   init_with_len(rvalue, rtype->size);
   free(avalues);
 
-  for (auto &s : structTypes) {
+  for (auto &s : struct_types) {
     free(s->elements);
     free(s);
   }
 
-  structTypes.clear();
+  struct_types.clear();
 
   return rvalue;
 }
 
 SortBytes
 hook_FFI_call(SortInt addr, SortList args, SortList types, SortFFIType ret) {
-  return ffiCall(false, addr, args, types, nullptr, ret);
+  return k_ffi_call(false, addr, args, types, nullptr, ret);
 }
 
 SortBytes hook_FFI_call_variadic(
     SortInt addr, SortList args, SortList fixtypes, SortList vartypes,
     SortFFIType ret) {
-  return ffiCall(true, addr, args, fixtypes, vartypes, ret);
+  return k_ffi_call(true, addr, args, fixtypes, vartypes, ret);
 }
 
-static std::map<std::string, void *> getPrivateSymbols() {
+static std::map<std::string, void *> get_private_symbols() {
   std::map<std::string, void *> m;
   m["atexit"] = (void *)atexit;
 #ifndef __APPLE__
@@ -318,14 +321,14 @@ static std::map<std::string, void *> getPrivateSymbols() {
 }
 
 SortInt hook_FFI_address(SortString fn) {
-  char *func = getTerminatedString(fn);
+  char *func = get_terminated_string(fn);
 
-  std::string funcStr = func;
-  static std::map<std::string, void *> const privateSymbols
-      = getPrivateSymbols();
+  std::string func_str = func;
+  static std::map<std::string, void *> const private_symbols
+      = get_private_symbols();
 
   void *address = nullptr;
-  if (auto it = privateSymbols.find(funcStr); it != privateSymbols.end()) {
+  if (auto it = private_symbols.find(func_str); it != private_symbols.end()) {
     address = it->second;
   } else {
     void *handle = so_lib_handle();
@@ -339,14 +342,14 @@ SortInt hook_FFI_address(SortString fn) {
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
-firstBlockEnumerator() {
+first_block_enumerator() {
   // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
   blocks.clear();
 
-  for (auto &keyVal : allocatedKItemPtrs) {
-    blocks.push_back(const_cast<block **>(&(keyVal.first)));
+  for (auto &key_val : allocated_k_item_ptrs) {
+    blocks.push_back(const_cast<block **>(&(key_val.first)));
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
@@ -355,14 +358,14 @@ firstBlockEnumerator() {
 
 static std::pair<
     std::vector<block **>::iterator, std::vector<block **>::iterator>
-secondBlockEnumerator() {
+second_block_enumerator() {
   // NOLINTBEGIN(*-const-cast)
   static std::vector<block **> blocks;
 
   blocks.clear();
 
-  for (auto &keyVal : allocatedBytesRefs) {
-    blocks.push_back(const_cast<block **>(&(keyVal.second)));
+  for (auto &key_val : allocated_bytes_refs) {
+    blocks.push_back(const_cast<block **>(&(key_val.second)));
   }
 
   return std::make_pair(blocks.begin(), blocks.end());
@@ -373,27 +376,27 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
   static int registered = -1;
 
   if (registered == -1) {
-    registerGCRootsEnumerator(firstBlockEnumerator);
-    registerGCRootsEnumerator(secondBlockEnumerator);
+    register_gc_roots_enumerator(first_block_enumerator);
+    register_gc_roots_enumerator(second_block_enumerator);
     registered = 0;
   }
 
   if (!mpz_fits_ulong_p(size)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Size is too large: {}", intToString(size));
+    KLLVM_HOOK_INVALID_ARGUMENT("Size is too large: {}", int_to_string(size));
   }
   if (!mpz_fits_ulong_p(align)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Alignment is too large: {}", intToString(align));
+        "Alignment is too large: {}", int_to_string(align));
   }
 
   size_t a = mpz_get_ui(align);
 
-  if (allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end()) {
-    string *result = allocatedKItemPtrs[kitem];
+  if (allocated_k_item_ptrs.find(kitem) != allocated_k_item_ptrs.end()) {
+    string *result = allocated_k_item_ptrs[kitem];
     if ((((uintptr_t)result) & (a - 1)) != 0) {
       KLLVM_HOOK_INVALID_ARGUMENT("Memory is not aligned");
     }
-    return allocatedKItemPtrs[kitem];
+    return allocated_k_item_ptrs[kitem];
   }
 
   size_t s = mpz_get_ui(size);
@@ -409,46 +412,46 @@ string *hook_FFI_alloc(block *kitem, mpz_t size, mpz_t align) {
   init_with_len(ret, s);
   ret->h.hdr |= NOT_YOUNG_OBJECT_BIT;
 
-  allocatedKItemPtrs[kitem] = ret;
-  allocatedBytesRefs[ret] = kitem;
+  allocated_k_item_ptrs[kitem] = ret;
+  allocated_bytes_refs[ret] = kitem;
 
   return ret;
 }
 
 block *hook_FFI_free(block *kitem) {
-  auto ptrIter = allocatedKItemPtrs.find(kitem);
-  auto refIter = allocatedBytesRefs.find(ptrIter->second);
+  auto ptr_iter = allocated_k_item_ptrs.find(kitem);
+  auto ref_iter = allocated_bytes_refs.find(ptr_iter->second);
 
-  if (ptrIter != allocatedKItemPtrs.end()) {
-    free(allocatedKItemPtrs[kitem]);
-    allocatedKItemPtrs.erase(ptrIter);
+  if (ptr_iter != allocated_k_item_ptrs.end()) {
+    free(allocated_k_item_ptrs[kitem]);
+    allocated_k_item_ptrs.erase(ptr_iter);
 
-    if (refIter != allocatedBytesRefs.end()) {
-      allocatedBytesRefs.erase(refIter);
+    if (ref_iter != allocated_bytes_refs.end()) {
+      allocated_bytes_refs.erase(ref_iter);
     } else {
       throw std::runtime_error("Internal memory map is out of sync");
     }
   }
 
-  return dotK;
+  return dot_k();
 }
 
 block *hook_FFI_freeAll(void) {
-  for (auto &allocatedKItemPtr : allocatedKItemPtrs) {
-    hook_FFI_free(allocatedKItemPtr.first);
+  for (auto &allocated_k_item_ptr : allocated_k_item_ptrs) {
+    hook_FFI_free(allocated_k_item_ptr.first);
   }
 
-  return dotK;
+  return dot_k();
 }
 
 block *hook_FFI_bytes_ref(string *bytes) {
-  auto refIter = allocatedBytesRefs.find(bytes);
+  auto ref_iter = allocated_bytes_refs.find(bytes);
 
-  if (refIter == allocatedBytesRefs.end()) {
+  if (ref_iter == allocated_bytes_refs.end()) {
     KLLVM_HOOK_INVALID_ARGUMENT("Bytes have no reference");
   }
 
-  return allocatedBytesRefs[bytes];
+  return allocated_bytes_refs[bytes];
 }
 
 mpz_ptr hook_FFI_bytes_address(string *bytes) {
@@ -458,7 +461,7 @@ mpz_ptr hook_FFI_bytes_address(string *bytes) {
 }
 
 bool hook_FFI_allocated(block *kitem) {
-  return allocatedKItemPtrs.find(kitem) != allocatedKItemPtrs.end();
+  return allocated_k_item_ptrs.find(kitem) != allocated_k_item_ptrs.end();
 }
 
 SortK hook_FFI_read(SortInt addr, SortBytes mem) {
@@ -466,7 +469,7 @@ SortK hook_FFI_read(SortInt addr, SortBytes mem) {
   auto intptr = (uintptr_t)l;
   char *ptr = (char *)intptr;
   memcpy(mem->data, ptr, len(mem));
-  return dotK;
+  return dot_k();
 }
 
 SortK hook_FFI_write(SortInt addr, SortBytes mem) {
@@ -478,6 +481,6 @@ SortK hook_FFI_write(SortInt addr, SortBytes mem) {
       ptr[i] = mem->data[i];
     }
   }
-  return dotK;
+  return dot_k();
 }
 }

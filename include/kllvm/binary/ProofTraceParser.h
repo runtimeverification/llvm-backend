@@ -35,216 +35,233 @@ constexpr uint64_t rule_event_sentinel = detail::word(0x22);
 constexpr uint64_t side_condition_event_sentinel = detail::word(0xEE);
 constexpr uint64_t side_condition_end_sentinel = detail::word(0x33);
 
-class LLVMStepEvent : public std::enable_shared_from_this<LLVMStepEvent> {
+class llvm_step_event : public std::enable_shared_from_this<llvm_step_event> {
 public:
-  virtual void print(std::ostream &Out, unsigned indent = 0U) const = 0;
-  virtual ~LLVMStepEvent() = default;
+  virtual void print(std::ostream &out, unsigned indent = 0U) const = 0;
+  virtual ~llvm_step_event() = default;
 };
 
-class LLVMRewriteEvent : public LLVMStepEvent {
+class llvm_rewrite_event : public llvm_step_event {
 public:
   using substitution_t
-      = std::map<std::string, std::pair<sptr<KOREPattern>, uint64_t>>;
+      = std::map<std::string, std::pair<sptr<kore_pattern>, uint64_t>>;
 
 private:
-  uint64_t ruleOrdinal;
-  substitution_t substitution{};
+  uint64_t rule_ordinal_;
+  substitution_t substitution_{};
 
 protected:
-  void printSubstitution(std::ostream &Out, unsigned indent = 0U) const;
+  void print_substitution(std::ostream &out, unsigned indent = 0U) const;
 
 public:
-  LLVMRewriteEvent(uint64_t _ruleOrdinal)
-      : ruleOrdinal(_ruleOrdinal) { }
+  llvm_rewrite_event(uint64_t rule_ordinal)
+      : rule_ordinal_(rule_ordinal) { }
 
-  [[nodiscard]] uint64_t getRuleOrdinal() const { return ruleOrdinal; }
-  [[nodiscard]] substitution_t const &getSubstitution() const {
-    return substitution;
+  [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
+  [[nodiscard]] substitution_t const &get_substitution() const {
+    return substitution_;
   }
 
-  void addSubstitution(
-      std::string const &name, sptr<KOREPattern> const &term,
+  void add_substitution(
+      std::string const &name, sptr<kore_pattern> const &term,
       uint64_t pattern_len) {
-    substitution.insert(
+    substitution_.insert(
         std::make_pair(name, std::make_pair(term, pattern_len)));
   }
 
-  ~LLVMRewriteEvent() override = default;
+  ~llvm_rewrite_event() override = default;
 };
 
-class LLVMRuleEvent : public LLVMRewriteEvent {
+class llvm_rule_event : public llvm_rewrite_event {
 private:
-  LLVMRuleEvent(uint64_t _ruleOrdinal)
-      : LLVMRewriteEvent(_ruleOrdinal) { }
+  llvm_rule_event(uint64_t rule_ordinal)
+      : llvm_rewrite_event(rule_ordinal) { }
 
 public:
-  static sptr<LLVMRuleEvent> Create(uint64_t _ruleOrdinal) {
-    return sptr<LLVMRuleEvent>(new LLVMRuleEvent(_ruleOrdinal));
+  static sptr<llvm_rule_event> create(uint64_t rule_ordinal) {
+    return sptr<llvm_rule_event>(new llvm_rule_event(rule_ordinal));
   }
 
-  void print(std::ostream &Out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, unsigned indent = 0U) const override;
 };
 
-class LLVMSideConditionEvent : public LLVMRewriteEvent {
+class llvm_side_condition_event : public llvm_rewrite_event {
 private:
-  LLVMSideConditionEvent(uint64_t _ruleOrdinal)
-      : LLVMRewriteEvent(_ruleOrdinal) { }
+  llvm_side_condition_event(uint64_t rule_ordinal)
+      : llvm_rewrite_event(rule_ordinal) { }
 
 public:
-  static sptr<LLVMSideConditionEvent> Create(uint64_t _ruleOrdinal) {
-    return sptr<LLVMSideConditionEvent>(
-        new LLVMSideConditionEvent(_ruleOrdinal));
+  static sptr<llvm_side_condition_event> create(uint64_t rule_ordinal) {
+    return sptr<llvm_side_condition_event>(
+        new llvm_side_condition_event(rule_ordinal));
   }
 
-  void print(std::ostream &Out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, unsigned indent = 0U) const override;
 };
 
-class LLVMSideConditionEndEvent : public LLVMStepEvent {
+class llvm_side_condition_end_event : public llvm_step_event {
 private:
-  uint64_t ruleOrdinal;
-  sptr<KOREPattern> korePattern{};
-  uint64_t patternLength{0U};
+  uint64_t rule_ordinal_;
+  sptr<kore_pattern> kore_pattern_{};
+  uint64_t pattern_length_{0U};
 
-  LLVMSideConditionEndEvent(uint64_t _ruleOrdinal)
-      : ruleOrdinal(_ruleOrdinal)
-      , korePattern(nullptr) { }
+  llvm_side_condition_end_event(uint64_t rule_ordinal)
+      : rule_ordinal_(rule_ordinal)
+      , kore_pattern_(nullptr) { }
 
 public:
-  static sptr<LLVMSideConditionEndEvent> Create(uint64_t _ruleOrdinal) {
-    return sptr<LLVMSideConditionEndEvent>(
-        new LLVMSideConditionEndEvent(_ruleOrdinal));
+  static sptr<llvm_side_condition_end_event> create(uint64_t rule_ordinal) {
+    return sptr<llvm_side_condition_end_event>(
+        new llvm_side_condition_end_event(rule_ordinal));
   }
 
-  [[nodiscard]] uint64_t getRuleOrdinal() const { return ruleOrdinal; }
-  [[nodiscard]] sptr<KOREPattern> getKOREPattern() const { return korePattern; }
-  [[nodiscard]] uint64_t getPatternLength() const { return patternLength; }
-  void setKOREPattern(sptr<KOREPattern> _korePattern, uint64_t _patternLength) {
-    korePattern = std::move(_korePattern);
-    patternLength = _patternLength;
+  [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
+  [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
+    return kore_pattern_;
+  }
+  [[nodiscard]] uint64_t get_pattern_length() const { return pattern_length_; }
+  void
+  setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
+    kore_pattern_ = std::move(kore_pattern);
+    pattern_length_ = pattern_length;
   }
 
-  void print(std::ostream &Out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, unsigned indent = 0U) const override;
 };
 
-class LLVMEvent;
+class llvm_event;
 
-class LLVMFunctionEvent : public LLVMStepEvent {
+class llvm_function_event : public llvm_step_event {
 private:
-  std::string name;
-  std::string relativePosition;
-  std::vector<LLVMEvent> arguments;
+  std::string name_;
+  std::string relative_position_;
+  std::vector<llvm_event> arguments_;
 
-  LLVMFunctionEvent(std::string _name, std::string _relativePosition);
+  llvm_function_event(std::string name, std::string relative_position);
 
 public:
-  static sptr<LLVMFunctionEvent>
-  Create(std::string const &_name, std::string const &_relativePosition) {
-    return sptr<LLVMFunctionEvent>(
-        new LLVMFunctionEvent(_name, _relativePosition));
+  static sptr<llvm_function_event>
+  create(std::string const &name, std::string const &relative_position) {
+    return sptr<llvm_function_event>(
+        new llvm_function_event(name, relative_position));
   }
 
-  [[nodiscard]] std::string const &getName() const { return name; }
-  [[nodiscard]] std::string const &getRelativePosition() const {
-    return relativePosition;
+  [[nodiscard]] std::string const &get_name() const { return name_; }
+  [[nodiscard]] std::string const &get_relative_position() const {
+    return relative_position_;
   }
-  [[nodiscard]] std::vector<LLVMEvent> const &getArguments() const;
+  [[nodiscard]] std::vector<llvm_event> const &get_arguments() const;
 
-  void addArgument(LLVMEvent const &argument);
+  void add_argument(llvm_event const &argument);
 
-  void print(std::ostream &Out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, unsigned indent = 0U) const override;
 };
 
-class LLVMHookEvent : public LLVMStepEvent {
+class llvm_hook_event : public llvm_step_event {
 private:
-  std::string name;
-  std::string relativePosition;
-  std::vector<LLVMEvent> arguments;
-  sptr<KOREPattern> korePattern;
-  uint64_t patternLength{0U};
+  std::string name_;
+  std::string relative_position_;
+  std::vector<llvm_event> arguments_;
+  sptr<kore_pattern> kore_pattern_;
+  uint64_t pattern_length_{0U};
 
-  LLVMHookEvent(std::string _name, std::string _relativePosition);
+  llvm_hook_event(std::string name, std::string relative_position);
 
 public:
-  static sptr<LLVMHookEvent>
-  Create(std::string const &_name, std::string const &_relativePosition) {
-    return sptr<LLVMHookEvent>(new LLVMHookEvent(_name, _relativePosition));
+  static sptr<llvm_hook_event>
+  create(std::string const &name, std::string const &relative_position) {
+    return sptr<llvm_hook_event>(new llvm_hook_event(name, relative_position));
   }
 
-  [[nodiscard]] std::string const &getName() const { return name; }
-  [[nodiscard]] std::string const &getRelativePosition() const {
-    return relativePosition;
+  [[nodiscard]] std::string const &get_name() const { return name_; }
+  [[nodiscard]] std::string const &get_relative_position() const {
+    return relative_position_;
   }
-  [[nodiscard]] std::vector<LLVMEvent> const &getArguments() const {
-    return arguments;
+  [[nodiscard]] std::vector<llvm_event> const &get_arguments() const {
+    return arguments_;
   }
-  [[nodiscard]] sptr<KOREPattern> getKOREPattern() const { return korePattern; }
-  [[nodiscard]] uint64_t getPatternLength() const { return patternLength; }
-  void setKOREPattern(sptr<KOREPattern> _korePattern, uint64_t _patternLength) {
-    korePattern = std::move(_korePattern);
-    patternLength = _patternLength;
+  [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
+    return kore_pattern_;
+  }
+  [[nodiscard]] uint64_t get_pattern_length() const { return pattern_length_; }
+  void
+  setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
+    kore_pattern_ = std::move(kore_pattern);
+    pattern_length_ = pattern_length;
   }
 
-  void addArgument(LLVMEvent const &argument);
+  void add_argument(llvm_event const &argument);
 
-  void print(std::ostream &Out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, unsigned indent = 0U) const override;
 };
 
-class LLVMEvent {
+class llvm_event {
 private:
-  bool isStepEvent{};
-  sptr<LLVMStepEvent> stepEvent{};
-  sptr<KOREPattern> korePattern{};
-  uint64_t patternLength{};
+  bool is_step_event_{};
+  sptr<llvm_step_event> step_event_{};
+  sptr<kore_pattern> kore_pattern_{};
+  uint64_t pattern_length_{};
 
 public:
-  [[nodiscard]] bool isStep() const { return isStepEvent; }
-  [[nodiscard]] bool isPattern() const { return !isStep(); }
-  [[nodiscard]] sptr<LLVMStepEvent> getStepEvent() const { return stepEvent; }
-  [[nodiscard]] sptr<KOREPattern> getKOREPattern() const { return korePattern; }
-  [[nodiscard]] uint64_t getPatternLength() const { return patternLength; }
-  void setStepEvent(sptr<LLVMStepEvent> _stepEvent) {
-    isStepEvent = true;
-    stepEvent = std::move(_stepEvent);
+  [[nodiscard]] bool is_step() const { return is_step_event_; }
+  [[nodiscard]] bool is_pattern() const { return !is_step(); }
+  [[nodiscard]] sptr<llvm_step_event> get_step_event() const {
+    return step_event_;
   }
-  void setKOREPattern(sptr<KOREPattern> _korePattern, uint64_t _patternLength) {
-    isStepEvent = false;
-    korePattern = std::move(_korePattern);
-    patternLength = _patternLength;
+  [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
+    return kore_pattern_;
   }
-  void print(std::ostream &Out, bool isArg, unsigned indent = 0U) const;
+  [[nodiscard]] uint64_t get_pattern_length() const { return pattern_length_; }
+  void set_step_event(sptr<llvm_step_event> step_event) {
+    is_step_event_ = true;
+    step_event_ = std::move(step_event);
+  }
+  void
+  setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
+    is_step_event_ = false;
+    kore_pattern_ = std::move(kore_pattern);
+    pattern_length_ = pattern_length;
+  }
+  void print(std::ostream &out, bool is_arg, unsigned indent = 0U) const;
 };
 
-class LLVMRewriteTrace {
+class llvm_rewrite_trace {
 private:
-  uint32_t version{};
-  std::vector<LLVMEvent> preTrace{};
-  LLVMEvent initialConfig;
-  std::vector<LLVMEvent> trace{};
+  uint32_t version_{};
+  std::vector<llvm_event> pre_trace_{};
+  llvm_event initial_config_;
+  std::vector<llvm_event> trace_{};
 
 public:
-  [[nodiscard]] uint32_t getVersion() const { return version; }
-  [[nodiscard]] std::vector<LLVMEvent> const &getPreTrace() const {
-    return preTrace;
+  [[nodiscard]] uint32_t get_version() const { return version_; }
+  [[nodiscard]] std::vector<llvm_event> const &get_pre_trace() const {
+    return pre_trace_;
   }
-  [[nodiscard]] LLVMEvent getInitialConfig() const { return initialConfig; }
-  [[nodiscard]] std::vector<LLVMEvent> const &getTrace() const { return trace; }
-  void setVersion(uint32_t _version) { version = _version; }
-  void setInitialConfig(LLVMEvent _initialConfig) {
-    initialConfig = std::move(_initialConfig);
+  [[nodiscard]] llvm_event get_initial_config() const {
+    return initial_config_;
+  }
+  [[nodiscard]] std::vector<llvm_event> const &get_trace() const {
+    return trace_;
+  }
+  void set_version(uint32_t v) { version_ = v; }
+  void set_initial_config(llvm_event initial_config) {
+    initial_config_ = std::move(initial_config);
   }
 
-  void addPreTraceEvent(LLVMEvent const &event) { preTrace.push_back(event); }
-  void addTraceEvent(LLVMEvent const &event) { trace.push_back(event); }
+  void add_pre_trace_event(llvm_event const &event) {
+    pre_trace_.push_back(event);
+  }
+  void add_trace_event(llvm_event const &event) { trace_.push_back(event); }
 
-  void print(std::ostream &Out, unsigned indent = 0U) const;
+  void print(std::ostream &out, unsigned indent = 0U) const;
 };
 
-class ProofTraceParser {
+class proof_trace_parser {
 public:
-  static constexpr uint32_t expectedVersion = 5U;
+  static constexpr uint32_t expected_version = 5U;
 
 private:
-  bool verbose;
+  bool verbose_;
 
   // Caller needs to check that there are at least 8 bytes remaining in the
   // stream before peeking
@@ -306,7 +323,7 @@ private:
   }
 
   template <typename It>
-  sptr<KOREPattern> parse_kore_term(It &ptr, It end, uint64_t &pattern_len) {
+  sptr<kore_pattern> parse_kore_term(It &ptr, It end, uint64_t &pattern_len) {
     if (std::distance(ptr, end) < 11U) {
       return nullptr;
     }
@@ -359,7 +376,7 @@ private:
       return false;
     }
 
-    if (version != expectedVersion) {
+    if (version != expected_version) {
       return false;
     }
 
@@ -367,7 +384,7 @@ private:
   }
 
   template <typename It>
-  bool parse_variable(It &ptr, It end, sptr<LLVMRewriteEvent> const &event) {
+  bool parse_variable(It &ptr, It end, sptr<llvm_rewrite_event> const &event) {
     std::string name;
     if (!parse_name(ptr, end, name)) {
       return false;
@@ -379,13 +396,13 @@ private:
       return false;
     }
 
-    event->addSubstitution(name, kore_term, pattern_len);
+    event->add_substitution(name, kore_term, pattern_len);
 
     return check_word(ptr, end, kore_end_sentinel);
   }
 
   template <typename It>
-  sptr<LLVMHookEvent> parse_hook(It &ptr, It end) {
+  sptr<llvm_hook_event> parse_hook(It &ptr, It end) {
     if (!check_word(ptr, end, hook_event_sentinel)) {
       return nullptr;
     }
@@ -400,15 +417,15 @@ private:
       return nullptr;
     }
 
-    auto event = LLVMHookEvent::Create(name, location);
+    auto event = llvm_hook_event::create(name, location);
 
     while (std::distance(ptr, end) < 8U
            || peek_word(ptr) != hook_result_sentinel) {
-      LLVMEvent argument;
+      llvm_event argument;
       if (!parse_argument(ptr, end, argument)) {
         return nullptr;
       }
-      event->addArgument(argument);
+      event->add_argument(argument);
     }
 
     if (!check_word(ptr, end, hook_result_sentinel)) {
@@ -420,13 +437,13 @@ private:
     if (!kore_term) {
       return nullptr;
     }
-    event->setKOREPattern(kore_term, pattern_len);
+    event->setkore_pattern(kore_term, pattern_len);
 
     return event;
   }
 
   template <typename It>
-  sptr<LLVMFunctionEvent> parse_function(It &ptr, It end) {
+  sptr<llvm_function_event> parse_function(It &ptr, It end) {
     if (!check_word(ptr, end, function_event_sentinel)) {
       return nullptr;
     }
@@ -441,15 +458,15 @@ private:
       return nullptr;
     }
 
-    auto event = LLVMFunctionEvent::Create(name, location);
+    auto event = llvm_function_event::create(name, location);
 
     while (std::distance(ptr, end) < 8U
            || peek_word(ptr) != function_end_sentinel) {
-      LLVMEvent argument;
+      llvm_event argument;
       if (!parse_argument(ptr, end, argument)) {
         return nullptr;
       }
-      event->addArgument(argument);
+      event->add_argument(argument);
     }
 
     if (!check_word(ptr, end, function_end_sentinel)) {
@@ -460,7 +477,7 @@ private:
   }
 
   template <typename It>
-  sptr<KOREPattern> parse_config(It &ptr, It end, uint64_t &pattern_len) {
+  sptr<kore_pattern> parse_config(It &ptr, It end, uint64_t &pattern_len) {
     if (!check_word(ptr, end, config_sentinel)) {
       return nullptr;
     }
@@ -478,7 +495,7 @@ private:
   }
 
   template <typename It>
-  sptr<LLVMRuleEvent> parse_rule(It &ptr, It end) {
+  sptr<llvm_rule_event> parse_rule(It &ptr, It end) {
     if (!check_word(ptr, end, rule_event_sentinel)) {
       return nullptr;
     }
@@ -493,7 +510,7 @@ private:
       return nullptr;
     }
 
-    auto event = LLVMRuleEvent::Create(ordinal);
+    auto event = llvm_rule_event::create(ordinal);
 
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(ptr, end, event)) {
@@ -505,7 +522,7 @@ private:
   }
 
   template <typename It>
-  sptr<LLVMSideConditionEvent> parse_side_condition(It &ptr, It end) {
+  sptr<llvm_side_condition_event> parse_side_condition(It &ptr, It end) {
     if (!check_word(ptr, end, side_condition_event_sentinel)) {
       return nullptr;
     }
@@ -520,7 +537,7 @@ private:
       return nullptr;
     }
 
-    auto event = LLVMSideConditionEvent::Create(ordinal);
+    auto event = llvm_side_condition_event::create(ordinal);
 
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(ptr, end, event)) {
@@ -532,7 +549,8 @@ private:
   }
 
   template <typename It>
-  sptr<LLVMSideConditionEndEvent> parse_side_condition_end(It &ptr, It end) {
+  sptr<llvm_side_condition_end_event>
+  parse_side_condition_end(It &ptr, It end) {
     if (!check_word(ptr, end, side_condition_end_sentinel)) {
       return nullptr;
     }
@@ -542,14 +560,14 @@ private:
       return nullptr;
     }
 
-    auto event = LLVMSideConditionEndEvent::Create(ordinal);
+    auto event = llvm_side_condition_end_event::create(ordinal);
 
     uint64_t pattern_len = 0;
     auto kore_term = parse_kore_term(ptr, end, pattern_len);
     if (!kore_term) {
       return nullptr;
     }
-    event->setKOREPattern(kore_term, pattern_len);
+    event->setkore_pattern(kore_term, pattern_len);
 
     if (!check_word(ptr, end, kore_end_sentinel)) {
       return nullptr;
@@ -559,14 +577,14 @@ private:
   }
 
   template <typename It>
-  bool parse_argument(It &ptr, It end, LLVMEvent &event) {
+  bool parse_argument(It &ptr, It end, llvm_event &event) {
     if (std::distance(ptr, end) >= 1U && detail::peek(ptr) == '\x7F') {
       uint64_t pattern_len = 0;
       auto kore_term = parse_kore_term(ptr, end, pattern_len);
       if (!kore_term) {
         return false;
       }
-      event.setKOREPattern(kore_term, pattern_len);
+      event.setkore_pattern(kore_term, pattern_len);
 
       return true;
     }
@@ -582,7 +600,7 @@ private:
       if (!hook_event) {
         return false;
       }
-      event.setStepEvent(hook_event);
+      event.set_step_event(hook_event);
       return true;
     }
 
@@ -591,7 +609,7 @@ private:
       if (!function_event) {
         return false;
       }
-      event.setStepEvent(function_event);
+      event.set_step_event(function_event);
       return true;
     }
 
@@ -600,7 +618,7 @@ private:
       if (!rule_event) {
         return false;
       }
-      event.setStepEvent(rule_event);
+      event.set_step_event(rule_event);
       return true;
     }
 
@@ -609,7 +627,7 @@ private:
   }
 
   template <typename It>
-  sptr<LLVMStepEvent> parse_step_event(It &ptr, It end) {
+  sptr<llvm_step_event> parse_step_event(It &ptr, It end) {
     if (std::distance(ptr, end) < 8U) {
       return nullptr;
     }
@@ -631,7 +649,7 @@ private:
   }
 
   template <typename It>
-  bool parse_event(It &ptr, It end, LLVMEvent &event) {
+  bool parse_event(It &ptr, It end, llvm_event &event) {
     if (std::distance(ptr, end) < 8U) {
       return false;
     }
@@ -642,32 +660,32 @@ private:
       if (!config) {
         return false;
       }
-      event.setKOREPattern(config, pattern_len);
+      event.setkore_pattern(config, pattern_len);
     } else {
       auto step_event = parse_step_event(ptr, end);
       if (!step_event) {
         return false;
       }
-      event.setStepEvent(step_event);
+      event.set_step_event(step_event);
     }
 
     return true;
   }
 
   template <typename It>
-  bool parse_trace(It &ptr, It end, LLVMRewriteTrace &trace) {
+  bool parse_trace(It &ptr, It end, llvm_rewrite_trace &trace) {
     uint32_t version = 0;
     if (!parse_header(ptr, end, version)) {
       return false;
     }
-    trace.setVersion(version);
+    trace.set_version(version);
 
     while (std::distance(ptr, end) >= 8U && peek_word(ptr) != config_sentinel) {
-      LLVMEvent event;
+      llvm_event event;
       if (!parse_event(ptr, end, event)) {
         return false;
       }
-      trace.addPreTraceEvent(event);
+      trace.add_pre_trace_event(event);
     }
 
     uint64_t pattern_len = 0;
@@ -675,27 +693,27 @@ private:
     if (!config) {
       return false;
     }
-    LLVMEvent config_event;
-    config_event.setKOREPattern(config, pattern_len);
-    trace.setInitialConfig(config_event);
+    llvm_event config_event;
+    config_event.setkore_pattern(config, pattern_len);
+    trace.set_initial_config(config_event);
 
     while (ptr != end) {
-      LLVMEvent event;
+      llvm_event event;
       if (!parse_event(ptr, end, event)) {
         return false;
       }
-      trace.addTraceEvent(event);
+      trace.add_trace_event(event);
     }
 
     return true;
   }
 
 public:
-  ProofTraceParser(bool _verbose);
+  proof_trace_parser(bool verbose);
 
-  std::optional<LLVMRewriteTrace>
+  std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);
-  std::optional<LLVMRewriteTrace> parse_proof_trace(std::string const &data);
+  std::optional<llvm_rewrite_trace> parse_proof_trace(std::string const &data);
 };
 
 } // namespace kllvm

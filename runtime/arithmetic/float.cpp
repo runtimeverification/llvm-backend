@@ -87,11 +87,12 @@ SortFloat hook_FLOAT_trunc(SortFloat a) {
 SortFloat hook_FLOAT_round(SortFloat a, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Precision out of range: {}", intToString(prec));
+        "Precision out of range: {}", int_to_string(prec));
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range: {}", intToString(exp));
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Exponent out of range: {}", int_to_string(exp));
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -103,7 +104,7 @@ SortFloat hook_FLOAT_round(SortFloat a, SortInt prec, SortInt exp) {
 
 mpz_ptr hook_FLOAT_float2int(SortFloat a) {
   if (!mpfr_number_p(a->f)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Not a finite number: {}", floatToString(a));
+    KLLVM_HOOK_INVALID_ARGUMENT("Not a finite number: {}", float_to_string(a));
   }
   mpz_t result;
   mpz_init(result);
@@ -114,11 +115,12 @@ mpz_ptr hook_FLOAT_float2int(SortFloat a) {
 SortFloat hook_FLOAT_int2float(SortInt a, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Precision out of range: {}", intToString(prec));
+        "Precision out of range: {}", int_to_string(prec));
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range: {}", intToString(exp));
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Exponent out of range: {}", int_to_string(exp));
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -268,11 +270,12 @@ bool hook_FLOAT_isNaN(SortFloat a) {
 SortFloat hook_FLOAT_maxValue(SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Precision out of range: {}", intToString(prec));
+        "Precision out of range: {}", int_to_string(prec));
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range: {}", intToString(exp));
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Exponent out of range: {}", int_to_string(exp));
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -286,11 +289,12 @@ SortFloat hook_FLOAT_maxValue(SortInt prec, SortInt exp) {
 SortFloat hook_FLOAT_minValue(SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Precision out of range: {}", intToString(prec));
+        "Precision out of range: {}", int_to_string(prec));
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range: {}", intToString(exp));
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Exponent out of range: {}", int_to_string(exp));
   }
   unsigned long uexp = mpz_get_ui(exp);
   floating result[1];
@@ -429,7 +433,7 @@ SortFloat hook_FLOAT_pow(SortFloat a, SortFloat b) {
 
 SortFloat hook_FLOAT_root(SortFloat a, SortInt b) {
   if (!mpz_fits_ulong_p(b)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Root out of range: {}", intToString(b));
+    KLLVM_HOOK_INVALID_ARGUMENT("Root out of range: {}", int_to_string(b));
   }
   unsigned long root = mpz_get_ui(b);
   floating result[1];
@@ -463,11 +467,12 @@ SortFloat hook_FLOAT_rat2float(
     SortInt numerator, SortInt denominator, SortInt prec, SortInt exp) {
   if (!mpz_fits_ulong_p(prec)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Precision out of range: {}", intToString(prec));
+        "Precision out of range: {}", int_to_string(prec));
   }
   unsigned long uprec = mpz_get_ui(prec);
   if (!mpz_fits_ulong_p(exp)) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Exponent out of range: {}", intToString(exp));
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Exponent out of range: {}", int_to_string(exp));
   }
   unsigned long uexp = mpz_get_ui(exp);
 

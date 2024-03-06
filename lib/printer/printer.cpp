@@ -36,7 +36,7 @@ std::string trim(std::string const &s) {
   return rtrim(ltrim(s));
 }
 
-std::map<std::string, std::string> getFormats() {
+std::map<std::string, std::string> get_formats() {
   static std::map<std::string, std::string> formats;
   static bool once = true;
 
@@ -67,7 +67,7 @@ std::map<std::string, std::string> getFormats() {
   return formats;
 }
 
-std::map<std::string, std::string> getTerminals() {
+std::map<std::string, std::string> get_terminals() {
   static std::map<std::string, std::string> terminals;
   static bool once = true;
 
@@ -98,7 +98,7 @@ std::map<std::string, std::string> getTerminals() {
   return terminals;
 }
 
-std::set<std::string> getAssocs() {
+std::set<std::string> get_assocs() {
   static std::set<std::string> assocs;
   static bool once = true;
 
@@ -112,7 +112,7 @@ std::set<std::string> getAssocs() {
   return assocs;
 }
 
-std::set<std::string> getComms() {
+std::set<std::string> get_comms() {
   static std::set<std::string> comms;
   static bool once = true;
 
@@ -125,35 +125,35 @@ std::set<std::string> getComms() {
   return comms;
 }
 
-std::map<std::string, std::set<std::string>> getLeftAssocs() {
-  static std::map<std::string, std::set<std::string>> leftAssocs;
+std::map<std::string, std::set<std::string>> get_left_assocs() {
+  static std::map<std::string, std::set<std::string>> left_assocs;
   static bool once = true;
 
   if (once) {
-    leftAssocs["kseq"].insert("kseq");
-    leftAssocs["append"].insert("append");
-    leftAssocs["\\and"].insert("\\and");
-    leftAssocs["\\or"].insert("\\or");
-    leftAssocs["\\rewrites"].insert("\\rewrites");
+    left_assocs["kseq"].insert("kseq");
+    left_assocs["append"].insert("append");
+    left_assocs["\\and"].insert("\\and");
+    left_assocs["\\or"].insert("\\or");
+    left_assocs["\\rewrites"].insert("\\rewrites");
     once = false;
   }
 
-  return leftAssocs;
+  return left_assocs;
 }
 
-std::map<std::string, std::set<std::string>> getRightAssocs() {
-  static std::map<std::string, std::set<std::string>> rightAssocs;
+std::map<std::string, std::set<std::string>> get_right_assocs() {
+  static std::map<std::string, std::set<std::string>> right_assocs;
   static bool once = true;
 
   if (once) {
-    rightAssocs["\\rewrites"].insert("\\rewrites");
+    right_assocs["\\rewrites"].insert("\\rewrites");
     once = false;
   }
 
-  return rightAssocs;
+  return right_assocs;
 }
 
-std::map<std::string, std::set<std::string>> getPriorities() {
+std::map<std::string, std::set<std::string>> get_priorities() {
   static std::map<std::string, std::set<std::string>> priorities;
   static bool once = true;
 
@@ -208,111 +208,111 @@ std::map<std::string, std::set<std::string>> getPriorities() {
   return priorities;
 }
 
-ptr<KOREDefinition> const &getDefinition(std::string const &kompiledDir) {
-  static std::map<std::string, ptr<KOREDefinition>> cache;
+ptr<kore_definition> const &get_definition(std::string const &kompiled_dir) {
+  static std::map<std::string, ptr<kore_definition>> cache;
 
-  if (cache.find(kompiledDir) == cache.end()) {
-    KOREParser parser(kompiledDir + std::string("/syntaxDefinition.kore"));
-    cache[kompiledDir] = parser.definition();
+  if (cache.find(kompiled_dir) == cache.end()) {
+    kore_parser parser(kompiled_dir + std::string("/syntaxDefinition.kore"));
+    cache[kompiled_dir] = parser.definition();
   }
 
-  return cache.at(kompiledDir);
+  return cache.at(kompiled_dir);
 }
 
-std::vector<ptr<KOREDeclaration>> const &
-getAxioms(std::string const &kompiledDir) {
-  static std::map<std::string, std::vector<ptr<KOREDeclaration>>> cache;
+std::vector<ptr<kore_declaration>> const &
+get_axioms(std::string const &kompiled_dir) {
+  static std::map<std::string, std::vector<ptr<kore_declaration>>> cache;
 
-  if (cache.find(kompiledDir) == cache.end()) {
-    KOREParser parser(kompiledDir + std::string("/macros.kore"));
-    cache[kompiledDir] = parser.declarations();
+  if (cache.find(kompiled_dir) == cache.end()) {
+    kore_parser parser(kompiled_dir + std::string("/macros.kore"));
+    cache[kompiled_dir] = parser.declarations();
   }
 
-  return cache.at(kompiledDir);
+  return cache.at(kompiled_dir);
 }
 
-struct PreprocessedPrintData {
-  PrettyPrintData data;
+struct preprocessed_print_data {
+  pretty_print_data data;
   SymbolMap overloads;
 };
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-PreprocessedPrintData getPrintData(
-    ptr<KOREDefinition> const &def,
-    std::vector<ptr<KOREDeclaration>> const &axioms, bool hasColor) {
-  auto formats = getFormats();
-  auto terminals = getTerminals();
-  auto assocs = getAssocs();
-  auto comms = getComms();
-  auto leftAssoc = getLeftAssocs();
-  auto rightAssoc = getRightAssocs();
-  auto priorities = getPriorities();
+preprocessed_print_data get_print_data(
+    ptr<kore_definition> const &def,
+    std::vector<ptr<kore_declaration>> const &axioms, bool has_color) {
+  auto formats = get_formats();
+  auto terminals = get_terminals();
+  auto assocs = get_assocs();
+  auto comms = get_comms();
+  auto left_assoc = get_left_assocs();
+  auto right_assoc = get_right_assocs();
+  auto priorities = get_priorities();
 
   BracketMap brackets;
 
   std::map<std::string, std::string> hooks;
   std::map<std::string, std::vector<std::string>> colors;
 
-  auto subsorts = def->getSubsorts();
-  auto overloads = def->getOverloads();
+  auto subsorts = def->get_subsorts();
+  auto overloads = def->get_overloads();
 
-  for (auto const &entry : def->getSymbolDeclarations()) {
+  for (auto const &entry : def->get_symbol_declarations()) {
     std::string name = entry.first;
 
-    if (entry.second->attributes().contains(attribute_set::key::format)) {
+    if (entry.second->attributes().contains(attribute_set::key::Format)) {
       formats[name]
-          = entry.second->attributes().get_string(attribute_set::key::format);
+          = entry.second->attributes().get_string(attribute_set::key::Format);
       terminals[name] = entry.second->attributes().get_string(
-          attribute_set::key::terminals);
+          attribute_set::key::Terminals);
 
-      if (entry.second->attributes().contains(attribute_set::key::assoc)) {
+      if (entry.second->attributes().contains(attribute_set::key::Assoc)) {
         assocs.insert(name);
       }
-      if (entry.second->attributes().contains(attribute_set::key::comm)) {
+      if (entry.second->attributes().contains(attribute_set::key::Comm)) {
         comms.insert(name);
       }
 
-      if (entry.second->attributes().contains(attribute_set::key::colors)) {
-        std::string colorAtt
-            = entry.second->attributes().get_string(attribute_set::key::colors);
+      if (entry.second->attributes().contains(attribute_set::key::Colors)) {
+        std::string color_att
+            = entry.second->attributes().get_string(attribute_set::key::Colors);
         std::vector<std::string> color;
         size_t idx = 0;
         do {
-          size_t pos = colorAtt.find_first_of(',', idx);
+          size_t pos = color_att.find_first_of(',', idx);
           if (pos == std::string::npos) {
-            color.push_back(trim(colorAtt.substr(idx)));
+            color.push_back(trim(color_att.substr(idx)));
             break;
           }
-          color.push_back(trim(colorAtt.substr(idx, pos - idx)));
+          color.push_back(trim(color_att.substr(idx, pos - idx)));
           idx = pos + 1;
 
         } while (true);
         colors[name] = color;
       }
 
-      if (entry.second->attributes().contains(attribute_set::key::bracket)) {
-        brackets[entry.second->getSymbol()->getSort().get()].push_back(
-            entry.second->getSymbol());
+      if (entry.second->attributes().contains(attribute_set::key::Bracket)) {
+        brackets[entry.second->get_symbol()->get_sort().get()].push_back(
+            entry.second->get_symbol());
       }
 
-      readMultimap(name, entry.second, leftAssoc, attribute_set::key::left);
-      readMultimap(name, entry.second, rightAssoc, attribute_set::key::right);
-      readMultimap(
-          name, entry.second, priorities, attribute_set::key::priorities);
+      read_multimap(name, entry.second, left_assoc, attribute_set::key::Left);
+      read_multimap(name, entry.second, right_assoc, attribute_set::key::Right);
+      read_multimap(
+          name, entry.second, priorities, attribute_set::key::Priorities);
     }
   }
 
-  for (auto const &entry : def->getSortDeclarations()) {
+  for (auto const &entry : def->get_sort_declarations()) {
     std::string name = entry.first;
-    if (entry.second->attributes().contains(attribute_set::key::hook)) {
+    if (entry.second->attributes().contains(attribute_set::key::Hook)) {
       hooks[name]
-          = entry.second->attributes().get_string(attribute_set::key::hook);
+          = entry.second->attributes().get_string(attribute_set::key::Hook);
     }
   }
 
-  PrettyPrintData data
-      = {formats, colors,   terminals, priorities, leftAssoc, rightAssoc,
-         hooks,   brackets, assocs,    comms,      subsorts,  hasColor};
+  pretty_print_data data
+      = {formats, colors,   terminals, priorities, left_assoc, right_assoc,
+         hooks,   brackets, assocs,    comms,      subsorts,   has_color};
 
   return {data, overloads};
 }
@@ -323,60 +323,60 @@ namespace kllvm {
 
 using namespace parser;
 
-std::ostream &printKORE(
-    std::ostream &os, std::string const &definitionPath,
-    std::string const &patternPath, bool hasColor, bool filterSubst,
+std::ostream &print_kore(
+    std::ostream &os, std::string const &definition_path,
+    std::string const &pattern_path, bool has_color, bool filter_subst,
     bool pretty) {
-  static std::map<std::string, PreprocessedPrintData> cache;
+  static std::map<std::string, preprocessed_print_data> cache;
 
-  auto const &def = getDefinition(definitionPath);
-  auto const &axioms = getAxioms(definitionPath);
+  auto const &def = get_definition(definition_path);
+  auto const &axioms = get_axioms(definition_path);
 
-  auto getPrintDataOrCached = [&] {
-    if (cache.find(definitionPath) == cache.end()) {
-      cache[definitionPath] = getPrintData(def, axioms, hasColor);
+  auto get_print_data_or_cached = [&] {
+    if (cache.find(definition_path) == cache.end()) {
+      cache[definition_path] = get_print_data(def, axioms, has_color);
     }
-    return cache.at(definitionPath);
+    return cache.at(definition_path);
   };
 
-  auto config = KOREPattern::load(patternPath);
-  config = config->unflattenAndOr();
-  std::map<std::string, std::vector<KORESymbol *>> symbols;
-  config->markSymbols(symbols);
+  auto config = kore_pattern::load(pattern_path);
+  config = config->unflatten_and_or();
+  std::map<std::string, std::vector<kore_symbol *>> symbols;
+  config->mark_symbols(symbols);
 
   for (auto const &decl : axioms) {
-    auto *axiom = dynamic_cast<KOREAxiomDeclaration *>(decl.get());
-    axiom->getPattern()->markSymbols(symbols);
+    auto *axiom = dynamic_cast<kore_axiom_declaration *>(decl.get());
+    axiom->get_pattern()->mark_symbols(symbols);
   }
 
   for (auto &entry : symbols) {
     for (auto *symbol : entry.second) {
-      auto *decl = def->getSymbolDeclarations().at(symbol->getName());
-      symbol->instantiateSymbol(decl);
+      auto *decl = def->get_symbol_declarations().at(symbol->get_name());
+      symbol->instantiate_symbol(decl);
     }
   }
 
-  auto [data, overloads] = getPrintDataOrCached();
+  auto [data, overloads] = get_print_data_or_cached();
 
-  sptr<KOREPattern> expanded
-      = config->expandMacros(data.subsorts, overloads, axioms, true);
-  sptr<KOREPattern> sorted = expanded->sortCollections(data);
-  sptr<KOREPattern> filtered;
+  sptr<kore_pattern> expanded
+      = config->expand_macros(data.subsorts, overloads, axioms, true);
+  sptr<kore_pattern> sorted = expanded->sort_collections(data);
+  sptr<kore_pattern> filtered;
 
-  if (filterSubst) {
-    std::set<std::string> vars = sorted->gatherSingletonVars();
-    filtered = sorted->filterSubstitution(data, vars);
-    filtered = filtered->dedupeDisjuncts();
-    filtered = filtered->sortCollections(data);
+  if (filter_subst) {
+    std::set<std::string> vars = sorted->gather_singleton_vars();
+    filtered = sorted->filter_substitution(data, vars);
+    filtered = filtered->dedupe_disjuncts();
+    filtered = filtered->sort_collections(data);
   } else {
     filtered = sorted;
   }
 
-  sptr<KOREPattern> withBrackets = addBrackets(filtered, data);
+  sptr<kore_pattern> with_brackets = add_brackets(filtered, data);
   if (pretty) {
-    withBrackets->prettyPrint(os, data);
+    with_brackets->pretty_print(os, data);
   } else {
-    withBrackets->print(os);
+    with_brackets->print(os);
   }
   os << std::endl;
 

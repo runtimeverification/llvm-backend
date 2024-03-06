@@ -25,11 +25,11 @@
 #include <runtime/collections/rangemap.h>
 #include <unordered_set>
 
-struct MatchLog {
-  enum { SUCCESS = 0, FUNCTION, FAIL } kind;
+struct match_log {
+  enum { Success = 0, Function, Fail } kind;
 
   char const *function{};
-  char const *debugName{};
+  char const *debug_name{};
   void *result{};
   std::vector<void *> args{};
 
@@ -189,29 +189,29 @@ __attribute__((always_inline)) constexpr bool is_heap_block(T const *s) {
   return is_in_young_gen_hdr(s->h.hdr) || is_in_old_gen_hdr(s->h.hdr);
 }
 
-class KElem {
+class k_elem {
 public:
-  KElem()
+  k_elem()
       : elem(nullptr) { }
 
-  KElem(block *elem)
+  k_elem(block *elem)
       : elem(elem) { }
 
-  bool operator==(KElem const &other) const {
+  bool operator==(k_elem const &other) const {
     return hook_KEQUAL_eq(this->elem, other.elem);
   }
 
-  bool operator!=(KElem const &other) const { return !(*this == other); }
+  bool operator!=(k_elem const &other) const { return !(*this == other); }
 
-  bool operator<(KElem const &other) const {
+  bool operator<(k_elem const &other) const {
     return hook_KEQUAL_lt(this->elem, other.elem);
   }
 
-  bool operator>(KElem const &other) const { return other < *this; }
+  bool operator>(k_elem const &other) const { return other < *this; }
 
-  bool operator<=(KElem const &other) const { return !(other < *this); }
+  bool operator<=(k_elem const &other) const { return !(other < *this); }
 
-  bool operator>=(KElem const &other) const { return !(*this < other); }
+  bool operator>=(k_elem const &other) const { return !(*this < other); }
 
   operator block *() const { return elem; }
 
@@ -225,7 +225,7 @@ struct kore_alloc_heap {
     if (during_gc()) {
       return ::operator new(size);
     }
-    auto *result = (string *)koreAllocToken(size + sizeof(blockheader));
+    auto *result = (string *)kore_alloc_token(size + sizeof(blockheader));
     init_with_len(result, size);
     return result->data;
   }
@@ -237,24 +237,27 @@ struct kore_alloc_heap {
   }
 };
 
-struct HashBlock {
-  size_t operator()(KElem const &block) const noexcept { return hash_k(block); }
+struct hash_block {
+  size_t operator()(k_elem const &block) const noexcept {
+    return hash_k(block);
+  }
 };
 
-struct KEq {
+struct k_eq {
   bool operator()(block *const &lhs, block *const &rhs) const {
     return hook_KEQUAL_eq(lhs, rhs);
   }
 };
 
 using list = immer::flex_vector<
-    KElem, immer::memory_policy<
-               immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
-               immer::no_lock_policy>>;
-using map
-    = immer::map<KElem, KElem, HashBlock, std::equal_to<>, list::memory_policy>;
-using set = immer::set<KElem, HashBlock, std::equal_to<>, list::memory_policy>;
-using rangemap = rng_map::RangeMap<KElem, KElem>;
+    k_elem, immer::memory_policy<
+                immer::heap_policy<kore_alloc_heap>, immer::no_refcount_policy,
+                immer::no_lock_policy>>;
+using map = immer::map<
+    k_elem, k_elem, hash_block, std::equal_to<>, list::memory_policy>;
+using set
+    = immer::set<k_elem, hash_block, std::equal_to<>, list::memory_policy>;
+using rangemap = rng_map::RangeMap<k_elem, k_elem>;
 
 using mapiter = struct mapiter {
   map::iterator curr{};
@@ -286,22 +289,22 @@ using SortSet = set *;
 using SortRange = block *;
 using SortRangeMap = rangemap *;
 
-void *constructCompositePattern(uint32_t tag, std::vector<void *> &arguments);
+void *construct_composite_pattern(uint32_t tag, std::vector<void *> &arguments);
 
 extern "C" {
 
-block *parseConfiguration(char const *filename);
-block *deserializeConfiguration(char *, size_t);
+block *parse_configuration(char const *filename);
+block *deserialize_configuration(char *, size_t);
 
-void printConfiguration(FILE *file, block *subject);
-void printStatistics(FILE *file, uint64_t steps);
-string *printConfigurationToString(block *subject);
-void printSortedConfigurationToFile(
+void print_configuration(FILE *file, block *subject);
+void print_statistics(FILE *file, uint64_t steps);
+string *print_configuration_to_string(block *subject);
+void print_sorted_configuration_to_file(
     FILE *file, block *subject, char const *sort);
-void printConfigurationInternal(
+void print_configuration_internal(
     writer *file, block *subject, char const *sort, bool, void *);
 
-// Returns a shared_ptr to a KOREPattern. The shared_ptr managess the lifetime
+// Returns a shared_ptr to a kore_pattern. The shared_ptr managess the lifetime
 // of the pattern and the pattern will be deallocated when the last reference
 // to the pattern is destroyed. There may exist references beyond the ones that
 // are provided to the user via this method, so destroying all values returned
@@ -310,9 +313,9 @@ void printConfigurationInternal(
 // If you need to have access to a function that returns a type with C linkage,
 // you can use the C bindings, which wrap the return value of this method in
 // a POD struct.
-std::shared_ptr<kllvm::KOREPattern> termToKorePattern(block *);
-std::shared_ptr<kllvm::KOREPattern>
-sortedTermToKorePattern(block *, char const *);
+std::shared_ptr<kllvm::kore_pattern> term_to_kore_pattern(block *);
+std::shared_ptr<kllvm::kore_pattern>
+sorted_term_to_kore_pattern(block *, char const *);
 
 // This function injects its argument into KItem before printing, using the sort
 // argument as the source sort. Doing so allows the term to be pretty-printed
@@ -323,69 +326,70 @@ string *debug_print_term(block *subject, char const *sort);
 
 mpz_ptr move_int(mpz_t);
 
-void serializeConfigurations(
-    FILE *file, std::unordered_set<block *, HashBlock, KEq> results);
-void serializeConfiguration(
+void serialize_configurations(
+    FILE *file, std::unordered_set<block *, hash_block, k_eq> results);
+void serialize_configuration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern);
-void serializeConfigurationToFile(
+void serialize_configuration_to_file(
     FILE *file, block *subject, bool emit_size, bool use_intern);
-void writeUInt64ToFile(FILE *file, uint64_t i);
-void serializeTermToFile(
+void write_uint64_to_file(FILE *file, uint64_t i);
+void serialize_term_to_file(
     FILE *file, block *subject, char const *sort, bool use_intern);
-void serializeRawTermToFile(
+void serialize_raw_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern);
-void printVariableToFile(FILE *file, char const *varname);
+void print_variable_to_file(FILE *file, char const *varname);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
-uint32_t getTagForSymbolName(char const *symbolname);
-struct blockheader getBlockHeaderForSymbol(uint32_t tag);
-bool isSymbolAFunction(uint32_t tag);
-bool isSymbolABinder(uint32_t tag);
-uint32_t getSymbolArity(uint32_t tag);
-void storeSymbolChildren(block *symbol, void *children[]);
-void *evaluateFunctionSymbol(uint32_t tag, void *arguments[]);
-void *getToken(char const *sortname, uint64_t len, char const *tokencontents);
-layout *getLayoutData(uint16_t);
-uint32_t getInjectionForSortOfTag(uint32_t tag);
+uint32_t get_tag_for_symbol_name(char const *symbolname);
+struct blockheader get_block_header_for_symbol(uint32_t tag);
+bool is_symbol_a_function(uint32_t tag);
+bool is_symbol_a_binder(uint32_t tag);
+uint32_t get_symbol_arity(uint32_t tag);
+void store_symbol_children(block *symbol, void *children[]);
+void *evaluate_function_symbol(uint32_t tag, void *arguments[]);
+void *get_token(char const *sortname, uint64_t len, char const *tokencontents);
+layout *get_layout_data(uint16_t);
+uint32_t get_injection_for_sort_of_tag(uint32_t tag);
 
 bool hook_STRING_eq(SortString, SortString);
 
-char const *getSymbolNameForTag(uint32_t tag);
-char const *getReturnSortForTag(uint32_t tag);
-char const **getArgumentSortsForTag(uint32_t tag);
-char const *topSort(void);
+char const *get_symbol_name_for_tag(uint32_t tag);
+char const *get_return_sort_for_tag(uint32_t tag);
+char const **get_argument_sorts_for_tag(uint32_t tag);
+char const *top_sort(void);
 
-bool symbolIsInstantiation(uint32_t tag);
+bool symbol_is_instantiation(uint32_t tag);
 
 using visitor = struct {
-  void (*visitConfig)(writer *, block *, char const *, bool, void *);
-  void (*visitMap)(
+  void (*visit_config)(writer *, block *, char const *, bool, void *);
+  void (*visit_map)(
       writer *, map *, char const *, char const *, char const *, void *);
-  void (*visitList)(
+  void (*visit_list)(
       writer *, list *, char const *, char const *, char const *, void *);
-  void (*visitSet)(
+  void (*visit_set)(
       writer *, set *, char const *, char const *, char const *, void *);
-  void (*visitInt)(writer *, mpz_t, char const *, void *);
-  void (*visitFloat)(writer *, floating *, char const *, void *);
-  void (*visitBool)(writer *, bool, char const *, void *);
-  void (*visitStringBuffer)(writer *, stringbuffer *, char const *, void *);
-  void (*visitMInt)(writer *, size_t *, size_t, char const *, void *);
-  void (*visitSeparator)(writer *, void *);
-  void (*visitRangeMap)(
+  void (*visit_int)(writer *, mpz_t, char const *, void *);
+  void (*visit_float)(writer *, floating *, char const *, void *);
+  void (*visit_bool)(writer *, bool, char const *, void *);
+  void (*visit_string_buffer)(writer *, stringbuffer *, char const *, void *);
+  void (*visit_m_int)(writer *, size_t *, size_t, char const *, void *);
+  void (*visit_separator)(writer *, void *);
+  void (*visit_range_map)(
       writer *, rangemap *, char const *, char const *, char const *, void *);
 };
 
-void printMap(
+void print_map(
     writer *, map *, char const *, char const *, char const *, void *);
-void printRangeMap(
+void print_range_map(
     writer *, rangemap *, char const *, char const *, char const *, void *);
-void printSet(
+void print_set(
     writer *, set *, char const *, char const *, char const *, void *);
-void printList(
+void print_list(
     writer *, list *, char const *, char const *, char const *, void *);
-void visitChildren(block *subject, writer *file, visitor *printer, void *state);
+void visit_children(
+    block *subject, writer *file, visitor *printer, void *state);
 
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
@@ -395,33 +399,35 @@ string *hook_BUFFER_toString(stringbuffer *buf);
 
 size_t hook_SET_size_long(set *);
 
-mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool isSigned);
-
-block *dot_k();
+mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool is_signed);
 
 block *debruijnize(block *);
-block *incrementDebruijn(block *);
-block *alphaRename(block *);
+block *increment_debruijn(block *);
+block *alpha_rename(block *);
 
 setiter set_iterator(set *);
 block *set_iterator_next(setiter *);
 mapiter map_iterator(map *);
 block *map_iterator_next(mapiter *);
 
-extern uint32_t const first_inj_tag, last_inj_tag;
+extern uint32_t const FIRST_INJ_TAG, LAST_INJ_TAG;
 bool is_injection(block *);
 block *strip_injection(block *);
-block *constructKItemInj(void *subject, char const *sort, bool raw_value);
-block *constructRawTerm(void *subject, char const *sort, bool raw_value);
+block *construct_k_item_inj(void *subject, char const *sort, bool raw_value);
+block *construct_raw_term(void *subject, char const *sort, bool raw_value);
+
+__attribute__((always_inline)) inline block *dot_k() {
+  return leaf_block(get_tag_for_symbol_name("dotk{}"));
+}
 }
 
-std::string floatToString(floating const *);
+std::string float_to_string(floating const *);
 void init_float2(floating *, std::string);
 
-std::string intToStringInBase(mpz_t, uint64_t);
-std::string intToString(mpz_t);
-void printValueOfType(
-    std::ostream &os, std::string const &definitionPath, void *value,
+std::string int_to_string_in_base(mpz_t, uint64_t);
+std::string int_to_string(mpz_t);
+void print_value_of_type(
+    std::ostream &os, std::string const &definition_path, void *value,
     std::string const &type);
 
 template <typename... Args>

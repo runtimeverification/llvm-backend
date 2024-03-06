@@ -14,12 +14,12 @@ using BlockEnumerator = std::pair<block_iterator, block_iterator> (*)();
 // more GC roots other than the top cell of the configuration.
 //
 // Example usage:
-void registerGCRootsEnumerator(BlockEnumerator);
+void register_gc_roots_enumerator(BlockEnumerator);
 
 using list_node = immer::detail::rbts::node<
-    KElem, list::memory_policy, list::bits, list::bits_leaf>;
+    k_elem, list::memory_policy, list::bits, list::bits_leaf>;
 using list_impl = immer::detail::rbts::rrbtree<
-    KElem, list::memory_policy, list::bits, list::bits_leaf>;
+    k_elem, list::memory_policy, list::bits, list::bits_leaf>;
 using map_node = map::iterator::node_t;
 using map_impl = map::iterator::tree_t;
 using set_node = set::iterator::node_t;
@@ -34,9 +34,9 @@ void migrate_list(void *l);
 void migrate_map(void *m);
 void migrate_rangemap(void *m);
 void migrate_set(void *s);
-void migrate_collection_node(void **nodePtr);
-void setKoreMemoryFunctionsForGMP(void);
-void koreCollect(void **, uint8_t, layoutitem *);
+void migrate_collection_node(void **node_ptr);
+void set_kore_memory_functions_for_gmp(void);
+void kore_collect(void **, uint8_t, layoutitem *);
 }
 
 #ifdef GC_DBG

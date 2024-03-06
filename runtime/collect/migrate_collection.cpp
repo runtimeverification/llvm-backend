@@ -4,33 +4,33 @@
 
 #include <cstring>
 
-void migrate_collection_node(void **nodePtr) {
-  string *currBlock = STRUCT_BASE(string, data, *nodePtr);
+void migrate_collection_node(void **node_ptr) {
+  string *curr_block = STRUCT_BASE(string, data, *node_ptr);
   if (youngspace_collection_id()
-          != getArenaSemispaceIDOfObject((void *)currBlock)
+          != get_arena_semispace_id_of_object((void *)curr_block)
       && oldspace_collection_id()
-             != getArenaSemispaceIDOfObject((void *)currBlock)) {
+             != get_arena_semispace_id_of_object((void *)curr_block)) {
     return;
   }
-  uint64_t const hdr = currBlock->h.hdr;
+  uint64_t const hdr = curr_block->h.hdr;
   INITIALIZE_MIGRATE();
-  size_t lenInBytes = get_size(hdr, 0);
+  size_t len_in_bytes = get_size(hdr, 0);
   if (!hasForwardingAddress) {
-    string *newBlock = nullptr;
+    string *new_block = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
-      newBlock = (string *)koreAllocOld(lenInBytes);
+      new_block = (string *)kore_alloc_old(len_in_bytes);
     } else {
-      newBlock = (string *)koreAlloc(lenInBytes);
+      new_block = (string *)kore_alloc(len_in_bytes);
     }
 #ifdef GC_DBG
-    numBytesLiveAtCollection[oldAge] += lenInBytes;
+    numBytesLiveAtCollection[oldAge] += len_in_bytes;
 #endif
-    memcpy(newBlock, currBlock, lenInBytes);
-    MIGRATE_HEADER(newBlock);
-    *(void **)(currBlock + 1) = newBlock + 1;
-    currBlock->h.hdr |= FWD_PTR_BIT;
+    memcpy(new_block, curr_block, len_in_bytes);
+    MIGRATE_HEADER(new_block);
+    *(void **)(curr_block + 1) = new_block + 1;
+    curr_block->h.hdr |= FWD_PTR_BIT;
   }
-  *nodePtr = *(void **)(currBlock + 1);
+  *node_ptr = *(void **)(curr_block + 1);
 }
 
 struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {
@@ -92,14 +92,14 @@ void migrate_champ_traversal(
 }
 
 void migrate_map_leaf(
-    std::pair<KElem, KElem> *start, std::pair<KElem, KElem> *end) {
+    std::pair<k_elem, k_elem> *start, std::pair<k_elem, k_elem> *end) {
   for (auto *it = start; it != end; ++it) {
     migrate_once(&it->first.elem);
     migrate_once(&it->second.elem);
   }
 }
 
-void migrate_set_leaf(KElem *start, KElem *end) {
+void migrate_set_leaf(k_elem *start, k_elem *end) {
   for (auto *it = start; it != end; ++it) {
     migrate_once(&it->elem);
   }
@@ -117,7 +117,7 @@ void migrate_map(void *m) {
   migrate_champ_traversal(impl.root, 0, migrate_map_leaf);
 }
 
-using treemap = rb_tree::RBTree<rng_map::Range<KElem>, KElem>;
+using treemap = rb_tree::RBTree<rng_map::Range<k_elem>, k_elem>;
 void migrate_treemap(treemap t) {
   if (t.empty()) {
     return;

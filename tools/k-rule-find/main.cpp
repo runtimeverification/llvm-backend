@@ -10,7 +10,7 @@
 using namespace llvm;
 using namespace kllvm;
 
-struct Location {
+struct location {
   std::string filename;
   int64_t start_line;
   int64_t end_line;
@@ -18,33 +18,33 @@ struct Location {
   int64_t end_column;
 };
 
-cl::OptionCategory KRuleCat("k-rule-find options");
+cl::OptionCategory k_rule_cat("k-rule-find options");
 
-cl::opt<std::string> KompiledDir(
+cl::opt<std::string> kompiled_dir(
     cl::Positional, cl::desc("<kompiled-dir>"), cl::Required,
-    cl::cat(KRuleCat));
+    cl::cat(k_rule_cat));
 
-cl::opt<std::string> RuleLocation(
+cl::opt<std::string> rule_location(
     cl::Positional, cl::desc("<filename.k:line[:column]>"), cl::Required,
-    cl::cat(KRuleCat));
+    cl::cat(k_rule_cat));
 
-std::string getSource(KOREAxiomDeclaration *axiom) {
-  auto *sourceAtt = axiom->attributes().get(attribute_set::key::source).get();
-  assert(sourceAtt->getArguments().size() == 1);
+std::string get_source(kore_axiom_declaration *axiom) {
+  auto *source_att = axiom->attributes().get(attribute_set::key::Source).get();
+  assert(source_att->get_arguments().size() == 1);
 
-  auto *strPattern
-      = dynamic_cast<KOREStringPattern *>(sourceAtt->getArguments()[0].get());
-  return strPattern->getContents();
+  auto *str_pattern = dynamic_cast<kore_string_pattern *>(
+      source_att->get_arguments()[0].get());
+  return str_pattern->get_contents();
 }
 
-Location getLocation(KOREAxiomDeclaration *axiom) {
-  auto *locationAtt
-      = axiom->attributes().get(attribute_set::key::location).get();
-  assert(locationAtt->getArguments().size() == 1);
+location get_location(kore_axiom_declaration *axiom) {
+  auto *location_att
+      = axiom->attributes().get(attribute_set::key::Location).get();
+  assert(location_att->get_arguments().size() == 1);
 
-  auto *strPattern
-      = dynamic_cast<KOREStringPattern *>(locationAtt->getArguments()[0].get());
-  std::string location = strPattern->getContents();
+  auto *str_pattern = dynamic_cast<kore_string_pattern *>(
+      location_att->get_arguments()[0].get());
+  std::string location = str_pattern->get_contents();
 
   size_t l_paren = location.find_first_of('(');
   size_t first_comma = location.find_first_of(',');
@@ -65,7 +65,7 @@ Location getLocation(KOREAxiomDeclaration *axiom) {
   return {location, start_line, end_line, start_column, end_column};
 }
 
-Location parseLocation(std::string const &loc) {
+location parse_location(std::string const &loc) {
   size_t pos = loc.find(':');
   if (pos == std::string::npos) {
     std::cerr << "Rule's location must be in the format: "
@@ -73,52 +73,52 @@ Location parseLocation(std::string const &loc) {
     exit(EXIT_FAILURE);
   }
 
-  std::string lineColumn = loc.substr(pos + 1);
-  size_t pos_lc = lineColumn.find(':');
+  std::string line_column = loc.substr(pos + 1);
+  size_t pos_lc = line_column.find(':');
 
   // If another “:” isn’t found, the tool assumes no column number was given.
   int64_t line = 0;
   int64_t column = -1;
   if (pos_lc == std::string::npos) {
-    line = stoi(lineColumn);
+    line = stoi(line_column);
   } else {
-    line = stoi(lineColumn.substr(0, pos_lc));
-    column = stoi(lineColumn.substr(pos_lc + 1));
+    line = stoi(line_column.substr(0, pos_lc));
+    column = stoi(line_column.substr(pos_lc + 1));
   }
 
   return {loc.substr(0, pos), line, line, column, column};
 }
 
-bool checkRanges(
-    Location const &param, Location const &file, bool checkColumn) {
+bool check_ranges(
+    location const &param, location const &file, bool check_column) {
   auto line
       = param.start_line >= file.start_line && param.end_line <= file.end_line;
   auto column = param.start_column >= file.start_column
                 && param.end_column <= file.end_column;
-  return checkColumn ? line && column : line;
+  return check_column ? line && column : line;
 }
 
 int main(int argc, char **argv) {
-  cl::HideUnrelatedOptions({&KRuleCat});
+  cl::HideUnrelatedOptions({&k_rule_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto loc = parseLocation(RuleLocation);
-  auto definition = KompiledDir + "/definition.kore";
+  auto loc = parse_location(rule_location);
+  auto definition = kompiled_dir + "/definition.kore";
   std::vector<std::string> rule_labels;
 
   // Parse the definition.kore to get the AST.
-  kllvm::parser::KOREParser parser(definition);
+  kllvm::parser::kore_parser parser(definition);
   auto kore_ast = parser.definition();
 
   // Iterate through axioms.
-  for (auto *axiom : kore_ast.get()->getAxioms()) {
-    if (axiom->attributes().contains(attribute_set::key::source)) {
-      auto source = getSource(axiom);
+  for (auto *axiom : kore_ast.get()->get_axioms()) {
+    if (axiom->attributes().contains(attribute_set::key::Source)) {
+      auto source = get_source(axiom);
       if (source.find(loc.filename) != std::string::npos) {
-        auto source_loc = getLocation(axiom);
-        if (checkRanges(loc, source_loc, loc.start_column != -1)) {
+        auto source_loc = get_location(axiom);
+        if (check_ranges(loc, source_loc, loc.start_column != -1)) {
           rule_labels.push_back(
-              axiom->attributes().get_string(attribute_set::key::label));
+              axiom->attributes().get_string(attribute_set::key::Label));
         }
       }
     }

@@ -7,17 +7,15 @@
 #include "kllvm/util/temporary_file.h"
 #include "runtime/header.h"
 
-static block *dotK = leaf_block(getTagForSymbolName("dotk{}"));
-
 extern "C" {
 
 extern char kompiled_directory;
 
 block *hook_IO_log(string *path, string *msg);
-int getTag(block *term);
+int get_tag(block *term);
 
 SortKItem hook_IO_logTerm(SortString path, SortKItem term) {
-  string *msg = printConfigurationToString(term);
+  string *msg = print_configuration_to_string(term);
   hook_IO_log(path, msg);
   return term;
 }
@@ -29,12 +27,12 @@ SortK hook_IO_traceTerm(block *term) {
   // Ensure that the term is injected into KItem correctly; if we don't do this
   // then the unparsed KORE ends up with a (null) in it which breaks the
   // printing below.
-  printSortedConfigurationToFile(fp, term, "SortKItem{}");
+  print_sorted_configuration_to_file(fp, term, "SortKItem{}");
   fflush(fp);
 
-  kllvm::printKORE(
+  kllvm::print_kore(
       std::cerr, &kompiled_directory, temp_file.filename(), false, true);
 
-  return dotK;
+  return dot_k();
 }
 }

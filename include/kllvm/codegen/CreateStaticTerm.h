@@ -12,23 +12,23 @@
 
 namespace kllvm {
 
-class CreateStaticTerm {
+class create_static_term {
 private:
-  KOREDefinition *Definition;
-  llvm::Module *Module;
-  llvm::LLVMContext &Ctx;
+  kore_definition *definition_;
+  llvm::Module *module_;
+  llvm::LLVMContext &ctx_;
 
   llvm::Constant *
-  notInjectionCase(KORECompositePattern *constructor, llvm::Constant *val);
+  not_injection_case(kore_composite_pattern *constructor, llvm::Constant *val);
 
 public:
-  CreateStaticTerm(KOREDefinition *Definition, llvm::Module *Module)
-      : Definition(Definition)
-      , Module(Module)
-      , Ctx(Module->getContext()) { }
+  create_static_term(kore_definition *definition, llvm::Module *module)
+      : definition_(definition)
+      , module_(module)
+      , ctx_(module->getContext()) { }
 
-  std::pair<llvm::Constant *, bool> operator()(KOREPattern *pattern);
-  llvm::Constant *createToken(ValueType sort, std::string contents);
+  std::pair<llvm::Constant *, bool> operator()(kore_pattern *pattern);
+  llvm::Constant *create_token(value_type sort, std::string contents);
 };
 
 } // namespace kllvm

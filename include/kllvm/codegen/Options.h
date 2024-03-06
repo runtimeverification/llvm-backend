@@ -5,16 +5,16 @@
 
 enum class opt_level { O0, O1, O2, O3 };
 
-extern llvm::cl::OptionCategory CodegenLibCat;
+extern llvm::cl::OptionCategory codegen_lib_cat;
 
-extern llvm::cl::opt<bool> Debug;
-extern llvm::cl::opt<bool> NoOptimize;
-extern llvm::cl::opt<bool> EmitObject;
-extern llvm::cl::opt<bool> BinaryIR;
-extern llvm::cl::opt<bool> ForceBinary;
-extern llvm::cl::opt<bool> ProofHintInstrumentation;
-extern llvm::cl::opt<bool> KeepFramePointer;
-extern llvm::cl::opt<opt_level> OptimizationLevel;
+extern llvm::cl::opt<bool> debug;
+extern llvm::cl::opt<bool> no_optimize;
+extern llvm::cl::opt<bool> emit_object;
+extern llvm::cl::opt<bool> binary_ir;
+extern llvm::cl::opt<bool> force_binary;
+extern llvm::cl::opt<bool> proof_hint_instrumentation;
+extern llvm::cl::opt<bool> keep_frame_pointer;
+extern llvm::cl::opt<opt_level> optimization_level;
 
 namespace kllvm {
 

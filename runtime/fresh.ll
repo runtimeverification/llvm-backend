@@ -13,10 +13,10 @@ define weak tailcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCel
   unreachable
 }
 
-declare i32 @getTagForFreshSort(i8*)
+declare i32 @get_tag_for_fresh_sort(i8*)
 declare %mpz* @hook_INT_add(%mpz*, %mpz*)
-declare i8* @evaluateFunctionSymbol(i32, i8**)
-declare i8* @getTerminatedString(%string*)
+declare i8* @evaluate_function_symbol(i32, i8**)
+declare i8* @get_terminated_string(%string*)
 
 @fresh_int_1 = global %mpz { i32 1, i32 1, i64* getelementptr inbounds ([1 x i64], [1 x i64]* @fresh_int_1_limbs, i32 0, i32 0) }
 @fresh_int_1_limbs = global [1 x i64] [i64 1]
@@ -29,12 +29,12 @@ entry:
   %currCounter = load %mpz*, %mpz** %mpzPtrPtr
   %nextCounter = call %mpz* @hook_INT_add(%mpz* %currCounter, %mpz* @fresh_int_1)
   store %mpz* %nextCounter, %mpz** %mpzPtrPtr
-  %sortData = call i8* @getTerminatedString(%string* %sort)
-  %tag = call i32 @getTagForFreshSort(i8* %sortData)
+  %sortData = call i8* @get_terminated_string(%string* %sort)
+  %tag = call i32 @get_tag_for_fresh_sort(i8* %sortData)
   %args = alloca i8*
   %voidPtr = bitcast %mpz* %currCounter to i8*
   store i8* %voidPtr, i8** %args
-  %retval = call i8* @evaluateFunctionSymbol(i32 %tag, i8** %args)
+  %retval = call i8* @evaluate_function_symbol(i32 %tag, i8** %args)
   ret i8* %retval
 }
 

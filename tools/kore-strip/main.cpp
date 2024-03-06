@@ -16,27 +16,27 @@
 
 using namespace llvm;
 
-cl::OptionCategory KoreStripCat("kore-strip options");
+cl::OptionCategory kore_strip_cat("kore-strip options");
 
-cl::opt<bool> StripArity(
+cl::opt<bool> strip_arity(
     "a",
     cl::desc(
         "Strip a single sequence of arity bytes from the end of the input"),
-    cl::cat(KoreStripCat));
+    cl::cat(kore_strip_cat));
 
-cl::opt<bool> StripHeader(
+cl::opt<bool> strip_header(
     "k",
     cl::desc("Strip the leading bytes (header, version and size for version "
              "1.2.0 onwards) from the input file"),
-    cl::cat(KoreStripCat));
+    cl::cat(kore_strip_cat));
 
-cl::opt<std::string> InputFilename(
+cl::opt<std::string> input_filename(
     "i", cl::desc("Specify input filename"), cl::value_desc("filename"),
-    cl::Required, cl::cat(KoreStripCat));
+    cl::Required, cl::cat(kore_strip_cat));
 
-cl::opt<std::string> OutputFilename(
+cl::opt<std::string> output_filename(
     "o", cl::desc("Specify output filename"), cl::value_desc("filename"),
-    cl::init("-"), cl::cat(KoreStripCat));
+    cl::init("-"), cl::cat(kore_strip_cat));
 
 std::FILE *check_fopen(char const *name, char const *mode) {
   auto *f = std::fopen(name, mode);
@@ -51,10 +51,10 @@ std::FILE *check_fopen(char const *name, char const *mode) {
 }
 
 int main(int argc, char **argv) {
-  cl::HideUnrelatedOptions({&KoreStripCat});
+  cl::HideUnrelatedOptions({&kore_strip_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  auto *input = check_fopen(InputFilename.c_str(), "rb");
+  auto *input = check_fopen(input_filename.c_str(), "rb");
 
   std::fseek(input, 0, SEEK_END);
   auto file_size = std::ftell(input);
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
   auto end_skip_length = 0;
   auto begin_skip_length = 0;
 
-  if (StripArity) {
+  if (strip_arity) {
     std::fseek(input, file_size - 9, SEEK_SET);
     auto buffer = std::vector<uint8_t>(9);
     auto read
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (StripHeader) {
+  if (strip_header) {
     std::fseek(input, 5, SEEK_SET);
     auto buffer = std::vector<uint8_t>(6);
     auto read
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if (OutputFilename == "-") {
+  if (output_filename == "-") {
     std::fwrite(buffer.data(), sizeof(uint8_t), result_size, stdout);
     std::fclose(input);
   } else {
@@ -136,6 +136,6 @@ int main(int argc, char **argv) {
     std::fwrite(buffer.data(), sizeof(uint8_t), result_size, file_pointer);
     std::fflush(file_pointer);
 
-    tmp_file.rename(OutputFilename);
+    tmp_file.rename(output_filename);
   }
 }
