@@ -5,11 +5,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.pattern._
-import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
-import org.kframework.parser.kore.CompoundSort
-import org.kframework.parser.kore.Sort
-import org.kframework.parser.kore.SymbolOrAlias
-import org.kframework.parser.kore.Variable
+import org.kframework.kore.implementation.{ DefaultBuilders => B }
+import org.kframework.kore.CompoundSort
+import org.kframework.kore.Sort
+import org.kframework.kore.SymbolOrAlias
+import org.kframework.kore.Variable
 
 trait AbstractColumn {
   def column: Column

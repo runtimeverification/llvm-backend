@@ -2,8 +2,8 @@ package org.kframework.backend.llvm.matching
 
 import java.util
 import java.util.Optional
-import org.kframework.parser.kore._
-import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
+import org.kframework.kore._
+import org.kframework.kore.implementation.{ DefaultBuilders => B }
 
 case class AxiomInfo(
     priority: Int,

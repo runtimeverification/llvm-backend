@@ -4,9 +4,9 @@ import java.util.regex.{ Pattern => Regex }
 import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.MatchingException
+import org.kframework.kore.CompoundSort
+import org.kframework.kore.Sort
 import org.kframework.mpfr._
-import org.kframework.parser.kore.CompoundSort
-import org.kframework.parser.kore.Sort
 
 sealed trait SortCategory {
   def hookAtt: String

@@ -1,9 +1,9 @@
 package org.kframework.backend.llvm.matching.pattern
 
 import org.kframework.backend.llvm.matching._
-import org.kframework.parser.kore
-import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
-import org.kframework.parser.kore.SymbolOrAlias
+import org.kframework.kore
+import org.kframework.kore.implementation.{ DefaultBuilders => B }
+import org.kframework.kore.SymbolOrAlias
 import scala.math.min
 
 sealed trait Pattern[T] {

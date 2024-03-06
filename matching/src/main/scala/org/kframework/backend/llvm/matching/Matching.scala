@@ -4,8 +4,8 @@ import java.io.File
 import java.io.FileWriter
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
-import org.kframework.parser.kore._
-import org.kframework.parser.kore.parser.TextToKore
+import org.kframework.kore._
+import org.kframework.kore.parser.TextToKore
 
 object Matching {
   def writeDecisionTreeToFile(

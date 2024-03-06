@@ -1,7 +1,7 @@
 package org.kframework.backend.llvm.matching
 
 import org.kframework.backend.llvm.matching.pattern._
-import org.kframework.parser.kore.SymbolOrAlias
+import org.kframework.kore.SymbolOrAlias
 
 sealed trait Constructor {
   def name: String

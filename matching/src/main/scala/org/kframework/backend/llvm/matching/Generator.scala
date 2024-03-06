@@ -12,7 +12,7 @@ import org.kframework.backend.llvm.matching.pattern.SortCategory
 import org.kframework.backend.llvm.matching.pattern.SymbolP
 import org.kframework.backend.llvm.matching.pattern.VariableP
 import org.kframework.backend.llvm.matching.pattern.WildcardP
-import org.kframework.parser.kore._
+import org.kframework.kore._
 
 object Generator {
 
