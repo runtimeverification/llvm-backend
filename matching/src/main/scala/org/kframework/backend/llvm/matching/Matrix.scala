@@ -1,18 +1,15 @@
 package org.kframework.backend.llvm.matching
 
+import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
+import com.runtimeverification.k.kore.CompoundSort
+import com.runtimeverification.k.kore.Sort
+import com.runtimeverification.k.kore.SymbolOrAlias
+import com.runtimeverification.k.kore.Variable
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.pattern._
-import org.kframework.kore.KORE.KApply
-import org.kframework.kore.KORE.KList
-import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
-import org.kframework.parser.kore.CompoundSort
-import org.kframework.parser.kore.Sort
-import org.kframework.parser.kore.SymbolOrAlias
-import org.kframework.parser.kore.Variable
-import org.kframework.unparser.ToKast
 
 trait AbstractColumn {
   def column: Column
@@ -1081,8 +1078,8 @@ class Matrix private (
             .mkString(" ")
         )
       }
-      val k          = fringe.zip(counterexample.get).map(t => t._2.toK(t._1))
-      val func       = KApply(symlib.koreToK(name), KList(k))
+      val k          = fringe.zip(counterexample.get).map(t => t._2.toKORE(t._1))
+      val func       = B.Application(name, k)
       val attributes = symlib.signatures(name)._3
       val location   = Parser.location(attributes)
       val source     = Parser.source(attributes)
@@ -1090,9 +1087,10 @@ class Matrix private (
       kem(
         new MatchingException(
           MatchingException.Type.NON_EXHAUSTIVE_MATCH,
-          "Non exhaustive match detected: " ++ ToKast(func),
+          "Non exhaustive match detected",
           source,
-          location
+          location,
+          func
         )
       )
     }

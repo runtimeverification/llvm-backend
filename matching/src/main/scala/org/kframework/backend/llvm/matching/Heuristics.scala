@@ -1,7 +1,7 @@
 package org.kframework.backend.llvm.matching
 
+import com.runtimeverification.k.kore.SymbolOrAlias
 import org.kframework.backend.llvm.matching.pattern._
-import org.kframework.parser.kore.SymbolOrAlias
 
 sealed trait Heuristic {
   val needsMatrix: Boolean

@@ -34,8 +34,8 @@
   <dependencies>
     <dependency>
       <groupId>com.runtimeverification.k</groupId>
-      <artifactId>kore</artifactId>
-      <version>${project.version}</version>
+      <artifactId>scala-kore</artifactId>
+      <version>0.3.0</version>
     </dependency>
     <dependency>
       <groupId>org.yaml</groupId>

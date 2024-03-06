@@ -1,10 +1,9 @@
 package org.kframework.backend.llvm.matching
 
+import com.runtimeverification.k.kore._
+import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
 import java.util
 import java.util.Optional
-import org.kframework.parser.kore._
-import org.kframework.parser.kore.implementation.{ DefaultBuilders => B }
-import org.kframework.parser.kore.parser.KoreToK
 
 case class AxiomInfo(
     priority: Int,
@@ -142,8 +141,6 @@ object Parser {
 
     private val hookAtts: Map[String, String] =
       sortAttData.map(t => (t._1.substring(4), getStringAtt(t._2, "hook").getOrElse(""))).toMap
-
-    val koreToK = new KoreToK(hookAtts)
   }
 
   private def rulePriority(axiom: AxiomDeclaration, search: Boolean): Int =
