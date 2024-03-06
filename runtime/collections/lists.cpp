@@ -24,6 +24,10 @@ list hook_LIST_concat(SortList l1, SortList l2) {
   return (*l1) + (*l2);
 }
 
+list hook_LIST_push(SortKItem value, SortList l) {
+  return l->push_front(value);
+}
+
 bool hook_LIST_in(SortKItem value, SortList list) {
   for (auto iter = list->begin(); iter != list->end(); ++iter) {
     if (hook_KEQUAL_eq(*iter, value)) {
