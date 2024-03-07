@@ -37,6 +37,14 @@ void migrate_set(void *s);
 void migrate_collection_node(void **node_ptr);
 void set_kore_memory_functions_for_gmp(void);
 void kore_collect(void **, uint8_t, layoutitem *);
+bool store_map_for_gc(void **, map *);
+bool store_set_for_gc(void **, set *);
+bool store_list_for_gc(void **, list *);
+bool store_rangemap_for_gc(void **, rangemap *);
+map *load_map_for_gc(void **, bool);
+set *load_set_for_gc(void **, bool);
+list *load_list_for_gc(void **, bool);
+rangemap *load_rangemap_for_gc(void **, bool);
 }
 
 #ifdef GC_DBG
