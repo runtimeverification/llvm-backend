@@ -196,6 +196,28 @@ void kore_definition::preprocess() {
   }
 
   insert_reserved_symbols();
+
+  for (auto &module : modules_) {
+    auto const &declarations = module->get_declarations();
+    for (auto const &declaration : declarations) {
+      auto *decl = dynamic_cast<kore_symbol_declaration *>(declaration.get());
+      if (decl == nullptr) {
+        continue;
+      }
+      if (decl->is_hooked() && decl->get_object_sort_variables().empty()) {
+        kore_symbol *symbol = decl->get_symbol();
+        symbols.emplace(symbol->get_name(), std::vector<kore_symbol *>{symbol});
+      }
+    }
+  }
+
+  for (auto const &entry : symbols) {
+    for (auto *symbol : entry.second) {
+      auto *decl = symbol_declarations_.at(symbol->get_name());
+      symbol->instantiate_symbol(decl);
+    }
+  }
+
   for (auto const &decl : symbol_declarations_) {
     if (decl.second->attributes().contains(
             attribute_set::key::FreshGenerator)) {
