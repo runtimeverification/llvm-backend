@@ -1,0 +1,32 @@
+name: 'Update dependencies'
+on:
+  push:
+    branches:
+      - 'scala-kore-bump'
+  workflow_dispatch:
+# Stop in progress workflows on the same branch and same workflow to use latest committed code
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-versions:
+    name: 'Update K version'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+
+      - name: 'Configure GitHub user'
+        run: |
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
+
+      - name: 'Update scala-kore release tag'
+        run: |
+          SCALA_KORE_VERSION="$(cat matching/deps/scala_kore_release)"
+          sed -i "s!^    <scala-kore.version>.*</scala-kore.version>$!    <scala-kore.version>${SCALA_KORE_VERSION}</scala-kore.version>!" matching/pom.xml
+          git add matching/pom.xml && git commit -m "matching: update scala-kore to ${SCALA_KORE_VERSION}" || true
