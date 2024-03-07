@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   update-versions:
-    name: 'Update K version'
+    name: 'Update scala-kore version'
     runs-on: ubuntu-latest
     steps:
       - name: 'Check out code'
@@ -28,5 +28,5 @@ jobs:
       - name: 'Update scala-kore release tag'
         run: |
           SCALA_KORE_VERSION="$(cat matching/deps/scala_kore_release)"
-          sed -i "s!^    <scala-kore.version>.*</scala-kore.version>$!    <scala-kore.version>${SCALA_KORE_VERSION}</scala-kore.version>!" matching/pom.xml
+          sed -i 's!^    <scala-kore.version>.*</scala-kore.version>$!    <scala-kore.version>'"${SCALA_KORE_VERSION}"'</scala-kore.version>!' matching/pom.xml
           git add matching/pom.xml && git commit -m "matching: update scala-kore to ${SCALA_KORE_VERSION}" || true
