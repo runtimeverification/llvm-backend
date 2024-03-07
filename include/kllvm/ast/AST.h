@@ -222,6 +222,7 @@ private:
   /* A unique integer representing the layout of the symbol in memory.
      See create_term.cpp for more information about the layout of K terms. */
   uint16_t layout_{};
+  bool instantiated_ = false;
 
 public:
   static ptr<kore_symbol> create(std::string const &name) {

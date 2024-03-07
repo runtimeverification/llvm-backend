@@ -319,6 +319,9 @@ bool kore_symbol::is_builtin() const {
 }
 
 void kore_symbol::instantiate_symbol(kore_symbol_declaration *decl) {
+  if (instantiated_) {
+    return;
+  }
   std::vector<sptr<kore_sort>> instantiated;
   int i = 0;
   kore_sort::substitution vars;
@@ -332,6 +335,7 @@ void kore_symbol::instantiate_symbol(kore_symbol_declaration *decl) {
   sort_ = return_sort->substitute(vars);
 
   arguments_ = instantiated;
+  instantiated_ = true;
 }
 
 std::string kore_variable::get_name() const {
