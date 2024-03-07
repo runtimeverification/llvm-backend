@@ -48,6 +48,7 @@ object Generator {
         ListP(immutable.Seq(), None, immutable.Seq(), c, SymbolP(sym, immutable.Seq()))
       case (Element(), immutable.Seq(p)) =>
         ListP(immutable.Seq(p), None, immutable.Seq(), c, SymbolP(sym, immutable.Seq(p)))
+      case _ => ???
     }
 
   private def mapPattern(
@@ -76,6 +77,7 @@ object Generator {
         MapP(immutable.Seq(), immutable.Seq(), None, c, SymbolP(sym, immutable.Seq()))
       case (Element(), immutable.Seq(k, v)) =>
         MapP(immutable.Seq(k), immutable.Seq(v), None, c, SymbolP(sym, immutable.Seq(k, v)))
+      case _ => ???
     }
 
   private def setPattern(
@@ -104,6 +106,7 @@ object Generator {
         SetP(immutable.Seq(), None, c, SymbolP(sym, immutable.Seq()))
       case (Element(), immutable.Seq(e)) =>
         SetP(immutable.Seq(e), None, c, SymbolP(sym, immutable.Seq(e)))
+      case _ => ???
     }
 
   private def genPatterns(
@@ -181,18 +184,18 @@ object Generator {
       case _         => immutable.Seq()
     }
 
-  def genClauseMatrix[T](
+  def genClauseMatrix(
       symlib: Parser.SymLib,
       mod: Definition,
       axioms: immutable.IndexedSeq[AxiomInfo],
       sorts: immutable.Seq[Sort]
   ): Matrix = {
     val actions = axioms.map { a =>
-      val lhsVars     = a.rewrite.getLeftHandSide.flatMap(genVars(_))
+      val lhsVars     = a.rewrite.getLeftHandSide.flatMap(genVars)
       val lhsVarNames = lhsVars.map(_.name)
       val rhsVars     = genVars(a.rewrite.getRightHandSide)
-      val scVars      = a.sideCondition.map(genVars(_))
-      new Action(
+      val scVars      = a.sideCondition.map(genVars)
+      Action(
         a.ordinal,
         lhsVars,
         rhsVars.map(_.name).sorted.distinct,
@@ -209,10 +212,11 @@ object Generator {
     }
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
     val cols =
-      (
-        sorts,
-        if (axioms.isEmpty) sorts.map(_ => immutable.IndexedSeq()) else patterns
-      ).zipped.toIndexedSeq
+      sorts
+        .lazyZip(
+          if (axioms.isEmpty) sorts.map(_ => immutable.IndexedSeq()) else patterns
+        )
+        .toIndexedSeq
     new Matrix(symlib, cols, actions).expand
   }
 
@@ -246,7 +250,7 @@ object Generator {
     val numerator   = originalMatrix.rows.size * threshold._1
     val denominator = finalMatrix.rows.size * threshold._2
     if (Matching.logging) {
-      System.out.println(finalMatrix.rows.size + "/" + originalMatrix.rows.size)
+      System.out.println(finalMatrix.rows.size.toString + "/" + originalMatrix.rows.size.toString)
     }
     numerator <= denominator
   }
@@ -260,7 +264,7 @@ object Generator {
   ): Option[(DecisionTree, immutable.Seq[(P[String], Occurrence)])] = {
     val rhs = genPatterns(mod, symlib, immutable.Seq(axiom.rewrite.getRightHandSide))
     val (specialized, residuals) = matrix.specializeBy(rhs.toIndexedSeq)
-    val residualMap = (residuals, specialized.fringe.map(_.occurrence)).zipped.to[immutable.Seq]
+    val residualMap = residuals.lazyZip(specialized.fringe.map(_.occurrence)).to(immutable.Seq)
     if (Matching.logging) {
       System.out.println("Residuals: " + residualMap.toList)
     }
@@ -269,7 +273,7 @@ object Generator {
       symlib,
       specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)),
       newClauses,
-      false
+      search = false
     )
     if (isPoorlySpecialized(finalMatrix, matrix, threshold)) {
       None

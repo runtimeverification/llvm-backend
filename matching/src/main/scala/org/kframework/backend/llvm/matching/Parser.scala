@@ -74,7 +74,7 @@ object Parser {
         params: immutable.Seq[Sort],
         args: immutable.Seq[Sort]
     ): Sort = {
-      val map = (params, args).zipped.toMap
+      val map = params.lazyZip(args).toMap
       s match {
         case v @ SortVariable(_) => map(v)
         case _                   => s
@@ -82,7 +82,7 @@ object Parser {
     }
 
     def isHooked(symbol: SymbolOrAlias): Boolean =
-      return symbolDecls(symbol.ctr).head.isInstanceOf[HookSymbolDeclaration]
+      symbolDecls(symbol.ctr).head.isInstanceOf[HookSymbolDeclaration]
 
     private def instantiate(
         s: immutable.Seq[Sort],
@@ -94,7 +94,7 @@ object Parser {
     val signatures: Map[SymbolOrAlias, (immutable.Seq[Sort], Sort, Attributes)] =
       symbols.map { symbol =>
         if (symbol.ctr == "\\dv") {
-          (symbol, (immutable.Seq(), symbol.params(0), B.Attributes(immutable.Seq())))
+          (symbol, (immutable.Seq(), symbol.params.head, B.Attributes(immutable.Seq())))
         } else {
           (
             symbol,
@@ -118,7 +118,9 @@ object Parser {
     val constructorsForSort: Map[Sort, immutable.Seq[SymbolOrAlias]] =
       signatures
         .groupBy(_._2._2)
-        .mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).to[immutable.Seq])
+        .view
+        .mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).to(immutable.Seq))
+        .toMap
 
     private val sortAttData: Map[String, Attributes] =
       sorts
@@ -141,16 +143,16 @@ object Parser {
             .exists(isAtt("function", _))
         )
         .keys
-        .to[immutable.Seq]
+        .to(immutable.Seq)
 
     val overloads: Map[SymbolOrAlias, immutable.Seq[SymbolOrAlias]] =
-      overloadSeq.groupBy(_._1).mapValues(_.map(_._2).to[immutable.Seq])
+      overloadSeq.groupBy(_._1).view.mapValues(_.map(_._2).to(immutable.Seq)).toMap
 
     def isSubsorted(less: Sort, greater: Sort): Boolean =
       signatures.contains(B.SymbolOrAlias("inj", immutable.Seq(less, greater)))
 
     private val hookAtts: Map[String, String] =
-      sortAttData.map(t => (t._1.substring(4), getStringAtt(t._2, "hook").getOrElse(""))).toMap
+      sortAttData.map(t => (t._1.substring(4), getStringAtt(t._2, "hook").getOrElse("")))
 
     val koreToK = new KoreToK(hookAtts)
   }
@@ -391,7 +393,9 @@ object Parser {
       axioms: immutable.Seq[AxiomDeclaration],
       search: Boolean
   ): immutable.IndexedSeq[AxiomInfo] = {
-    val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(splitTop, _, false, search))
+    val withOwise = axioms.zipWithIndex.flatMap(
+      parseAxiomSentence(splitTop, _, simplification = false, search = search)
+    )
     withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
   }
 
@@ -400,7 +404,7 @@ object Parser {
       simplification: Boolean
   ): Map[SymbolOrAlias, immutable.IndexedSeq[AxiomInfo]] = {
     val withOwise = axioms.zipWithIndex.flatMap(
-      parseAxiomSentence(a => splitFunction(a), _, simplification, true)
+      parseAxiomSentence(a => splitFunction(a), _, simplification, search = true)
     )
     withOwise
       .sortWith(_._2.priority < _._2.priority)
@@ -408,7 +412,9 @@ object Parser {
       .filter(_._1.isDefined)
       .map(t => (t._1.get, t._2))
       .groupBy(_._1)
+      .view
       .mapValues(_.map(_._2))
+      .toMap
   }
 
   private def isConcrete(symbol: SymbolOrAlias): Boolean =
@@ -449,6 +455,7 @@ object Parser {
           (args.head, args(1)) match {
             case (Application(g, _), Application(l, _)) => (g, l)
           }
+        case _ => ???
       })
   }
 
@@ -479,7 +486,7 @@ object Parser {
     heuristicMap(heuristic)
 
   def parseHeuristics(heuristics: String): immutable.Seq[Heuristic] =
-    heuristics.toList.map(parseHeuristic(_))
+    heuristics.toList.map(parseHeuristic)
 
   def parseSymbols(defn: Definition, heuristics: String): SymLib = {
     val axioms    = getAxioms(defn)

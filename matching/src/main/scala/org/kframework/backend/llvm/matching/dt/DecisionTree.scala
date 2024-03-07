@@ -16,7 +16,7 @@ sealed trait DecisionTree {
     val writer = new OutputStreamWriter(
       new FileOutputStream(file),
       Charset.forName("UTF-8").newEncoder()
-    );
+    )
     new Yaml().dump(representation, writer)
     writer.close()
   }
@@ -25,7 +25,7 @@ sealed trait DecisionTree {
     val writer = new OutputStreamWriter(
       new FileOutputStream(file),
       Charset.forName("UTF-8").newEncoder()
-    );
+    )
     val residualRepr = new util.ArrayList[AnyRef]()
     for (entry <- residuals) {
       val pair = new util.ArrayList[AnyRef]()
@@ -395,7 +395,7 @@ object MakePattern {
         for (p <- ps)
           args.add(representPattern(p))
     }
-    assert(!result.isEmpty())
+    assert(!result.isEmpty)
     result
   }
   def representResidual(pattern: Pattern[String]): util.HashMap[String, AnyRef] = {
@@ -419,7 +419,7 @@ object MakePattern {
         for (p <- ps)
           args.add(representResidual(p))
     }
-    assert(!result.isEmpty())
+    assert(!result.isEmpty)
     result
   }
 }

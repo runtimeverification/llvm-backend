@@ -48,7 +48,7 @@ object SortCategory {
       case Some("BOOL.Bool")           => BoolS()
       case Some("KVAR.KVar")           => VarS()
       case Some("BUFFER.StringBuffer") => BufferS()
-      case Some("MINT.MInt") => MIntS(getBitwidth(s.asInstanceOf[CompoundSort].params(0), symlib))
+      case Some("MINT.MInt") => MIntS(getBitwidth(s.asInstanceOf[CompoundSort].params.head, symlib))
       case Some("BAG.Bag") =>
         throw new MatchingException(
           MatchingException.Type.COMPILER_ERROR,
@@ -156,14 +156,14 @@ abstract class EqualLiteral() extends SortCategory {
   }
 }
 case class StringS() extends EqualLiteral {
-  def hookAtt         = "STRING.String"
-  def equalityFun     = "hook_KEQUAL_eq"
-  def fresh(idx: Int) = idx.toString
+  def hookAtt                 = "STRING.String"
+  def equalityFun             = "hook_KEQUAL_eq"
+  def fresh(idx: Int): String = idx.toString
 }
 case class BytesS() extends EqualLiteral {
-  def hookAtt         = "BYTES.Bytes"
-  def equalityFun     = "hook_KEQUAL_eq"
-  def fresh(idx: Int) = idx.toString
+  def hookAtt                 = "BYTES.Bytes"
+  def equalityFun             = "hook_KEQUAL_eq"
+  def fresh(idx: Int): String = idx.toString
 }
 case class ListS() extends SortCategory {
   def hookAtt = "LIST.List"
@@ -458,13 +458,13 @@ case class RangeMapS() extends SortCategory {
   def equalityFun = "hook_RANGEMAP_eq"
 }
 case class FloatS() extends EqualLiteral {
-  def hookAtt         = "FLOAT.Float"
-  def equalityFun     = "hook_FLOAT_trueeq"
-  def fresh(idx: Int) = idx.toString + ".0"
+  def hookAtt                 = "FLOAT.Float"
+  def equalityFun             = "hook_FLOAT_trueeq"
+  def fresh(idx: Int): String = idx.toString + ".0"
   override def equal(s1: String, s2: String): Boolean =
     parseKFloat(s1) == parseKFloat(s2)
 
-  private val precisionAndExponent = Regex.compile("(.*)[pP](\\d+)[xX](\\d+)");
+  private val precisionAndExponent = Regex.compile("(.*)[pP](\\d+)[xX](\\d+)")
   def parseKFloat(s: String): (BigFloat, Int) =
     try {
       val m = precisionAndExponent.matcher(s)
@@ -551,7 +551,7 @@ case class IntS() extends SortCategory {
   ): immutable.Seq[(String, immutable.Seq[String], DecisionTree)] =
     cases
       .groupBy(t => sizeOf(t._1))
-      .to[immutable.Seq]
+      .to(immutable.Seq)
       .map(t => (t._1.toString, immutable.Seq(), limbSwitch(litO, t._1.abs, t._2, default, 0)))
 
   def limbSwitch(
@@ -565,7 +565,7 @@ case class IntS() extends SortCategory {
       Failure()
     } else if (size == i) {
       assert(cases.size == 1)
-      cases(0)._3
+      cases.head._3
     } else {
       val limbO = Num(i, litO)
       Function(
@@ -586,7 +586,7 @@ case class IntS() extends SortCategory {
   ): immutable.Seq[(String, immutable.Seq[String], DecisionTree)] =
     cases
       .groupBy(t => getLimb(t._1, i))
-      .to[immutable.Seq]
+      .to(immutable.Seq)
       .map(t => (t._1, immutable.Seq(), limbSwitch(litO, size, t._2, default, i + 1)))
 
   def sizeOf(str: String): Int = {
@@ -632,17 +632,17 @@ case class BoolS() extends SortCategory {
   override def length(rawLength: Int) = 2
 }
 case class VarS() extends EqualLiteral {
-  def hookAtt         = "KVAR.KVar"
-  def equalityFun     = "hook_STRING_eq"
-  def fresh(idx: Int) = "_" + idx.toString
+  def hookAtt                 = "KVAR.KVar"
+  def equalityFun             = "hook_STRING_eq"
+  def fresh(idx: Int): String = "_" + idx.toString
 }
 case class BufferS() extends EqualLiteral {
-  def hookAtt         = "BUFFER.StringBuffer"
-  def equalityFun     = ???
-  def fresh(idx: Int) = idx.toString
+  def hookAtt                 = "BUFFER.StringBuffer"
+  def equalityFun: String     = ???
+  def fresh(idx: Int): String = idx.toString
 }
 case class MIntS(bitwidth: Int) extends SortCategory {
-  def hookAtt = "MINT.MInt " + bitwidth
+  def hookAtt: String = "MINT.MInt " + bitwidth
   def hasIncompleteSignature(
       sigma: immutable.Seq[Constructor],
       isExact: Boolean,
@@ -663,6 +663,6 @@ case class MIntS(bitwidth: Int) extends SortCategory {
     matrix.compiledCases,
     matrix.compiledDefault
   )
-  def equalityFun                     = ???
-  override def length(rawLength: Int) = 1 << bitwidth
+  def equalityFun: String                  = ???
+  override def length(rawLength: Int): Int = 1 << bitwidth
 }
