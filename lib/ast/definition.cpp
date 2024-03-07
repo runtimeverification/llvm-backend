@@ -73,11 +73,29 @@ void kore_definition::add_module(sptr<kore_module> module) {
 void kore_definition::insert_reserved_symbols() {
   auto mod = kore_module::create("K-RAW-TERM");
   auto decl = kore_symbol_declaration::create("rawTerm", true);
-  auto sort = kore_composite_sort::create("SortKItem");
+  auto kitem = kore_composite_sort::create("SortKItem");
+  std::shared_ptr<kore_composite_sort> sort;
 
-  decl->get_symbol()->add_sort(sort);
-  decl->get_symbol()->add_argument(sort);
+  decl->get_symbol()->add_sort(kitem);
+  decl->get_symbol()->add_argument(kitem);
   mod->add_declaration(std::move(decl));
+
+  for (auto cat : hooked_sorts_) {
+    switch (cat.first.cat) {
+    case sort_category::Map:
+    case sort_category::List:
+    case sort_category::Set:
+    case sort_category::RangeMap:
+      decl = kore_symbol_declaration::create(
+          "rawCollection_" + std::to_string((int)cat.first.cat), true);
+      sort = cat.second;
+      decl->get_symbol()->add_sort(kitem);
+      decl->get_symbol()->add_argument(sort);
+      mod->add_declaration(std::move(decl));
+      break;
+    default: break;
+    }
+  }
 
   add_module(std::move(mod));
 }
