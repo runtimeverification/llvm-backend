@@ -977,17 +977,22 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
   std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
   std::vector<llvm::Value *> are_block;
+  llvm::AllocaInst *are_block_val = new llvm::AllocaInst(
+      llvm::Type::getInt1Ty(module->getContext()), 0,
+      llvm::ConstantInt::get(
+          llvm::Type::getInt64Ty(module->getContext()), nroots),
+      "are_block", block->getParent()->getEntryBlock().getFirstNonPHI());
   llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
       llvm::Type::getInt8PtrTy(module->getContext()));
+  auto *zero
+      = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
   for (unsigned i = 0; i < nroots; i++) {
     auto *ptr = llvm::GetElementPtrInst::CreateInBounds(
         root_ty, arr,
-        {llvm::ConstantInt::get(
-             llvm::Type::getInt64Ty(module->getContext()), 0),
-         llvm::ConstantInt::get(
-             llvm::Type::getInt64Ty(module->getContext()), i)},
+        {zero, llvm::ConstantInt::get(
+                   llvm::Type::getInt64Ty(module->getContext()), i)},
         "", collect);
-    llvm::Value *is_block;
+    llvm::Value *is_block, *are_block_ptr;
     switch (types[i].cat) {
     case sort_category::Map:
       is_block = llvm::CallInst::Create(
@@ -996,6 +1001,12 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
               llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
               ptr_types[i]),
           {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, collect);
       root_ptrs.emplace_back(ptr, ptr_types[i]);
       are_block.push_back(is_block);
       break;
@@ -1006,6 +1017,12 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
               llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
               ptr_types[i]),
           {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, collect);
       root_ptrs.emplace_back(ptr, ptr_types[i]);
       are_block.push_back(is_block);
       break;
@@ -1016,6 +1033,12 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
               llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
               ptr_types[i]),
           {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, collect);
       root_ptrs.emplace_back(ptr, ptr_types[i]);
       are_block.push_back(is_block);
       break;
@@ -1026,6 +1049,12 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
               llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
               ptr_types[i]),
           {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, "", collect);
       root_ptrs.emplace_back(ptr, ptr_types[i]);
       are_block.push_back(is_block);
       break;
@@ -1033,6 +1062,14 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       auto *casted = new llvm::BitCastInst(
           ptr, llvm::PointerType::getUnqual(ptr_types[i]), "", collect);
       new llvm::StoreInst(roots[i], casted, collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(
+          llvm::ConstantInt::getFalse(module->getContext()), are_block_ptr, "",
+          collect);
       root_ptrs.emplace_back(casted, ptr_types[i]);
       are_block.push_back(nullptr);
       break;
@@ -1084,14 +1121,15 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       module, "kore_collect",
       llvm::FunctionType::get(
           llvm::Type::getVoidTy(module->getContext()),
-          {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptr_ty},
+          {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptr_ty,
+           llvm::Type::getInt1PtrTy(module->getContext())},
           false));
   auto *call = llvm::CallInst::Create(
       kore_collect,
       {arr,
        llvm::ConstantInt::get(
            llvm::Type::getInt8Ty(module->getContext()), nroots),
-       llvm::ConstantExpr::getBitCast(layout, ptr_ty)},
+       llvm::ConstantExpr::getBitCast(layout, ptr_ty), are_block_val},
       "", collect);
   set_debug_loc(call);
   i = 0;

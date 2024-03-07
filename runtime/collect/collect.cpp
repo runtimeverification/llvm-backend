@@ -199,10 +199,14 @@ static void migrate_floating(floating **floating_ptr) {
   *floating_ptr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
-static void
-migrate_child(void *curr_block, layoutitem *args, unsigned i, bool ptr) {
+static void migrate_child(
+    void *curr_block, layoutitem *args, unsigned i, bool ptr, bool is_block) {
   layoutitem *arg_data = args + i;
   void *arg = ((char *)curr_block) + arg_data->offset;
+  if (is_block) {
+    migrate((block **)arg);
+    return;
+  }
   switch (arg_data->cat) {
   case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
   case RANGEMAP_LAYOUT: migrate_rangemap(ptr ? *(rangemap **)arg : arg); break;
@@ -226,7 +230,7 @@ static char *evacuate(char *scan_ptr, char **alloc_ptr) {
   if (layout_int) {
     layout *layout_data = get_layout_data(layout_int);
     for (unsigned i = 0; i < layout_data->nargs; i++) {
-      migrate_child(curr_block, layout_data->args, i, false);
+      migrate_child(curr_block, layout_data->args, i, false, false);
     }
   }
   return move_ptr(scan_ptr, get_size(hdr, layout_int), *alloc_ptr);
@@ -256,7 +260,8 @@ void init_static_objects(void) {
   set_kore_memory_functions_for_gmp();
 }
 
-void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
+void kore_collect(
+    void **roots, uint8_t nroots, layoutitem *type_info, bool *are_block) {
   is_gc = true;
   collect_old = should_collect_old_gen();
   MEM_LOG("Starting garbage collection\n");
@@ -274,7 +279,7 @@ void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
 #endif
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
   for (int i = 0; i < nroots; i++) {
-    migrate_child(roots, type_info, i, true);
+    migrate_child(roots, type_info, i, true, are_block[i]);
   }
   migrate_roots();
   char *scan_ptr = youngspace_ptr();
@@ -326,7 +331,7 @@ void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
 }
 
 void free_all_kore_mem() {
-  kore_collect(nullptr, 0, nullptr);
+  kore_collect(nullptr, 0, nullptr, nullptr);
 }
 
 bool is_collection() {
