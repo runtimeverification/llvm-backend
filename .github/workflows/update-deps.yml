@@ -2,7 +2,7 @@ name: 'Update dependencies'
 on:
   push:
     branches:
-      - 'scala-kore-bump'
+      - '_update-deps/runtimeverification/scala-kore'
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:
