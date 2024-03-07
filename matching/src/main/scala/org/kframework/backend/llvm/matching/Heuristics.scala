@@ -2,6 +2,7 @@ package org.kframework.backend.llvm.matching
 
 import com.runtimeverification.k.kore.SymbolOrAlias
 import org.kframework.backend.llvm.matching.pattern._
+import scala.collection.immutable
 
 sealed trait Heuristic {
   val needsMatrix: Boolean
@@ -72,11 +73,14 @@ sealed trait Heuristic {
 
   def computeScoreForKey(c: AbstractColumn, key: Option[Pattern[Option[Occurrence]]]): Double
 
-  def breakTies(cols: Seq[MatrixColumn]): MatrixColumn = RPseudoHeuristic.breakTies(cols)
+  def breakTies(cols: immutable.Seq[MatrixColumn]): MatrixColumn = RPseudoHeuristic.breakTies(cols)
 }
 
 object Heuristic {
-  def getBest(cols: Seq[MatrixColumn], allCols: Seq[MatrixColumn]): Seq[MatrixColumn] = {
+  def getBest(
+      cols: immutable.Seq[MatrixColumn],
+      allCols: immutable.Seq[MatrixColumn]
+  ): immutable.Seq[MatrixColumn] = {
     var result: List[MatrixColumn] = Nil
     var best                       = cols(0).score
     for (col <- cols) {
@@ -410,18 +414,18 @@ sealed trait PseudoHeuristic extends Heuristic {
 
 @NamedHeuristic(name = 'N')
 object NPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn =
+  override def breakTies(cols: immutable.Seq[MatrixColumn]): MatrixColumn =
     cols(0)
 }
 
 @NamedHeuristic(name = 'L')
 object LPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn =
+  override def breakTies(cols: immutable.Seq[MatrixColumn]): MatrixColumn =
     cols.minBy(_.column.fringe.occurrence.size)
 }
 
 @NamedHeuristic(name = 'R')
 object RPseudoHeuristic extends PseudoHeuristic {
-  override def breakTies(cols: Seq[MatrixColumn]): MatrixColumn =
+  override def breakTies(cols: immutable.Seq[MatrixColumn]): MatrixColumn =
     cols.reverse.minBy(_.column.fringe.occurrence.size)
 }

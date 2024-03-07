@@ -1,7 +1,6 @@
 package org.kframework.backend.llvm.matching
 
 import java.util
-import java.util.ArrayList
 import org.kframework.backend.llvm.matching.pattern.Pattern
 
 sealed trait Occurrence {

@@ -7,6 +7,10 @@ import java.io.FileWriter
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
 
+import java.io.{File, FileWriter}
+import java.util.Optional
+import scala.collection.immutable
+
 object Matching {
   def writeDecisionTreeToFile(
       filename: File,
@@ -27,9 +31,15 @@ object Matching {
     val (dt, dtSearch, matrix) = if (axioms.isEmpty) {
       (Failure(), Failure(), null)
     } else {
-      val matrix = Generator.genClauseMatrix(symlib, defn, axioms, Seq(axioms.head.rewrite.sort))
+      val matrix =
+        Generator.genClauseMatrix(symlib, defn, axioms, immutable.Seq(axioms.head.rewrite.sort))
       val searchMatrix =
-        Generator.genClauseMatrix(symlib, defn, searchAxioms, Seq(searchAxioms.head.rewrite.sort))
+        Generator.genClauseMatrix(
+          symlib,
+          defn,
+          searchAxioms,
+          immutable.Seq(searchAxioms.head.rewrite.sort)
+        )
       if (warn) {
         searchMatrix.checkUsefulness(kem)
       }
@@ -42,7 +52,12 @@ object Matching {
     if (genSingleRuleTrees) {
       for (axiom <- axioms.par) {
         val matrix =
-          Generator.genClauseMatrix(symlib, defn, IndexedSeq(axiom), Seq(axiom.rewrite.sort))
+          Generator.genClauseMatrix(
+            symlib,
+            defn,
+            immutable.IndexedSeq(axiom),
+            immutable.Seq(axiom.rewrite.sort)
+          )
         val dt       = matrix.compile
         val filename = "match_" + axiom.ordinal + ".yaml"
         dt.serializeToYaml(new File(outputFolder, filename))
@@ -59,7 +74,7 @@ object Matching {
         Generator.mkDecisionTree(
           symlib,
           defn,
-          funcAxioms.getOrElse(f, IndexedSeq()),
+          funcAxioms.getOrElse(f, immutable.IndexedSeq()),
           symlib.signatures(f)._1,
           f,
           kem

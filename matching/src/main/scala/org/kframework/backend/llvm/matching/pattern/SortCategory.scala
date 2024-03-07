@@ -7,13 +7,18 @@ import org.kframework.backend.llvm.matching._
 import org.kframework.backend.llvm.matching.dt._
 import org.kframework.backend.llvm.matching.MatchingException
 import org.kframework.mpfr._
+import scala.collection.immutable
 
 sealed trait SortCategory {
   def hookAtt: String
-  def hasIncompleteSignature(sigma: Seq[Constructor], isExact: Boolean, sortInfo: SortInfo): Boolean
-  def hasIncompleteSignature(sigma: Seq[Constructor], f: Fringe): Boolean =
+  def hasIncompleteSignature(
+      sigma: immutable.Seq[Constructor],
+      isExact: Boolean,
+      sortInfo: SortInfo
+  ): Boolean
+  def hasIncompleteSignature(sigma: immutable.Seq[Constructor], f: Fringe): Boolean =
     hasIncompleteSignature(sigma, f.isExact, f.sortInfo)
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String]
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String]
   def isExpandDefault: Boolean = false
   def equalityFun: String
   def tree(matrix: Matrix): DecisionTree
@@ -59,19 +64,19 @@ object SortCategory {
 case class SymbolS() extends SortCategory {
   def hookAtt = "STRING.String"
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = sigma.contains(
     Empty()
   ) || (!isExact && sigma.size != sortInfo.length) || (isExact && sigma.size != sortInfo.exactLength)
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = {
     val sym = if (f.isExact) {
       (f.sortInfo.exactConstructors.toSet -- sigma.map(_.asInstanceOf[SymbolC].sym).toSet).head
     } else {
       (f.sortInfo.constructors.toSet -- sigma.map(_.asInstanceOf[SymbolC].sym).toSet).head
     }
-    SymbolP(sym, Seq.fill[Pattern[String]](f.symlib.signatures(sym)._1.size)(WildcardP()))
+    SymbolP(sym, immutable.Seq.fill[Pattern[String]](f.symlib.signatures(sym)._1.size)(WildcardP()))
   }
   def equalityFun = "hook_KEQUAL_eq"
   // not matching a builtin, therefore construct a regular switch
@@ -81,11 +86,11 @@ case class SymbolS() extends SortCategory {
 }
 abstract class EqualLiteral() extends SortCategory {
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = true
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = {
     var idx  = 0
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     while (true) {
@@ -103,13 +108,16 @@ abstract class EqualLiteral() extends SortCategory {
   def tree(matrix: Matrix): DecisionTree =
     tree(matrix, matrix.cases)
 
-  private def tree(matrix: Matrix, ls: Seq[(String, Seq[String], Matrix)]): DecisionTree = {
+  private def tree(
+      matrix: Matrix,
+      ls: immutable.Seq[(String, immutable.Seq[String], Matrix)]
+  ): DecisionTree = {
     val litO          = matrix.bestCol.fringe.occurrence
     val defaultMatrix = matrix.default(matrix.bestColIx, matrix.sigma)
     if (defaultMatrix.isDefined && ls.isEmpty) {
       // if no specializations remain and a default exists, consume the occurrence and continue with
       // the default
-      Switch(litO, hookAtt, Seq(), Some(defaultMatrix.get.compile))
+      Switch(litO, hookAtt, immutable.Seq(), Some(defaultMatrix.get.compile))
     } else if (ls.isEmpty) {
       // if no specializations remain and no default exists, fail the match
       Failure()
@@ -126,15 +134,19 @@ abstract class EqualLiteral() extends SortCategory {
         Function(
           equalityFun,
           eqO,
-          Seq((litO, hookAtt), (newO, hookAtt)),
+          immutable.Seq((litO, hookAtt), (newO, hookAtt)),
           "BOOL.Bool",
           SwitchLit(
             eqO,
             "BOOL.Bool",
             1,
-            Seq(
-              ("1", Seq(), Switch(litO, hookAtt, Seq(), Some(ls.head._3.compile))),
-              ("0", Seq(), tree(matrix, ls.tail))
+            immutable.Seq(
+              (
+                "1",
+                immutable.Seq(),
+                Switch(litO, hookAtt, immutable.Seq(), Some(ls.head._3.compile))
+              ),
+              ("0", immutable.Seq(), tree(matrix, ls.tail))
             ),
             None
           )
@@ -156,24 +168,24 @@ case class BytesS() extends EqualLiteral {
 case class ListS() extends SortCategory {
   def hookAtt = "LIST.List"
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = true
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = {
     val maxSize = sigma.map(_.asInstanceOf[ListC].length).max
     def element(v: Pattern[String]): Pattern[String] =
-      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, Seq(v))
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, immutable.Seq(v))
     val unit: Pattern[String] =
-      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, Seq())
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, immutable.Seq())
     def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] =
-      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, Seq(m1, m2))
+      SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, immutable.Seq(m1, m2))
     ListP(
-      Seq.fill[Pattern[String]](maxSize + 1)(WildcardP()),
+      immutable.Seq.fill[Pattern[String]](maxSize + 1)(WildcardP()),
       None,
-      Seq(),
+      immutable.Seq(),
       sigma.head.asInstanceOf[ListC].element,
-      Seq.fill(maxSize + 1)(element(WildcardP())).fold(unit)(concat)
+      immutable.Seq.fill(maxSize + 1)(element(WildcardP())).fold(unit)(concat)
     )
   }
   override def isExpandDefault = true
@@ -196,7 +208,7 @@ case class ListS() extends SortCategory {
       Function(
         "hook_LIST_get_long",
         Num(i, listO),
-        Seq(
+        immutable.Seq(
           (listO, hookAtt),
           len match {
             case None           => (Lit(i.toString, "MINT.MInt 64"), "MINT.MInt 64")
@@ -234,7 +246,7 @@ case class ListS() extends SortCategory {
     Function(
       "hook_LIST_size_long",
       newO,
-      Seq((listO, hookAtt)),
+      immutable.Seq((listO, hookAtt)),
       "MINT.MInt 64",
       SwitchLit(
         newO,
@@ -257,13 +269,13 @@ case class ListS() extends SortCategory {
 case class MapS() extends SortCategory {
   def hookAtt = "MAP.Map"
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = sigma.isEmpty || sigma.contains(Empty())
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
-  override def isExpandDefault                                                = true
-  def equalityFun                                                             = "hook_MAP_eq"
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = ???
+  override def isExpandDefault                                                          = true
+  def equalityFun = "hook_MAP_eq"
   // matching a map, so construct a node to decompose the map by one of its elements
   def tree(matrix: Matrix): DecisionTree = {
     val mapO = matrix.bestCol.fringe.occurrence
@@ -273,7 +285,7 @@ case class MapS() extends SortCategory {
       Function(
         "hook_MAP_size_long",
         newO,
-        Seq((mapO, hookAtt)),
+        immutable.Seq((mapO, hookAtt)),
         "MINT.MInt 64",
         SwitchLit(newO, "MINT.MInt 64", 64, matrix.compiledCases, matrix.compiledDefault)
       )
@@ -289,7 +301,7 @@ case class MapS() extends SortCategory {
           CheckNull(
             Choice(mapO),
             "STRING.String",
-            Seq(
+            immutable.Seq(
               ("0", m("0")._1, m("0")._2),
               (
                 "1",
@@ -297,12 +309,12 @@ case class MapS() extends SortCategory {
                 Function(
                   "hook_MAP_lookup",
                   ChoiceValue(mapO),
-                  Seq((mapO, hookAtt), (Choice(mapO), "STRING.String")),
+                  immutable.Seq((mapO, hookAtt), (Choice(mapO), "STRING.String")),
                   "STRING.String",
                   Function(
                     "hook_MAP_remove",
                     ChoiceRem(mapO),
-                    Seq((mapO, hookAtt), (Choice(mapO), "STRING.String")),
+                    immutable.Seq((mapO, hookAtt), (Choice(mapO), "STRING.String")),
                     hookAtt,
                     m("1")._2
                   )
@@ -327,12 +339,12 @@ case class MapS() extends SortCategory {
             Function(
               "hook_MAP_lookup_null",
               Value(k, mapO),
-              Seq((mapO, hookAtt), (newO, "STRING.String")),
+              immutable.Seq((mapO, hookAtt), (newO, "STRING.String")),
               "STRING.String",
               Function(
                 "hook_MAP_remove",
                 Rem(k, mapO),
-                Seq((mapO, hookAtt), (newO, "STRING.String")),
+                immutable.Seq((mapO, hookAtt), (newO, "STRING.String")),
                 "MAP.Map",
                 CheckNull(
                   Value(k, mapO),
@@ -350,13 +362,13 @@ case class MapS() extends SortCategory {
 case class SetS() extends SortCategory {
   def hookAtt = "SET.Set"
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = sigma.isEmpty || sigma.contains(Empty())
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
-  override def isExpandDefault                                                = true
-  def equalityFun                                                             = "hook_SET_eq"
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = ???
+  override def isExpandDefault                                                          = true
+  def equalityFun = "hook_SET_eq"
   // matching a set, so construct a node to decompose the set by one of its elements
   def tree(matrix: Matrix): DecisionTree = {
     val setO = matrix.bestCol.fringe.occurrence
@@ -366,7 +378,7 @@ case class SetS() extends SortCategory {
       Function(
         "hook_SET_size_long",
         newO,
-        Seq((setO, hookAtt)),
+        immutable.Seq((setO, hookAtt)),
         "MINT.MInt 64",
         SwitchLit(newO, "MINT.MInt 64", 64, matrix.compiledCases, matrix.compiledDefault)
       )
@@ -382,7 +394,7 @@ case class SetS() extends SortCategory {
           CheckNull(
             Choice(setO),
             "STRING.String",
-            Seq(
+            immutable.Seq(
               ("0", m("0")._1, m("0")._2),
               (
                 "1",
@@ -390,7 +402,7 @@ case class SetS() extends SortCategory {
                 Function(
                   "hook_SET_remove",
                   ChoiceRem(setO),
-                  Seq((setO, hookAtt), (Choice(setO), "STRING.String")),
+                  immutable.Seq((setO, hookAtt), (Choice(setO), "STRING.String")),
                   hookAtt,
                   m("1")._2
                 )
@@ -413,12 +425,12 @@ case class SetS() extends SortCategory {
             Function(
               "hook_SET_in",
               Value(k, setO),
-              Seq((newO, "STRING.String"), (setO, hookAtt)),
+              immutable.Seq((newO, "STRING.String"), (setO, hookAtt)),
               "BOOL.Bool",
               Function(
                 "hook_SET_remove",
                 Rem(k, setO),
-                Seq((setO, hookAtt), (newO, "STRING.String")),
+                immutable.Seq((setO, hookAtt), (newO, "STRING.String")),
                 "SET.Set",
                 SwitchLit(
                   Value(k, setO),
@@ -437,13 +449,13 @@ case class SetS() extends SortCategory {
 case class RangeMapS() extends SortCategory {
   def hookAtt = "RANGEMAP.RangeMap"
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = true
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = ???
-  def tree(matrix: Matrix): DecisionTree                                      = ???
-  def equalityFun                                                             = "hook_RANGEMAP_eq"
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = ???
+  def tree(matrix: Matrix): DecisionTree                                                = ???
+  def equalityFun = "hook_RANGEMAP_eq"
 }
 case class FloatS() extends EqualLiteral {
   def hookAtt         = "FLOAT.Float"
@@ -488,12 +500,12 @@ case class FloatS() extends EqualLiteral {
 case class IntS() extends SortCategory {
   def hookAtt = "INT.Int"
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = true
   def equalityFun = "hook_INT_eq"
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = {
     var idx  = 0
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     while (true) {
@@ -519,7 +531,7 @@ case class IntS() extends SortCategory {
       Function(
         "hook_INT_size_int",
         sizeO,
-        Seq((litO, hookAtt)),
+        immutable.Seq((litO, hookAtt)),
         "MINT.MInt 32",
         SwitchLit(
           sizeO,
@@ -534,18 +546,18 @@ case class IntS() extends SortCategory {
 
   def sizeCases(
       litO: Occurrence,
-      cases: Seq[(String, Seq[String], DecisionTree)],
+      cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
       default: Option[DecisionTree]
-  ): Seq[(String, Seq[String], DecisionTree)] =
+  ): immutable.Seq[(String, immutable.Seq[String], DecisionTree)] =
     cases
       .groupBy(t => sizeOf(t._1))
-      .toSeq
-      .map(t => (t._1.toString, Seq(), limbSwitch(litO, t._1.abs, t._2, default, 0)))
+      .to[immutable.Seq]
+      .map(t => (t._1.toString, immutable.Seq(), limbSwitch(litO, t._1.abs, t._2, default, 0)))
 
   def limbSwitch(
       litO: Occurrence,
       size: Int,
-      cases: Seq[(String, Seq[String], DecisionTree)],
+      cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
       default: Option[DecisionTree],
       i: Int
   ): DecisionTree =
@@ -559,7 +571,7 @@ case class IntS() extends SortCategory {
       Function(
         "hook_INT_limb",
         limbO,
-        Seq((litO, hookAtt), (Lit(i.toString, "MINT.MInt 64"), "MINT.MInt 64")),
+        immutable.Seq((litO, hookAtt), (Lit(i.toString, "MINT.MInt 64"), "MINT.MInt 64")),
         "MINT.MInt 64",
         SwitchLit(limbO, "MINT.MInt 64", 64, limbCases(litO, size, cases, default, i), default)
       )
@@ -568,14 +580,14 @@ case class IntS() extends SortCategory {
   def limbCases(
       litO: Occurrence,
       size: Int,
-      cases: Seq[(String, Seq[String], DecisionTree)],
+      cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
       default: Option[DecisionTree],
       i: Int
-  ): Seq[(String, Seq[String], DecisionTree)] =
+  ): immutable.Seq[(String, immutable.Seq[String], DecisionTree)] =
     cases
       .groupBy(t => getLimb(t._1, i))
-      .toSeq
-      .map(t => (t._1, Seq(), limbSwitch(litO, size, t._2, default, i + 1)))
+      .to[immutable.Seq]
+      .map(t => (t._1, immutable.Seq(), limbSwitch(litO, size, t._2, default, i + 1)))
 
   def sizeOf(str: String): Int = {
     val i = BigInt(str)
@@ -596,11 +608,11 @@ case class IntS() extends SortCategory {
 case class BoolS() extends SortCategory {
   def hookAtt = "BOOL.Bool"
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = sigma.length != 2
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     if (strs("1")) {
       LiteralP("false", this)
@@ -632,11 +644,11 @@ case class BufferS() extends EqualLiteral {
 case class MIntS(bitwidth: Int) extends SortCategory {
   def hookAtt = "MINT.MInt " + bitwidth
   def hasIncompleteSignature(
-      sigma: Seq[Constructor],
+      sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
   ): Boolean = sigma.length != (1 << bitwidth)
-  def missingConstructor(sigma: Seq[Constructor], f: Fringe): Pattern[String] = {
+  def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = {
     val strs = sigma.map(_.asInstanceOf[LiteralC].literal).toSet
     for (i <- 0 until 1 << bitwidth)
       if (!strs(i.toString))

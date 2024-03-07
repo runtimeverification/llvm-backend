@@ -4,6 +4,8 @@ import com.runtimeverification.k.kore._
 import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
 import java.util
 import java.util.Optional
+import scala.collection.immutable
+
 
 case class AxiomInfo(
     priority: Int,
@@ -47,11 +49,11 @@ object Parser {
     }
 
   class SymLib(
-      symbols: Seq[SymbolOrAlias],
-      sorts: Seq[Sort],
+      symbols: immutable.Seq[SymbolOrAlias],
+      sorts: immutable.Seq[Sort],
       mod: Definition,
-      overloadSeq: Seq[(SymbolOrAlias, SymbolOrAlias)],
-      val heuristics: Seq[Heuristic]
+      overloadSeq: immutable.Seq[(SymbolOrAlias, SymbolOrAlias)],
+      val heuristics: immutable.Seq[Heuristic]
   ) {
     val sortCache = new util.HashMap[Sort, SortInfo]()
 
@@ -67,7 +69,11 @@ object Parser {
       .map(_.asInstanceOf[SortDeclaration])
       .groupBy(_.sort.asInstanceOf[CompoundSort].ctr)
 
-    private def instantiate(s: Sort, params: Seq[Sort], args: Seq[Sort]): Sort = {
+    private def instantiate(
+        s: Sort,
+        params: immutable.Seq[Sort],
+        args: immutable.Seq[Sort]
+    ): Sort = {
       val map = (params, args).zipped.toMap
       s match {
         case v @ SortVariable(_) => map(v)
@@ -78,13 +84,17 @@ object Parser {
     def isHooked(symbol: SymbolOrAlias): Boolean =
       return symbolDecls(symbol.ctr).head.isInstanceOf[HookSymbolDeclaration]
 
-    private def instantiate(s: Seq[Sort], params: Seq[Sort], args: Seq[Sort]): Seq[Sort] =
+    private def instantiate(
+        s: immutable.Seq[Sort],
+        params: immutable.Seq[Sort],
+        args: immutable.Seq[Sort]
+    ): immutable.Seq[Sort] =
       s.map(instantiate(_, params, args))
 
-    val signatures: Map[SymbolOrAlias, (Seq[Sort], Sort, Attributes)] =
+    val signatures: Map[SymbolOrAlias, (immutable.Seq[Sort], Sort, Attributes)] =
       symbols.map { symbol =>
         if (symbol.ctr == "\\dv") {
-          (symbol, (Seq(), symbol.params(0), B.Attributes(Seq())))
+          (symbol, (immutable.Seq(), symbol.params(0), B.Attributes(immutable.Seq())))
         } else {
           (
             symbol,
@@ -105,10 +115,10 @@ object Parser {
         }
       }.toMap
 
-    val constructorsForSort: Map[Sort, Seq[SymbolOrAlias]] =
+    val constructorsForSort: Map[Sort, immutable.Seq[SymbolOrAlias]] =
       signatures
         .groupBy(_._2._2)
-        .mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).toSeq)
+        .mapValues(_.keys.filter(k => !hasAtt(signatures(k)._3, "function")).to[immutable.Seq])
 
     private val sortAttData: Map[String, Attributes] =
       sorts
@@ -124,20 +134,20 @@ object Parser {
     def sortAtt(s: Sort): Attributes =
       sortAttData(s.asInstanceOf[CompoundSort].ctr)
 
-    val functions: Seq[SymbolOrAlias] =
+    val functions: immutable.Seq[SymbolOrAlias] =
       signatures
         .filter(s =>
           s._2._3.patterns.exists(isAtt("anywhere", _)) || s._2._3.patterns
             .exists(isAtt("function", _))
         )
         .keys
-        .toSeq
+        .to[immutable.Seq]
 
-    val overloads: Map[SymbolOrAlias, Seq[SymbolOrAlias]] =
-      overloadSeq.groupBy(_._1).mapValues(_.map(_._2).toSeq)
+    val overloads: Map[SymbolOrAlias, immutable.Seq[SymbolOrAlias]] =
+      overloadSeq.groupBy(_._1).mapValues(_.map(_._2).to[immutable.Seq])
 
     def isSubsorted(less: Sort, greater: Sort): Boolean =
-      signatures.contains(B.SymbolOrAlias("inj", Seq(less, greater)))
+      signatures.contains(B.SymbolOrAlias("inj", immutable.Seq(less, greater)))
 
     private val hookAtts: Map[String, String] =
       sortAttData.map(t => (t._1.substring(4), getStringAtt(t._2, "hook").getOrElse(""))).toMap
@@ -180,7 +190,7 @@ object Parser {
       axiom: (AxiomDeclaration, Int),
       simplification: Boolean,
       search: Boolean
-  ): Seq[(Option[SymbolOrAlias], AxiomInfo)] = {
+  ): immutable.Seq[(Option[SymbolOrAlias], AxiomInfo)] = {
     val splitted = split(axiom._1.pattern)
     if (splitted.isDefined) {
       val s = axiom._1
@@ -190,9 +200,9 @@ object Parser {
           "non-executable"
         ) || (hasAtt(s, "simplification") && !simplification)
       ) {
-        Seq()
+        immutable.Seq()
       } else {
-        Seq(
+        immutable.Seq(
           (
             splitted.get._1,
             AxiomInfo(
@@ -209,7 +219,7 @@ object Parser {
         )
       }
     } else {
-      Seq()
+      immutable.Seq()
     }
   }
 
@@ -219,21 +229,25 @@ object Parser {
     topPattern match {
       case Rewrites(
             s,
-            And(_, (req @ Equals(_, _, _, _)) +: l +: Seq()),
-            And(_, ens +: r +: Seq())
+            And(_, (req @ Equals(_, _, _, _)) +: l +: immutable.Seq()),
+            And(_, ens +: r +: immutable.Seq())
           ) =>
-        Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
-      case Rewrites(s, And(_, (req @ Top(_)) +: l +: Seq()), And(_, ens +: r +: Seq())) =>
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
       case Rewrites(
             s,
-            And(_, Not(_, _) +: And(_, req +: l +: Seq()) +: Seq()),
-            And(_, ens +: r +: Seq())
+            And(_, (req @ Top(_)) +: l +: immutable.Seq()),
+            And(_, ens +: r +: immutable.Seq())
           ) =>
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
-      case Rewrites(s, And(_, l +: req +: Seq()), And(_, r +: ens +: Seq())) =>
+      case Rewrites(
+            s,
+            And(_, Not(_, _) +: And(_, req +: l +: immutable.Seq()) +: immutable.Seq()),
+            And(_, ens +: r +: immutable.Seq())
+          ) =>
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
-      case Rewrites(s, And(_, l +: req +: Seq()), r @ Application(_, _)) =>
+      case Rewrites(s, And(_, l +: req +: immutable.Seq()), And(_, r +: ens +: immutable.Seq())) =>
+        Some((None, B.Rewrites(s, l, r), splitPredicate(req), splitPredicate(ens)))
+      case Rewrites(s, And(_, l +: req +: immutable.Seq()), r @ Application(_, _)) =>
         Some((None, B.Rewrites(s, l, r), splitPredicate(req), None))
       case _ => None
     }
@@ -247,8 +261,8 @@ object Parser {
 
   private def getPatterns(pat: Pattern): List[Pattern] =
     pat match {
-      case And(_, Mem(_, _, _, pat) +: pats +: Seq()) => pat :: getPatterns(pats)
-      case Top(_)                                     => Nil
+      case And(_, Mem(_, _, _, pat) +: pats +: immutable.Seq()) => pat :: getPatterns(pats)
+      case Top(_)                                               => Nil
     }
 
   private def splitFunction(
@@ -257,8 +271,8 @@ object Parser {
     topPattern match {
       case Implies(
             _,
-            And(_, Not(_, _) +: And(_, req +: args +: Seq()) +: Seq()),
-            Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: Seq()))
+            And(_, Not(_, _) +: And(_, req +: args +: immutable.Seq()) +: immutable.Seq()),
+            Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: immutable.Seq()))
           ) =>
         Some(
           Some(symbol),
@@ -268,8 +282,8 @@ object Parser {
         )
       case Implies(
             _,
-            And(_, req +: args +: Seq()),
-            Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: Seq()))
+            And(_, req +: args +: immutable.Seq()),
+            Equals(i, o, Application(symbol, _), And(_, rhs +: ens +: immutable.Seq()))
           ) =>
         Some(
           Some(symbol),
@@ -280,7 +294,7 @@ object Parser {
       case Implies(
             _,
             req,
-            Equals(i, o, app @ Application(symbol, _), And(_, rhs +: ens +: Seq()))
+            Equals(i, o, app @ Application(symbol, _), And(_, rhs +: ens +: immutable.Seq()))
           ) =>
         Some(Some(symbol), B.Equals(i, o, app, rhs), splitPredicate(req), splitPredicate(ens))
       case Implies(_, req, eq @ Equals(_, _, Application(symbol, _), _)) =>
@@ -289,7 +303,10 @@ object Parser {
       case _                                            => None
     }
 
-  private def getSubstitution(pat: Pattern, subject: Seq[Pattern]): Map[String, Pattern] = {
+  private def getSubstitution(
+      pat: Pattern,
+      subject: immutable.Seq[Pattern]
+  ): Map[String, Pattern] = {
     val pattern = pat.asInstanceOf[Application]
     pattern.args.map(_.asInstanceOf[Variable].name).zip(subject).toMap
   }
@@ -348,7 +365,7 @@ object Parser {
     B.AxiomDeclaration(axiom.params, expandAliases(axiom.pattern, aliases), axiom.att)
       .asInstanceOf[AxiomDeclaration]
 
-  def getAxioms(defn: Definition): Seq[AxiomDeclaration] = {
+  def getAxioms(defn: Definition): immutable.Seq[AxiomDeclaration] = {
     val aliases = defn.modules
       .flatMap(_.decls)
       .filter(_.isInstanceOf[AliasDeclaration])
@@ -362,21 +379,24 @@ object Parser {
       .map(expandAliases(_, aliases))
   }
 
-  def getSorts(defn: Definition): Seq[Sort] =
+  def getSorts(defn: Definition): immutable.Seq[Sort] =
     defn.modules
       .flatMap(_.decls)
       .filter(_.isInstanceOf[SortDeclaration])
       .map(_.asInstanceOf[SortDeclaration].sort)
 
-  def parseTopAxioms(axioms: Seq[AxiomDeclaration], search: Boolean): IndexedSeq[AxiomInfo] = {
+  def parseTopAxioms(
+      axioms: immutable.Seq[AxiomDeclaration],
+      search: Boolean
+  ): immutable.IndexedSeq[AxiomInfo] = {
     val withOwise = axioms.zipWithIndex.flatMap(parseAxiomSentence(splitTop, _, false, search))
     withOwise.map(_._2).sortWith(_.priority < _.priority).toIndexedSeq
   }
 
   def parseFunctionAxioms(
-      axioms: Seq[AxiomDeclaration],
+      axioms: immutable.Seq[AxiomDeclaration],
       simplification: Boolean
-  ): Map[SymbolOrAlias, IndexedSeq[AxiomInfo]] = {
+  ): Map[SymbolOrAlias, immutable.IndexedSeq[AxiomInfo]] = {
     val withOwise = axioms.zipWithIndex.flatMap(
       parseAxiomSentence(a => splitFunction(a), _, simplification, true)
     )
@@ -392,11 +412,12 @@ object Parser {
   private def isConcrete(symbol: SymbolOrAlias): Boolean =
     symbol.params.forall(_.isInstanceOf[CompoundSort])
 
-  private def parsePatternForSymbols(pat: Pattern): Seq[SymbolOrAlias] =
+  private def parsePatternForSymbols(pat: Pattern): immutable.Seq[SymbolOrAlias] =
     pat match {
-      case And(_, ps)           => ps.flatMap(parsePatternForSymbols)
-      case Application(s, ps)   => Seq(s).filter(isConcrete) ++ ps.flatMap(parsePatternForSymbols)
-      case DomainValue(sort, _) => Seq(B.SymbolOrAlias("\\dv", Seq(sort)))
+      case And(_, ps) => ps.flatMap(parsePatternForSymbols)
+      case Application(s, ps) =>
+        immutable.Seq(s).filter(isConcrete) ++ ps.flatMap(parsePatternForSymbols)
+      case DomainValue(sort, _) => immutable.Seq(B.SymbolOrAlias("\\dv", immutable.Seq(sort)))
       case Ceil(_, _, p)        => parsePatternForSymbols(p)
       case Equals(_, _, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
       case Exists(_, _, p)      => parsePatternForSymbols(p)
@@ -409,12 +430,14 @@ object Parser {
       case Not(_, p)           => parsePatternForSymbols(p)
       case Or(_, ps)           => ps.flatMap(parsePatternForSymbols)
       case Rewrites(_, p1, p2) => parsePatternForSymbols(p1) ++ parsePatternForSymbols(p2)
-      case _                   => Seq()
+      case _                   => immutable.Seq()
     }
 
-  private def getOverloads(axioms: Seq[AxiomDeclaration]): Seq[(SymbolOrAlias, SymbolOrAlias)] = {
+  private def getOverloads(
+      axioms: immutable.Seq[AxiomDeclaration]
+  ): immutable.Seq[(SymbolOrAlias, SymbolOrAlias)] = {
     if (axioms.isEmpty) {
-      Seq()
+      immutable.Seq()
     }
     axioms
       .filter(hasAtt(_, "symbol-overload"))
@@ -453,7 +476,7 @@ object Parser {
   def parseHeuristic(heuristic: Char): Heuristic =
     heuristicMap(heuristic)
 
-  def parseHeuristics(heuristics: String): Seq[Heuristic] =
+  def parseHeuristics(heuristics: String): immutable.Seq[Heuristic] =
     heuristics.toList.map(parseHeuristic(_))
 
   def parseSymbols(defn: Definition, heuristics: String): SymLib = {

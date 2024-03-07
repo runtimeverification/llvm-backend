@@ -4,9 +4,10 @@ import com.runtimeverification.k.kore
 import com.runtimeverification.k.kore.implementation.{ DefaultBuilders => B }
 import com.runtimeverification.k.kore.SymbolOrAlias
 import org.kframework.backend.llvm.matching._
+import scala.collection.immutable
 
 sealed trait Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor]
+  def signature(clause: Clause): immutable.Seq[Constructor]
   def isWildcard: Boolean
   def isDefault: Boolean
   def isSpecialized(
@@ -28,26 +29,27 @@ sealed trait Pattern[T] {
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]]
+  ): immutable.Seq[VariableBinding[T]]
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       maxPriority: Int
-  ): Seq[Pattern[T]]
-  def expandOr: Seq[Pattern[T]]
+  ): immutable.Seq[Pattern[T]]
+  def expandOr: immutable.Seq[Pattern[T]]
 
-  def isChoice: Boolean                                                              = false
-  def mapOrSetKeys: Seq[Pattern[T]]                                                  = Seq()
-  def listRange(ix: Option[Constructor], o: Occurrence): Seq[(Occurrence, Int, Int)] = Seq()
+  def isChoice: Boolean                       = false
+  def mapOrSetKeys: immutable.Seq[Pattern[T]] = immutable.Seq()
+  def listRange(ix: Option[Constructor], o: Occurrence): immutable.Seq[(Occurrence, Int, Int)] =
+    immutable.Seq()
   def overloadChildren(
       f: Fringe,
       ix: Option[Constructor],
       residual: Option[Pattern[String]],
       o: Occurrence
-  ): Seq[(Constructor, Fringe, VariableBinding[T])] = Seq()
+  ): immutable.Seq[(Constructor, Fringe, VariableBinding[T])] = immutable.Seq()
   def category: Option[SortCategory]
   def variables: Set[T]
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]]
@@ -82,7 +84,7 @@ object Pattern {
 }
 
 case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] =
+  def signature(clause: Clause): immutable.Seq[Constructor] =
     pat.signature(clause)
   def isWildcard: Boolean = pat.isWildcard
   def isDefault: Boolean  = pat.isDefault
@@ -95,15 +97,15 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
       key: Option[Pattern[Option[Occurrence]]],
       isEmpty: Boolean
   ): Double = h.scoreAs(this, f, c, key, isEmpty)
-  override def isChoice: Boolean             = pat.isChoice
-  override def mapOrSetKeys: Seq[Pattern[T]] = pat.mapOrSetKeys
+  override def isChoice: Boolean                       = pat.isChoice
+  override def mapOrSetKeys: immutable.Seq[Pattern[T]] = pat.mapOrSetKeys
   def bindings(
       ix: Option[Constructor],
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] =
-    Seq(new VariableBinding(name, sort, occurrence, residual)) ++ pat.bindings(
+  ): immutable.Seq[VariableBinding[T]] =
+    immutable.Seq(new VariableBinding(name, sort, occurrence, residual)) ++ pat.bindings(
       ix,
       residual,
       occurrence,
@@ -112,22 +114,26 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       m: Int
-  ): Seq[Pattern[T]] =
+  ): immutable.Seq[Pattern[T]] =
     pat.expand(ix, isExact, fringes, f, clause, m)
-  def expandOr: Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
+  def expandOr: immutable.Seq[AsP[T]] = pat.expandOr.map(AsP(name, sort, _))
 
-  override def listRange(ix: Option[Constructor], o: Occurrence): Seq[(Occurrence, Int, Int)] =
+  override def listRange(
+      ix: Option[Constructor],
+      o: Occurrence
+  ): immutable.Seq[(Occurrence, Int, Int)] =
     pat.listRange(ix, o)
   override def overloadChildren(
       f: Fringe,
       ix: Option[Constructor],
       residual: Option[Pattern[String]],
       o: Occurrence
-  ): Seq[(Constructor, Fringe, VariableBinding[T])] = pat.overloadChildren(f, ix, residual, o)
+  ): immutable.Seq[(Constructor, Fringe, VariableBinding[T])] =
+    pat.overloadChildren(f, ix, residual, o)
   def category: Option[SortCategory] = pat.category
   lazy val variables: Set[T]         = Set(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] =
@@ -142,13 +148,13 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
 }
 
 case class ListP[T] private (
-    head: Seq[Pattern[T]],
+    head: immutable.Seq[Pattern[T]],
     frame: Option[Pattern[T]],
-    tail: Seq[Pattern[T]],
+    tail: immutable.Seq[Pattern[T]],
     ctr: SymbolOrAlias,
     orig: Pattern[T]
 ) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] =
+  def signature(clause: Clause): immutable.Seq[Constructor] =
     (0 to (head.size + tail.size)).map(ListC(ctr, _))
   def isWildcard         = false
   def isDefault: Boolean = frame.isDefined
@@ -179,25 +185,25 @@ case class ListP[T] private (
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] =
+  ): immutable.Seq[VariableBinding[T]] =
     if (frame.isEmpty) {
-      Seq()
+      immutable.Seq()
     } else
       ix.get match {
         case listC: ListC =>
           val len = listC.length
           frame.get.bindings(None, residual, Num(len, occurrence), symlib)
         case _ =>
-          Seq()
+          immutable.Seq()
       }
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       m: Int
-  ): Seq[Pattern[T]] =
+  ): immutable.Seq[Pattern[T]] =
     ix match {
       case ListC(_, len) =>
         head ++ (0 until len - head.size - tail.size).map(_ =>
@@ -205,8 +211,8 @@ case class ListP[T] private (
         ) ++ tail
       case _ => ???
     }
-  def expandOr: Seq[Pattern[T]] = {
-    val withHead = head.indices.foldLeft(Seq(this))((accum, ix) =>
+  def expandOr: immutable.Seq[Pattern[T]] = {
+    val withHead = head.indices.foldLeft(immutable.Seq(this))((accum, ix) =>
       accum.flatMap(l =>
         l.head(ix).expandOr.map(p => new ListP(l.head.updated(ix, p), l.frame, l.tail, ctr, orig))
       )
@@ -225,10 +231,13 @@ case class ListP[T] private (
     }
   }
 
-  override def listRange(ix: Option[Constructor], o: Occurrence): Seq[(Occurrence, Int, Int)] =
+  override def listRange(
+      ix: Option[Constructor],
+      o: Occurrence
+  ): immutable.Seq[(Occurrence, Int, Int)] =
     ix match {
-      case Some(ListC(_, len)) => Seq((Num(len, o), head.size, tail.size))
-      case _                   => Seq()
+      case Some(ListC(_, len)) => immutable.Seq((Num(len, o), head.size, tail.size))
+      case _                   => immutable.Seq()
     }
 
   def category = Some(ListS())
@@ -261,9 +270,9 @@ case class ListP[T] private (
 
 object ListP {
   def apply[T](
-      head: Seq[Pattern[T]],
+      head: immutable.Seq[Pattern[T]],
       frame: Option[Pattern[T]],
-      tail: Seq[Pattern[T]],
+      tail: immutable.Seq[Pattern[T]],
       ctr: SymbolOrAlias,
       orig: Pattern[T]
   ): Pattern[T] =
@@ -275,8 +284,8 @@ object ListP {
 }
 
 case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] =
-    Seq(LiteralC(literal))
+  def signature(clause: Clause): immutable.Seq[Constructor] =
+    immutable.Seq(LiteralC(literal))
   def isWildcard = false
   def isDefault  = false
   def isSpecialized(ix: Constructor, isExact: Boolean, f: Fringe, c: Clause, m: Int): Boolean =
@@ -295,16 +304,16 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] = Seq()
+  ): immutable.Seq[VariableBinding[T]] = immutable.Seq()
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       m: Int
-  ): Seq[Pattern[T]] = Seq()
-  def expandOr: Seq[Pattern[T]] = Seq(this)
+  ): immutable.Seq[Pattern[T]] = immutable.Seq()
+  def expandOr: immutable.Seq[Pattern[T]] = immutable.Seq(this)
 
   def category                                                  = Some(sort)
   def variables: Set[T]                                         = Set()
@@ -319,27 +328,27 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
 }
 
 case class MapP[T] private (
-    keys: Seq[Pattern[T]],
-    values: Seq[Pattern[T]],
+    keys: immutable.Seq[Pattern[T]],
+    values: immutable.Seq[Pattern[T]],
     frame: Option[Pattern[T]],
     ctr: SymbolOrAlias,
     orig: Pattern[T]
 ) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] =
+  def signature(clause: Clause): immutable.Seq[Constructor] =
     if (keys.isEmpty && frame.isEmpty) {
-      Seq(Empty())
+      immutable.Seq(Empty())
     } else if (keys.isEmpty) {
       frame.get.signature(clause)
     } else if (frame.isEmpty) {
       keys.flatMap(key =>
-        Seq(
+        immutable.Seq(
           HasKey(isSet = false, ctr, clause.canonicalize(key)),
           HasNoKey(false, clause.canonicalize(key))
         )
       )
     } else {
       keys.flatMap(key =>
-        Seq(
+        immutable.Seq(
           HasKey(isSet = false, ctr, clause.canonicalize(key)),
           HasNoKey(false, clause.canonicalize(key))
         )
@@ -379,28 +388,28 @@ case class MapP[T] private (
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] =
+  ): immutable.Seq[VariableBinding[T]] =
     if (keys.isEmpty && values.isEmpty && frame.isDefined) {
       frame.get.bindings(None, residual, occurrence, symlib)
     } else {
-      Seq()
+      immutable.Seq()
     }
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       maxPriority: Int
-  ): Seq[Pattern[T]] =
+  ): immutable.Seq[Pattern[T]] =
     ix match {
-      case Empty() => Seq()
+      case Empty() => immutable.Seq()
       case HasKey(_, _, Some(p)) =>
         val canonKs = keys.map(_.canonicalize(clause))
         canonKs.indexOf(p) match {
-          case -1 => Seq(WildcardP(), WildcardP(), this)
+          case -1 => immutable.Seq(WildcardP(), WildcardP(), this)
           case i =>
-            Seq(
+            immutable.Seq(
               values(i),
               MapP(
                 keys.take(i) ++ keys.takeRight(keys.size - i - 1),
@@ -412,17 +421,17 @@ case class MapP[T] private (
               WildcardP()
             )
         }
-      case HasNoKey(_, _) | NonEmpty() => Seq(this)
+      case HasNoKey(_, _) | NonEmpty() => immutable.Seq(this)
       case HasKey(_, _, None) =>
         if (keys.isEmpty && frame.isDefined) {
           frame.get.expand(ix, isExact, fringes, f, clause, maxPriority)
         } else {
-          Seq(keys.head, values.head, MapP(keys.tail, values.tail, frame, ctr, orig))
+          immutable.Seq(keys.head, values.head, MapP(keys.tail, values.tail, frame, ctr, orig))
         }
       case _ => ???
     }
-  def expandOr: Seq[Pattern[T]] = {
-    val withKeys = keys.indices.foldLeft(Seq(this))((accum, ix) =>
+  def expandOr: immutable.Seq[Pattern[T]] = {
+    val withKeys = keys.indices.foldLeft(immutable.Seq(this))((accum, ix) =>
       accum.flatMap(m =>
         m.keys(ix).expandOr.map(p => new MapP(m.keys.updated(ix, p), m.values, m.frame, ctr, orig))
       )
@@ -443,7 +452,7 @@ case class MapP[T] private (
     }
   }
 
-  override def mapOrSetKeys: Seq[Pattern[T]] = keys
+  override def mapOrSetKeys: immutable.Seq[Pattern[T]] = keys
 
   def category = Some(MapS())
   lazy val variables: Set[T] = keys.flatMap(_.variables).toSet ++ values
@@ -475,8 +484,8 @@ case class MapP[T] private (
 
 object MapP {
   def apply[T](
-      keys: Seq[Pattern[T]],
-      values: Seq[Pattern[T]],
+      keys: immutable.Seq[Pattern[T]],
+      values: immutable.Seq[Pattern[T]],
       frame: Option[Pattern[T]],
       ctr: SymbolOrAlias,
       orig: Pattern[T]
@@ -490,10 +499,10 @@ object MapP {
     }
 }
 
-case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] = ps.flatMap(_.signature(clause))
-  def isWildcard: Boolean                         = ps.forall(_.isWildcard)
-  def isDefault: Boolean                          = ???
+case class OrP[T](ps: immutable.Seq[Pattern[T]]) extends Pattern[T] {
+  def signature(clause: Clause): immutable.Seq[Constructor] = ps.flatMap(_.signature(clause))
+  def isWildcard: Boolean                                   = ps.forall(_.isWildcard)
+  def isDefault: Boolean                                    = ???
   def isSpecialized(ix: Constructor, isExact: Boolean, f: Fringe, c: Clause, m: Int): Boolean = ???
   def score(
       h: Heuristic,
@@ -502,23 +511,23 @@ case class OrP[T](ps: Seq[Pattern[T]]) extends Pattern[T] {
       key: Option[Pattern[Option[Occurrence]]],
       isEmpty: Boolean
   ): Double = h.scoreOr(this, f, c, key, isEmpty)
-  override def isChoice: Boolean             = ps.exists(_.isChoice)
-  override def mapOrSetKeys: Seq[Pattern[T]] = ps.flatMap(_.mapOrSetKeys)
+  override def isChoice: Boolean                       = ps.exists(_.isChoice)
+  override def mapOrSetKeys: immutable.Seq[Pattern[T]] = ps.flatMap(_.mapOrSetKeys)
   def bindings(
       ix: Option[Constructor],
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] = ???
+  ): immutable.Seq[VariableBinding[T]] = ???
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       m: Int
-  ): Seq[Pattern[T]] = ???
-  def expandOr: Seq[Pattern[T]] = ps.flatMap(_.expandOr)
+  ): immutable.Seq[Pattern[T]] = ???
+  def expandOr: immutable.Seq[Pattern[T]] = ps.flatMap(_.expandOr)
   def category: Option[SortCategory] = {
     val s = ps.map(_.category).filter(_.isDefined)
     if (s.isEmpty) {
@@ -544,33 +553,33 @@ object OrP {
   def apply[T](p1: Pattern[T], p2: Pattern[T]): OrP[T] =
     (p1, p2) match {
       case (OrP(ps1), OrP(ps2)) => OrP(ps1 ++ ps2)
-      case (OrP(ps1), _)        => OrP(ps1 ++ Seq(p2))
-      case (_, OrP(ps2))        => OrP(Seq(p1) ++ ps2)
-      case _                    => OrP(Seq(p1, p2))
+      case (OrP(ps1), _)        => OrP(ps1 ++ immutable.Seq(p2))
+      case (_, OrP(ps2))        => OrP(immutable.Seq(p1) ++ ps2)
+      case _                    => OrP(immutable.Seq(p1, p2))
     }
 }
 
 case class SetP[T] private (
-    elements: Seq[Pattern[T]],
+    elements: immutable.Seq[Pattern[T]],
     frame: Option[Pattern[T]],
     ctr: SymbolOrAlias,
     orig: Pattern[T]
 ) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] =
+  def signature(clause: Clause): immutable.Seq[Constructor] =
     if (elements.isEmpty && frame.isEmpty) {
-      Seq(Empty())
+      immutable.Seq(Empty())
     } else if (elements.isEmpty) {
       frame.get.signature(clause)
     } else if (frame.isEmpty) {
       elements.flatMap(elem =>
-        Seq(
+        immutable.Seq(
           HasKey(isSet = true, ctr, clause.canonicalize(elem)),
           HasNoKey(true, clause.canonicalize(elem))
         )
       )
     } else {
       elements.flatMap(elem =>
-        Seq(
+        immutable.Seq(
           HasKey(isSet = true, ctr, clause.canonicalize(elem)),
           HasNoKey(true, clause.canonicalize(elem))
         )
@@ -609,43 +618,43 @@ case class SetP[T] private (
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] =
+  ): immutable.Seq[VariableBinding[T]] =
     if (elements.isEmpty && frame.isDefined) {
       frame.get.bindings(None, residual, occurrence, symlib)
     } else {
-      Seq()
+      immutable.Seq()
     }
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       maxPriority: Int
-  ): Seq[Pattern[T]] =
+  ): immutable.Seq[Pattern[T]] =
     ix match {
-      case Empty() => Seq()
+      case Empty() => immutable.Seq()
       case HasKey(_, _, Some(p)) =>
         val canonEs = elements.map(_.canonicalize(clause))
         canonEs.indexOf(p) match {
-          case -1 => Seq(WildcardP(), this)
+          case -1 => immutable.Seq(WildcardP(), this)
           case i =>
-            Seq(
+            immutable.Seq(
               SetP(elements.take(i) ++ elements.takeRight(elements.size - i - 1), frame, ctr, orig),
               WildcardP()
             )
         }
-      case HasNoKey(_, _) | NonEmpty() => Seq(this)
+      case HasNoKey(_, _) | NonEmpty() => immutable.Seq(this)
       case HasKey(_, _, None) =>
         if (elements.isEmpty && frame.isDefined) {
           frame.get.expand(ix, isExact, fringes, f, clause, maxPriority)
         } else {
-          Seq(elements.head, SetP(elements.tail, frame, ctr, orig))
+          immutable.Seq(elements.head, SetP(elements.tail, frame, ctr, orig))
         }
       case _ => ???
     }
-  def expandOr: Seq[Pattern[T]] = {
-    val withElements = elements.indices.foldLeft(Seq(this))((accum, ix) =>
+  def expandOr: immutable.Seq[Pattern[T]] = {
+    val withElements = elements.indices.foldLeft(immutable.Seq(this))((accum, ix) =>
       accum.flatMap(s =>
         s.elements(ix).expandOr.map(p => new SetP(s.elements.updated(ix, p), s.frame, ctr, orig))
       )
@@ -657,7 +666,7 @@ case class SetP[T] private (
     }
   }
 
-  override def mapOrSetKeys: Seq[Pattern[T]] = elements
+  override def mapOrSetKeys: immutable.Seq[Pattern[T]] = elements
 
   def category = Some(SetS())
   lazy val variables: Set[T] =
@@ -680,7 +689,7 @@ case class SetP[T] private (
 
 object SetP {
   def apply[T](
-      elements: Seq[Pattern[T]],
+      elements: immutable.Seq[Pattern[T]],
       frame: Option[Pattern[T]],
       ctr: SymbolOrAlias,
       orig: Pattern[T]
@@ -692,19 +701,22 @@ object SetP {
     }
 }
 
-case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] = Seq(SymbolC(sym))
-  def isWildcard                                  = false
-  def isDefault                                   = false
+case class SymbolP[T](sym: SymbolOrAlias, ps: immutable.Seq[Pattern[T]]) extends Pattern[T] {
+  def signature(clause: Clause): immutable.Seq[Constructor] = immutable.Seq(SymbolC(sym))
+  def isWildcard                                            = false
+  def isDefault                                             = false
   def isSpecialized(ix: Constructor, isExact: Boolean, f: Fringe, clause: Clause, m: Int): Boolean =
     (ix, sym) match {
-      case (SymbolC(SymbolOrAlias("inj", Seq(a, c))), SymbolOrAlias("inj", Seq(b, c2))) =>
+      case (
+            SymbolC(SymbolOrAlias("inj", immutable.Seq(a, c))),
+            SymbolOrAlias("inj", immutable.Seq(b, c2))
+          ) =>
         lazy val f2 = f.expand(SymbolC(sym)).head
         c == c2 && (a == b || (f.symlib.isSubsorted(b, a) && !isExact) || (f.symlib.isSubsorted(
           a,
           b
         ) && f2.sortInfo.category == SymbolS() && ps.head.isSpecialized(
-          SymbolC(B.SymbolOrAlias("inj", Seq(a, b))),
+          SymbolC(B.SymbolOrAlias("inj", immutable.Seq(a, b))),
           isExact,
           f2,
           clause,
@@ -728,36 +740,42 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] =
+  ): immutable.Seq[VariableBinding[T]] =
     (ix, sym) match {
-      case (Some(SymbolC(SymbolOrAlias("inj", Seq(a, _)))), SymbolOrAlias("inj", Seq(b, _))) =>
+      case (
+            Some(SymbolC(SymbolOrAlias("inj", immutable.Seq(a, _)))),
+            SymbolOrAlias("inj", immutable.Seq(b, _))
+          ) =>
         if (a == b || !symlib.isSubsorted(a, b)) {
-          Seq()
+          immutable.Seq()
         } else {
           ps.head.bindings(
-            Some(SymbolC(B.SymbolOrAlias("inj", Seq(a, b)))),
+            Some(SymbolC(B.SymbolOrAlias("inj", immutable.Seq(a, b)))),
             residual,
             occurrence,
             symlib
           )
         }
-      case _ => Seq()
+      case _ => immutable.Seq()
     }
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       m: Int
-  ): Seq[Pattern[T]] =
+  ): immutable.Seq[Pattern[T]] =
     (ix, sym) match {
-      case (SymbolC(SymbolOrAlias("inj", Seq(a, _))), inj @ SymbolOrAlias("inj", Seq(b, _))) =>
+      case (
+            SymbolC(SymbolOrAlias("inj", immutable.Seq(a, _))),
+            inj @ SymbolOrAlias("inj", immutable.Seq(b, _))
+          ) =>
         if (a == b) {
-          Seq(ps.head)
+          immutable.Seq(ps.head)
         } else if (f.symlib.isSubsorted(a, b)) {
           ps.head.expand(
-            SymbolC(B.SymbolOrAlias("inj", Seq(a, b))),
+            SymbolC(B.SymbolOrAlias("inj", immutable.Seq(a, b))),
             isExact,
             fringes,
             f.expand(SymbolC(inj)).head,
@@ -765,14 +783,16 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
             m
           )
         } else {
-          Seq(SymbolP(B.SymbolOrAlias("inj", Seq(b, a)), Seq(ps.head)))
+          immutable.Seq(
+            SymbolP(B.SymbolOrAlias("inj", immutable.Seq(b, a)), immutable.Seq(ps.head))
+          )
         }
       case (SymbolC(SymbolOrAlias("inj", _)), _) =>
         val less     = f.overloads(sym)
         val f2       = fringes.head
         val fringePs = f.expand(SymbolC(sym))
         val validLess = less.filter(isValidOverload(f2, isExact, clause, m, fringePs, _)) match {
-          case Seq(head) => head
+          case immutable.Seq(head) => head
         }
         val fringeTs = f2.expand(SymbolC(validLess))
         val newPs = (ps, fringePs, fringeTs).zipped.map { case (p, fringeP, fringeT) =>
@@ -780,20 +800,20 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
             p
           } else {
             p.expand(
-              SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))),
+              SymbolC(B.SymbolOrAlias("inj", immutable.Seq(fringeT.sort, fringeP.sort))),
               isExact,
-              Seq(fringeT),
+              immutable.Seq(fringeT),
               fringeP,
               clause,
               m
             ).head
           }
         }
-        Seq(SymbolP(validLess, newPs))
+        immutable.Seq(SymbolP(validLess, newPs))
       case _ => ps
     }
-  def expandOr: Seq[Pattern[T]] =
-    ps.indices.foldLeft(Seq(this))((accum, ix) =>
+  def expandOr: immutable.Seq[Pattern[T]] =
+    ps.indices.foldLeft(immutable.Seq(this))((accum, ix) =>
       accum.flatMap(s => s.ps(ix).expandOr.map(p => SymbolP(sym, s.ps.updated(ix, p))))
     )
 
@@ -804,7 +824,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       isExact: Boolean,
       clause: Clause,
       m: Int,
-      fringePs: Seq[Fringe],
+      fringePs: immutable.Seq[Fringe],
       less: SymbolOrAlias
   ): Boolean = {
     def isValidChild(p: Pattern[T], fringeP: Fringe, fringeT: Fringe): Boolean =
@@ -812,7 +832,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
         fringeT.sort,
         fringeP.sort
       ) && fringeP.sortInfo.category == SymbolS() && p.isSpecialized(
-        SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort))),
+        SymbolC(B.SymbolOrAlias("inj", immutable.Seq(fringeT.sort, fringeP.sort))),
         false,
         fringeP,
         clause,
@@ -840,18 +860,18 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       ix: Option[Constructor],
       residual: Option[Pattern[String]],
       o: Occurrence
-  ): Seq[(Constructor, Fringe, VariableBinding[T])] = {
+  ): immutable.Seq[(Constructor, Fringe, VariableBinding[T])] = {
     def getVar(
         fringeP: Fringe,
         fringeT: Fringe,
         pat: Pattern[T],
         i: Int
-    ): Seq[(Constructor, Fringe, VariableBinding[T])] = {
+    ): immutable.Seq[(Constructor, Fringe, VariableBinding[T])] = {
       val vars  = pat.bindings(None, residual, Inj(Num(i, o)), f.symlib) /* compute variable bindings
        * for this pattern */
-      val child = SymbolC(B.SymbolOrAlias("inj", Seq(fringeT.sort, fringeP.sort)))
+      val child = SymbolC(B.SymbolOrAlias("inj", immutable.Seq(fringeT.sort, fringeP.sort)))
       if (fringeP.sort == fringeT.sort) {
-        Seq() // exact match, so no bindings
+        immutable.Seq() // exact match, so no bindings
       } else {
         val childOverloads = pat.overloadChildren(fringeP, Some(child), residual, Num(i, o)) /*
          * recurse into child term */
@@ -859,14 +879,17 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
       }
     }
     (ix, sym) match {
-      case (Some(SymbolC(SymbolOrAlias("inj", Seq(a, _)))), SymbolOrAlias("inj", Seq(b, _))) =>
+      case (
+            Some(SymbolC(SymbolOrAlias("inj", immutable.Seq(a, _)))),
+            SymbolOrAlias("inj", immutable.Seq(b, _))
+          ) =>
         if (a == b || !f.symlib.isSubsorted(a, b)) { // exact match, don't recurse
-          Seq()
+          immutable.Seq()
         } else {
           val fringeB = f.expand(SymbolC(sym)).head
           ps.head.overloadChildren(
             fringeB,
-            Some(SymbolC(B.SymbolOrAlias("inj", Seq(a, b)))),
+            Some(SymbolC(B.SymbolOrAlias("inj", immutable.Seq(a, b)))),
             residual,
             o
           )
@@ -878,13 +901,14 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
 
         val child = less.find(c => f2.contains(SymbolC(c))).map(c => f2.expand(SymbolC(c)))
         child match {
-          case None => Seq() // no overloads exist
+          case None => immutable.Seq() // no overloads exist
           case Some(fringeTs) =>
-            (fringePs, fringeTs, ps).zipped.toSeq.zipWithIndex.flatMap(t =>
-              getVar(t._1._1, t._1._2, t._1._3, t._2)
-            ) // compute variable bindings
+            (fringePs, fringeTs, ps).zipped
+              .to[immutable.Seq]
+              .zipWithIndex
+              .flatMap(t => getVar(t._1._1, t._1._2, t._1._3, t._2)) // compute variable bindings
         }
-      case _ => Seq()
+      case _ => immutable.Seq()
     }
   }
 
@@ -904,9 +928,9 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: Seq[Pattern[T]]) extends Pattern[T
 }
 
 case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] = Seq()
-  def isWildcard                                  = true
-  def isDefault                                   = true
+  def signature(clause: Clause): immutable.Seq[Constructor] = immutable.Seq()
+  def isWildcard                                            = true
+  def isDefault                                             = true
   def isSpecialized(
       ix: Constructor,
       ixExact: Boolean,
@@ -930,18 +954,18 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] =
-    Seq(new VariableBinding(name, sort, occurrence, residual))
+  ): immutable.Seq[VariableBinding[T]] =
+    immutable.Seq(new VariableBinding(name, sort, occurrence, residual))
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       m: Int
-  ): Seq[Pattern[T]] =
+  ): immutable.Seq[Pattern[T]] =
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
-  def expandOr: Seq[Pattern[T]] = Seq(this)
+  def expandOr: immutable.Seq[Pattern[T]] = immutable.Seq(this)
 
   def category: None.type    = None
   lazy val variables: Set[T] = Set(name)
@@ -963,9 +987,9 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
 }
 
 case class WildcardP[T]() extends Pattern[T] {
-  def signature(clause: Clause): Seq[Constructor] = Seq()
-  def isWildcard                                  = true
-  def isDefault                                   = true
+  def signature(clause: Clause): immutable.Seq[Constructor] = immutable.Seq()
+  def isWildcard                                            = true
+  def isDefault                                             = true
   def isSpecialized(
       ix: Constructor,
       isExact: Boolean,
@@ -990,17 +1014,17 @@ case class WildcardP[T]() extends Pattern[T] {
       residual: Option[Pattern[String]],
       occurrence: Occurrence,
       symlib: Parser.SymLib
-  ): Seq[VariableBinding[T]] = Seq()
+  ): immutable.Seq[VariableBinding[T]] = immutable.Seq()
   def expand(
       ix: Constructor,
       isExact: Boolean,
-      fringes: Seq[Fringe],
+      fringes: immutable.Seq[Fringe],
       f: Fringe,
       clause: Clause,
       m: Int
-  ): Seq[Pattern[T]] =
+  ): immutable.Seq[Pattern[T]] =
     fringes.map(_ => WildcardP().asInstanceOf[Pattern[T]])
-  def expandOr: Seq[Pattern[T]] = Seq(this)
+  def expandOr: immutable.Seq[Pattern[T]] = immutable.Seq(this)
 
   def category: None.type                                       = None
   def variables: Set[T]                                         = Set()
