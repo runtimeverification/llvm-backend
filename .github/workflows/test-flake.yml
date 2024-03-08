@@ -44,9 +44,6 @@ jobs:
       - name: 'Build LLVM backend'
         run: GC_DONT_GC=1 nix build --print-build-logs .
 
-      - name: 'Build pattern matching compiler'
-        run: GC_DONT_GC=1 nix build --print-build-logs .#llvm-backend-matching
-
       - name: 'Test LLVM backend'
         run: GC_DONT_GC=1 nix flake check --print-build-logs
 
