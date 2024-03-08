@@ -22,11 +22,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v4
-    - uses: ludeeus/action-shellcheck@2.0.0
+    - uses: ludeeus/action-shellcheck@1.1.0
       name: Check that shell scripts follow best practices
       with:
         scandir: './bin'
-        additional_files: './scripts/update-scala-kore.sh'
 
   clang-tidy-check:
     name: Clang Tidy check

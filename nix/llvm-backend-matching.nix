@@ -7,10 +7,6 @@ let self = maven.buildMavenPackage rec {
 
     buildOffline = true;
 
-    manualMvnArtifacts = [
-      "org.scala-lang:scala-compiler:2.12.18"
-    ];
-
     passthru = {
       jar =
         "${self}/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar";
