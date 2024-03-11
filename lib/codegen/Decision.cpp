@@ -977,11 +977,14 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
   std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
   std::vector<llvm::Value *> are_block;
-  llvm::AllocaInst *are_block_val = new llvm::AllocaInst(
-      llvm::Type::getInt1Ty(module->getContext()), 0,
+  llvm::Instruction *are_block_val = llvm::CallInst::CreateMalloc(
+      collect, llvm::Type::getInt64Ty(block->getContext()),
+      llvm::Type::getInt1Ty(module->getContext()),
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
       llvm::ConstantInt::get(
           llvm::Type::getInt64Ty(module->getContext()), nroots),
-      "are_block", block->getParent()->getEntryBlock().getFirstNonPHI());
+      nullptr);
+  are_block_val->insertAfter(&collect->back());
   llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
       llvm::Type::getInt8PtrTy(module->getContext()));
   auto *zero
