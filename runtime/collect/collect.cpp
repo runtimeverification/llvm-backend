@@ -340,107 +340,99 @@ bool is_collection() {
 }
 
 bool store_map_for_gc(void **roots, map *ptr) {
-  if (get_arena_semispace_id_of_object(ptr) == ALWAYSGCSPACE_ID) {
-    void *mem = kore_alloc(sizeof(blockheader) + sizeof(map));
-    blockheader *hdr = (blockheader *)mem;
-    std::string name = "rawCollection_"
-                       + std::to_string((int)kllvm::sort_category::Map) + "{}";
-    *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-    map *child = (map *)(hdr + 1);
-    *child = *ptr;
-    *roots = mem;
-    return true;
-  } else {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
     *roots = ptr;
     return false;
   }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(map));
+  auto *hdr = (blockheader *)mem;
+  std::string name = "rawCollection_"
+                     + std::to_string((int)kllvm::sort_category::Map) + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (map *)(hdr + 1);
+  *child = *ptr;
+  *roots = mem;
+  return true;
 }
 
 bool store_set_for_gc(void **roots, set *ptr) {
-  if (get_arena_semispace_id_of_object(ptr) == ALWAYSGCSPACE_ID) {
-    void *mem = kore_alloc(sizeof(blockheader) + sizeof(set));
-    blockheader *hdr = (blockheader *)mem;
-    std::string name = "rawCollection_"
-                       + std::to_string((int)kllvm::sort_category::Set) + "{}";
-    *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-    set *child = (set *)(hdr + 1);
-    *child = *ptr;
-    *roots = mem;
-    return true;
-  } else {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
     *roots = ptr;
     return false;
   }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(set));
+  auto *hdr = (blockheader *)mem;
+  std::string name = "rawCollection_"
+                     + std::to_string((int)kllvm::sort_category::Set) + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (set *)(hdr + 1);
+  *child = *ptr;
+  *roots = mem;
+  return true;
 }
 
 bool store_list_for_gc(void **roots, list *ptr) {
-  if (get_arena_semispace_id_of_object(ptr) == ALWAYSGCSPACE_ID) {
-    void *mem = kore_alloc(sizeof(blockheader) + sizeof(list));
-    blockheader *hdr = (blockheader *)mem;
-    std::string name = "rawCollection_"
-                       + std::to_string((int)kllvm::sort_category::List) + "{}";
-    *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-    list *child = (list *)(hdr + 1);
-    *child = *ptr;
-    *roots = mem;
-    return true;
-  } else {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
     *roots = ptr;
     return false;
   }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(list));
+  auto *hdr = (blockheader *)mem;
+  std::string name = "rawCollection_"
+                     + std::to_string((int)kllvm::sort_category::List) + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (list *)(hdr + 1);
+  *child = *ptr;
+  *roots = mem;
+  return true;
 }
 
 bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
-  if (get_arena_semispace_id_of_object(ptr) == ALWAYSGCSPACE_ID) {
-    void *mem = kore_alloc(sizeof(blockheader) + sizeof(rangemap));
-    blockheader *hdr = (blockheader *)mem;
-    std::string name = "rawCollection_"
-                       + std::to_string((int)kllvm::sort_category::RangeMap)
-                       + "{}";
-    *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-    rangemap *child = (rangemap *)(hdr + 1);
-    *child = *ptr;
-    *roots = mem;
-    return true;
-  } else {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
     *roots = ptr;
     return false;
   }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(rangemap));
+  auto *hdr = (blockheader *)mem;
+  std::string name = "rawCollection_"
+                     + std::to_string((int)kllvm::sort_category::RangeMap)
+                     + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (rangemap *)(hdr + 1);
+  *child = *ptr;
+  *roots = mem;
+  return true;
 }
 
 map *load_map_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
     return (map *)(((char *)mem) + 8);
-  } else {
-    return (map *)mem;
   }
+  return (map *)mem;
 }
 
 set *load_set_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
     return (set *)(((char *)mem) + 8);
-  } else {
-    return (set *)mem;
   }
+  return (set *)mem;
 }
 
 list *load_list_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
     return (list *)(((char *)mem) + 8);
-  } else {
-    return (list *)mem;
   }
+  return (list *)mem;
 }
 
 rangemap *load_rangemap_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
     return (rangemap *)(((char *)mem) + 8);
-  } else {
-    return (rangemap *)mem;
   }
+  return (rangemap *)mem;
 }
 }

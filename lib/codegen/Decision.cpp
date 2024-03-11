@@ -995,7 +995,8 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
         {zero, llvm::ConstantInt::get(
                    llvm::Type::getInt64Ty(module->getContext()), i)},
         "", collect);
-    llvm::Value *is_block, *are_block_ptr;
+    llvm::Value *is_block = nullptr;
+    llvm::Value *are_block_ptr = nullptr;
     switch (types[i].cat) {
     case sort_category::Map:
       is_block = llvm::CallInst::Create(
@@ -1138,7 +1139,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   i = 0;
   std::vector<llvm::Value *> phis;
   for (auto [ptr, pointee_ty] : root_ptrs) {
-    llvm::Value *loaded;
+    llvm::Value *loaded = nullptr;
     switch (types[i].cat) {
     case sort_category::Map:
       loaded = llvm::CallInst::Create(

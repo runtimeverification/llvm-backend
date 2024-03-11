@@ -80,7 +80,7 @@ void kore_definition::insert_reserved_symbols() {
   decl->get_symbol()->add_argument(kitem);
   mod->add_declaration(std::move(decl));
 
-  for (auto cat : hooked_sorts_) {
+  for (auto const &cat : hooked_sorts_) {
     switch (cat.first.cat) {
     case sort_category::Map:
     case sort_category::List:
