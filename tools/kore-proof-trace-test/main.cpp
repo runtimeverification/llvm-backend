@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&kore_proof_trace_test_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  proof_trace_parser parser(false);
+  proof_trace_parser parser(false, false);
   auto trace = parser.parse_proof_trace_from_file(input_filename);
   if (!trace.has_value()) {
     return 1;
