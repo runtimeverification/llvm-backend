@@ -59,3 +59,23 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
+
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: llvm-backend-ci-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 15
+
+      - name: 'Run backend tests'
+        run: |
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'mkdir build && cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DBUILD_TESTS=On ..'
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'cd matching && mvn package'
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'lit -av test'
+
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 llvm-backend-ci-${GITHUB_SHA}
+          docker container rm --force llvm-backend-ci-${GITHUB_SHA} || true
