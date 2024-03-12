@@ -1,4 +1,4 @@
-name: "Test Nix Flake"
+name: "Run LLVM backend tests"
 on:
   pull_request:
 concurrency:
@@ -52,3 +52,10 @@ jobs:
           GC_DONT_GC=1 nix build --print-build-logs . --json \
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push k-framework
+
+  build-from-source:
+    name: 'Build LLVM backend from source'
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
