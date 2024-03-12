@@ -399,7 +399,7 @@ bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
                      + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (rangemap *)(hdr + 1);
-  *child = *ptr;
+  *child = std::move(*ptr);
   *roots = mem;
   return true;
 }
