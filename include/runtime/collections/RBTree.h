@@ -130,6 +130,15 @@ public:
     root_ = t.root_;
   }
 
+  RBTree(RBTree const &other) = default;
+
+  RBTree &operator=(RBTree const &other) = default;
+
+  RBTree &operator=(RBTree &&other) {
+    other.root_.swap(root_);
+    return *this;
+  }
+
   // Return true if this tree is empty.
   [[nodiscard]] bool empty() const { return root_->is_leaf(); }
 
