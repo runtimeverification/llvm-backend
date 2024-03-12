@@ -49,7 +49,7 @@ RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP 
 USER $USER:$GROUP
 
 RUN    pip3 install --user --upgrade pip  \
-    && ~/.local/bin/pip3 install --user lit
+    && ~/.local/bin/pip3 install --user lit pybind11
 
 ADD matching/pom.xml /home/user/.tmp-maven/
 RUN    cd /home/user/.tmp-maven \
