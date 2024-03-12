@@ -72,7 +72,7 @@ jobs:
 
       - name: 'Run backend tests'
         run: |
-          docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'mkdir build && cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DBUILD_TESTS=On .. && make install'
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'mkdir build && cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=install .. && make -j$(nproc) install'
           docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'cd matching && mvn package'
           docker exec -t llvm-backend-ci-${GITHUB_SHA} /bin/bash -c 'PATH=./build/install:$PATH lit -av test'
 
