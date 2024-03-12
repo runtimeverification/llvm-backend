@@ -12,5 +12,5 @@ pushd matching
 mvn package
 popd
 
-export PATH="$(realpath ./build/install/bin):$(realpath ./build/bin):$PATH"
-lit -av test
+export PATH="$(realpath ./build/install/bin):$(realpath ./build/bin):/usr/lib/llvm-15/bin:$PATH"
+lit -v test
