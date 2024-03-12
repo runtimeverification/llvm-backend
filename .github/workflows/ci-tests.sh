@@ -12,5 +12,5 @@ pushd matching
 mvn package
 popd
 
-export PATH="$(realpath ./build/install):$PATH"
+export PATH="$(realpath ./build/install/bin):$(realpath ./build/bin):$PATH"
 lit -av test
