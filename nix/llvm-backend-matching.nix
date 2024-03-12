@@ -9,6 +9,7 @@ let self = maven.buildMavenPackage rec {
 
     manualMvnArtifacts = [
       "org.scala-lang:scala-compiler:2.12.18"
+      "org.apache.maven.plugins:maven-compiler-plugin:3.7.0"
     ];
 
     passthru = {
