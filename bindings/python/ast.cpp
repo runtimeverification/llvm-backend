@@ -379,7 +379,7 @@ void bind_proof_trace(py::module_ &m) {
   auto step_event
       = py::class_<llvm_step_event, std::shared_ptr<llvm_step_event>>(
             proof_trace, "llvm_step_event")
-            .def("__repr__", print_repr_adapter<llvm_step_event>());
+            .def("__repr__", print_repr_adapter<llvm_step_event>(true));
 
   auto rewrite_event
       = py::class_<llvm_rewrite_event, std::shared_ptr<llvm_rewrite_event>>(
@@ -422,7 +422,7 @@ void bind_proof_trace(py::module_ &m) {
       .def_property_readonly("result", &llvm_hook_event::getkore_pattern);
 
   py::class_<llvm_event, std::shared_ptr<llvm_event>>(proof_trace, "Argument")
-      .def("__repr__", print_repr_adapter<llvm_event>(true))
+      .def("__repr__", print_repr_adapter<llvm_event>(true, true))
       .def_property_readonly("step_event", &llvm_event::get_step_event)
       .def_property_readonly("kore_pattern", &llvm_event::getkore_pattern)
       .def("is_step_event", &llvm_event::is_step)
@@ -430,7 +430,7 @@ void bind_proof_trace(py::module_ &m) {
 
   py::class_<llvm_rewrite_trace, std::shared_ptr<llvm_rewrite_trace>>(
       proof_trace, "llvm_rewrite_trace")
-      .def("__repr__", print_repr_adapter<llvm_rewrite_trace>())
+      .def("__repr__", print_repr_adapter<llvm_rewrite_trace>(true))
       .def_property_readonly("version", &llvm_rewrite_trace::get_version)
       .def_property_readonly("pre_trace", &llvm_rewrite_trace::get_pre_trace)
       .def_property_readonly(
@@ -439,7 +439,7 @@ void bind_proof_trace(py::module_ &m) {
       .def_static(
           "parse",
           [](py::bytes const &bytes) {
-            proof_trace_parser parser(false);
+            proof_trace_parser parser(false, false);
             auto str = std::string(bytes);
             return parser.parse_proof_trace(str);
           },

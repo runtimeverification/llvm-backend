@@ -37,7 +37,9 @@ constexpr uint64_t side_condition_end_sentinel = detail::word(0x33);
 
 class llvm_step_event : public std::enable_shared_from_this<llvm_step_event> {
 public:
-  virtual void print(std::ostream &out, unsigned indent = 0U) const = 0;
+  virtual void
+  print(std::ostream &out, bool expand_terms, unsigned indent = 0U) const
+      = 0;
   virtual ~llvm_step_event() = default;
 };
 
@@ -51,7 +53,8 @@ private:
   substitution_t substitution_{};
 
 protected:
-  void print_substitution(std::ostream &out, unsigned indent = 0U) const;
+  void print_substitution(
+      std::ostream &out, bool expand_terms, unsigned indent = 0U) const;
 
 public:
   llvm_rewrite_event(uint64_t rule_ordinal)
@@ -82,7 +85,8 @@ public:
     return sptr<llvm_rule_event>(new llvm_rule_event(rule_ordinal));
   }
 
-  void print(std::ostream &out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
 };
 
 class llvm_side_condition_event : public llvm_rewrite_event {
@@ -96,7 +100,8 @@ public:
         new llvm_side_condition_event(rule_ordinal));
   }
 
-  void print(std::ostream &out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
 };
 
 class llvm_side_condition_end_event : public llvm_step_event {
@@ -126,7 +131,8 @@ public:
     pattern_length_ = pattern_length;
   }
 
-  void print(std::ostream &out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
 };
 
 class llvm_event;
@@ -154,7 +160,8 @@ public:
 
   void add_argument(llvm_event const &argument);
 
-  void print(std::ostream &out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
 };
 
 class llvm_hook_event : public llvm_step_event {
@@ -192,7 +199,8 @@ public:
 
   void add_argument(llvm_event const &argument);
 
-  void print(std::ostream &out, unsigned indent = 0U) const override;
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
 };
 
 class llvm_event {
@@ -222,7 +230,9 @@ public:
     kore_pattern_ = std::move(kore_pattern);
     pattern_length_ = pattern_length;
   }
-  void print(std::ostream &out, bool is_arg, unsigned indent = 0U) const;
+  void print(
+      std::ostream &out, bool expand_terms, bool is_arg,
+      unsigned indent = 0U) const;
 };
 
 class llvm_rewrite_trace {
@@ -253,7 +263,7 @@ public:
   }
   void add_trace_event(llvm_event const &event) { trace_.push_back(event); }
 
-  void print(std::ostream &out, unsigned indent = 0U) const;
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U) const;
 };
 
 class proof_trace_parser {
@@ -262,6 +272,7 @@ public:
 
 private:
   bool verbose_;
+  bool expand_terms_;
 
   // Caller needs to check that there are at least 8 bytes remaining in the
   // stream before peeking
@@ -709,7 +720,7 @@ private:
   }
 
 public:
-  proof_trace_parser(bool verbose);
+  proof_trace_parser(bool verbose, bool expand_terms);
 
   std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);
