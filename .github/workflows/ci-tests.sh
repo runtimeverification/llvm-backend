@@ -9,7 +9,7 @@ make -j$(nproc) install
 popd
 
 pushd matching
-mvn package --offline
+mvn package
 popd
 
 export PATH="$(realpath ./build/install/bin):$(realpath ./build/bin):/usr/lib/llvm-15/bin:$PATH"
