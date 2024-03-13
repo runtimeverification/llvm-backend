@@ -984,7 +984,13 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       llvm::ConstantInt::get(
           llvm::Type::getInt64Ty(module->getContext()), nroots),
       nullptr);
+
+#if LLVM_VERSION_MAJOR < 16
   are_block_val->insertAfter(&collect->back());
+#else
+  are_block_val->insertInto(collect, collect->end());
+#endif
+
   llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
       llvm::Type::getInt8PtrTy(module->getContext()));
   auto *zero
