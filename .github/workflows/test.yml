@@ -1,4 +1,4 @@
-name: "Test Nix Flake"
+name: "Run LLVM backend tests"
 on:
   pull_request:
 concurrency:
@@ -55,3 +55,30 @@ jobs:
           GC_DONT_GC=1 nix build --print-build-logs . --json \
             | jq -r '.[].outputs | to_entries[].value' \
             | cachix push k-framework
+
+  build-from-source:
+    name: 'Build LLVM backend from source'
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: 'Set up Docker'
+        uses: ./.github/actions/with-docker
+        with:
+          tag: llvm-backend-ci-${{ github.sha }}
+          os: ubuntu
+          distro: jammy
+          llvm: 15
+
+      - name: 'Run backend tests'
+        run: |
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} .github/workflows/ci-tests.sh
+
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop --time=0 llvm-backend-ci-${GITHUB_SHA}
+          docker container rm --force llvm-backend-ci-${GITHUB_SHA} || true
