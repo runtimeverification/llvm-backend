@@ -18,7 +18,7 @@ cl::opt<bool> verbose_output(
     llvm::cl::desc("Print verbose information about the input proof trace"),
     llvm::cl::cat(kore_proof_trace_cat));
 
-cl::opt<bool> expand_tetms_in_output(
+cl::opt<bool> expand_terms_in_output(
     "expand-terms", llvm::cl::desc("Expand KORE terms in the verbose output"),
     llvm::cl::cat(kore_proof_trace_cat));
 
