@@ -402,7 +402,7 @@ bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
 map *load_map_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (map *)(((char *)mem) + 8);
+    return (map *)(((char *)mem) + sizeof(blockheader));
   }
   return (map *)mem;
 }
@@ -410,7 +410,7 @@ map *load_map_for_gc(void **roots, bool is_block) {
 set *load_set_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (set *)(((char *)mem) + 8);
+    return (set *)(((char *)mem) + sizeof(blockheader));
   }
   return (set *)mem;
 }
@@ -418,7 +418,7 @@ set *load_set_for_gc(void **roots, bool is_block) {
 list *load_list_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (list *)(((char *)mem) + 8);
+    return (list *)(((char *)mem) + sizeof(blockheader));
   }
   return (list *)mem;
 }
@@ -426,7 +426,7 @@ list *load_list_for_gc(void **roots, bool is_block) {
 rangemap *load_rangemap_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (rangemap *)(((char *)mem) + 8);
+    return (rangemap *)(((char *)mem) + sizeof(blockheader));
   }
   return (rangemap *)mem;
 }
