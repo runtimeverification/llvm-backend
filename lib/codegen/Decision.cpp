@@ -916,85 +916,19 @@ void make_anywhere_function(
   make_eval_or_anywhere_function(function, definition, module, dt, add_owise);
 }
 
-std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
-    unsigned ordinal, llvm::Module *module, kore_definition *definition,
-    llvm::BasicBlock *block, llvm::BasicBlock *stuck,
-    std::vector<llvm::Value *> args, std::vector<value_type> const &types) {
-  auto *finished = get_or_insert_function(
-      module, "finished_rewriting",
-      llvm::FunctionType::get(
-          llvm::Type::getInt1Ty(module->getContext()), {}, false));
-  auto *is_finished = llvm::CallInst::Create(finished, {}, "", block);
-  auto *check_collect = llvm::BasicBlock::Create(
-      module->getContext(), "checkCollect", block->getParent());
-  llvm::BranchInst::Create(stuck, check_collect, is_finished, block);
-
-  auto *collection = get_or_insert_function(
-      module, "is_collection",
-      llvm::FunctionType::get(
-          llvm::Type::getInt1Ty(module->getContext()), {}, false));
-  auto *is_collection
-      = llvm::CallInst::Create(collection, {}, "", check_collect);
-  set_debug_loc(is_collection);
-  auto *collect = llvm::BasicBlock::Create(
-      module->getContext(), "isCollect", block->getParent());
-  auto *merge = llvm::BasicBlock::Create(
-      module->getContext(), "step", block->getParent());
-  llvm::BranchInst::Create(collect, merge, is_collection, check_collect);
-
-  unsigned nroots = 0;
-  unsigned i = 0;
-  std::vector<llvm::Type *> ptr_types;
-  std::vector<llvm::Value *> roots;
-  for (auto type : types) {
-    switch (type.cat) {
-    case sort_category::Map:
-    case sort_category::RangeMap:
-    case sort_category::List:
-    case sort_category::Set:
-      nroots++;
-      ptr_types.push_back(
-          llvm::PointerType::getUnqual(getvalue_type(type, module)));
-      roots.push_back(args[i]);
-      break;
-    case sort_category::Int:
-    case sort_category::Float:
-    case sort_category::StringBuffer:
-    case sort_category::Symbol:
-    case sort_category::Variable:
-      nroots++;
-      ptr_types.push_back(getvalue_type(type, module));
-      roots.push_back(args[i]);
-      break;
-    case sort_category::Bool:
-    case sort_category::MInt: break;
-    case sort_category::Uncomputed: abort();
-    }
-    i++;
-  }
-  auto *root_ty = llvm::ArrayType::get(
-      llvm::Type::getInt8PtrTy(module->getContext()), 256);
-  auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
-  std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
-  std::vector<llvm::Value *> are_block;
-  llvm::Instruction *are_block_val = llvm::CallInst::CreateMalloc(
-      collect, llvm::Type::getInt64Ty(block->getContext()),
-      llvm::Type::getInt1Ty(module->getContext()),
-      llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
-      llvm::ConstantInt::get(
-          llvm::Type::getInt64Ty(module->getContext()), nroots),
-      nullptr);
-
-#if LLVM_VERSION_MAJOR < 16
-  are_block_val->insertAfter(&collect->back());
-#else
-  are_block_val->insertInto(collect, collect->end());
-#endif
-
-  llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
-      llvm::Type::getInt8PtrTy(module->getContext()));
+// writes pointers to gc_roots prior to garbage collection
+static void store_ptrs_for_gc(
+    unsigned nroots, llvm::Module *module, llvm::Type *root_ty,
+    llvm::Constant *arr, llvm::Instruction *are_block_val,
+    llvm::BasicBlock *collect, std::vector<llvm::Value *> const &roots,
+    std::vector<value_type> const &types,
+    std::vector<llvm::Type *> const &ptr_types,
+    std::vector<std::pair<llvm::Value *, llvm::Type *>> &root_ptrs,
+    std::vector<llvm::Value *> &are_block) {
   auto *zero
       = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
+  llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
+      llvm::Type::getInt8PtrTy(module->getContext()));
   for (unsigned i = 0; i < nroots; i++) {
     auto *ptr = llvm::GetElementPtrInst::CreateInBounds(
         root_ty, arr,
@@ -1085,6 +1019,138 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       break;
     }
   }
+}
+
+// reads pointers from gc_roots global variable following garbage collection
+// and creates phi nodes for assigning the correct new value for the roots
+static void load_ptrs_for_gc(
+    llvm::Module *module, llvm::BasicBlock *check_collect,
+    llvm::BasicBlock *collect, llvm::BasicBlock *merge,
+    std::vector<llvm::Value *> &phis, std::vector<llvm::Value *> const &roots,
+    std::vector<std::pair<llvm::Value *, llvm::Type *>> const &root_ptrs,
+    std::vector<value_type> const &types,
+    std::vector<llvm::Value *> const &are_block) {
+  llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
+      llvm::Type::getInt8PtrTy(module->getContext()));
+  unsigned i = 0;
+  for (auto [ptr, pointee_ty] : root_ptrs) {
+    llvm::Value *loaded = nullptr;
+    switch (types[i].cat) {
+    case sort_category::Map:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_map_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    case sort_category::RangeMap:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_rangemap_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    case sort_category::List:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_list_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    case sort_category::Set:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_set_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    default: loaded = new llvm::LoadInst(pointee_ty, ptr, "", collect);
+    }
+    auto *phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
+    phi->addIncoming(loaded, collect);
+    phi->addIncoming(roots[i++], check_collect);
+    phis.push_back(phi);
+  }
+}
+
+std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
+    unsigned ordinal, llvm::Module *module, kore_definition *definition,
+    llvm::BasicBlock *block, llvm::BasicBlock *stuck,
+    std::vector<llvm::Value *> args, std::vector<value_type> const &types) {
+  auto *finished = get_or_insert_function(
+      module, "finished_rewriting",
+      llvm::FunctionType::get(
+          llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto *is_finished = llvm::CallInst::Create(finished, {}, "", block);
+  auto *check_collect = llvm::BasicBlock::Create(
+      module->getContext(), "checkCollect", block->getParent());
+  llvm::BranchInst::Create(stuck, check_collect, is_finished, block);
+
+  auto *collection = get_or_insert_function(
+      module, "is_collection",
+      llvm::FunctionType::get(
+          llvm::Type::getInt1Ty(module->getContext()), {}, false));
+  auto *is_collection
+      = llvm::CallInst::Create(collection, {}, "", check_collect);
+  set_debug_loc(is_collection);
+  auto *collect = llvm::BasicBlock::Create(
+      module->getContext(), "isCollect", block->getParent());
+  auto *merge = llvm::BasicBlock::Create(
+      module->getContext(), "step", block->getParent());
+  llvm::BranchInst::Create(collect, merge, is_collection, check_collect);
+
+  unsigned nroots = 0;
+  unsigned i = 0;
+  std::vector<llvm::Type *> ptr_types;
+  std::vector<llvm::Value *> roots;
+  for (auto type : types) {
+    switch (type.cat) {
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
+      nroots++;
+      ptr_types.push_back(
+          llvm::PointerType::getUnqual(getvalue_type(type, module)));
+      roots.push_back(args[i]);
+      break;
+    case sort_category::Int:
+    case sort_category::Float:
+    case sort_category::StringBuffer:
+    case sort_category::Symbol:
+    case sort_category::Variable:
+      nroots++;
+      ptr_types.push_back(getvalue_type(type, module));
+      roots.push_back(args[i]);
+      break;
+    case sort_category::Bool:
+    case sort_category::MInt: break;
+    case sort_category::Uncomputed: abort();
+    }
+    i++;
+  }
+  auto *root_ty = llvm::ArrayType::get(
+      llvm::Type::getInt8PtrTy(module->getContext()), 256);
+  auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
+  std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
+  std::vector<llvm::Value *> are_block;
+  llvm::Instruction *are_block_val = llvm::CallInst::CreateMalloc(
+      collect, llvm::Type::getInt64Ty(block->getContext()),
+      llvm::Type::getInt1Ty(module->getContext()),
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
+      llvm::ConstantInt::get(
+          llvm::Type::getInt64Ty(module->getContext()), nroots),
+      nullptr);
+
+#if LLVM_VERSION_MAJOR < 16
+  are_block_val->insertAfter(&collect->back());
+#else
+  are_block_val->insertInto(collect, collect->end());
+#endif
+
+  store_ptrs_for_gc(
+      nroots, module, root_ty, arr, are_block_val, collect, roots, types,
+      ptr_types, root_ptrs, are_block);
   std::vector<llvm::Constant *> elements;
   i = 0;
   for (auto cat : types) {
@@ -1144,44 +1210,9 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   set_debug_loc(call);
   i = 0;
   std::vector<llvm::Value *> phis;
-  for (auto [ptr, pointee_ty] : root_ptrs) {
-    llvm::Value *loaded = nullptr;
-    switch (types[i].cat) {
-    case sort_category::Map:
-      loaded = llvm::CallInst::Create(
-          get_or_insert_function(
-              module, "load_map_for_gc", pointee_ty, voidptrptr,
-              llvm::Type::getInt1Ty(module->getContext())),
-          {ptr, are_block[i]}, "", collect);
-      break;
-    case sort_category::RangeMap:
-      loaded = llvm::CallInst::Create(
-          get_or_insert_function(
-              module, "load_rangemap_for_gc", pointee_ty, voidptrptr,
-              llvm::Type::getInt1Ty(module->getContext())),
-          {ptr, are_block[i]}, "", collect);
-      break;
-    case sort_category::List:
-      loaded = llvm::CallInst::Create(
-          get_or_insert_function(
-              module, "load_list_for_gc", pointee_ty, voidptrptr,
-              llvm::Type::getInt1Ty(module->getContext())),
-          {ptr, are_block[i]}, "", collect);
-      break;
-    case sort_category::Set:
-      loaded = llvm::CallInst::Create(
-          get_or_insert_function(
-              module, "load_set_for_gc", pointee_ty, voidptrptr,
-              llvm::Type::getInt1Ty(module->getContext())),
-          {ptr, are_block[i]}, "", collect);
-      break;
-    default: loaded = new llvm::LoadInst(pointee_ty, ptr, "", collect);
-    }
-    auto *phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
-    phi->addIncoming(loaded, collect);
-    phi->addIncoming(roots[i++], check_collect);
-    phis.push_back(phi);
-  }
+  load_ptrs_for_gc(
+      module, check_collect, collect, merge, phis, roots, root_ptrs, types,
+      are_block);
   llvm::BranchInst::Create(merge, collect);
   i = 0;
   unsigned root_idx = 0;
