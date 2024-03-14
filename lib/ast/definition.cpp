@@ -74,7 +74,6 @@ void kore_definition::insert_reserved_symbols() {
   auto mod = kore_module::create("K-RAW-TERM");
   auto decl = kore_symbol_declaration::create("rawTerm", true);
   auto kitem = kore_composite_sort::create("SortKItem");
-  std::shared_ptr<kore_composite_sort> sort;
 
   decl->get_symbol()->add_sort(kitem);
   decl->get_symbol()->add_argument(kitem);
@@ -85,14 +84,15 @@ void kore_definition::insert_reserved_symbols() {
     case sort_category::Map:
     case sort_category::List:
     case sort_category::Set:
-    case sort_category::RangeMap:
-      decl = kore_symbol_declaration::create(
+    case sort_category::RangeMap: {
+      auto decl = kore_symbol_declaration::create(
           "rawCollection_" + std::to_string((int)cat.first.cat), true);
-      sort = cat.second;
+      auto sort = cat.second;
       decl->get_symbol()->add_sort(kitem);
       decl->get_symbol()->add_argument(sort);
       mod->add_declaration(std::move(decl));
       break;
+    }
     default: break;
     }
   }
