@@ -1208,7 +1208,6 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
        llvm::ConstantExpr::getBitCast(layout, ptr_ty), are_block_val},
       "", collect);
   set_debug_loc(call);
-  i = 0;
   std::vector<llvm::Value *> phis;
   load_ptrs_for_gc(
       module, check_collect, collect, merge, phis, roots, root_ptrs, types,
