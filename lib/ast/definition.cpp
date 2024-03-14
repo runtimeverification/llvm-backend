@@ -90,7 +90,7 @@ void kore_definition::insert_reserved_symbols() {
     case sort_category::Set:
     case sort_category::RangeMap: {
       auto decl = kore_symbol_declaration::create(
-          "rawCollection_" + std::to_string((int)cat.first.cat), true);
+          get_raw_symbol_name(cat.first.cat), true);
       auto sort = cat.second;
       decl->get_symbol()->add_sort(kitem);
       decl->get_symbol()->add_argument(sort);

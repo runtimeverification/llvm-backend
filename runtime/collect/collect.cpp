@@ -346,8 +346,7 @@ bool store_map_for_gc(void **roots, map *ptr) {
   }
   void *mem = kore_alloc(sizeof(blockheader) + sizeof(map));
   auto *hdr = (blockheader *)mem;
-  std::string name = "rawCollection_"
-                     + std::to_string((int)kllvm::sort_category::Map) + "{}";
+  std::string name = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (map *)(hdr + 1);
   *child = *ptr;
@@ -362,8 +361,7 @@ bool store_set_for_gc(void **roots, set *ptr) {
   }
   void *mem = kore_alloc(sizeof(blockheader) + sizeof(set));
   auto *hdr = (blockheader *)mem;
-  std::string name = "rawCollection_"
-                     + std::to_string((int)kllvm::sort_category::Set) + "{}";
+  std::string name = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (set *)(hdr + 1);
   *child = *ptr;
@@ -378,8 +376,7 @@ bool store_list_for_gc(void **roots, list *ptr) {
   }
   void *mem = kore_alloc(sizeof(blockheader) + sizeof(list));
   auto *hdr = (blockheader *)mem;
-  std::string name = "rawCollection_"
-                     + std::to_string((int)kllvm::sort_category::List) + "{}";
+  std::string name = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (list *)(hdr + 1);
   *child = *ptr;
@@ -394,9 +391,7 @@ bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
   }
   void *mem = kore_alloc(sizeof(blockheader) + sizeof(rangemap));
   auto *hdr = (blockheader *)mem;
-  std::string name = "rawCollection_"
-                     + std::to_string((int)kllvm::sort_category::RangeMap)
-                     + "{}";
+  std::string name = get_raw_symbol_name(kllvm::sort_category::RangeMap) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (rangemap *)(hdr + 1);
   *child = std::move(*ptr);
