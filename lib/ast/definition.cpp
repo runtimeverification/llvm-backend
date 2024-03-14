@@ -70,6 +70,10 @@ void kore_definition::add_module(sptr<kore_module> module) {
   modules_.push_back(std::move(module));
 }
 
+std::string get_raw_symbol_name(sort_category cat) {
+  return "rawCollection_" + std::to_string((int)cat);
+}
+
 void kore_definition::insert_reserved_symbols() {
   auto mod = kore_module::create("K-RAW-TERM");
   auto decl = kore_symbol_declaration::create("rawTerm", true);

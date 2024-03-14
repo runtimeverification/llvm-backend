@@ -1018,6 +1018,8 @@ void read_multimap(
 
 sptr<kore_pattern> strip_raw_term(sptr<kore_pattern> const &term);
 
+std::string get_raw_symbol_name(sort_category);
+
 namespace detail {
 
 template <typename T>
