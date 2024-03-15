@@ -328,6 +328,14 @@ public:
     treemap_ = m.treemap_;
   }
 
+  RangeMap(RangeMap const &other) = default;
+
+  RangeMap(RangeMap &&other) = default;
+
+  RangeMap &operator=(RangeMap const &other) = default;
+
+  RangeMap &operator=(RangeMap &&other) = default;
+
   // Getter for the rb-tree underlying this rangemap.
   [[nodiscard]] rb_tree::RBTree<Range<T>, V> treemap() const {
     return treemap_;

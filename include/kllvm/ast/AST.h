@@ -222,6 +222,7 @@ private:
   /* A unique integer representing the layout of the symbol in memory.
      See create_term.cpp for more information about the layout of K terms. */
   uint16_t layout_{};
+  bool instantiated_ = false;
 
 public:
   static ptr<kore_symbol> create(std::string const &name) {
@@ -1016,6 +1017,8 @@ void read_multimap(
     std::map<std::string, std::set<std::string>> &, attribute_set::key);
 
 sptr<kore_pattern> strip_raw_term(sptr<kore_pattern> const &term);
+
+std::string get_raw_symbol_name(sort_category);
 
 namespace detail {
 

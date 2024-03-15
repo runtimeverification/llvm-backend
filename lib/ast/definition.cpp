@@ -70,14 +70,36 @@ void kore_definition::add_module(sptr<kore_module> module) {
   modules_.push_back(std::move(module));
 }
 
+std::string get_raw_symbol_name(sort_category cat) {
+  return "rawCollection_" + std::to_string((int)cat);
+}
+
 void kore_definition::insert_reserved_symbols() {
   auto mod = kore_module::create("K-RAW-TERM");
   auto decl = kore_symbol_declaration::create("rawTerm", true);
-  auto sort = kore_composite_sort::create("SortKItem");
+  auto kitem = kore_composite_sort::create("SortKItem");
 
-  decl->get_symbol()->add_sort(sort);
-  decl->get_symbol()->add_argument(sort);
+  decl->get_symbol()->add_sort(kitem);
+  decl->get_symbol()->add_argument(kitem);
   mod->add_declaration(std::move(decl));
+
+  for (auto const &cat : hooked_sorts_) {
+    switch (cat.first.cat) {
+    case sort_category::Map:
+    case sort_category::List:
+    case sort_category::Set:
+    case sort_category::RangeMap: {
+      auto decl = kore_symbol_declaration::create(
+          get_raw_symbol_name(cat.first.cat), true);
+      auto sort = cat.second;
+      decl->get_symbol()->add_sort(kitem);
+      decl->get_symbol()->add_argument(sort);
+      mod->add_declaration(std::move(decl));
+      break;
+    }
+    default: break;
+    }
+  }
 
   add_module(std::move(mod));
 }
@@ -121,24 +143,11 @@ SymbolMap kore_definition::get_overloads() const {
 
 // NOLINTNEXTLINE(*-function-cognitive-complexity)
 void kore_definition::preprocess() {
-  insert_reserved_symbols();
-
   for (auto *axiom : axioms_) {
     axiom->pattern_ = axiom->pattern_->expand_aliases(this);
   }
   auto symbols = std::map<std::string, std::vector<kore_symbol *>>{};
   unsigned next_ordinal = 0;
-  for (auto const &decl : symbol_declarations_) {
-    if (decl.second->attributes().contains(
-            attribute_set::key::FreshGenerator)) {
-      auto sort = decl.second->get_symbol()->get_sort();
-      if (sort->is_concrete()) {
-        fresh_functions_[dynamic_cast<kore_composite_sort *>(sort.get())
-                             ->get_name()]
-            = decl.second->get_symbol();
-      }
-    }
-  }
   for (auto iter = axioms_.begin(); iter != axioms_.end();) {
     auto *axiom = *iter;
     axiom->ordinal_ = next_ordinal;
@@ -163,12 +172,68 @@ void kore_definition::preprocess() {
       }
     }
   }
+
   for (auto const &entry : symbols) {
     for (auto *symbol : entry.second) {
       auto *decl = symbol_declarations_.at(symbol->get_name());
       symbol->instantiate_symbol(decl);
     }
   }
+
+  for (auto const &entry : symbols) {
+    for (auto *symbol : entry.second) {
+      for (auto const &sort : symbol->get_arguments()) {
+        if (sort->is_concrete()) {
+          hooked_sorts_[dynamic_cast<kore_composite_sort *>(sort.get())
+                            ->get_category(this)]
+              = std::dynamic_pointer_cast<kore_composite_sort>(sort);
+        }
+      }
+      if (symbol->get_sort()->is_concrete()) {
+        hooked_sorts_[dynamic_cast<kore_composite_sort *>(
+                          symbol->get_sort().get())
+                          ->get_category(this)]
+            = std::dynamic_pointer_cast<kore_composite_sort>(
+                symbol->get_sort());
+      }
+    }
+  }
+
+  insert_reserved_symbols();
+
+  for (auto &module : modules_) {
+    auto const &declarations = module->get_declarations();
+    for (auto const &declaration : declarations) {
+      auto *decl = dynamic_cast<kore_symbol_declaration *>(declaration.get());
+      if (decl == nullptr) {
+        continue;
+      }
+      if (decl->is_hooked() && decl->get_object_sort_variables().empty()) {
+        kore_symbol *symbol = decl->get_symbol();
+        symbols.emplace(symbol->get_name(), std::vector<kore_symbol *>{symbol});
+      }
+    }
+  }
+
+  for (auto const &entry : symbols) {
+    for (auto *symbol : entry.second) {
+      auto *decl = symbol_declarations_.at(symbol->get_name());
+      symbol->instantiate_symbol(decl);
+    }
+  }
+
+  for (auto const &decl : symbol_declarations_) {
+    if (decl.second->attributes().contains(
+            attribute_set::key::FreshGenerator)) {
+      auto sort = decl.second->get_symbol()->get_sort();
+      if (sort->is_concrete()) {
+        fresh_functions_[dynamic_cast<kore_composite_sort *>(sort.get())
+                             ->get_name()]
+            = decl.second->get_symbol();
+      }
+    }
+  }
+
   uint32_t next_symbol = 0;
   uint16_t next_layout = 1;
   auto instantiations
@@ -202,20 +267,6 @@ void kore_definition::preprocess() {
   for (auto const &entry : symbols) {
     auto range = variables.at(entry.first);
     for (auto *symbol : entry.second) {
-      for (auto const &sort : symbol->get_arguments()) {
-        if (sort->is_concrete()) {
-          hooked_sorts_[dynamic_cast<kore_composite_sort *>(sort.get())
-                            ->get_category(this)]
-              = std::dynamic_pointer_cast<kore_composite_sort>(sort);
-        }
-      }
-      if (symbol->get_sort()->is_concrete()) {
-        hooked_sorts_[dynamic_cast<kore_composite_sort *>(
-                          symbol->get_sort().get())
-                          ->get_category(this)]
-            = std::dynamic_pointer_cast<kore_composite_sort>(
-                symbol->get_sort());
-      }
       if (!symbol->is_concrete()) {
         if (symbol->is_polymorphic()) {
           symbol->first_tag_ = range.first;

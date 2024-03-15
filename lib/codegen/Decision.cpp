@@ -916,6 +916,163 @@ void make_anywhere_function(
   make_eval_or_anywhere_function(function, definition, module, dt, add_owise);
 }
 
+// writes pointers to gc_roots prior to garbage collection
+static void store_ptrs_for_gc(
+    unsigned nroots, llvm::Module *module, llvm::Type *root_ty,
+    llvm::Constant *arr, llvm::Instruction *are_block_val,
+    llvm::BasicBlock *collect, std::vector<llvm::Value *> const &roots,
+    std::vector<value_type> const &types,
+    std::vector<llvm::Type *> const &ptr_types,
+    std::vector<std::pair<llvm::Value *, llvm::Type *>> &root_ptrs,
+    std::vector<llvm::Value *> &are_block) {
+  auto *zero
+      = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
+  llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
+      llvm::Type::getInt8PtrTy(module->getContext()));
+  for (unsigned i = 0; i < nroots; i++) {
+    auto *ptr = llvm::GetElementPtrInst::CreateInBounds(
+        root_ty, arr,
+        {zero, llvm::ConstantInt::get(
+                   llvm::Type::getInt64Ty(module->getContext()), i)},
+        "", collect);
+    llvm::Value *is_block = nullptr;
+    llvm::Value *are_block_ptr = nullptr;
+    switch (types[i].cat) {
+    case sort_category::Map:
+      is_block = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "store_map_for_gc",
+              llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
+              ptr_types[i]),
+          {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, collect);
+      root_ptrs.emplace_back(ptr, ptr_types[i]);
+      are_block.push_back(is_block);
+      break;
+    case sort_category::RangeMap:
+      is_block = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "store_rangemap_for_gc",
+              llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
+              ptr_types[i]),
+          {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, collect);
+      root_ptrs.emplace_back(ptr, ptr_types[i]);
+      are_block.push_back(is_block);
+      break;
+    case sort_category::List:
+      is_block = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "store_list_for_gc",
+              llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
+              ptr_types[i]),
+          {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, collect);
+      root_ptrs.emplace_back(ptr, ptr_types[i]);
+      are_block.push_back(is_block);
+      break;
+    case sort_category::Set:
+      is_block = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "store_set_for_gc",
+              llvm::Type::getInt1Ty(module->getContext()), voidptrptr,
+              ptr_types[i]),
+          {ptr, roots[i]}, "is_block", collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(is_block, are_block_ptr, "", collect);
+      root_ptrs.emplace_back(ptr, ptr_types[i]);
+      are_block.push_back(is_block);
+      break;
+    default:
+      auto *casted = new llvm::BitCastInst(
+          ptr, llvm::PointerType::getUnqual(ptr_types[i]), "", collect);
+      new llvm::StoreInst(roots[i], casted, collect);
+      are_block_ptr = llvm::GetElementPtrInst::CreateInBounds(
+          llvm::Type::getInt1Ty(module->getContext()), are_block_val,
+          {llvm::ConstantInt::get(
+              llvm::Type::getInt64Ty(module->getContext()), i)},
+          "", collect);
+      new llvm::StoreInst(
+          llvm::ConstantInt::getFalse(module->getContext()), are_block_ptr, "",
+          collect);
+      root_ptrs.emplace_back(casted, ptr_types[i]);
+      are_block.push_back(nullptr);
+      break;
+    }
+  }
+}
+
+// reads pointers from gc_roots global variable following garbage collection
+// and creates phi nodes for assigning the correct new value for the roots
+static void load_ptrs_for_gc(
+    llvm::Module *module, llvm::BasicBlock *check_collect,
+    llvm::BasicBlock *collect, llvm::BasicBlock *merge,
+    std::vector<llvm::Value *> &phis, std::vector<llvm::Value *> const &roots,
+    std::vector<std::pair<llvm::Value *, llvm::Type *>> const &root_ptrs,
+    std::vector<value_type> const &types,
+    std::vector<llvm::Value *> const &are_block) {
+  llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
+      llvm::Type::getInt8PtrTy(module->getContext()));
+  unsigned i = 0;
+  for (auto [ptr, pointee_ty] : root_ptrs) {
+    llvm::Value *loaded = nullptr;
+    switch (types[i].cat) {
+    case sort_category::Map:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_map_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    case sort_category::RangeMap:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_rangemap_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    case sort_category::List:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_list_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    case sort_category::Set:
+      loaded = llvm::CallInst::Create(
+          get_or_insert_function(
+              module, "load_set_for_gc", pointee_ty, voidptrptr,
+              llvm::Type::getInt1Ty(module->getContext())),
+          {ptr, are_block[i]}, "", collect);
+      break;
+    default: loaded = new llvm::LoadInst(pointee_ty, ptr, "", collect);
+    }
+    auto *phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
+    phi->addIncoming(loaded, collect);
+    phi->addIncoming(roots[i++], check_collect);
+    phis.push_back(phi);
+  }
+}
+
 std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
     unsigned ordinal, llvm::Module *module, kore_definition *definition,
     llvm::BasicBlock *block, llvm::BasicBlock *stuck,
@@ -976,19 +1133,24 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       llvm::Type::getInt8PtrTy(module->getContext()), 256);
   auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
   std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
-  for (unsigned i = 0; i < nroots; i++) {
-    auto *ptr = llvm::GetElementPtrInst::CreateInBounds(
-        root_ty, arr,
-        {llvm::ConstantInt::get(
-             llvm::Type::getInt64Ty(module->getContext()), 0),
-         llvm::ConstantInt::get(
-             llvm::Type::getInt64Ty(module->getContext()), i)},
-        "", collect);
-    auto *casted = new llvm::BitCastInst(
-        ptr, llvm::PointerType::getUnqual(ptr_types[i]), "", collect);
-    new llvm::StoreInst(roots[i], casted, collect);
-    root_ptrs.emplace_back(casted, ptr_types[i]);
-  }
+  std::vector<llvm::Value *> are_block;
+  llvm::Instruction *are_block_val = llvm::CallInst::CreateMalloc(
+      collect, llvm::Type::getInt64Ty(block->getContext()),
+      llvm::Type::getInt1Ty(module->getContext()),
+      llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
+      llvm::ConstantInt::get(
+          llvm::Type::getInt64Ty(module->getContext()), nroots),
+      nullptr);
+
+#if LLVM_VERSION_MAJOR < 16
+  are_block_val->insertAfter(&collect->back());
+#else
+  are_block_val->insertInto(collect, collect->end());
+#endif
+
+  store_ptrs_for_gc(
+      nroots, module, root_ty, arr, are_block_val, collect, roots, types,
+      ptr_types, root_ptrs, are_block);
   std::vector<llvm::Constant *> elements;
   i = 0;
   for (auto cat : types) {
@@ -1035,25 +1197,21 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       module, "kore_collect",
       llvm::FunctionType::get(
           llvm::Type::getVoidTy(module->getContext()),
-          {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptr_ty},
+          {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptr_ty,
+           llvm::Type::getInt1PtrTy(module->getContext())},
           false));
   auto *call = llvm::CallInst::Create(
       kore_collect,
       {arr,
        llvm::ConstantInt::get(
            llvm::Type::getInt8Ty(module->getContext()), nroots),
-       llvm::ConstantExpr::getBitCast(layout, ptr_ty)},
+       llvm::ConstantExpr::getBitCast(layout, ptr_ty), are_block_val},
       "", collect);
   set_debug_loc(call);
-  i = 0;
   std::vector<llvm::Value *> phis;
-  for (auto [ptr, pointee_ty] : root_ptrs) {
-    auto *loaded = new llvm::LoadInst(pointee_ty, ptr, "", collect);
-    auto *phi = llvm::PHINode::Create(loaded->getType(), 2, "phi", merge);
-    phi->addIncoming(loaded, collect);
-    phi->addIncoming(roots[i++], check_collect);
-    phis.push_back(phi);
-  }
+  load_ptrs_for_gc(
+      module, check_collect, collect, merge, phis, roots, root_ptrs, types,
+      are_block);
   llvm::BranchInst::Create(merge, collect);
   i = 0;
   unsigned root_idx = 0;
