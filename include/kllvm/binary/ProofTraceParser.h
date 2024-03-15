@@ -699,14 +699,16 @@ private:
       trace.add_pre_trace_event(event);
     }
 
-    uint64_t pattern_len = 0;
-    auto config = parse_config(ptr, end, pattern_len);
-    if (!config) {
-      return false;
+    if (ptr != end) {
+      uint64_t pattern_len = 0;
+      auto config = parse_config(ptr, end, pattern_len);
+      if (!config) {
+        return false;
+      }
+      llvm_event config_event;
+      config_event.setkore_pattern(config, pattern_len);
+      trace.set_initial_config(config_event);
     }
-    llvm_event config_event;
-    config_event.setkore_pattern(config, pattern_len);
-    trace.set_initial_config(config_event);
 
     while (ptr != end) {
       llvm_event event;

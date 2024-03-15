@@ -126,7 +126,9 @@ void llvm_rewrite_trace::print(
   for (auto const &pre_trace_event : pre_trace_) {
     pre_trace_event.print(out, expand_terms, false, ind);
   }
-  initial_config_.print(out, expand_terms, false, ind);
+  if (initial_config_.is_pattern() && initial_config_.getkore_pattern()) {
+    initial_config_.print(out, expand_terms, false, ind);
+  }
   for (auto const &trace_event : trace_) {
     trace_event.print(out, expand_terms, false, ind);
   }
