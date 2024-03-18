@@ -199,10 +199,14 @@ static void migrate_floating(floating **floating_ptr) {
   *floating_ptr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
-static void
-migrate_child(void *curr_block, layoutitem *args, unsigned i, bool ptr) {
+static void migrate_child(
+    void *curr_block, layoutitem *args, unsigned i, bool ptr, bool is_block) {
   layoutitem *arg_data = args + i;
   void *arg = ((char *)curr_block) + arg_data->offset;
+  if (is_block) {
+    migrate((block **)arg);
+    return;
+  }
   switch (arg_data->cat) {
   case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
   case RANGEMAP_LAYOUT: migrate_rangemap(ptr ? *(rangemap **)arg : arg); break;
@@ -226,7 +230,7 @@ static char *evacuate(char *scan_ptr, char **alloc_ptr) {
   if (layout_int) {
     layout *layout_data = get_layout_data(layout_int);
     for (unsigned i = 0; i < layout_data->nargs; i++) {
-      migrate_child(curr_block, layout_data->args, i, false);
+      migrate_child(curr_block, layout_data->args, i, false, false);
     }
   }
   return move_ptr(scan_ptr, get_size(hdr, layout_int), *alloc_ptr);
@@ -256,7 +260,8 @@ void init_static_objects(void) {
   set_kore_memory_functions_for_gmp();
 }
 
-void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
+void kore_collect(
+    void **roots, uint8_t nroots, layoutitem *type_info, bool *are_block) {
   is_gc = true;
   collect_old = should_collect_old_gen();
   MEM_LOG("Starting garbage collection\n");
@@ -274,7 +279,7 @@ void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
 #endif
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
   for (int i = 0; i < nroots; i++) {
-    migrate_child(roots, type_info, i, true);
+    migrate_child(roots, type_info, i, true, are_block[i]);
   }
   migrate_roots();
   char *scan_ptr = youngspace_ptr();
@@ -326,11 +331,103 @@ void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
 }
 
 void free_all_kore_mem() {
-  kore_collect(nullptr, 0, nullptr);
+  kore_collect(nullptr, 0, nullptr, nullptr);
 }
 
 bool is_collection() {
   size_t threshold = get_gc_threshold();
   return youngspace_almost_full(threshold);
+}
+
+bool store_map_for_gc(void **roots, map *ptr) {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
+    *roots = ptr;
+    return false;
+  }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(map));
+  auto *hdr = (blockheader *)mem;
+  std::string name = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (map *)(hdr + 1);
+  *child = *ptr;
+  *roots = mem;
+  return true;
+}
+
+bool store_set_for_gc(void **roots, set *ptr) {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
+    *roots = ptr;
+    return false;
+  }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(set));
+  auto *hdr = (blockheader *)mem;
+  std::string name = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (set *)(hdr + 1);
+  *child = *ptr;
+  *roots = mem;
+  return true;
+}
+
+bool store_list_for_gc(void **roots, list *ptr) {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
+    *roots = ptr;
+    return false;
+  }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(list));
+  auto *hdr = (blockheader *)mem;
+  std::string name = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (list *)(hdr + 1);
+  *child = *ptr;
+  *roots = mem;
+  return true;
+}
+
+bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
+  if (get_arena_semispace_id_of_object(ptr) != ALWAYSGCSPACE_ID) {
+    *roots = ptr;
+    return false;
+  }
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(rangemap));
+  auto *hdr = (blockheader *)mem;
+  std::string name = get_raw_symbol_name(kllvm::sort_category::RangeMap) + "{}";
+  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  auto *child = (rangemap *)(hdr + 1);
+  *child = std::move(*ptr);
+  *roots = mem;
+  return true;
+}
+
+map *load_map_for_gc(void **roots, bool is_block) {
+  void *mem = *roots;
+  if (is_block) {
+    return (map *)(((char *)mem) + sizeof(blockheader));
+  }
+  return (map *)mem;
+}
+
+set *load_set_for_gc(void **roots, bool is_block) {
+  void *mem = *roots;
+  if (is_block) {
+    return (set *)(((char *)mem) + sizeof(blockheader));
+  }
+  return (set *)mem;
+}
+
+list *load_list_for_gc(void **roots, bool is_block) {
+  void *mem = *roots;
+  if (is_block) {
+    return (list *)(((char *)mem) + sizeof(blockheader));
+  }
+  return (list *)mem;
+}
+
+rangemap *load_rangemap_for_gc(void **roots, bool is_block) {
+  void *mem = *roots;
+  if (is_block) {
+    return (rangemap *)(((char *)mem) + sizeof(blockheader));
+  }
+  return (rangemap *)mem;
 }
 }
