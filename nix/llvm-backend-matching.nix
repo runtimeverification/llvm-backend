@@ -13,7 +13,7 @@ let self = maven.buildMavenPackage rec {
     ];
 
     manualMvnSourceArtifacts = [
-      "org.scala-sbt:compiler-bridge_2.12"
+      "org.scala-sbt:compiler-bridge_2.12:1.8.0"
     ];
 
     passthru = {
