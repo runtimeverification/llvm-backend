@@ -21,7 +21,7 @@ let
 
   llvm-backend-matching = import ./llvm-backend-matching.nix {
     src = prev.llvm-backend-matching-src;
-    mvnHash = "sha256-HF6BXeCnV5I7+oRVGK8DGHjaAtHWLfEaCwtkVcQHoGU";
+    mvnHash = "sha256-2X8G3T05Pk1apA0f04Mdu/8DAB89oB9XwTBQ3KVoc/A=";
     inherit (final) maven;
   };
 

@@ -429,6 +429,7 @@ object Parser {
 
   val heuristicMap: Map[Char, Heuristic] = {
     import scala.reflect.runtime.universe
+    import universe.LiteralTag
 
     val heuristicType        = universe.typeOf[Heuristic]
     val heuristicClass       = heuristicType.typeSymbol.asClass

@@ -49,6 +49,7 @@ object SortCategory {
           MatchingException.Type.COMPILER_ERROR,
           "LLVM Backend does not support multisets. If you are seeing this error due to a configuration cell tagged with multiplicity=\"*\", please add either type=\"Map\" or type=\"Set\". If you still need the collection to not contain duplicates, it is recommended you also add a unique identifier each time a cell is created. You can do this with !X:Int."
         );
+      case _ => ???
     }
 
   private def getBitwidth(s: Sort, symlib: Parser.SymLib): Int =

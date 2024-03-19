@@ -12,10 +12,16 @@ let self = maven.buildMavenPackage rec {
       "org.apache.maven.plugins:maven-compiler-plugin:3.7.0"
     ];
 
+    manualMvnSourceArtifacts = [
+      "org.scala-sbt:compiler-bridge_2.12:1.8.0"
+    ];
+
     passthru = {
       jar =
         "${self}/share/java/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar";
     };
+
+    mvnParameters = "-DsecondaryCacheDir=secondary-cache";
 
     installPhase = ''
       mkdir -p $out/share/java

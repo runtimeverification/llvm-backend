@@ -781,18 +781,20 @@ class Matrix private (
         )
     }
     // fill out the bindings for list range variables
-    val withRanges = row.clause.listRanges.foldRight(sc) { case ((o @ Num(_, o2), hd, tl), dt) =>
-      Function(
-        "hook_LIST_range_long",
-        o,
-        Seq(
-          (o2, "LIST.List"),
-          (Lit(hd.toString, "MINT.MInt 64"), "MINT.MInt 64"),
-          (Lit(tl.toString, "MINT.MInt 64"), "MINT.MInt 64")
-        ),
-        "LIST.List",
-        dt
-      )
+    val withRanges = row.clause.listRanges.foldRight(sc) {
+      case ((o @ Num(_, o2), hd, tl), dt) =>
+        Function(
+          "hook_LIST_range_long",
+          o,
+          Seq(
+            (o2, "LIST.List"),
+            (Lit(hd.toString, "MINT.MInt 64"), "MINT.MInt 64"),
+            (Lit(tl.toString, "MINT.MInt 64"), "MINT.MInt 64")
+          ),
+          "LIST.List",
+          dt
+        )
+      case _ => ???
     }
     val withOverloads = row.clause.overloadChildren.foldRight(withRanges) {
       case ((SymbolC(inj), f, v), dt) =>
@@ -810,6 +812,7 @@ class Matrix private (
           ),
           dt
         )
+      case _ => ???
     }
     val withSpecials = row.clause.specializedVars.foldRight(withOverloads) { case ((o, p), dt) =>
       MakePattern(o, p._1.hookAtt, p._2, dt)
