@@ -1,8 +1,10 @@
-version: 5
+version: 6
 hook: MAP.element (0)
   function: Lbl'UndsPipe'-'-GT-Unds'{} (0)
     arg: kore[74]
     arg: kore[1787]
+  arg: kore[74]
+  arg: kore[1787]
 hook result: kore[1937]
 hook: MAP.unit (0)
   function: Lbl'Stop'Map{} (0)
@@ -11,6 +13,8 @@ hook: MAP.concat (0)
   function: Lbl'Unds'Map'Unds'{} (0)
     arg: kore[64]
     arg: kore[1937]
+  arg: kore[64]
+  arg: kore[1937]
 hook result: kore[1937]
 function: LblinitGeneratedTopCell{} (0)
   arg: kore[1937]
@@ -29,6 +33,8 @@ function: Lblproject'Coln'Pgm{} (0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
       arg: kore[1937]
       arg: kore[74]
+    arg: kore[1937]
+    arg: kore[74]
   hook result: kore[1787]
   arg: kore[1807]
 rule: 3070 1
@@ -54,8 +60,12 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:1)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
+  arg: kore[64]
+  arg: kore[188]
 hook result: kore[188]
 config: kore[2027]
 rule: 2919 5
@@ -71,8 +81,12 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:1)
         arg: kore[57]
         arg: kore[57]
+      arg: kore[57]
+      arg: kore[57]
     hook result: kore[190]
     arg: kore[190]
+  arg: kore[188]
+  arg: kore[190]
 hook result: kore[356]
 config: kore[2107]
 rule: 2918 4
@@ -122,9 +136,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[58]
+      arg: kore[55]
+      arg: kore[58]
     hook result: kore[189]
     arg: kore[189]
     arg: kore[190]
+  arg: kore[189]
+  arg: kore[190]
 hook result: kore[357]
 config: kore[1712]
 side condition entry: 2912 1
@@ -154,9 +172,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[57]
+      arg: kore[57]
+      arg: kore[57]
     hook result: kore[190]
     arg: kore[190]
     arg: kore[189]
+  arg: kore[190]
+  arg: kore[189]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -304,6 +326,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -601,6 +625,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -649,9 +675,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[189]
+  arg: kore[191]
+  arg: kore[189]
 hook result: kore[358]
 config: kore[1849]
 side condition entry: 2912 1
@@ -776,6 +806,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1936]
 side condition entry: 2885 1
@@ -844,6 +876,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[71]
+  arg: kore[71]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1760]
 side condition entry: 2890 1
@@ -892,9 +926,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -1042,6 +1080,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -1339,6 +1379,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -1387,9 +1429,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -1514,6 +1560,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -1582,6 +1630,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -1630,9 +1680,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -1780,6 +1834,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -2077,6 +2133,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -2125,9 +2183,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -2252,6 +2314,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -2320,6 +2384,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -2368,9 +2434,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -2518,6 +2588,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -2815,6 +2887,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -2863,9 +2937,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -2990,6 +3068,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -3058,6 +3138,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -3106,9 +3188,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -3256,6 +3342,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -3553,6 +3641,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -3601,9 +3691,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -3728,6 +3822,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -3796,6 +3892,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -3844,9 +3942,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -3994,6 +4096,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -4291,6 +4395,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -4339,9 +4445,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -4466,6 +4576,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -4534,6 +4646,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -4582,9 +4696,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -4732,6 +4850,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -5029,6 +5149,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -5077,9 +5199,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -5204,6 +5330,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -5272,6 +5400,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -5320,9 +5450,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -5470,6 +5604,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -5767,6 +5903,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -5815,9 +5953,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -5942,6 +6084,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -6010,6 +6154,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -6058,9 +6204,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -6208,6 +6358,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -6505,6 +6657,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -6553,9 +6707,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -6680,6 +6838,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -6748,6 +6908,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -6796,9 +6958,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -6946,6 +7112,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[76]
 config: kore[2742]
 side condition entry: 2880 1
@@ -7243,6 +7411,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[71]
     arg: kore[70]
+  arg: kore[71]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[2092]
 side condition entry: 2890 1
@@ -7291,9 +7461,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[57]
         arg: kore[58]
+      arg: kore[57]
+      arg: kore[58]
     hook result: kore[191]
     arg: kore[191]
     arg: kore[188]
+  arg: kore[191]
+  arg: kore[188]
 hook result: kore[357]
 config: kore[1848]
 side condition entry: 2912 1
@@ -7418,6 +7592,8 @@ hook: INT.sub (0:0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[71]
 config: kore[1934]
 side condition entry: 2885 1
@@ -7486,6 +7662,8 @@ hook: INT.add (0:0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[71]
+  arg: kore[70]
+  arg: kore[71]
 hook result: kore[70]
 config: kore[1759]
 side condition entry: 2890 1
@@ -7534,9 +7712,13 @@ hook: MAP.concat (0:0:1:0)
       function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
         arg: kore[55]
         arg: kore[57]
+      arg: kore[55]
+      arg: kore[57]
     hook result: kore[188]
     arg: kore[188]
     arg: kore[191]
+  arg: kore[188]
+  arg: kore[191]
 hook result: kore[357]
 config: kore[1518]
 rule: 2892 6
@@ -7684,6 +7866,8 @@ hook: INT.le (0:0:0:0:0)
   function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
     arg: kore[70]
     arg: kore[70]
+  arg: kore[70]
+  arg: kore[70]
 hook result: kore[75]
 config: kore[2741]
 side condition entry: 2880 1

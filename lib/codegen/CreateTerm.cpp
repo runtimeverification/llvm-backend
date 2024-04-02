@@ -656,7 +656,7 @@ llvm::Value *create_term::create_hook(
   }
   std::string hook_name = "hook_" + name.substr(0, name.find('.')) + "_"
                           + name.substr(name.find('.') + 1);
-  return create_function_call(hook_name, pattern, true, false, location_stack);
+  return create_function_call(hook_name, pattern, true, false, true, location_stack);
 }
 
 // We use tailcc calling convention for apply_rule_* and eval_* functions to
@@ -664,7 +664,7 @@ llvm::Value *create_term::create_hook(
 // recursive.
 llvm::Value *create_term::create_function_call(
     std::string const &name, kore_composite_pattern *pattern, bool sret,
-    bool tailcc, std::string const &location_stack) {
+    bool tailcc, bool is_hook, std::string const &location_stack) {
   auto event = proof_event(definition_, module_);
 
   current_block_
@@ -699,6 +699,16 @@ llvm::Value *create_term::create_function_call(
   }
 
   current_block_ = event.function_event_post(current_block_);
+
+  if (is_hook) {
+    int i = 0;
+    for (auto const &p : pattern->get_arguments()) {
+      auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
+      proof_event e(definition_, module_);
+      current_block_ = e.hook_arg(args[i], sort, current_block_);
+      i++;
+    }
+  }
 
   return create_function_call(
       name, return_cat, args, sret, tailcc, location_stack);
@@ -903,7 +913,7 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
       auto fn_name = fmt::format("eval_{}", ast_to_string(*symbol, 0, false));
       return std::make_pair(
           create_function_call(
-              fn_name, constructor, false, true, location_stack),
+              fn_name, constructor, false, true, false, location_stack),
           true);
     }
     if (auto cat

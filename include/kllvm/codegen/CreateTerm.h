@@ -28,7 +28,7 @@ private:
       std::string const &location_stack = "0");
   llvm::Value *create_function_call(
       std::string const &name, kore_composite_pattern *pattern, bool sret,
-      bool tailcc, std::string const &location_stack = "0");
+      bool tailcc, bool is_hook, std::string const &location_stack = "0");
   llvm::Value *not_injection_case(
       kore_composite_pattern *constructor, llvm::Value *val,
       std::string const &location_stack = "0");
