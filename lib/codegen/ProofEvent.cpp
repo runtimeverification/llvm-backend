@@ -174,7 +174,7 @@ proof_event::event_prelude(
 llvm::BasicBlock *proof_event::hook_event_pre(
     std::string const &name, llvm::BasicBlock *current_block,
     std::string const &location_stack) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
@@ -192,7 +192,7 @@ llvm::BasicBlock *proof_event::hook_event_pre(
 llvm::BasicBlock *proof_event::hook_event_post(
     llvm::Value *val, kore_composite_sort *sort,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
@@ -207,15 +207,23 @@ llvm::BasicBlock *proof_event::hook_event_post(
   return merge_block;
 }
 
-llvm::BasicBlock *proof_event::hook_arg(
-    llvm::Value *val, kore_composite_sort *sort,
+/*
+ * Arguments for Hook/Function Events
+ */
+
+llvm::BasicBlock *proof_event::argument(
+    llvm::Value *val, kore_composite_sort *sort, bool is_hook_arg,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
+    return current_block;
+  }
+
+  if (!is_hook_arg && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
   auto [true_block, merge_block, outputFile]
-      = event_prelude("hookarg", current_block);
+      = event_prelude("eventarg", current_block);
 
   emit_serialize_term(*sort, outputFile, val, true_block);
 
@@ -232,7 +240,7 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
     std::map<std::string, kore_variable_pattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
@@ -261,7 +269,7 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
 llvm::BasicBlock *proof_event::rewrite_event_post(
     kore_axiom_declaration *axiom, llvm::Value *return_value,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
@@ -286,7 +294,7 @@ llvm::BasicBlock *proof_event::rewrite_event_post(
 llvm::BasicBlock *proof_event::function_event_pre(
     llvm::BasicBlock *current_block, kore_composite_pattern *pattern,
     std::string const &location_stack) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
@@ -304,7 +312,7 @@ llvm::BasicBlock *proof_event::function_event_pre(
 
 llvm::BasicBlock *
 proof_event::function_event_post(llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
@@ -321,7 +329,7 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
 llvm::BasicBlock *proof_event::side_condition_event_pre(
     kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 
@@ -360,7 +368,7 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 llvm::BasicBlock *proof_event::side_condition_event_post(
     kore_axiom_declaration *axiom, llvm::Value *check_result,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation && !proof_hint_instrumentation_slow) {
     return current_block;
   }
 

@@ -9,6 +9,12 @@ cl::opt<bool> proof_hint_instrumentation(
     llvm::cl::desc("Enable instrumentation for generation of proof hints"),
     llvm::cl::cat(codegen_lib_cat));
 
+cl::opt<bool> proof_hint_instrumentation_slow(
+    "proof-hint-instrumentation-slow",
+    llvm::cl::desc("Enable instrumentation for generation of proof hints that "
+                   "contain function argument KORE terms as part of the trace"),
+    llvm::cl::cat(codegen_lib_cat));
+
 cl::opt<bool> keep_frame_pointer(
     "fno-omit-frame-pointer",
     cl::desc("Keep frame pointer in compiled code for debugging purposes"),
