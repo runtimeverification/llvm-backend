@@ -21,14 +21,14 @@ private:
   std::set<kore_pattern *> static_terms_;
 
   llvm::Value *alloc_arg(
-      kore_composite_pattern *pattern, int idx,
+      kore_composite_pattern *pattern, int idx, bool is_hook_arg,
       std::string const &location_stack);
   llvm::Value *create_hook(
       kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
       std::string const &location_stack = "0");
   llvm::Value *create_function_call(
       std::string const &name, kore_composite_pattern *pattern, bool sret,
-      bool tailcc, std::string const &location_stack = "0");
+      bool tailcc, bool is_hook, std::string const &location_stack = "0");
   llvm::Value *not_injection_case(
       kore_composite_pattern *constructor, llvm::Value *val,
       std::string const &location_stack = "0");

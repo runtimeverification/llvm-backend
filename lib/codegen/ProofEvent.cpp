@@ -207,15 +207,23 @@ llvm::BasicBlock *proof_event::hook_event_post(
   return merge_block;
 }
 
-llvm::BasicBlock *proof_event::hook_arg(
-    llvm::Value *val, kore_composite_sort *sort,
+/*
+ * Arguments for Hook/Function Events
+ */
+
+llvm::BasicBlock *proof_event::argument(
+    llvm::Value *val, kore_composite_sort *sort, bool is_hook_arg,
     llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
   }
 
+  if (!is_hook_arg && !proof_hint_instrumentation_slow) {
+    return current_block;
+  }
+
   auto [true_block, merge_block, outputFile]
-      = event_prelude("hookarg", current_block);
+      = event_prelude("eventarg", current_block);
 
   emit_serialize_term(*sort, outputFile, val, true_block);
 
