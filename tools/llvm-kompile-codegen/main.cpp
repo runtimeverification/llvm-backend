@@ -161,8 +161,7 @@ int main(int argc, char **argv) {
     } else {
       auto dt_filename
           = dt_dir() / fmt::format("dt_{}.yaml", axiom->get_ordinal());
-      if (fs::exists(dt_filename) && !proof_hint_instrumentation
-          && !proof_hint_instrumentation_slow) {
+      if (fs::exists(dt_filename) && !proof_hint_instrumentation) {
         auto residuals = parse_yaml_specialdecision_tree(
             mod.get(), dt_filename, definition->get_all_symbols(),
             definition->get_hooked_sorts());

@@ -64,6 +64,10 @@ void validate_codegen_args(bool is_tty) {
         "Not printing binary file to stdout; use -o to specify output path "
         "or force binary with -f\n");
   }
+
+  if (proof_hint_instrumentation_slow) {
+    proof_hint_instrumentation = true;
+  }
 }
 
 } // namespace kllvm
