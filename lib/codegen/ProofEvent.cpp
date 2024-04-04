@@ -288,7 +288,7 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
 llvm::BasicBlock *proof_event::rewrite_event_post(
     kore_axiom_declaration *axiom, llvm::Value *return_value,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation) {
+  if (!proof_hint_instrumentation_slow) {
     return current_block;
   }
 
