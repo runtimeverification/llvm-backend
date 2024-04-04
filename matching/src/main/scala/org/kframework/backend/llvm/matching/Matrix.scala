@@ -1087,15 +1087,16 @@ class Matrix private (
       val location   = Parser.location(attributes)
       val source     = Parser.source(attributes)
 
-      kem(
-        new MatchingException(
-          MatchingException.Type.NON_EXHAUSTIVE_MATCH,
-          "Non exhaustive match detected",
-          source,
-          location,
-          func
+      if (!Parser.hasAtt(attributes, "no-evaluators"))
+        kem(
+          new MatchingException(
+            MatchingException.Type.NON_EXHAUSTIVE_MATCH,
+            "Non exhaustive match detected",
+            source,
+            location,
+            func
+          )
         )
-      )
     }
   }
 
