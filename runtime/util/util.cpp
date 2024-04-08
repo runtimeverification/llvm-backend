@@ -35,7 +35,7 @@ block *construct_raw_term(void *subject, char const *sort, bool raw_value) {
 }
 
 void print_proof_hint_header(FILE *file) {
-  uint32_t version = 6;
+  uint32_t version = 7;
   fmt::print(file, "HINT");
   fwrite(&version, sizeof(version), 1, file);
 }
