@@ -349,7 +349,7 @@ bool store_map_for_gc(void **roots, map *ptr) {
   std::string name = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (map *)(hdr + 1);
-  *child = *ptr;
+  *child = std::move(*ptr);
   *roots = mem;
   return true;
 }
@@ -364,7 +364,7 @@ bool store_set_for_gc(void **roots, set *ptr) {
   std::string name = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (set *)(hdr + 1);
-  *child = *ptr;
+  *child = std::move(*ptr);
   *roots = mem;
   return true;
 }
@@ -379,7 +379,7 @@ bool store_list_for_gc(void **roots, list *ptr) {
   std::string name = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   auto *child = (list *)(hdr + 1);
-  *child = *ptr;
+  *child = std::move(*ptr);
   *roots = mem;
   return true;
 }
