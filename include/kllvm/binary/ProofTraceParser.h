@@ -587,7 +587,7 @@ private:
 
     auto event = llvm_side_condition_end_event::create(ordinal);
 
-    bool side_condition_result;
+    bool side_condition_result = false;
     auto result = parse_bool(ptr, end, side_condition_result);
     if (!result) {
       return nullptr;
