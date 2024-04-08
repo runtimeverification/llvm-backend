@@ -118,8 +118,8 @@ llvm::CallInst *proof_event::emit_bool_term(
     term = b.CreatePointerCast(term, i8_ptr_ty);
   }
 
-  auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
+  auto *func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
 
   auto *serialize
       = get_or_insert_function(module_, "write_bool_to_file", func_ty);
