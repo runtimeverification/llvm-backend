@@ -108,6 +108,7 @@ class llvm_side_condition_end_event : public llvm_step_event {
 private:
   uint64_t rule_ordinal_;
   sptr<kore_pattern> kore_pattern_{};
+  bool result_{false};
   uint64_t pattern_length_{0U};
 
   llvm_side_condition_end_event(uint64_t rule_ordinal)
@@ -130,6 +131,9 @@ public:
     kore_pattern_ = std::move(kore_pattern);
     pattern_length_ = pattern_length;
   }
+
+  [[nodiscard]] bool get_result() const { return result_; }
+  void set_result(bool result) { result_ = result; }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
       const override;
@@ -331,6 +335,16 @@ private:
   template <typename It>
   bool parse_arity(It &ptr, It end, uint64_t &arity) {
     return read_uint64(ptr, end, arity);
+  }
+
+  template <typename It>
+  bool parse_bool(It &ptr, It end, bool &b) {
+    if (std::distance(ptr, end) < 1U) {
+      return false;
+    }
+
+    b = detail::read<bool>(ptr, end);
+    return true;
   }
 
   template <typename It>
@@ -573,12 +587,13 @@ private:
 
     auto event = llvm_side_condition_end_event::create(ordinal);
 
-    uint64_t pattern_len = 0;
-    auto kore_term = parse_kore_term(ptr, end, pattern_len);
-    if (!kore_term) {
+    bool side_condition_result;
+    auto result = parse_bool(ptr, end, side_condition_result);
+    if (!result) {
       return nullptr;
     }
-    event->setkore_pattern(kore_term, pattern_len);
+
+    event->set_result(side_condition_result);
 
     if (!check_word(ptr, end, kore_end_sentinel)) {
       return nullptr;

@@ -63,16 +63,9 @@ void llvm_side_condition_event::print(
 void llvm_side_condition_end_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
-  if (expand_terms) {
-    out << fmt::format(
-        "{}side condition exit: {} kore[", indent, rule_ordinal_);
-    kore_pattern_->print(out);
-    out << fmt::format("]\n");
-  } else {
-    out << fmt::format(
-        "{}side condition exit: {} kore[{}]\n", indent, rule_ordinal_,
-        pattern_length_);
-  }
+  out << fmt::format("{}side condition exit: {} ", indent, rule_ordinal_);
+  out << (result_ ? "true" : "false");
+  out << fmt::format("\n");
 }
 
 void llvm_function_event::print(
