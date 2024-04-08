@@ -104,6 +104,29 @@ llvm::CallInst *proof_event::emit_write_uint64(
       func, {output_file, i64_value}, "", insert_at_end);
 }
 
+llvm::CallInst *proof_event::emit_bool_term(
+    llvm::Value *output_file, llvm::Value *term,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+
+  if (term->getType()->isIntegerTy()) {
+    term = b.CreateIntToPtr(term, i8_ptr_ty);
+  } else {
+    term = b.CreatePointerCast(term, i8_ptr_ty);
+  }
+
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
+
+  auto *serialize
+      = get_or_insert_function(module_, "write_bool_to_file", func_ty);
+
+  return b.CreateCall(serialize, {output_file, term});
+}
+
 llvm::CallInst *proof_event::emit_write_string(
     llvm::Value *output_file, std::string const &str,
     llvm::BasicBlock *insert_at_end) {
@@ -377,12 +400,9 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
 
   size_t ordinal = axiom->get_ordinal();
 
-  auto check_result_sort = std::dynamic_pointer_cast<kore_composite_sort>(
-      axiom->get_requires()->get_sort());
-
   emit_write_uint64(outputFile, detail::word(0x33), true_block);
   emit_write_uint64(outputFile, ordinal, true_block);
-  emit_serialize_term(*check_result_sort, outputFile, check_result, true_block);
+  emit_bool_term(outputFile, check_result, true_block);
   emit_write_uint64(outputFile, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
