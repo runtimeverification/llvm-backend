@@ -101,8 +101,8 @@ public:
       llvm::Value *val, kore_composite_sort *sort,
       llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *hook_arg(
-      llvm::Value *val, kore_composite_sort *sort,
+  [[nodiscard]] llvm::BasicBlock *argument(
+      llvm::Value *val, kore_composite_sort *sort, bool is_hook_arg,
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *rewrite_event_pre(

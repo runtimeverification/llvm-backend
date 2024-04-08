@@ -293,7 +293,7 @@ sptr<kore_sort> term_sort(kore_pattern *pattern) {
 }
 
 llvm::Value *create_term::alloc_arg(
-    kore_composite_pattern *pattern, int idx,
+    kore_composite_pattern *pattern, int idx, bool is_hook_arg,
     std::string const &location_stack) {
   kore_pattern *p = pattern->get_arguments()[idx].get();
   std::string new_location = fmt::format("{}:{}", location_stack, idx);
@@ -303,7 +303,7 @@ llvm::Value *create_term::alloc_arg(
   llvm::Value *ret = create_allocation(p, new_location).first;
   auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
   proof_event e(definition_, module_);
-  current_block_ = e.hook_arg(ret, sort, current_block_);
+  current_block_ = e.argument(ret, sort, is_hook_arg, current_block_);
   return ret;
 }
 
@@ -327,7 +327,7 @@ llvm::Value *create_term::create_hook(
   std::string name = str_pattern->get_contents();
   if (name == "BOOL.and" || name == "BOOL.andThen") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
     llvm::BasicBlock *cond_block = current_block_;
     llvm::BasicBlock *true_block
         = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
@@ -336,7 +336,7 @@ llvm::Value *create_term::create_hook(
     llvm::BranchInst::Create(
         true_block, merge_block, first_arg, current_block_);
     current_block_ = true_block;
-    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
     llvm::BranchInst::Create(merge_block, current_block_);
     llvm::PHINode *phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(ctx_), 2, "phi", merge_block);
@@ -347,7 +347,7 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.or" || name == "BOOL.orElse") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
     llvm::BasicBlock *cond_block = current_block_;
     llvm::BasicBlock *false_block
         = llvm::BasicBlock::Create(ctx_, "else", current_block_->getParent());
@@ -356,7 +356,7 @@ llvm::Value *create_term::create_hook(
     llvm::BranchInst::Create(
         merge_block, false_block, first_arg, current_block_);
     current_block_ = false_block;
-    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
     llvm::BranchInst::Create(merge_block, current_block_);
     llvm::PHINode *phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(ctx_), 2, "phi", merge_block);
@@ -367,7 +367,7 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.not") {
     assert(pattern->get_arguments().size() == 1);
-    llvm::Value *arg = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *arg = alloc_arg(pattern, 0, true, location_stack);
     llvm::BinaryOperator *neg = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, arg,
         llvm::ConstantInt::get(llvm::Type::getInt1Ty(ctx_), 1), "hook_BOOL_not",
@@ -376,7 +376,7 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.implies") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
     llvm::BasicBlock *cond_block = current_block_;
     llvm::BasicBlock *true_block
         = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
@@ -385,7 +385,7 @@ llvm::Value *create_term::create_hook(
     llvm::BranchInst::Create(
         true_block, merge_block, first_arg, current_block_);
     current_block_ = true_block;
-    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
     llvm::BranchInst::Create(merge_block, current_block_);
     llvm::PHINode *phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(ctx_), 2, "phi", merge_block);
@@ -397,8 +397,8 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.ne" || name == "BOOL.xor") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
-    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
     llvm::BinaryOperator *xor_op = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, first_arg, second_arg, "hook_BOOL_ne",
         current_block_);
@@ -406,8 +406,8 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.eq") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
-    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
     auto *eq = new llvm::ICmpInst(
         *current_block_, llvm::CmpInst::ICMP_EQ, first_arg, second_arg,
         "hook_BOOL_eq");
@@ -415,7 +415,7 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "KEQUAL.ite") {
     assert(pattern->get_arguments().size() == 3);
-    llvm::Value *cond = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *cond = alloc_arg(pattern, 0, true, location_stack);
     llvm::BasicBlock *true_block
         = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
     llvm::BasicBlock *false_block
@@ -424,10 +424,10 @@ llvm::Value *create_term::create_hook(
         ctx_, "hook_KEQUAL_ite", current_block_->getParent());
     llvm::BranchInst::Create(true_block, false_block, cond, current_block_);
     current_block_ = true_block;
-    llvm::Value *true_arg = alloc_arg(pattern, 1, location_stack);
+    llvm::Value *true_arg = alloc_arg(pattern, 1, true, location_stack);
     llvm::BasicBlock *new_true_block = current_block_;
     current_block_ = false_block;
-    llvm::Value *false_arg = alloc_arg(pattern, 2, location_stack);
+    llvm::Value *false_arg = alloc_arg(pattern, 2, true, location_stack);
     if (true_arg->getType()->isPointerTy()
         && !false_arg->getType()->isPointerTy()) {
       auto *alloc_collection
@@ -452,7 +452,7 @@ llvm::Value *create_term::create_hook(
     return phi;
   }
   if (name == "MINT.uvalue") {
-    llvm::Value *mint = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *mint = alloc_arg(pattern, 0, true, location_stack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
                          pattern->get_constructor()->get_arguments()[0].get())
                          ->get_category(definition_);
@@ -504,7 +504,7 @@ llvm::Value *create_term::create_hook(
     return result;
   }
   if (name == "MINT.svalue") {
-    llvm::Value *mint = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *mint = alloc_arg(pattern, 0, true, location_stack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
                          pattern->get_constructor()->get_arguments()[0].get())
                          ->get_category(definition_);
@@ -556,7 +556,7 @@ llvm::Value *create_term::create_hook(
     return result;
   }
   if (name == "MINT.integer") {
-    llvm::Value *mpz = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *mpz = alloc_arg(pattern, 0, true, location_stack);
     value_type cat = dynamic_cast<kore_composite_sort *>(
                          pattern->get_constructor()->get_sort().get())
                          ->get_category(definition_);
@@ -603,17 +603,17 @@ llvm::Value *create_term::create_hook(
     return result;
   }
   if (name == "MINT.neg") {
-    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", current_block_);
   }
   if (name == "MINT.not") {
-    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", current_block_);
 #define MINT_CMP(hookname, inst)                                               \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
-    llvm::Value *first = alloc_arg(pattern, 0, location_stack);                \
-    llvm::Value *second = alloc_arg(pattern, 1, location_stack);               \
+    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
+    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
   return new llvm::ICmpInst(                                                   \
       *current_block_, llvm::CmpInst::inst, first, second,                     \
       "hook_MINT_" #hookname)
@@ -630,8 +630,8 @@ llvm::Value *create_term::create_hook(
 #define MINT_BINOP(hookname, inst)                                             \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
-    llvm::Value *first = alloc_arg(pattern, 0, location_stack);                \
-    llvm::Value *second = alloc_arg(pattern, 1, location_stack);               \
+    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
+    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
   return llvm::BinaryOperator::Create(                                         \
       llvm::Instruction::inst, first, second, "hook_MINT_" #hookname,          \
       current_block_)
@@ -656,7 +656,8 @@ llvm::Value *create_term::create_hook(
   }
   std::string hook_name = "hook_" + name.substr(0, name.find('.')) + "_"
                           + name.substr(name.find('.') + 1);
-  return create_function_call(hook_name, pattern, true, false, location_stack);
+  return create_function_call(
+      hook_name, pattern, true, false, true, location_stack);
 }
 
 // We use tailcc calling convention for apply_rule_* and eval_* functions to
@@ -664,7 +665,7 @@ llvm::Value *create_term::create_hook(
 // recursive.
 llvm::Value *create_term::create_function_call(
     std::string const &name, kore_composite_pattern *pattern, bool sret,
-    bool tailcc, std::string const &location_stack) {
+    bool tailcc, bool is_hook, std::string const &location_stack) {
   auto event = proof_event(definition_, module_);
 
   current_block_
@@ -677,7 +678,7 @@ llvm::Value *create_term::create_function_call(
   int i = 0;
   for (auto const &sort : pattern->get_constructor()->get_arguments()) {
     auto *concrete_sort = dynamic_cast<kore_composite_sort *>(sort.get());
-    llvm::Value *arg = alloc_arg(pattern, i, location_stack);
+    llvm::Value *arg = alloc_arg(pattern, i, false, location_stack);
     i++;
     switch (concrete_sort->get_category(definition_).cat) {
     case sort_category::Map:
@@ -699,6 +700,16 @@ llvm::Value *create_term::create_function_call(
   }
 
   current_block_ = event.function_event_post(current_block_);
+
+  if (is_hook) {
+    int i = 0;
+    for (auto const &p : pattern->get_arguments()) {
+      auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
+      proof_event e(definition_, module_);
+      current_block_ = e.argument(args[i], sort, true, current_block_);
+      i++;
+    }
+  }
 
   return create_function_call(
       name, return_cat, args, sret, tailcc, location_stack);
@@ -903,7 +914,7 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
       auto fn_name = fmt::format("eval_{}", ast_to_string(*symbol, 0, false));
       return std::make_pair(
           create_function_call(
-              fn_name, constructor, false, true, location_stack),
+              fn_name, constructor, false, true, false, location_stack),
           true);
     }
     if (auto cat

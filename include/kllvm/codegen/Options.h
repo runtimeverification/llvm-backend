@@ -13,6 +13,7 @@ extern llvm::cl::opt<bool> emit_object;
 extern llvm::cl::opt<bool> binary_ir;
 extern llvm::cl::opt<bool> force_binary;
 extern llvm::cl::opt<bool> proof_hint_instrumentation;
+extern llvm::cl::opt<bool> proof_hint_instrumentation_slow;
 extern llvm::cl::opt<bool> keep_frame_pointer;
 extern llvm::cl::opt<opt_level> optimization_level;
 
