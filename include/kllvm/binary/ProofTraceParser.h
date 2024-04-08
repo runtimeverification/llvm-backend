@@ -595,10 +595,6 @@ private:
 
     event->set_result(side_condition_result);
 
-    if (!check_word(ptr, end, kore_end_sentinel)) {
-      return nullptr;
-    }
-
     return event;
   }
 

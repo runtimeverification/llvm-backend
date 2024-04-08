@@ -403,7 +403,6 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
   emit_write_uint64(outputFile, detail::word(0x33), true_block);
   emit_write_uint64(outputFile, ordinal, true_block);
   emit_bool_term(outputFile, check_result, true_block);
-  emit_write_uint64(outputFile, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 
