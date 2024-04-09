@@ -8,12 +8,12 @@ let self = maven.buildMavenPackage rec {
     buildOffline = true;
 
     manualMvnArtifacts = [
-      "org.scala-lang:scala-compiler:2.12.18"
+      "org.scala-lang:scala-compiler:2.13.13"
       "org.apache.maven.plugins:maven-compiler-plugin:3.7.0"
     ];
 
     manualMvnSourceArtifacts = [
-      "org.scala-sbt:compiler-bridge_2.12:1.8.0"
+      "org.scala-sbt:compiler-bridge_2.13:1.8.0"
     ];
 
     passthru = {

@@ -82,7 +82,7 @@
     </dependency>
     <dependency>
       <groupId>org.scala-sbt</groupId>
-      <artifactId>compiler-bridge_2.12</artifactId>
+      <artifactId>compiler-bridge_2.13</artifactId>
       <version>1.8.0</version>
     </dependency>
   </dependencies>
