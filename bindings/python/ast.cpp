@@ -405,7 +405,7 @@ void bind_proof_trace(py::module_ &m) {
       .def_property_readonly(
           "rule_ordinal", &llvm_side_condition_end_event::get_rule_ordinal)
       .def_property_readonly(
-          "check_result", &llvm_side_condition_end_event::getkore_pattern);
+          "check_result", &llvm_side_condition_end_event::get_result);
 
   py::class_<llvm_function_event, std::shared_ptr<llvm_function_event>>(
       proof_trace, "llvm_function_event", step_event)

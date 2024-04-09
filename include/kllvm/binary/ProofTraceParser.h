@@ -107,31 +107,20 @@ public:
 class llvm_side_condition_end_event : public llvm_step_event {
 private:
   uint64_t rule_ordinal_;
-  sptr<kore_pattern> kore_pattern_{};
-  bool result_{false};
-  uint64_t pattern_length_{0U};
+  bool result_;
 
-  llvm_side_condition_end_event(uint64_t rule_ordinal)
+  llvm_side_condition_end_event(uint64_t rule_ordinal, bool result)
       : rule_ordinal_(rule_ordinal)
-      , kore_pattern_(nullptr) { }
+      , result_(result) { }
 
 public:
-  static sptr<llvm_side_condition_end_event> create(uint64_t rule_ordinal) {
+  static sptr<llvm_side_condition_end_event>
+  create(uint64_t rule_ordinal, bool result) {
     return sptr<llvm_side_condition_end_event>(
-        new llvm_side_condition_end_event(rule_ordinal));
+        new llvm_side_condition_end_event(rule_ordinal, result));
   }
 
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
-  [[nodiscard]] sptr<kore_pattern> getkore_pattern() const {
-    return kore_pattern_;
-  }
-  [[nodiscard]] uint64_t get_pattern_length() const { return pattern_length_; }
-  void
-  setkore_pattern(sptr<kore_pattern> kore_pattern, uint64_t pattern_length) {
-    kore_pattern_ = std::move(kore_pattern);
-    pattern_length_ = pattern_length;
-  }
-
   [[nodiscard]] bool get_result() const { return result_; }
   void set_result(bool result) { result_ = result; }
 
@@ -585,15 +574,14 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_side_condition_end_event::create(ordinal);
-
     bool side_condition_result = false;
     auto result = parse_bool(ptr, end, side_condition_result);
     if (!result) {
       return nullptr;
     }
 
-    event->set_result(side_condition_result);
+    auto event
+        = llvm_side_condition_end_event::create(ordinal, side_condition_result);
 
     return event;
   }
