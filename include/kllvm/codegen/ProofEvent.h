@@ -69,7 +69,7 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
-  * Emit a call that will serialize a boolean value to the specified `outputFile`.
+  * Emit a call that will serialize a boolean value to the specified `output_file`.
   */
   llvm::CallInst *emit_bool_term(
       llvm::Value *output_file, llvm::Value *term,

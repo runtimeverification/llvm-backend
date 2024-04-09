@@ -45,6 +45,7 @@ hook              ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
 
 ordinal           ::= uint64
 arity             ::= uint64
+boolean_result    ::= uint8
 variable          ::= name kore_term WORD(0xCC)
 rule              ::= WORD(0x22) ordinal arity variable*
 
