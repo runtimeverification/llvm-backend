@@ -112,11 +112,7 @@ llvm::CallInst *proof_event::emit_bool_term(
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
 
-  if (term->getType()->isIntegerTy()) {
-    term = b.CreateIntToPtr(term, i8_ptr_ty);
-  } else {
-    term = b.CreatePointerCast(term, i8_ptr_ty);
-  }
+  term = b.CreateIntToPtr(term, i8_ptr_ty);
 
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);

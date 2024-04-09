@@ -334,7 +334,7 @@ void serialize_configuration(
 void serialize_configuration_to_file(
     FILE *file, block *subject, bool emit_size, bool use_intern);
 void write_uint64_to_file(FILE *file, uint64_t i);
-void write_bool_to_file(FILE *file, void *subject);
+void write_bool_to_file(FILE *file, bool b);
 void serialize_term_to_file(
     FILE *file, block *subject, char const *sort, bool use_intern);
 void serialize_raw_term_to_file(
