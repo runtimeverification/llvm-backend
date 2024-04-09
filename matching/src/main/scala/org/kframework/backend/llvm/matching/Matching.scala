@@ -6,10 +6,8 @@ import java.io.File
 import java.io.FileWriter
 import java.util.Optional
 import org.kframework.backend.llvm.matching.dt._
-
-import java.io.{File, FileWriter}
-import java.util.Optional
 import scala.collection.immutable
+import scala.collection.parallel.CollectionConverters._
 
 object Matching {
   def writeDecisionTreeToFile(
@@ -21,12 +19,12 @@ object Matching {
       warn: Boolean,
       genSearch: Boolean,
       kem: MatchingException => Unit
-  ) {
+  ): Unit = {
     val defn = new TextToKore().parse(filename)
     outputFolder.mkdirs()
     val allAxioms    = Parser.getAxioms(defn)
-    val axioms       = Parser.parseTopAxioms(allAxioms, false)
-    val searchAxioms = Parser.parseTopAxioms(allAxioms, true)
+    val axioms       = Parser.parseTopAxioms(allAxioms, search = false)
+    val searchAxioms = Parser.parseTopAxioms(allAxioms, search = true)
     val symlib       = Parser.parseSymbols(defn, heuristic)
     val (dt, dtSearch, matrix) = if (axioms.isEmpty) {
       (Failure(), Failure(), null)
@@ -63,7 +61,7 @@ object Matching {
         dt.serializeToYaml(new File(outputFolder, filename))
       }
     }
-    val funcAxioms = Parser.parseFunctionAxioms(allAxioms, false)
+    val funcAxioms = Parser.parseFunctionAxioms(allAxioms, simplification = false)
     val dts = symlib.functions.map { f =>
       if (logging) {
         System.out.println("Compiling " + f)
@@ -90,7 +88,7 @@ object Matching {
         if (logging) {
           System.out.println("Compiling decision tree for axiom " + a.ordinal)
         }
-        Matrix.clearCache
+        Matrix.clearCache()
         val dt       = Generator.mkSpecialDecisionTree(symlib, defn, matrix, a, threshold.get)
         val ordinal  = a.ordinal
         val filename = "dt_" + ordinal + ".yaml"
@@ -99,7 +97,7 @@ object Matching {
         }
       }
     }
-    val files  = (symlib.functions, dts).zipped.toIterable
+    val files  = symlib.functions.lazyZip(dts).toSeq
     val index  = new File(outputFolder, "index.txt")
     val writer = new FileWriter(index)
     var idx    = 0
@@ -110,7 +108,7 @@ object Matching {
       writer.write(pair._1.ctr + "\t" + filename + "\n")
       idx += 1
     }
-    writer.close
+    writer.close()
   }
 
   var logging = false
@@ -133,16 +131,16 @@ object Matching {
   def main(args: Array[String]): Unit = {
     val file         = new File(args(0))
     val outputFolder = new File(args(2))
-    logging = args.size > 4
+    logging = args.length > 4
     writeDecisionTreeToFile(
       file,
       args(1),
       outputFolder,
       getThreshold(args(3)),
-      true,
-      true,
-      true,
-      e => ()
+      genSingleRuleTrees = true,
+      warn = true,
+      genSearch = true,
+      _ => ()
     )
   }
 }

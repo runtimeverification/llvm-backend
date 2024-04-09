@@ -70,7 +70,7 @@ object Pattern {
       case (_, AsP(_, _, pat))                => Pattern.mightUnify(p1, pat)
       case (LiteralP(c1, _), LiteralP(c2, _)) => c1 == c2
       case (SymbolP(c1, ps1), SymbolP(c2, ps2)) =>
-        c1 == c2 && (ps1, ps2).zipped.toIterable.forall(t => Pattern.mightUnify(t._1, t._2))
+        c1 == c2 && ps1.lazyZip(ps2).toSeq.forall(t => Pattern.mightUnify(t._1, t._2))
       case (ListP(_, _, _, _, _), ListP(_, _, _, _, _)) => true
       case (MapP(_, _, _, _, _), MapP(_, _, _, _, _))   => true
       case (SetP(_, _, _, _), SetP(_, _, _, _))         => true
@@ -105,7 +105,7 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
       occurrence: Occurrence,
       symlib: Parser.SymLib
   ): immutable.Seq[VariableBinding[T]] =
-    immutable.Seq(new VariableBinding(name, sort, occurrence, residual)) ++ pat.bindings(
+    immutable.Seq(VariableBinding(name, sort, occurrence, residual)) ++ pat.bindings(
       ix,
       residual,
       occurrence,
@@ -138,11 +138,11 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   lazy val variables: Set[T]         = Set(name) ++ pat.variables
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] =
     AsP(clause.canonicalize(name.toString), sort, pat.canonicalize(clause))
-  def decanonicalize: Pattern[String]   = AsP("_", sort, pat.decanonicalize)
-  def isBound(clause: Clause): Boolean  = clause.isBound(name) && pat.isBound(clause)
-  def isResidual(symlib: Parser.SymLib) = pat.isResidual(symlib)
-  override lazy val hashCode: Int       = scala.runtime.ScalaRunTime._hashCode(this)
-  def toShortString: String             = pat.toShortString + " #as " + name.toString
+  def decanonicalize: Pattern[String]            = AsP("_", sort, pat.decanonicalize)
+  def isBound(clause: Clause): Boolean           = clause.isBound(name) && pat.isBound(clause)
+  def isResidual(symlib: Parser.SymLib): Boolean = pat.isResidual(symlib)
+  override lazy val hashCode: Int                = scala.runtime.ScalaRunTime._hashCode(this)
+  def toShortString: String                      = pat.toShortString + " #as " + name.toString
   def toKORE(f: Fringe): kore.Pattern =
     B.And(f.sort, pat.toKORE(f), B.Variable(name.toString, f.sort))
 }
@@ -240,7 +240,7 @@ case class ListP[T] private (
       case _                   => immutable.Seq()
     }
 
-  def category = Some(ListS())
+  def category: Option[SortCategory] = Some(ListS())
   lazy val variables: Set[T] = head.flatMap(_.variables).toSet ++ tail
     .flatMap(_.variables)
     .toSet ++ frame.map(_.variables).getOrElse(Set())
@@ -315,7 +315,7 @@ case class LiteralP[T](literal: String, sort: SortCategory) extends Pattern[T] {
   ): immutable.Seq[Pattern[T]] = immutable.Seq()
   def expandOr: immutable.Seq[Pattern[T]] = immutable.Seq(this)
 
-  def category                                                  = Some(sort)
+  def category: Option[SortCategory]                            = Some(sort)
   def variables: Set[T]                                         = Set()
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = LiteralP(literal, sort)
   def decanonicalize: Pattern[String]                           = LiteralP(literal, sort)
@@ -343,14 +343,14 @@ case class MapP[T] private (
       keys.flatMap(key =>
         immutable.Seq(
           HasKey(isSet = false, ctr, clause.canonicalize(key)),
-          HasNoKey(false, clause.canonicalize(key))
+          HasNoKey(isSet = false, clause.canonicalize(key))
         )
       )
     } else {
       keys.flatMap(key =>
         immutable.Seq(
           HasKey(isSet = false, ctr, clause.canonicalize(key)),
-          HasNoKey(false, clause.canonicalize(key))
+          HasNoKey(isSet = false, clause.canonicalize(key))
         )
       ) ++ frame.get.signature(clause)
     }
@@ -454,7 +454,7 @@ case class MapP[T] private (
 
   override def mapOrSetKeys: immutable.Seq[Pattern[T]] = keys
 
-  def category = Some(MapS())
+  def category: Option[SortCategory] = Some(MapS())
   lazy val variables: Set[T] = keys.flatMap(_.variables).toSet ++ values
     .flatMap(_.variables)
     .toSet ++ frame.map(_.variables).getOrElse(Set())
@@ -540,11 +540,11 @@ case class OrP[T](ps: immutable.Seq[Pattern[T]]) extends Pattern[T] {
   def canonicalize(clause: Clause): Pattern[Option[Occurrence]] = OrP(
     ps.map(_.canonicalize(clause))
   )
-  def decanonicalize: Pattern[String]   = OrP(ps.map(_.decanonicalize))
-  def isBound(clause: Clause): Boolean  = ps.forall(_.isBound(clause))
-  def isResidual(symlib: Parser.SymLib) = ???
-  override lazy val hashCode: Int       = scala.runtime.ScalaRunTime._hashCode(this)
-  def toShortString: String             = ps.map(_.toShortString).mkString(" #Or ")
+  def decanonicalize: Pattern[String]            = OrP(ps.map(_.decanonicalize))
+  def isBound(clause: Clause): Boolean           = ps.forall(_.isBound(clause))
+  def isResidual(symlib: Parser.SymLib): Boolean = ???
+  override lazy val hashCode: Int                = scala.runtime.ScalaRunTime._hashCode(this)
+  def toShortString: String                      = ps.map(_.toShortString).mkString(" #Or ")
   def toKORE(f: Fringe): kore.Pattern =
     ps.map(_.toKORE(f)).reduce((l, r) => B.Or(f.sort, l, r))
 }
@@ -574,14 +574,14 @@ case class SetP[T] private (
       elements.flatMap(elem =>
         immutable.Seq(
           HasKey(isSet = true, ctr, clause.canonicalize(elem)),
-          HasNoKey(true, clause.canonicalize(elem))
+          HasNoKey(isSet = true, clause.canonicalize(elem))
         )
       )
     } else {
       elements.flatMap(elem =>
         immutable.Seq(
           HasKey(isSet = true, ctr, clause.canonicalize(elem)),
-          HasNoKey(true, clause.canonicalize(elem))
+          HasNoKey(isSet = true, clause.canonicalize(elem))
         )
       ) ++ frame.get.signature(clause)
     }
@@ -668,7 +668,7 @@ case class SetP[T] private (
 
   override def mapOrSetKeys: immutable.Seq[Pattern[T]] = elements
 
-  def category = Some(SetS())
+  def category: Option[SortCategory] = Some(SetS())
   lazy val variables: Set[T] =
     elements.flatMap(_.variables).toSet ++ frame.map(_.variables).getOrElse(Set())
   def canonicalize(clause: Clause): SetP[Option[Occurrence]] = new SetP(
@@ -727,6 +727,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: immutable.Seq[Pattern[T]]) extends
         lazy val f2 = f.expand(ix).head
         less.exists(isValidOverload(f2, isExact, clause, m, f.expand(SymbolC(sym)), _))
       case (SymbolC(ix2), _) => ix2 == sym
+      case _                 => ???
     }
   def score(
       h: Heuristic,
@@ -795,7 +796,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: immutable.Seq[Pattern[T]]) extends
           case immutable.Seq(head) => head
         }
         val fringeTs = f2.expand(SymbolC(validLess))
-        val newPs = (ps, fringePs, fringeTs).zipped.map { case (p, fringeP, fringeT) =>
+        val newPs = ps.lazyZip(fringePs).lazyZip(fringeTs).map { case (p, fringeP, fringeT) =>
           if (fringeP.sort == fringeT.sort) {
             p
           } else {
@@ -842,7 +843,9 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: immutable.Seq[Pattern[T]]) extends
     val cons = SymbolC(less)
     if (f.contains(cons)) {
       val fringeTs = f.expand(cons)
-      (ps, fringePs, fringeTs).zipped.toIterable
+      ps.lazyZip(fringePs)
+        .lazyZip(fringeTs)
+        .toSeq
         .map(t => isValidChild(t._1, t._2, t._3))
         .forall(identity)
     } else {
@@ -903,8 +906,10 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: immutable.Seq[Pattern[T]]) extends
         child match {
           case None => immutable.Seq() // no overloads exist
           case Some(fringeTs) =>
-            (fringePs, fringeTs, ps).zipped
-              .to[immutable.Seq]
+            fringePs
+              .lazyZip(fringeTs)
+              .lazyZip(ps)
+              .to(immutable.Seq)
               .zipWithIndex
               .flatMap(t => getVar(t._1._1, t._1._2, t._1._3, t._2)) // compute variable bindings
         }
@@ -918,7 +923,7 @@ case class SymbolP[T](sym: SymbolOrAlias, ps: immutable.Seq[Pattern[T]]) extends
     SymbolP(sym, ps.map(_.canonicalize(clause)))
   def decanonicalize: Pattern[String]  = SymbolP(sym, ps.map(_.decanonicalize))
   def isBound(clause: Clause): Boolean = ps.forall(_.isBound(clause))
-  def isResidual(symlib: Parser.SymLib) =
+  def isResidual(symlib: Parser.SymLib): Boolean =
     symlib.functions
       .contains(sym) || Parser.getStringAtt(symlib.signatures(sym)._3, "anywhere").isDefined
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -955,7 +960,7 @@ case class VariableP[T](name: T, sort: SortCategory) extends Pattern[T] {
       occurrence: Occurrence,
       symlib: Parser.SymLib
   ): immutable.Seq[VariableBinding[T]] =
-    immutable.Seq(new VariableBinding(name, sort, occurrence, residual))
+    immutable.Seq(VariableBinding(name, sort, occurrence, residual))
   def expand(
       ix: Constructor,
       isExact: Boolean,

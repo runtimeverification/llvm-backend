@@ -82,7 +82,7 @@ object Heuristic {
       allCols: immutable.Seq[MatrixColumn]
   ): immutable.Seq[MatrixColumn] = {
     var result: List[MatrixColumn] = Nil
-    var best                       = cols(0).score
+    var best                       = cols.head.score
     for (col <- cols) {
       import Ordering.Implicits._
       val bestInvalid = allCols
@@ -311,7 +311,7 @@ object RHeuristic extends Heuristic {
             .patterns(i)
             .isSpecialized(
               con,
-              false,
+              isExact = false,
               c.column.fringe,
               c.column.clauses(i),
               c.column.maxPriorityForKey(key)
@@ -415,7 +415,7 @@ sealed trait PseudoHeuristic extends Heuristic {
 @NamedHeuristic(name = 'N')
 object NPseudoHeuristic extends PseudoHeuristic {
   override def breakTies(cols: immutable.Seq[MatrixColumn]): MatrixColumn =
-    cols(0)
+    cols.head
 }
 
 @NamedHeuristic(name = 'L')

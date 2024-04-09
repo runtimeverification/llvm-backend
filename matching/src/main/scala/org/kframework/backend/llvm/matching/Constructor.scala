@@ -21,7 +21,7 @@ case class Empty() extends Constructor {
       case SetS() => SetP(immutable.Seq(), None, symbol, SymbolP(symbol, immutable.Seq()))
       case MapS() =>
         MapP(immutable.Seq(), immutable.Seq(), None, symbol, SymbolP(symbol, immutable.Seq()))
-      case _      => ???
+      case _ => ???
     }
   }
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
@@ -31,7 +31,7 @@ case class NonEmpty() extends Constructor {
   def name: String                                      = ???
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
   def expand(f: Fringe): Option[immutable.Seq[Fringe]]  = Some(immutable.Seq(f))
-  def contract(f: Fringe, children: immutable.Seq[Pattern[String]]): Pattern[String] = children(0)
+  def contract(f: Fringe, children: immutable.Seq[Pattern[String]]): Pattern[String] = children.head
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
@@ -46,27 +46,27 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
         if (isSet) {
           Some(
             immutable.Seq(
-              new Fringe(f.symlib, sorts(0), Choice(f.occurrence), false),
-              new Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), false)
+              Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
+              Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
             )
           )
         } else {
           Some(
             immutable.Seq(
-              new Fringe(f.symlib, sorts(0), Choice(f.occurrence), false),
-              new Fringe(f.symlib, sorts(1), ChoiceValue(f.occurrence), false),
-              new Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), false)
+              Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
+              Fringe(f.symlib, sorts(1), ChoiceValue(f.occurrence), isExact = false),
+              Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
             )
           )
         }
       case Some(k) =>
         if (isSet) {
-          Some(immutable.Seq(new Fringe(f.symlib, f.sort, Rem(k, f.occurrence), false), f))
+          Some(immutable.Seq(Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false), f))
         } else {
           Some(
             immutable.Seq(
-              new Fringe(f.symlib, sorts(1), Value(k, f.occurrence), false),
-              new Fringe(f.symlib, f.sort, Rem(k, f.occurrence), false),
+              Fringe(f.symlib, sorts(1), Value(k, f.occurrence), isExact = false),
+              Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false),
               f
             )
           )
@@ -80,9 +80,9 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
     assert((isSet && children.size == 2) || (!isSet && children.size == 3))
     if (this.key.isEmpty) {
       if (isSet) {
-        key = children(0)
+        key = children.head
       } else {
-        key = children(0)
+        key = children.head
         value = children(1)
       }
     } else {
@@ -90,7 +90,7 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
         key = this.key.get.decanonicalize
       } else {
         key = this.key.get.decanonicalize
-        value = children(0)
+        value = children.head
       }
     }
     def element(k: Pattern[String], v: Pattern[String]): Pattern[String] =
@@ -132,7 +132,7 @@ case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) ex
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[immutable.Seq[Fringe]]  = Some(immutable.Seq(f))
   def contract(f: Fringe, children: immutable.Seq[Pattern[String]]): Pattern[String] = {
-    val child = children(0)
+    val child = children.head
     def element(k: Pattern[String], v: Pattern[String]): Pattern[String] =
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, immutable.Seq(k, v))
     def setElement(k: Pattern[String]): Pattern[String] =
@@ -181,7 +181,7 @@ case class ListC(element: SymbolOrAlias, length: Int) extends Constructor {
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = true
   def expand(f: Fringe): Option[immutable.Seq[Fringe]] = {
     val sort = f.symlib.signatures(element)._1.head
-    Some((0 until length).map(i => new Fringe(f.symlib, sort, Num(i, f.occurrence), false)))
+    Some((0 until length).map(i => Fringe(f.symlib, sort, Num(i, f.occurrence), isExact = false)))
   }
   def contract(f: Fringe, children: immutable.Seq[Pattern[String]]): Pattern[String] = {
     def element(v: Pattern[String]): Pattern[String] =
@@ -211,7 +211,7 @@ case class SymbolC(sym: SymbolOrAlias) extends Constructor {
       val sorts = f.symlib.signatures(sym)._1
       Some(
         sorts.zipWithIndex.map(t =>
-          new Fringe(f.symlib, t._1, Num(t._2, f.occurrence), sym.ctr == "inj")
+          Fringe(f.symlib, t._1, Num(t._2, f.occurrence), sym.ctr == "inj")
         )
       )
     }
