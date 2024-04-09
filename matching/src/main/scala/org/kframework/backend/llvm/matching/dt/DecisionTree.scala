@@ -9,22 +9,23 @@ import java.util.concurrent.ConcurrentHashMap
 import org.kframework.backend.llvm.matching.pattern._
 import org.kframework.backend.llvm.matching.Occurrence
 import org.yaml.snakeyaml.Yaml
+import scala.collection.immutable
 
 sealed trait DecisionTree {
   def serializeToYaml(file: File): Unit = {
     val writer = new OutputStreamWriter(
       new FileOutputStream(file),
       Charset.forName("UTF-8").newEncoder()
-    );
+    )
     new Yaml().dump(representation, writer)
     writer.close()
   }
 
-  def serializeToYaml(file: File, residuals: Seq[(Pattern[String], Occurrence)]): Unit = {
+  def serializeToYaml(file: File, residuals: immutable.Seq[(Pattern[String], Occurrence)]): Unit = {
     val writer = new OutputStreamWriter(
       new FileOutputStream(file),
       Charset.forName("UTF-8").newEncoder()
-    );
+    )
     val residualRepr = new util.ArrayList[AnyRef]()
     for (entry <- residuals) {
       val pair = new util.ArrayList[AnyRef]()
@@ -49,7 +50,7 @@ case class Failure private () extends DecisionTree {
     that.isInstanceOf[AnyRef] && (this eq that.asInstanceOf[AnyRef])
 }
 
-case class Leaf private (ordinal: Int, occurrences: Seq[(Occurrence, String)])
+case class Leaf private (ordinal: Int, occurrences: immutable.Seq[(Occurrence, String)])
     extends DecisionTree {
   val representation = new util.HashMap[String, AnyRef]()
   val action         = new util.ArrayList[AnyRef]()
@@ -70,7 +71,7 @@ case class Leaf private (ordinal: Int, occurrences: Seq[(Occurrence, String)])
 
 case class SearchLeaf private (
     ordinal: Int,
-    occurrences: Seq[(Occurrence, String)],
+    occurrences: immutable.Seq[(Occurrence, String)],
     child: DecisionTree
 ) extends DecisionTree {
   val representation = new util.HashMap[String, AnyRef]()
@@ -94,7 +95,7 @@ case class SearchLeaf private (
 case class Switch private (
     occurrence: Occurrence,
     hook: String,
-    cases: Seq[(String, Seq[String], DecisionTree)],
+    cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
     default: Option[DecisionTree]
 ) extends DecisionTree {
   val representation = new util.HashMap[String, AnyRef]()
@@ -122,7 +123,7 @@ case class SwitchLit private (
     occurrence: Occurrence,
     hook: String,
     bitwidth: Int,
-    cases: Seq[(String, Seq[String], DecisionTree)],
+    cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
     default: Option[DecisionTree]
 ) extends DecisionTree {
   val representation = new util.HashMap[String, AnyRef]()
@@ -150,7 +151,7 @@ case class SwitchLit private (
 case class Function private (
     name: String,
     occurrence: Occurrence,
-    vars: Seq[(Occurrence, String)],
+    vars: immutable.Seq[(Occurrence, String)],
     hook: String,
     child: DecisionTree
 ) extends DecisionTree {
@@ -175,7 +176,7 @@ case class Function private (
 case class CheckNull private (
     occurrence: Occurrence,
     hook: String,
-    cases: Seq[(String, Seq[String], DecisionTree)],
+    cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
     default: Option[DecisionTree]
 ) extends DecisionTree {
   val representation = new util.HashMap[String, AnyRef]()
@@ -252,27 +253,36 @@ object Failure {
 }
 
 object Leaf {
-  private val cache = new ConcurrentHashMap[(Int, Seq[(Occurrence, String)]), Leaf]()
-  def apply(ordinal: Int, occurrences: Seq[(Occurrence, String)]): Leaf =
+  private val cache = new ConcurrentHashMap[(Int, immutable.Seq[(Occurrence, String)]), Leaf]()
+  def apply(ordinal: Int, occurrences: immutable.Seq[(Occurrence, String)]): Leaf =
     cache.computeIfAbsent((ordinal, occurrences), k => new Leaf(k._1, k._2))
 }
 
 object SearchLeaf {
   private val cache =
-    new ConcurrentHashMap[(Int, Seq[(Occurrence, String)], DecisionTree), SearchLeaf]()
-  def apply(ordinal: Int, occurrences: Seq[(Occurrence, String)], child: DecisionTree): SearchLeaf =
+    new ConcurrentHashMap[(Int, immutable.Seq[(Occurrence, String)], DecisionTree), SearchLeaf]()
+  def apply(
+      ordinal: Int,
+      occurrences: immutable.Seq[(Occurrence, String)],
+      child: DecisionTree
+  ): SearchLeaf =
     cache.computeIfAbsent((ordinal, occurrences, child), k => new SearchLeaf(k._1, k._2, k._3))
 }
 
 object Switch {
   val cache = new ConcurrentHashMap[
-    (Occurrence, String, Seq[(String, Seq[String], DecisionTree)], Option[DecisionTree]),
+    (
+        Occurrence,
+        String,
+        immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
+        Option[DecisionTree]
+    ),
     Switch
   ]()
   def apply(
       occurrence: Occurrence,
       hook: String,
-      cases: Seq[(String, Seq[String], DecisionTree)],
+      cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
       default: Option[DecisionTree]
   ): Switch =
     cache.computeIfAbsent(
@@ -283,14 +293,20 @@ object Switch {
 
 object SwitchLit {
   val cache = new ConcurrentHashMap[
-    (Occurrence, String, Int, Seq[(String, Seq[String], DecisionTree)], Option[DecisionTree]),
+    (
+        Occurrence,
+        String,
+        Int,
+        immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
+        Option[DecisionTree]
+    ),
     SwitchLit
   ]()
   def apply(
       occurrence: Occurrence,
       hook: String,
       bitwidth: Int,
-      cases: Seq[(String, Seq[String], DecisionTree)],
+      cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
       default: Option[DecisionTree]
   ): SwitchLit =
     cache.computeIfAbsent(
@@ -301,13 +317,13 @@ object SwitchLit {
 
 object Function {
   val cache = new ConcurrentHashMap[
-    (String, Occurrence, Seq[(Occurrence, String)], String, DecisionTree),
+    (String, Occurrence, immutable.Seq[(Occurrence, String)], String, DecisionTree),
     Function
   ]()
   def apply(
       name: String,
       occurrence: Occurrence,
-      vars: Seq[(Occurrence, String)],
+      vars: immutable.Seq[(Occurrence, String)],
       hook: String,
       child: DecisionTree
   ): Function =
@@ -319,13 +335,18 @@ object Function {
 
 object CheckNull {
   val cache = new ConcurrentHashMap[
-    (Occurrence, String, Seq[(String, Seq[String], DecisionTree)], Option[DecisionTree]),
+    (
+        Occurrence,
+        String,
+        immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
+        Option[DecisionTree]
+    ),
     CheckNull
   ]()
   def apply(
       occurrence: Occurrence,
       hook: String,
-      cases: Seq[(String, Seq[String], DecisionTree)],
+      cases: immutable.Seq[(String, immutable.Seq[String], DecisionTree)],
       default: Option[DecisionTree]
   ): CheckNull =
     cache.computeIfAbsent(
@@ -374,7 +395,7 @@ object MakePattern {
         for (p <- ps)
           args.add(representPattern(p))
     }
-    assert(!result.isEmpty())
+    assert(!result.isEmpty)
     result
   }
   def representResidual(pattern: Pattern[String]): util.HashMap[String, AnyRef] = {
@@ -398,7 +419,7 @@ object MakePattern {
         for (p <- ps)
           args.add(representResidual(p))
     }
-    assert(!result.isEmpty())
+    assert(!result.isEmpty)
     result
   }
 }
