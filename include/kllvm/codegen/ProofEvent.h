@@ -69,13 +69,20 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
+  * Emit a call that will serialize a boolean value to the specified `output_file`.
+  */
+  llvm::CallInst *emit_bool_term(
+      llvm::Value *output_file, llvm::Value *term,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
    * Emit a call that will serialize `str` to the specified `outputFile`.
    */
   llvm::CallInst *emit_write_string(
       llvm::Value *output_file, std::string const &str,
       llvm::BasicBlock *insert_at_end);
 
-  /* 
+  /*
    * Emit an instruction that has no effect and will be removed by optimization
    * passes.
    *
