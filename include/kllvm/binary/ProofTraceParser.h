@@ -122,7 +122,6 @@ public:
 
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] bool get_result() const { return result_; }
-  void set_result(bool result) { result_ = result; }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
       const override;
