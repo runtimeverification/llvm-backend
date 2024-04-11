@@ -12,10 +12,10 @@
 
   <properties>
     <java.version>17</java.version>
-    <scala-kore.version>0.3.0</scala-kore.version>
+    <scala-kore.version>0.3.3</scala-kore.version>
     <spotless.version>2.41.1</spotless.version>
-    <scala.majorVersion>2.12</scala.majorVersion>
-    <scala.minorVersion>18</scala.minorVersion>
+    <scala.majorVersion>2.13</scala.majorVersion>
+    <scala.minorVersion>13</scala.minorVersion>
     <scala.version>${scala.majorVersion}.${scala.minorVersion}</scala.version>
     <scalafmt.version>3.7.17</scalafmt.version>
   </properties>
@@ -49,6 +49,11 @@
       <version>${scala.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-parallel-collections_2.13</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+    <dependency>
       <groupId>com.runtimeverification.k</groupId>
       <artifactId>scala-kore</artifactId>
       <version>${scala-kore.version}</version>
@@ -77,7 +82,7 @@
     </dependency>
     <dependency>
       <groupId>org.scala-sbt</groupId>
-      <artifactId>compiler-bridge_2.12</artifactId>
+      <artifactId>compiler-bridge_2.13</artifactId>
       <version>1.8.0</version>
     </dependency>
   </dependencies>

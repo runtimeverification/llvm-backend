@@ -13,6 +13,7 @@ import org.kframework.backend.llvm.matching.pattern.SortCategory
 import org.kframework.backend.llvm.matching.pattern.SymbolP
 import org.kframework.backend.llvm.matching.pattern.VariableP
 import org.kframework.backend.llvm.matching.pattern.WildcardP
+import scala.collection.immutable
 
 object Generator {
 
@@ -24,82 +25,94 @@ object Generator {
   private def listPattern(
       sym: SymbolOrAlias,
       cons: CollectionCons,
-      ps: Seq[P[String]],
+      ps: immutable.Seq[P[String]],
       c: SymbolOrAlias
   ): P[String] =
     (cons, ps) match {
-      case (Concat(), Seq(ListP(hd1, None, tl1, _, o1), ListP(hd2, frame, tl2, _, o2))) =>
-        ListP(hd1 ++ tl1 ++ hd2, frame, tl2, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(ListP(hd1, frame, tl1, _, o1), ListP(hd2, None, tl2, _, o2))) =>
-        ListP(hd1, frame, tl1 ++ hd2 ++ tl2, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ VariableP(_, _))) =>
-        ListP(hd ++ tl, Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(ListP(hd, None, tl, _, o), p @ WildcardP())) =>
-        ListP(hd ++ tl, Some(p), Seq(), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(p @ VariableP(_, _), ListP(hd, None, tl, _, o))) =>
-        ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
-      case (Concat(), Seq(p @ WildcardP(), ListP(hd, None, tl, _, o))) =>
-        ListP(Seq(), Some(p), hd ++ tl, c, SymbolP(sym, Seq(p, o)))
-      case (Concat(), Seq(p1, p2)) => ListP(Seq(), None, Seq(), c, SymbolP(sym, Seq(p1, p2))) /* not
+      case (Concat(), immutable.Seq(ListP(hd1, None, tl1, _, o1), ListP(hd2, frame, tl2, _, o2))) =>
+        ListP(hd1 ++ tl1 ++ hd2, frame, tl2, c, SymbolP(sym, immutable.Seq(o1, o2)))
+      case (Concat(), immutable.Seq(ListP(hd1, frame, tl1, _, o1), ListP(hd2, None, tl2, _, o2))) =>
+        ListP(hd1, frame, tl1 ++ hd2 ++ tl2, c, SymbolP(sym, immutable.Seq(o1, o2)))
+      case (Concat(), immutable.Seq(ListP(hd, None, tl, _, o), p @ VariableP(_, _))) =>
+        ListP(hd ++ tl, Some(p), immutable.Seq(), c, SymbolP(sym, immutable.Seq(o, p)))
+      case (Concat(), immutable.Seq(ListP(hd, None, tl, _, o), p @ WildcardP())) =>
+        ListP(hd ++ tl, Some(p), immutable.Seq(), c, SymbolP(sym, immutable.Seq(o, p)))
+      case (Concat(), immutable.Seq(p @ VariableP(_, _), ListP(hd, None, tl, _, o))) =>
+        ListP(immutable.Seq(), Some(p), hd ++ tl, c, SymbolP(sym, immutable.Seq(p, o)))
+      case (Concat(), immutable.Seq(p @ WildcardP(), ListP(hd, None, tl, _, o))) =>
+        ListP(immutable.Seq(), Some(p), hd ++ tl, c, SymbolP(sym, immutable.Seq(p, o)))
+      case (Concat(), immutable.Seq(p1, p2)) =>
+        ListP(immutable.Seq(), None, immutable.Seq(), c, SymbolP(sym, immutable.Seq(p1, p2))) /* not
          * valid, but necessary for iterated pattern matching */
-      case (Unit(), Seq())         => ListP(Seq(), None, Seq(), c, SymbolP(sym, Seq()))
-      case (Element(), Seq(p))     => ListP(Seq(p), None, Seq(), c, SymbolP(sym, Seq(p)))
+      case (Unit(), immutable.Seq()) =>
+        ListP(immutable.Seq(), None, immutable.Seq(), c, SymbolP(sym, immutable.Seq()))
+      case (Element(), immutable.Seq(p)) =>
+        ListP(immutable.Seq(p), None, immutable.Seq(), c, SymbolP(sym, immutable.Seq(p)))
+      case _ => ???
     }
 
   private def mapPattern(
       sym: SymbolOrAlias,
       cons: CollectionCons,
-      ps: Seq[P[String]],
+      ps: immutable.Seq[P[String]],
       c: SymbolOrAlias
   ): P[String] =
     (cons, ps) match {
-      case (Concat(), Seq(MapP(ks1, vs1, None, _, o1), MapP(ks2, vs2, frame, _, o2))) =>
-        MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(MapP(ks1, vs1, frame, _, o1), MapP(ks2, vs2, None, _, o2))) =>
-        MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(MapP(ks, vs, None, _, o), p @ VariableP(_, _))) =>
-        MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(MapP(ks, vs, None, _, o), p @ WildcardP())) =>
-        MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(p @ VariableP(_, _), MapP(ks, vs, None, _, o))) =>
-        MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(p, o)))
-      case (Concat(), Seq(p @ WildcardP(), MapP(ks, vs, None, _, o))) =>
-        MapP(ks, vs, Some(p), c, SymbolP(sym, Seq(p, o)))
-      case (Concat(), Seq(p1, p2)) => MapP(Seq(), Seq(), None, c, SymbolP(sym, Seq(p1, p2))) /* not
+      case (Concat(), immutable.Seq(MapP(ks1, vs1, None, _, o1), MapP(ks2, vs2, frame, _, o2))) =>
+        MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, immutable.Seq(o1, o2)))
+      case (Concat(), immutable.Seq(MapP(ks1, vs1, frame, _, o1), MapP(ks2, vs2, None, _, o2))) =>
+        MapP(ks1 ++ ks2, vs1 ++ vs2, frame, c, SymbolP(sym, immutable.Seq(o1, o2)))
+      case (Concat(), immutable.Seq(MapP(ks, vs, None, _, o), p @ VariableP(_, _))) =>
+        MapP(ks, vs, Some(p), c, SymbolP(sym, immutable.Seq(o, p)))
+      case (Concat(), immutable.Seq(MapP(ks, vs, None, _, o), p @ WildcardP())) =>
+        MapP(ks, vs, Some(p), c, SymbolP(sym, immutable.Seq(o, p)))
+      case (Concat(), immutable.Seq(p @ VariableP(_, _), MapP(ks, vs, None, _, o))) =>
+        MapP(ks, vs, Some(p), c, SymbolP(sym, immutable.Seq(p, o)))
+      case (Concat(), immutable.Seq(p @ WildcardP(), MapP(ks, vs, None, _, o))) =>
+        MapP(ks, vs, Some(p), c, SymbolP(sym, immutable.Seq(p, o)))
+      case (Concat(), immutable.Seq(p1, p2)) =>
+        MapP(immutable.Seq(), immutable.Seq(), None, c, SymbolP(sym, immutable.Seq(p1, p2))) /* not
          * valid, but necessary for iterated pattern matching */
-      case (Unit(), Seq())         => MapP(Seq(), Seq(), None, c, SymbolP(sym, Seq()))
-      case (Element(), Seq(k, v))  => MapP(Seq(k), Seq(v), None, c, SymbolP(sym, Seq(k, v)))
+      case (Unit(), immutable.Seq()) =>
+        MapP(immutable.Seq(), immutable.Seq(), None, c, SymbolP(sym, immutable.Seq()))
+      case (Element(), immutable.Seq(k, v)) =>
+        MapP(immutable.Seq(k), immutable.Seq(v), None, c, SymbolP(sym, immutable.Seq(k, v)))
+      case _ => ???
     }
 
   private def setPattern(
       sym: SymbolOrAlias,
       cons: CollectionCons,
-      ps: Seq[P[String]],
+      ps: immutable.Seq[P[String]],
       c: SymbolOrAlias
   ): P[String] =
     (cons, ps) match {
-      case (Concat(), Seq(SetP(ks1, None, _, o1), SetP(ks2, frame, _, o2))) =>
-        SetP(ks1 ++ ks2, frame, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(SetP(ks1, frame, _, o1), SetP(ks2, None, _, o2))) =>
-        SetP(ks1 ++ ks2, frame, c, SymbolP(sym, Seq(o1, o2)))
-      case (Concat(), Seq(SetP(ks, None, _, o), p @ VariableP(_, _))) =>
-        SetP(ks, Some(p), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(SetP(ks, None, _, o), p @ WildcardP())) =>
-        SetP(ks, Some(p), c, SymbolP(sym, Seq(o, p)))
-      case (Concat(), Seq(p @ VariableP(_, _), SetP(ks, None, _, o))) =>
-        SetP(ks, Some(p), c, SymbolP(sym, Seq(p, o)))
-      case (Concat(), Seq(p @ WildcardP(), SetP(ks, None, _, o))) =>
-        SetP(ks, Some(p), c, SymbolP(sym, Seq(p, o)))
-      case (Concat(), Seq(p1, p2)) => SetP(Seq(), None, c, SymbolP(sym, Seq(p1, p2))) /* not valid,
-         * but necessary for iterated pattern matching */
-      case (Unit(), Seq())         => SetP(Seq(), None, c, SymbolP(sym, Seq()))
-      case (Element(), Seq(e))     => SetP(Seq(e), None, c, SymbolP(sym, Seq(e)))
+      case (Concat(), immutable.Seq(SetP(ks1, None, _, o1), SetP(ks2, frame, _, o2))) =>
+        SetP(ks1 ++ ks2, frame, c, SymbolP(sym, immutable.Seq(o1, o2)))
+      case (Concat(), immutable.Seq(SetP(ks1, frame, _, o1), SetP(ks2, None, _, o2))) =>
+        SetP(ks1 ++ ks2, frame, c, SymbolP(sym, immutable.Seq(o1, o2)))
+      case (Concat(), immutable.Seq(SetP(ks, None, _, o), p @ VariableP(_, _))) =>
+        SetP(ks, Some(p), c, SymbolP(sym, immutable.Seq(o, p)))
+      case (Concat(), immutable.Seq(SetP(ks, None, _, o), p @ WildcardP())) =>
+        SetP(ks, Some(p), c, SymbolP(sym, immutable.Seq(o, p)))
+      case (Concat(), immutable.Seq(p @ VariableP(_, _), SetP(ks, None, _, o))) =>
+        SetP(ks, Some(p), c, SymbolP(sym, immutable.Seq(p, o)))
+      case (Concat(), immutable.Seq(p @ WildcardP(), SetP(ks, None, _, o))) =>
+        SetP(ks, Some(p), c, SymbolP(sym, immutable.Seq(p, o)))
+      case (Concat(), immutable.Seq(p1, p2)) =>
+        SetP(immutable.Seq(), None, c, SymbolP(sym, immutable.Seq(p1, p2))) /* not valid, but
+         * necessary for iterated pattern matching */
+      case (Unit(), immutable.Seq()) =>
+        SetP(immutable.Seq(), None, c, SymbolP(sym, immutable.Seq()))
+      case (Element(), immutable.Seq(e)) =>
+        SetP(immutable.Seq(e), None, c, SymbolP(sym, immutable.Seq(e)))
+      case _ => ???
     }
 
   private def genPatterns(
       mod: Definition,
       symlib: Parser.SymLib,
-      lhs: Seq[Pattern]
+      lhs: immutable.Seq[Pattern]
   ): List[P[String]] = {
     def getElementSym(sort: Sort): SymbolOrAlias =
       Parser.getSymbolAtt(symlib.sortAtt(sort), "element").get
@@ -112,17 +125,17 @@ object Generator {
           hookAtt match {
             case Some("LIST.concat") =>
               listPattern(sym, Concat(), ps.map(genPattern), getElementSym(sort))
-            case Some("LIST.unit") => listPattern(sym, Unit(), Seq(), getElementSym(sort))
+            case Some("LIST.unit") => listPattern(sym, Unit(), immutable.Seq(), getElementSym(sort))
             case Some("LIST.element") =>
               listPattern(sym, Element(), ps.map(genPattern), getElementSym(sort))
             case Some("MAP.concat") =>
               mapPattern(sym, Concat(), ps.map(genPattern), getElementSym(sort))
-            case Some("MAP.unit") => mapPattern(sym, Unit(), Seq(), getElementSym(sort))
+            case Some("MAP.unit") => mapPattern(sym, Unit(), immutable.Seq(), getElementSym(sort))
             case Some("MAP.element") =>
               mapPattern(sym, Element(), ps.map(genPattern), getElementSym(sort))
             case Some("SET.concat") =>
               setPattern(sym, Concat(), ps.map(genPattern), getElementSym(sort))
-            case Some("SET.unit") => setPattern(sym, Unit(), Seq(), getElementSym(sort))
+            case Some("SET.unit") => setPattern(sym, Unit(), immutable.Seq(), getElementSym(sort))
             case Some("SET.element") =>
               setPattern(sym, Element(), ps.map(genPattern), getElementSym(sort))
             case _ => SymbolP(sym, ps.map(genPattern))
@@ -144,7 +157,7 @@ object Generator {
           val att     = symlib.sortAtt(sort)
           val hookAtt = Parser.getStringAtt(att, "hook")
           VariableP(name, SortCategory(hookAtt.orElse(Some("STRING.String")), sort, symlib))
-        case And(_, p +: (v @ Variable(_, _)) +: Seq()) =>
+        case And(_, p +: (v @ Variable(_, _)) +: immutable.Seq()) =>
           val _var = genPattern(v).asInstanceOf[VariableP[String]]
           AsP(_var.name, _var.sort, genPattern(p))
         case Or(_, args) => args.map(genPattern).reduce(OrP(_, _))
@@ -152,9 +165,9 @@ object Generator {
     lhs.map(genPattern).toList
   }
 
-  private def genVars(pat: Pattern): Seq[Variable] =
+  private def genVars(pat: Pattern): immutable.Seq[Variable] =
     pat match {
-      case v @ Variable(_, _)   => Seq(v)
+      case v @ Variable(_, _)   => immutable.Seq(v)
       case And(_, ps)           => ps.flatMap(genVars)
       case Application(_, ps)   => ps.flatMap(genVars)
       case Ceil(_, _, p)        => genVars(p)
@@ -168,26 +181,26 @@ object Generator {
       // case Next(_, p) => genVars(p)
       case Not(_, p) => genVars(p)
       case Or(_, ps) => ps.flatMap(genVars)
-      case _         => Seq()
+      case _         => immutable.Seq()
     }
 
-  def genClauseMatrix[T](
+  def genClauseMatrix(
       symlib: Parser.SymLib,
       mod: Definition,
-      axioms: IndexedSeq[AxiomInfo],
-      sorts: Seq[Sort]
+      axioms: immutable.IndexedSeq[AxiomInfo],
+      sorts: immutable.Seq[Sort]
   ): Matrix = {
     val actions = axioms.map { a =>
-      val lhsVars     = a.rewrite.getLeftHandSide.flatMap(genVars(_))
+      val lhsVars     = a.rewrite.getLeftHandSide.flatMap(genVars)
       val lhsVarNames = lhsVars.map(_.name)
       val rhsVars     = genVars(a.rewrite.getRightHandSide)
-      val scVars      = a.sideCondition.map(genVars(_))
-      new Action(
+      val scVars      = a.sideCondition.map(genVars)
+      Action(
         a.ordinal,
         lhsVars,
         rhsVars.map(_.name).sorted.distinct,
         scVars.map(_.map(_.name).sorted.distinct),
-        (rhsVars ++ scVars.getOrElse(Seq()))
+        (rhsVars ++ scVars.getOrElse(immutable.Seq()))
           .filter(_.name.startsWith("Var'Bang"))
           .map(v => (v.name, v.sort)),
         a.rewrite.getLeftHandSide.size,
@@ -199,15 +212,19 @@ object Generator {
     }
     val patterns = axioms.map(a => genPatterns(mod, symlib, a.rewrite.getLeftHandSide)).transpose
     val cols =
-      (sorts, if (axioms.isEmpty) sorts.map(_ => IndexedSeq()) else patterns).zipped.toIndexedSeq
+      sorts
+        .lazyZip(
+          if (axioms.isEmpty) sorts.map(_ => immutable.IndexedSeq()) else patterns
+        )
+        .toIndexedSeq
     new Matrix(symlib, cols, actions).expand
   }
 
   def mkDecisionTree(
       symlib: Parser.SymLib,
       mod: Definition,
-      axioms: IndexedSeq[AxiomInfo],
-      sorts: Seq[Sort],
+      axioms: immutable.IndexedSeq[AxiomInfo],
+      sorts: immutable.Seq[Sort],
       name: SymbolOrAlias,
       kem: MatchingException => scala.Unit
   ): DecisionTree = {
@@ -233,7 +250,7 @@ object Generator {
     val numerator   = originalMatrix.rows.size * threshold._1
     val denominator = finalMatrix.rows.size * threshold._2
     if (Matching.logging) {
-      System.out.println(finalMatrix.rows.size + "/" + originalMatrix.rows.size)
+      System.out.println(finalMatrix.rows.size.toString + "/" + originalMatrix.rows.size.toString)
     }
     numerator <= denominator
   }
@@ -244,10 +261,10 @@ object Generator {
       matrix: Matrix,
       axiom: AxiomInfo,
       threshold: (Int, Int)
-  ): Option[(DecisionTree, Seq[(P[String], Occurrence)])] = {
-    val rhs                      = genPatterns(mod, symlib, Seq(axiom.rewrite.getRightHandSide))
+  ): Option[(DecisionTree, immutable.Seq[(P[String], Occurrence)])] = {
+    val rhs = genPatterns(mod, symlib, immutable.Seq(axiom.rewrite.getRightHandSide))
     val (specialized, residuals) = matrix.specializeBy(rhs.toIndexedSeq)
-    val residualMap              = (residuals, specialized.fringe.map(_.occurrence)).zipped.toSeq
+    val residualMap = residuals.lazyZip(specialized.fringe.map(_.occurrence)).to(immutable.Seq)
     if (Matching.logging) {
       System.out.println("Residuals: " + residualMap.toList)
     }
@@ -256,7 +273,7 @@ object Generator {
       symlib,
       specialized.columns.map(c => new Column(c.fringe.inexact, c.patterns, newClauses)),
       newClauses,
-      false
+      search = false
     )
     if (isPoorlySpecialized(finalMatrix, matrix, threshold)) {
       None
