@@ -1,4 +1,4 @@
-version: 6
+version: 7
 hook: MAP.element (0)
   function: Lbl'UndsPipe'-'-GT-Unds'{} (0)
     arg: kore[74]
@@ -122,7 +122,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1237]
@@ -158,7 +158,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -202,7 +202,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -224,7 +224,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -244,7 +244,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -270,7 +270,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -292,7 +292,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -315,7 +315,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -340,7 +340,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -361,7 +361,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -381,7 +381,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -404,7 +404,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -451,7 +451,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -472,7 +472,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -498,7 +498,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -520,7 +520,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[56]
@@ -543,7 +543,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -569,7 +569,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -591,7 +591,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -614,7 +614,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -639,7 +639,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -661,7 +661,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -697,7 +697,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[338]
@@ -718,7 +718,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[338]
@@ -744,7 +744,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[338]
@@ -766,7 +766,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[57]
@@ -789,7 +789,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[338]
@@ -820,7 +820,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[338]
@@ -842,7 +842,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[57]
@@ -865,7 +865,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[338]
@@ -890,7 +890,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[338]
@@ -912,7 +912,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -956,7 +956,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -978,7 +978,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -998,7 +998,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1024,7 +1024,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1046,7 +1046,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -1069,7 +1069,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1094,7 +1094,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1115,7 +1115,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1135,7 +1135,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1158,7 +1158,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1205,7 +1205,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1226,7 +1226,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1252,7 +1252,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1274,7 +1274,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -1297,7 +1297,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1323,7 +1323,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1345,7 +1345,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -1368,7 +1368,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1393,7 +1393,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1415,7 +1415,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -1451,7 +1451,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1472,7 +1472,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1498,7 +1498,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1520,7 +1520,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -1543,7 +1543,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1574,7 +1574,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1596,7 +1596,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -1619,7 +1619,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1644,7 +1644,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1666,7 +1666,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -1710,7 +1710,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1732,7 +1732,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1752,7 +1752,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1778,7 +1778,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1800,7 +1800,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -1823,7 +1823,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1848,7 +1848,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1869,7 +1869,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1889,7 +1889,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1912,7 +1912,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1959,7 +1959,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -1980,7 +1980,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2006,7 +2006,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2028,7 +2028,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -2051,7 +2051,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2077,7 +2077,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2099,7 +2099,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -2122,7 +2122,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2147,7 +2147,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2169,7 +2169,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -2205,7 +2205,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2226,7 +2226,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2252,7 +2252,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2274,7 +2274,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -2297,7 +2297,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2328,7 +2328,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2350,7 +2350,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -2373,7 +2373,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2398,7 +2398,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2420,7 +2420,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -2464,7 +2464,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2486,7 +2486,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2506,7 +2506,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2532,7 +2532,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2554,7 +2554,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -2577,7 +2577,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2602,7 +2602,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2623,7 +2623,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2643,7 +2643,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2666,7 +2666,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2713,7 +2713,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2734,7 +2734,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2760,7 +2760,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2782,7 +2782,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -2805,7 +2805,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2831,7 +2831,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2853,7 +2853,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -2876,7 +2876,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2901,7 +2901,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2923,7 +2923,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -2959,7 +2959,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -2980,7 +2980,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3006,7 +3006,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3028,7 +3028,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -3051,7 +3051,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3082,7 +3082,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3104,7 +3104,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -3127,7 +3127,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3152,7 +3152,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3174,7 +3174,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -3218,7 +3218,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3240,7 +3240,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3260,7 +3260,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3286,7 +3286,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3308,7 +3308,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -3331,7 +3331,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3356,7 +3356,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3377,7 +3377,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3397,7 +3397,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3420,7 +3420,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3467,7 +3467,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3488,7 +3488,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3514,7 +3514,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3536,7 +3536,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -3559,7 +3559,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3585,7 +3585,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3607,7 +3607,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -3630,7 +3630,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3655,7 +3655,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3677,7 +3677,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -3713,7 +3713,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3734,7 +3734,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3760,7 +3760,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3782,7 +3782,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -3805,7 +3805,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3836,7 +3836,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3858,7 +3858,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -3881,7 +3881,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3906,7 +3906,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3928,7 +3928,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -3972,7 +3972,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -3994,7 +3994,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4014,7 +4014,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4040,7 +4040,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4062,7 +4062,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -4085,7 +4085,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4110,7 +4110,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4131,7 +4131,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4151,7 +4151,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4174,7 +4174,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4221,7 +4221,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4242,7 +4242,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4268,7 +4268,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4290,7 +4290,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -4313,7 +4313,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4339,7 +4339,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4361,7 +4361,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -4384,7 +4384,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4409,7 +4409,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4431,7 +4431,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -4467,7 +4467,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4488,7 +4488,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4514,7 +4514,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4536,7 +4536,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -4559,7 +4559,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4590,7 +4590,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4612,7 +4612,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -4635,7 +4635,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4660,7 +4660,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4682,7 +4682,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -4726,7 +4726,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4748,7 +4748,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4768,7 +4768,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4794,7 +4794,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4816,7 +4816,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -4839,7 +4839,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4864,7 +4864,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4885,7 +4885,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4905,7 +4905,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4928,7 +4928,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4975,7 +4975,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -4996,7 +4996,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5022,7 +5022,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5044,7 +5044,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -5067,7 +5067,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5093,7 +5093,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5115,7 +5115,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -5138,7 +5138,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5163,7 +5163,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5185,7 +5185,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -5221,7 +5221,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5242,7 +5242,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5268,7 +5268,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5290,7 +5290,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -5313,7 +5313,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5344,7 +5344,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5366,7 +5366,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -5389,7 +5389,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5414,7 +5414,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5436,7 +5436,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -5480,7 +5480,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5502,7 +5502,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5522,7 +5522,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5548,7 +5548,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5570,7 +5570,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -5593,7 +5593,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5618,7 +5618,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5639,7 +5639,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5659,7 +5659,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5682,7 +5682,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5729,7 +5729,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5750,7 +5750,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5776,7 +5776,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5798,7 +5798,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -5821,7 +5821,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5847,7 +5847,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5869,7 +5869,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -5892,7 +5892,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5917,7 +5917,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5939,7 +5939,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -5975,7 +5975,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -5996,7 +5996,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6022,7 +6022,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6044,7 +6044,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -6067,7 +6067,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6098,7 +6098,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6120,7 +6120,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -6143,7 +6143,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6168,7 +6168,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6190,7 +6190,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -6234,7 +6234,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6256,7 +6256,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6276,7 +6276,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6302,7 +6302,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6324,7 +6324,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -6347,7 +6347,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6372,7 +6372,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6393,7 +6393,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6413,7 +6413,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6436,7 +6436,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6483,7 +6483,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6504,7 +6504,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6530,7 +6530,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6552,7 +6552,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -6575,7 +6575,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6601,7 +6601,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6623,7 +6623,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -6646,7 +6646,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6671,7 +6671,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6693,7 +6693,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -6729,7 +6729,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6750,7 +6750,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6776,7 +6776,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6798,7 +6798,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -6821,7 +6821,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6852,7 +6852,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6874,7 +6874,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -6897,7 +6897,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6922,7 +6922,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -6944,7 +6944,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -6988,7 +6988,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7010,7 +7010,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7030,7 +7030,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7056,7 +7056,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7078,7 +7078,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -7101,7 +7101,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7126,7 +7126,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7147,7 +7147,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7167,7 +7167,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7190,7 +7190,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2917 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7237,7 +7237,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7258,7 +7258,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7284,7 +7284,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7306,7 +7306,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[54]
   VarK0 = kore[57]
@@ -7329,7 +7329,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7355,7 +7355,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7377,7 +7377,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
@@ -7400,7 +7400,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7425,7 +7425,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7447,7 +7447,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1373]
@@ -7483,7 +7483,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2912 kore[75]
+side condition exit: 2912 true
 rule: 2912 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7504,7 +7504,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2903 kore[75]
+side condition exit: 2903 true
 rule: 2903 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7530,7 +7530,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2884 kore[75]
+side condition exit: 2884 true
 rule: 2884 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7552,7 +7552,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[73]
   VarK0 = kore[56]
@@ -7575,7 +7575,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2904 kore[75]
+side condition exit: 2904 true
 rule: 2904 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7606,7 +7606,7 @@ hook: BOOL.and (0)
     VarKResult = kore[60]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2885 kore[75]
+side condition exit: 2885 true
 rule: 2885 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7628,7 +7628,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2903 kore[76]
+side condition exit: 2903 false
 side condition entry: 2904 2
   VarHOLE = kore[57]
   VarK0 = kore[56]
@@ -7651,7 +7651,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2904 kore[76]
+side condition exit: 2904 false
 rule: 2905 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7676,7 +7676,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2890 kore[75]
+side condition exit: 2890 true
 rule: 2890 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7698,7 +7698,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2912 kore[76]
+side condition exit: 2912 false
 rule: 2913 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar2 = kore[1043]
@@ -7742,7 +7742,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2915 kore[75]
+side condition exit: 2915 true
 rule: 2915 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7764,7 +7764,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2894 kore[75]
+side condition exit: 2894 true
 rule: 2894 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7784,7 +7784,7 @@ hook: BOOL.and (0)
   hook result: kore[75]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2909 kore[75]
+side condition exit: 2909 true
 rule: 2909 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7810,7 +7810,7 @@ hook: BOOL.and (0)
     VarKResult = kore[59]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2888 kore[75]
+side condition exit: 2888 true
 rule: 2888 6
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7832,7 +7832,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2909 kore[76]
+side condition exit: 2909 false
 side condition entry: 2910 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
@@ -7855,7 +7855,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2910 kore[76]
+side condition exit: 2910 false
 rule: 2911 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7880,7 +7880,7 @@ hook: BOOL.and (0)
     VarKResult = kore[64]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2880 kore[75]
+side condition exit: 2880 true
 rule: 2880 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7901,7 +7901,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2894 kore[76]
+side condition exit: 2894 false
 rule: 2895 4
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7921,7 +7921,7 @@ hook: BOOL.and (0)
     VarKResult = kore[65]
   arg: kore[75]
 hook result: kore[75]
-side condition exit: 2891 kore[75]
+side condition exit: 2891 true
 rule: 2891 7
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]
@@ -7944,7 +7944,7 @@ hook: BOOL.and (0)
   hook result: kore[76]
   arg: kore[76]
 hook result: kore[76]
-side condition exit: 2915 kore[76]
+side condition exit: 2915 false
 rule: 2916 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'DotVar1 = kore[337]

@@ -444,6 +444,10 @@ void write_uint64_to_file(FILE *file, uint64_t i) {
   fwrite(&i, 8, 1, file);
 }
 
+void write_bool_to_file(FILE *file, bool b) {
+  fwrite(&b, 1, 1, file);
+}
+
 void serialize_term_to_file(
     FILE *file, block *subject, char const *sort, bool use_intern) {
   char *data = nullptr;
