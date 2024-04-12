@@ -15,7 +15,8 @@ cl::opt<std::string> input_filename(
 
 cl::opt<bool> slow(
     "slow",
-    llvm::cl::desc("test proof trace generated with slow instrumentation option"),
+    llvm::cl::desc(
+        "test proof trace generated with slow instrumentation option"),
     cl::cat(kore_proof_trace_test_cat));
 
 int main(int argc, char **argv) {
@@ -53,14 +54,16 @@ int main(int argc, char **argv) {
   }
 
   // only in slow instrumentation, check that the next event is a configuration
-  if (slow && !(trace->get_trace()[1].is_pattern()
-        && trace->get_trace()[1].getkore_pattern())) {
+  if (slow
+      && !(
+          trace->get_trace()[1].is_pattern()
+          && trace->get_trace()[1].getkore_pattern())) {
     return 1;
   }
 
   // check that the next event is the rewrite b() => c()
   auto const rule2 = std::dynamic_pointer_cast<llvm_rule_event>(
-      trace->get_trace()[slow? 2 : 1].get_step_event());
+      trace->get_trace()[slow ? 2 : 1].get_step_event());
   if (!rule2) {
     return 1;
   }

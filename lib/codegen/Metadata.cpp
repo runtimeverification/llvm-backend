@@ -62,7 +62,8 @@ void add_safe_partial_flag(llvm::Module &mod, bool enabled, bool debug) {
   add_boolean_flag(mod, safe_partial, enabled, debug);
 }
 
-void add_proof_hint_instrumentation_slow_flag(llvm::Module &mod, bool enabled, bool debug) {
+void add_proof_hint_instrumentation_slow_flag(
+    llvm::Module &mod, bool enabled, bool debug) {
   add_boolean_flag(mod, proof_hint_instrumentation_slow, enabled, debug);
 }
 

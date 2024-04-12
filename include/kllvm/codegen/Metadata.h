@@ -15,7 +15,8 @@ void add_mutable_bytes_flag(llvm::Module &mod, bool enabled, bool debug);
 
 void add_safe_partial_flag(llvm::Module &mod, bool enabled, bool debug);
 
-void add_proof_hint_instrumentation_slow_flag(llvm::Module &mod, bool enabled, bool debug);
+void add_proof_hint_instrumentation_slow_flag(
+    llvm::Module &mod, bool enabled, bool debug);
 } // namespace kllvm
 
 #endif

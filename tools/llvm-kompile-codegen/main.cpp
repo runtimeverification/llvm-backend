@@ -128,7 +128,8 @@ void emit_metadata(llvm::Module &mod) {
   add_kompiled_dir_symbol(mod, kompiled_dir, debug);
   add_mutable_bytes_flag(mod, mutable_bytes, debug);
   add_safe_partial_flag(mod, safe_partial, debug);
-  add_proof_hint_instrumentation_slow_flag(mod, proof_hint_instrumentation_slow, debug);
+  add_proof_hint_instrumentation_slow_flag(
+      mod, proof_hint_instrumentation_slow, debug);
 }
 
 } // namespace
