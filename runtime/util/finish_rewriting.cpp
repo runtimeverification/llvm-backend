@@ -13,6 +13,7 @@ bool proof_output = false;
 
 extern int64_t steps;
 extern bool safe_partial;
+extern bool proof_hint_instrumentation_slow;
 
 int32_t get_exit_code(block *);
 
@@ -44,7 +45,7 @@ int32_t get_exit_code(block *);
     } else {
       print_configuration(output_file, subject);
     }
-  } else if (!error) {
+  } else if (!error && !proof_hint_instrumentation_slow) {
     write_uint64_to_file(output_file, 0xFFFFFFFFFFFFFFFF);
     serialize_configuration_to_file(output_file, subject, true, false);
     write_uint64_to_file(output_file, 0xCCCCCCCCCCCCCCCC);

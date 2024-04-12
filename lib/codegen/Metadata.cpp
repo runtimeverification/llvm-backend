@@ -13,6 +13,7 @@ namespace {
 std::string kompiled_dir = "kompiled_directory";
 std::string strict_bytes = "enable_mutable_bytes";
 std::string safe_partial = "safe_partial";
+std::string proof_hint_instrumentation_slow = "proof_hint_instrumentation_slow";
 
 void add_boolean_flag(
     llvm::Module &mod, std::string const &name, bool enabled, bool debug) {
@@ -59,6 +60,10 @@ void add_mutable_bytes_flag(llvm::Module &mod, bool enabled, bool debug) {
 
 void add_safe_partial_flag(llvm::Module &mod, bool enabled, bool debug) {
   add_boolean_flag(mod, safe_partial, enabled, debug);
+}
+
+void add_proof_hint_instrumentation_slow_flag(llvm::Module &mod, bool enabled, bool debug) {
+  add_boolean_flag(mod, proof_hint_instrumentation_slow, enabled, debug);
 }
 
 } // namespace kllvm
