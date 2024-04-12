@@ -45,9 +45,9 @@ int32_t get_exit_code(block *);
       print_configuration(output_file, subject);
     }
   } else if (!error) {
-    write_uint64_to_file(output_file, 0x33);
+    write_uint64_to_file(output_file, 0xFFFFFFFFFFFFFFFF);
     serialize_configuration_to_file(output_file, subject, true, false);
-    write_uint64_to_file(output_file, 0xCC);
+    write_uint64_to_file(output_file, 0xCCCCCCCCCCCCCCCC);
   }
 
   auto exit_code = error ? 113 : get_exit_code(subject);
