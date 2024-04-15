@@ -233,9 +233,9 @@ migrate_root(void *curr_block, layoutitem *args, unsigned i, bool is_block) {
   case LIST_LAYOUT:
   case SET_LAYOUT: {
     char *root_ptr = *(char **)arg;
-    uint64_t *offset_ptr = (uint64_t *)(root_ptr - sizeof(uint64_t));
+    auto *offset_ptr = (uint64_t *)(root_ptr - sizeof(uint64_t));
     uint64_t offset = *offset_ptr;
-    block *base_ptr = (block *)(root_ptr - offset);
+    auto *base_ptr = (block *)(root_ptr - offset);
     migrate((block **)&base_ptr);
     *(void **)arg = (void *)((char *)base_ptr + offset);
     break;
@@ -367,7 +367,7 @@ bool store_map_for_gc(void **roots, map *ptr) {
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto offset = (uint64_t *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (map *)(hdr + 2);
   *child = std::move(*ptr);
@@ -384,7 +384,7 @@ bool store_set_for_gc(void **roots, set *ptr) {
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto offset = (uint64_t *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (set *)(hdr + 2);
   *child = std::move(*ptr);
@@ -401,7 +401,7 @@ bool store_list_for_gc(void **roots, list *ptr) {
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto offset = (uint64_t *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (list *)(hdr + 2);
   *child = std::move(*ptr);
@@ -418,7 +418,7 @@ bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::RangeMap) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto offset = (uint64_t *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (rangemap *)(hdr + 2);
   *child = std::move(*ptr);
