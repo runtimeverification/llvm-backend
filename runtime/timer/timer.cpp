@@ -13,6 +13,16 @@ block *hook_TIMER_timerStart(void) {
   return dot_k();
 }
 
+block *hook_TIMER_timerStartArg(mpz_ptr i) {
+  hook_timer_start();
+
+  std::ofstream times_file;
+  times_file.open("hook_times.txt", std::ios_base::app);
+  times_file << int_to_string(i) << " ";
+
+  return dot_k();
+}
+
 block *hook_TIMER_timerStop(void) {
   hook_timer_stop();
 
