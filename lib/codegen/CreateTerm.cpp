@@ -818,24 +818,36 @@ llvm::Value *create_term::not_injection_case(
   llvm::StructType *block_type = get_block_type(module_, definition_, symbol);
   llvm::Value *block_header
       = get_block_header(module_, definition_, symbol, block_type);
-  int idx = 2;
+  int idx = 0;
   std::vector<llvm::Value *> children;
   for (auto const &child : constructor->get_arguments()) {
+    auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
+    auto cat = sort->get_category(definition_);
+    switch (cat.cat) {
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
+      children.push_back(llvm::ConstantExpr::getOffsetOf(
+          block_type, get_block_offset(definition_, symbol, idx)));
+      break;
+    default: break;
+    }
     llvm::Value *child_value = nullptr;
-    if (idx == 2 && val != nullptr) {
+    if (idx == 0 && val != nullptr) {
       child_value = val;
     } else {
-      std::string new_location = fmt::format("{}:{}", location_stack, idx - 2);
+      std::string new_location = fmt::format("{}:{}", location_stack, idx);
       if (is_injection_symbol(child.get(), definition_->get_inj_symbol())) {
         new_location = location_stack;
       }
       child_value = create_allocation(child.get(), new_location).first;
     }
 
-    auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
     if (sort && is_collection_sort(sort->get_category(definition_))) {
       child_value = new llvm::LoadInst(
-          block_type->elements()[idx], child_value, "", current_block_);
+          block_type->elements()[get_block_offset(definition_, symbol, idx)],
+          child_value, "", current_block_);
     }
     children.push_back(child_value);
     idx++;
