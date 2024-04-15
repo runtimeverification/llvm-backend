@@ -22,4 +22,18 @@ llvm::Function *kore_heap_alloc(std::string const &name, llvm::Module *module) {
   return get_or_insert_function(module, name, alloc_type);
 }
 
+llvm::Constant *get_offset_of_member(
+    [[maybe_unused]] llvm::Module *mod, llvm::StructType *struct_ty,
+    int nth_member) {
+#if LLVM_VERSION_MAJOR >= 17
+  auto offset
+      = llvm::DataLayout(mod).getStructLayout(struct_ty)->getElementOffset(
+          nth_member);
+  auto *offset_ty = llvm::Type::getInt64Ty(mod->getContext());
+  return llvm::ConstantInt::get(offset_ty, offset);
+#else
+  return llvm::ConstantExpr::getOffsetOf(struct_ty, nth_member);
+#endif
+}
+
 } // namespace kllvm

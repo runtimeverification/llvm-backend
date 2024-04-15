@@ -1118,20 +1118,6 @@ static void get_visitor(
   }
 }
 
-static llvm::Constant *get_offset_of_member(
-    [[maybe_unused]] llvm::Module *mod, llvm::StructType *struct_ty,
-    int nth_member) {
-#if LLVM_VERSION_MAJOR >= 17
-  auto offset
-      = llvm::DataLayout(mod).getStructLayout(struct_ty)->getElementOffset(
-          nth_member);
-  auto *offset_ty = llvm::Type::getInt64Ty(mod->getContext());
-  return llvm::ConstantInt::get(offset_ty, offset);
-#else
-  return llvm::ConstantExpr::getOffsetOf(struct_ty, nth_member);
-#endif
-}
-
 static llvm::Constant *get_layout_data(
     uint16_t layout, kore_symbol *symbol, llvm::Module *module,
     kore_definition *def) {

@@ -2,6 +2,7 @@
 #define KLLVM_UTIL_H
 
 #include <llvm/Config/llvm-config.h>
+#include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
@@ -10,6 +11,8 @@
 #include <string>
 
 namespace kllvm {
+
+llvm::Constant *get_offset_of_member(llvm::Module *, llvm::StructType *, int);
 
 // Returns a reference to the function declaration for a memory allocation
 // function with the given name, adding a declaration to the current module if
