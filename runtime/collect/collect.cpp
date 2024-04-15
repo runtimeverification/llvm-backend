@@ -227,7 +227,21 @@ migrate_root(void *curr_block, layoutitem *args, unsigned i, bool is_block) {
     migrate((block **)arg);
     return;
   }
-  migrate_child(curr_block, args, i, true);
+  switch (arg_data->cat) {
+  case MAP_LAYOUT:
+  case RANGEMAP_LAYOUT:
+  case LIST_LAYOUT:
+  case SET_LAYOUT: {
+    char *root_ptr = *(char **)arg;
+    uint64_t *offset_ptr = (uint64_t *)(root_ptr - sizeof(uint64_t));
+    uint64_t offset = *offset_ptr;
+    block *base_ptr = (block *)(root_ptr - offset);
+    migrate((block **)&base_ptr);
+    *(void **)arg = (void *)((char *)base_ptr + offset);
+    break;
+  }
+  default: migrate_child(curr_block, args, i, true); break;
+  }
 }
 
 static char *evacuate(char *scan_ptr, char **alloc_ptr) {
