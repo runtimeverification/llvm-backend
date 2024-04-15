@@ -200,6 +200,16 @@ llvm::StructType *get_block_type(
   types.push_back(empty_array_type);
   for (auto const &arg : symbol->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
+    auto cat = sort->get_category(definition);
+    switch (cat.cat) {
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
+      types.push_back(llvm::Type::getInt64Ty(module->getContext()));
+      break;
+    default: break;
+    }
     llvm::Type *type = getvalue_type(sort->get_category(definition), module);
     types.push_back(type);
   }
