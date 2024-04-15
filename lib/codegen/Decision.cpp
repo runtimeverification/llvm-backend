@@ -246,7 +246,9 @@ void switch_node::codegen(decision *d) {
             block_type, cast,
             {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->ctx_), 0),
              llvm::ConstantInt::get(
-                 llvm::Type::getInt32Ty(d->ctx_), offset + 2)},
+                 llvm::Type::getInt32Ty(d->ctx_),
+                 get_block_offset(
+                     d->definition_, switch_case.get_constructor(), offset))},
             "", d->current_block_);
 
         llvm::Value *child = nullptr;
@@ -851,7 +853,8 @@ void abort_when_stuck(
       llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
           block_type, block,
           {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0),
-           llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), idx + 2)},
+           llvm::ConstantInt::get(
+               llvm::Type::getInt32Ty(ctx), get_block_offset(d, symbol, idx))},
           "", current_block);
       if (is_collection_sort(cat)) {
         child_value = new llvm::LoadInst(
