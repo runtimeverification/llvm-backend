@@ -279,7 +279,7 @@ void kore_collect(
   for (int i = 0; i < nroots; i++) {
     migrate_child(roots, type_info, i, true, are_block[i]);
   }
-  migrate_roots();
+  migrate_static_roots();
   char *scan_ptr = youngspace_ptr();
   if (scan_ptr != *young_alloc_ptr()) {
     MEM_LOG("Evacuating young generation\n");

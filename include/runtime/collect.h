@@ -29,7 +29,7 @@ extern "C" {
 extern size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
 extern bool collect_old;
 size_t get_size(uint64_t, uint16_t);
-void migrate_roots(void);
+void migrate_static_roots(void);
 void migrate(block **block_ptr);
 void migrate_once(block **);
 void migrate_list(void *l);

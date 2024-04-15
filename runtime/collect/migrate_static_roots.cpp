@@ -9,7 +9,7 @@ extern bool kllvm_rand_state_initialized;
 
 extern "C" {
 
-void migrate_roots() {
+void migrate_static_roots() {
   auto &l1 = list_impl::empty_root();
   migrate_collection_node((void **)&l1);
   auto &l2 = list_impl::empty_tail();
