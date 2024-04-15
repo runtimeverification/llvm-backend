@@ -828,8 +828,8 @@ llvm::Value *create_term::not_injection_case(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      children.push_back(llvm::ConstantExpr::getOffsetOf(
-          block_type, get_block_offset(definition_, symbol, idx)));
+      children.push_back(get_offset_of_member(
+          module_, block_type, get_block_offset(definition_, symbol, idx)));
       break;
     default: break;
     }

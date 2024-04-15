@@ -68,8 +68,9 @@ llvm::Constant *create_static_term::not_injection_case(
       case sort_category::RangeMap:
       case sort_category::List:
       case sort_category::Set:
-        block_vals.push_back(llvm::ConstantExpr::getOffsetOf(
-            block_header_type, get_block_offset(definition_, symbol, idx)));
+        block_vals.push_back(get_offset_of_member(
+            module_, block_header_type,
+            get_block_offset(definition_, symbol, idx)));
         break;
       default: break;
       }
