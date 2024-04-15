@@ -251,8 +251,6 @@ static bool should_collect_old_gen() {
 #endif
 }
 
-void migrate_roots();
-
 void init_static_objects(void) {
   map m = map();
   list l = list();
