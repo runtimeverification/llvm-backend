@@ -206,6 +206,35 @@ llvm::StructType *get_block_type(
   return llvm::StructType::get(module->getContext(), types);
 }
 
+uint64_t get_block_offset(
+    kore_definition *definition, kore_symbol const *symbol, int idx) {
+  uint64_t result = 2;
+  int i = 0;
+  for (auto const &arg : symbol->get_arguments()) {
+    auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
+    auto cat = sort->get_category(definition);
+    switch (cat.cat) {
+    case sort_category::Map:
+    case sort_category::RangeMap:
+    case sort_category::List:
+    case sort_category::Set:
+      if (i == idx) {
+        return result + 1;
+      }
+      result += 2;
+      break;
+    default:
+      if (i == idx) {
+        return result;
+      }
+      result += 1;
+      break;
+    }
+    i++;
+  }
+  throw std::invalid_argument("idx not within bounds of symbol");
+}
+
 uint64_t get_block_header_val(
     llvm::Module *module, kore_symbol const *symbol, llvm::Type *block_type) {
   uint64_t header_val = symbol->get_tag();
