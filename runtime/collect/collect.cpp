@@ -363,7 +363,7 @@ bool store_map_for_gc(void **roots, map *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(map));
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(map) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
@@ -380,7 +380,7 @@ bool store_set_for_gc(void **roots, set *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(set));
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(set) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
@@ -397,7 +397,7 @@ bool store_list_for_gc(void **roots, list *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(list));
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(list) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
@@ -414,7 +414,8 @@ bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(rangemap));
+  void *mem
+      = kore_alloc(sizeof(blockheader) + sizeof(rangemap) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::RangeMap) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
