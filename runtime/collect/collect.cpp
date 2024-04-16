@@ -41,6 +41,14 @@ size_t get_size(uint64_t hdr, uint16_t layout) {
   return size_hdr(hdr);
 }
 
+uint8_t get_first_field_offset(uint16_t layout_int) {
+  if (!layout_int) {
+    return 1;
+  }
+  layout *layout_data = get_layout_data(layout_int);
+  return layout_data->args[0].offset / 8;
+}
+
 void migrate(block **block_ptr) {
   block *curr_block = *block_ptr;
   if (is_leaf_block(curr_block) || !is_heap_block(curr_block)) {
@@ -50,7 +58,8 @@ void migrate(block **block_ptr) {
   INITIALIZE_MIGRATE();
   uint16_t layout = layout_hdr(hdr);
   size_t len_in_bytes = get_size(hdr, layout);
-  auto **forwarding_address = (block **)(curr_block + 1);
+  auto **forwarding_address
+      = (block **)(curr_block + get_first_field_offset(layout));
   if (!hasForwardingAddress) {
     block *new_block = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
