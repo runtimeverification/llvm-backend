@@ -10,15 +10,21 @@
 #define REGISTER_TIMER(name, unit) \
   static std::chrono::high_resolution_clock::time_point name ## _clock_start; \
   static std::chrono::high_resolution_clock::time_point name ## _clock_stop; \
+  static bool name ## _timer_has_started = false; \
   void name ## _timer_start() { \
     name ## _clock_start = std::chrono::high_resolution_clock::now(); \
+    name ## _timer_has_started = true; \
   } \
   void name ## _timer_stop() { \
     name ## _clock_stop = std::chrono::high_resolution_clock::now(); \
+    name ## _timer_has_started = false; \
   } \
   uint64_t name ## _timer_measurement() { \
     return std::chrono::duration_cast<std::chrono::unit>( \
        name ## _clock_stop -  name ## _clock_start).count(); \
+  } \
+  bool name ## _timer_started() { \
+    return name ## _timer_has_started; \
   }
 
 #endif // TIMER_H
