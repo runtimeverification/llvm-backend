@@ -324,9 +324,6 @@ llvm::Value *create_term::alloc_arg(
     std::string const &location_stack) {
   kore_pattern *p = pattern->get_arguments()[idx].get();
   std::string new_location = fmt::format("{}:{}", location_stack, idx);
-  if (is_injection_symbol(p, definition_->get_inj_symbol())) {
-    new_location = location_stack;
-  }
   llvm::Value *ret = create_allocation(p, new_location).first;
   auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
   proof_event e(definition_, module_);
@@ -808,6 +805,8 @@ llvm::Value *create_term::not_injection_case(
       = get_block_header(module_, definition_, symbol, block_type);
   int idx = 0;
   std::vector<llvm::Value *> children;
+  bool is_injection = symbol_decl->attributes().contains(attribute_set::key::SortInjection);
+  assert(!is_injection || constructor->get_arguments().size() == 1);
   for (auto const &child : constructor->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
     auto cat = sort->get_category(definition_);
@@ -819,8 +818,8 @@ llvm::Value *create_term::not_injection_case(
     if (idx == 0 && val != nullptr) {
       child_value = val;
     } else {
-      std::string new_location = fmt::format("{}:{}", location_stack, idx);
-      if (is_injection_symbol(child.get(), definition_->get_inj_symbol())) {
+      std::string new_location = location_stack.size() ? fmt::format("{}:{}", location_stack, idx) : fmt::format("{}", idx);
+      if (is_injection) {
         new_location = location_stack;
       }
       child_value = create_allocation(child.get(), new_location).first;
