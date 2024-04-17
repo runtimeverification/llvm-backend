@@ -1,16 +1,21 @@
 # Proof Trace Format
 
 This document describes the format for the binary proof trace that gets emitted
-when the `--proof-output` flag gets passed to the interpreter. Note that this trace
+when the `--proof-output` flag gets passed to the interpreter. In order for the trace
+to be emitted, an appropriate instrumentation flag should have been passed to `llvm-kompile`.
+We currently offer two modes of instrumentation: the default one is enabled with the flag
+`--proof-hint-instrumentation`, while a slower one that generates a longer trace is enabled with
+the flag `--proof-hint-instrumentation-slow`. Note that this trace
 format is in its early stages and will probably change quite a bit as development on it
 continues.
 
 ## Overview
 
 The information presented by the trace starts with the initial configuration of the execution,
-followed by a sequence of rewrite steps consisting of which rule applied, the variable substitutions
-for that rule, and the resulting configuration after the rewrite, and then finally the configuration
-at the end of the execution.
+followed by a sequence of rewrite steps consisting of which rule applied and the variable substitutions
+for that rule, and finally the configuration at the end of the execution. If slow instrumentation
+has been enabled, the trace additionally contains the intermediate configurations after each rewrite
+event, as well as the kore terms that are passed as arguments in function events.
 
 The format of the kore terms themselves are in binary format, and in the proof trace we delimit
 them with 64-bit sentinel values of 0xffffffffffffffff at the beginning and 0xcccccccccccccccc
@@ -21,7 +26,7 @@ have rendered this unnecessary, but the change hasn't been implemented yet.
 
 Here is a BNF styled description of the format:
 ```
-proof_trace ::= header event*
+proof_trace ::= header event* // only starting and final config events in normal mode
 
 header            ::= "HINT" <4-byte version number>
 
@@ -39,7 +44,7 @@ argument          ::= hook
 
 name              ::= string
 location          ::= string
-function          ::= WORD(0xDD) name location arg* WORD(0x11)
+function          ::= WORD(0xDD) name location arg* WORD(0x11) // the arg list is ommited in normal mode
 
 hook              ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
 
