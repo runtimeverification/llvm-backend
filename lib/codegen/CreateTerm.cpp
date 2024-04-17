@@ -201,14 +201,8 @@ llvm::StructType *get_block_type(
   for (auto const &arg : symbol->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
     auto cat = sort->get_category(definition);
-    switch (cat.cat) {
-    case sort_category::Map:
-    case sort_category::RangeMap:
-    case sort_category::List:
-    case sort_category::Set:
+    if (is_collection_sort(cat)) {
       types.push_back(llvm::Type::getInt64Ty(module->getContext()));
-      break;
-    default: break;
     }
     llvm::Type *type = getvalue_type(sort->get_category(definition), module);
     types.push_back(type);
@@ -223,22 +217,16 @@ uint64_t get_block_offset(
   for (auto const &arg : symbol->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
     auto cat = sort->get_category(definition);
-    switch (cat.cat) {
-    case sort_category::Map:
-    case sort_category::RangeMap:
-    case sort_category::List:
-    case sort_category::Set:
+    if (is_collection_sort(cat)) {
       if (i == idx) {
         return result + 1;
       }
       result += 2;
-      break;
-    default:
+    } else {
       if (i == idx) {
         return result;
       }
       result += 1;
-      break;
     }
     i++;
   }
@@ -823,15 +811,9 @@ llvm::Value *create_term::not_injection_case(
   for (auto const &child : constructor->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
     auto cat = sort->get_category(definition_);
-    switch (cat.cat) {
-    case sort_category::Map:
-    case sort_category::RangeMap:
-    case sort_category::List:
-    case sort_category::Set:
+    if (is_collection_sort(cat)) {
       children.push_back(get_offset_of_member(
           module_, block_type, get_block_offset(definition_, symbol, idx)));
-      break;
-    default: break;
     }
     llvm::Value *child_value = nullptr;
     if (idx == 0 && val != nullptr) {

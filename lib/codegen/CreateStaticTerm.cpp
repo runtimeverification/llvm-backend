@@ -63,16 +63,10 @@ llvm::Constant *create_static_term::not_injection_case(
       auto *sort = dynamic_cast<kore_composite_sort *>(
           symbol->get_arguments()[idx].get());
       auto cat = sort->get_category(definition_);
-      switch (cat.cat) {
-      case sort_category::Map:
-      case sort_category::RangeMap:
-      case sort_category::List:
-      case sort_category::Set:
+      if (is_collection_sort(cat)) {
         block_vals.push_back(get_offset_of_member(
             module_, block_header_type,
             get_block_offset(definition_, symbol, idx)));
-        break;
-      default: break;
       }
       llvm::Constant *child_value = nullptr;
       if (idx++ == 0 && val != nullptr) {
