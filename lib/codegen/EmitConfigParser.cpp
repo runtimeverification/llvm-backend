@@ -859,7 +859,9 @@ static void get_store(
     llvm::Type *arg_ty = get_arg_type(cat, module);
     llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
         block_type, cast,
-        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), idx++ + 2)},
+        {zero, llvm::ConstantInt::get(
+                   llvm::Type::getInt32Ty(ctx),
+                   get_block_offset(definition, symbol, idx++))},
         "", case_block);
     if (is_collection_sort(cat)) {
       arg = new llvm::LoadInst(arg_ty, arg, "", case_block);
@@ -954,7 +956,9 @@ static void get_visitor(
     value_type cat = composite_sort->get_category(definition);
     llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
         block_type, cast,
-        {zero, llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), idx++ + 2)},
+        {zero, llvm::ConstantInt::get(
+                   llvm::Type::getInt32Ty(ctx),
+                   get_block_offset(definition, symbol, idx++))},
         "", case_block);
     llvm::Value *child = new llvm::LoadInst(
         getvalue_type(cat, module), child_ptr, "", case_block);
@@ -1114,20 +1118,6 @@ static void get_visitor(
   }
 }
 
-static llvm::Constant *get_offset_of_member(
-    [[maybe_unused]] llvm::Module *mod, llvm::StructType *struct_ty,
-    int nth_member) {
-#if LLVM_VERSION_MAJOR >= 17
-  auto offset
-      = llvm::DataLayout(mod).getStructLayout(struct_ty)->getElementOffset(
-          nth_member);
-  auto *offset_ty = llvm::Type::getInt64Ty(mod->getContext());
-  return llvm::ConstantInt::get(offset_ty, offset);
-#else
-  return llvm::ConstantExpr::getOffsetOf(struct_ty, nth_member);
-#endif
-}
-
 static llvm::Constant *get_layout_data(
     uint16_t layout, kore_symbol *symbol, llvm::Module *module,
     kore_definition *def) {
@@ -1135,13 +1125,12 @@ static llvm::Constant *get_layout_data(
   std::vector<llvm::Constant *> elements;
   llvm::LLVMContext &ctx = module->getContext();
   auto *block_type = get_block_type(module, def, symbol);
-  int i = 2;
+  int i = 0;
   for (auto const &sort : symbol->get_arguments()) {
     value_type cat
         = dynamic_cast<kore_composite_sort *>(sort.get())->get_category(def);
     auto *offset = get_offset_of_member(
-        module, block_type,
-        i++); //llvm::ConstantExpr::getOffsetOf(BlockType, i++);
+        module, block_type, get_block_offset(def, symbol, i++));
     elements.push_back(llvm::ConstantStruct::get(
         llvm::StructType::getTypeByName(
             module->getContext(), layoutitem_struct),

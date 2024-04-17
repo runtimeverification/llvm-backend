@@ -89,6 +89,8 @@ new_module(std::string const &name, llvm::LLVMContext &context);
 llvm::StructType *get_block_type(
     llvm::Module *module, kore_definition *definition,
     kore_symbol const *symbol);
+uint64_t get_block_offset(
+    kore_definition *definition, kore_symbol const *symbol, int idx);
 uint64_t get_block_header_val(
     llvm::Module *module, kore_symbol const *symbol, llvm::Type *block_type);
 llvm::Value *get_block_header(

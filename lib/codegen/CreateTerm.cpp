@@ -200,10 +200,37 @@ llvm::StructType *get_block_type(
   types.push_back(empty_array_type);
   for (auto const &arg : symbol->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
+    auto cat = sort->get_category(definition);
+    if (is_collection_sort(cat)) {
+      types.push_back(llvm::Type::getInt64Ty(module->getContext()));
+    }
     llvm::Type *type = getvalue_type(sort->get_category(definition), module);
     types.push_back(type);
   }
   return llvm::StructType::get(module->getContext(), types);
+}
+
+uint64_t get_block_offset(
+    kore_definition *definition, kore_symbol const *symbol, int idx) {
+  uint64_t result = 2;
+  int i = 0;
+  for (auto const &arg : symbol->get_arguments()) {
+    auto *sort = dynamic_cast<kore_composite_sort *>(arg.get());
+    auto cat = sort->get_category(definition);
+    if (is_collection_sort(cat)) {
+      if (i == idx) {
+        return result + 1;
+      }
+      result += 2;
+    } else {
+      if (i == idx) {
+        return result;
+      }
+      result += 1;
+    }
+    i++;
+  }
+  throw std::invalid_argument("idx not within bounds of symbol");
 }
 
 uint64_t get_block_header_val(
@@ -779,24 +806,30 @@ llvm::Value *create_term::not_injection_case(
   llvm::StructType *block_type = get_block_type(module_, definition_, symbol);
   llvm::Value *block_header
       = get_block_header(module_, definition_, symbol, block_type);
-  int idx = 2;
+  int idx = 0;
   std::vector<llvm::Value *> children;
   for (auto const &child : constructor->get_arguments()) {
+    auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
+    auto cat = sort->get_category(definition_);
+    if (is_collection_sort(cat)) {
+      children.push_back(get_offset_of_member(
+          module_, block_type, get_block_offset(definition_, symbol, idx)));
+    }
     llvm::Value *child_value = nullptr;
-    if (idx == 2 && val != nullptr) {
+    if (idx == 0 && val != nullptr) {
       child_value = val;
     } else {
-      std::string new_location = fmt::format("{}:{}", location_stack, idx - 2);
+      std::string new_location = fmt::format("{}:{}", location_stack, idx);
       if (is_injection_symbol(child.get(), definition_->get_inj_symbol())) {
         new_location = location_stack;
       }
       child_value = create_allocation(child.get(), new_location).first;
     }
 
-    auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
     if (sort && is_collection_sort(sort->get_category(definition_))) {
       child_value = new llvm::LoadInst(
-          block_type->elements()[idx], child_value, "", current_block_);
+          block_type->elements()[get_block_offset(definition_, symbol, idx)],
+          child_value, "", current_block_);
     }
     children.push_back(child_value);
     idx++;

@@ -1,6 +1,6 @@
 add_library(collect STATIC
   collect.cpp
-  migrate_roots.cpp
+  migrate_static_roots.cpp
   migrate_collection.cpp
 )
 

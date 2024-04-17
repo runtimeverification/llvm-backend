@@ -58,10 +58,18 @@ llvm::Constant *create_static_term::not_injection_case(
     block_vals.push_back(llvm::ConstantArray::get(
         empty_array_type, llvm::ArrayRef<llvm::Constant *>()));
 
-    int idx = 2;
+    int idx = 0;
     for (auto const &child : constructor->get_arguments()) {
+      auto *sort = dynamic_cast<kore_composite_sort *>(
+          symbol->get_arguments()[idx].get());
+      auto cat = sort->get_category(definition_);
+      if (is_collection_sort(cat)) {
+        block_vals.push_back(get_offset_of_member(
+            module_, block_header_type,
+            get_block_offset(definition_, symbol, idx)));
+      }
       llvm::Constant *child_value = nullptr;
-      if (idx++ == 2 && val != nullptr) {
+      if (idx++ == 0 && val != nullptr) {
         child_value = val;
       } else {
         child_value = (*this)(child.get()).first;

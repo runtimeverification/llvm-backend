@@ -41,6 +41,14 @@ size_t get_size(uint64_t hdr, uint16_t layout) {
   return size_hdr(hdr);
 }
 
+uint8_t get_first_field_offset(uint16_t layout_int) {
+  if (!layout_int) {
+    return 1;
+  }
+  layout *layout_data = get_layout_data(layout_int);
+  return layout_data->args[0].offset / 8;
+}
+
 void migrate(block **block_ptr) {
   block *curr_block = *block_ptr;
   if (is_leaf_block(curr_block) || !is_heap_block(curr_block)) {
@@ -50,7 +58,8 @@ void migrate(block **block_ptr) {
   INITIALIZE_MIGRATE();
   uint16_t layout = layout_hdr(hdr);
   size_t len_in_bytes = get_size(hdr, layout);
-  auto **forwarding_address = (block **)(curr_block + 1);
+  auto **forwarding_address
+      = (block **)(curr_block + get_first_field_offset(layout));
   if (!hasForwardingAddress) {
     block *new_block = nullptr;
     if (shouldPromote || (isInOldGen && collect_old)) {
@@ -199,14 +208,10 @@ static void migrate_floating(floating **floating_ptr) {
   *floating_ptr = *(floating **)(flt->f.f->_mpfr_d);
 }
 
-static void migrate_child(
-    void *curr_block, layoutitem *args, unsigned i, bool ptr, bool is_block) {
+static void
+migrate_child(void *curr_block, layoutitem *args, unsigned i, bool ptr) {
   layoutitem *arg_data = args + i;
   void *arg = ((char *)curr_block) + arg_data->offset;
-  if (is_block) {
-    migrate((block **)arg);
-    return;
-  }
   switch (arg_data->cat) {
   case MAP_LAYOUT: migrate_map(ptr ? *(map **)arg : arg); break;
   case RANGEMAP_LAYOUT: migrate_rangemap(ptr ? *(rangemap **)arg : arg); break;
@@ -223,6 +228,31 @@ static void migrate_child(
   }
 }
 
+static void
+migrate_root(void *curr_block, layoutitem *args, unsigned i, bool is_block) {
+  layoutitem *arg_data = args + i;
+  void *arg = ((char *)curr_block) + arg_data->offset;
+  if (is_block) {
+    migrate((block **)arg);
+    return;
+  }
+  switch (arg_data->cat) {
+  case MAP_LAYOUT:
+  case RANGEMAP_LAYOUT:
+  case LIST_LAYOUT:
+  case SET_LAYOUT: {
+    char *root_ptr = *(char **)arg;
+    auto *offset_ptr = (uint64_t *)(root_ptr - sizeof(uint64_t));
+    uint64_t offset = *offset_ptr;
+    auto *base_ptr = (block *)(root_ptr - offset);
+    migrate((block **)&base_ptr);
+    *(void **)arg = (void *)((char *)base_ptr + offset);
+    break;
+  }
+  default: migrate_child(curr_block, args, i, true); break;
+  }
+}
+
 static char *evacuate(char *scan_ptr, char **alloc_ptr) {
   auto *curr_block = (block *)scan_ptr;
   uint64_t const hdr = curr_block->h.hdr;
@@ -230,7 +260,7 @@ static char *evacuate(char *scan_ptr, char **alloc_ptr) {
   if (layout_int) {
     layout *layout_data = get_layout_data(layout_int);
     for (unsigned i = 0; i < layout_data->nargs; i++) {
-      migrate_child(curr_block, layout_data->args, i, false, false);
+      migrate_child(curr_block, layout_data->args, i, false);
     }
   }
   return move_ptr(scan_ptr, get_size(hdr, layout_int), *alloc_ptr);
@@ -250,8 +280,6 @@ static bool should_collect_old_gen() {
   return false;
 #endif
 }
-
-void migrate_roots();
 
 void init_static_objects(void) {
   map m = map();
@@ -279,9 +307,9 @@ void kore_collect(
 #endif
   char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
   for (int i = 0; i < nroots; i++) {
-    migrate_child(roots, type_info, i, true, are_block[i]);
+    migrate_root(roots, type_info, i, are_block[i]);
   }
-  migrate_roots();
+  migrate_static_roots();
   char *scan_ptr = youngspace_ptr();
   if (scan_ptr != *young_alloc_ptr()) {
     MEM_LOG("Evacuating young generation\n");
@@ -344,11 +372,13 @@ bool store_map_for_gc(void **roots, map *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(map));
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(map) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto *child = (map *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
+  *offset = 16;
+  auto *child = (map *)(hdr + 2);
   *child = std::move(*ptr);
   *roots = mem;
   return true;
@@ -359,11 +389,13 @@ bool store_set_for_gc(void **roots, set *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(set));
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(set) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto *child = (set *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
+  *offset = 16;
+  auto *child = (set *)(hdr + 2);
   *child = std::move(*ptr);
   *roots = mem;
   return true;
@@ -374,11 +406,13 @@ bool store_list_for_gc(void **roots, list *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(list));
+  void *mem = kore_alloc(sizeof(blockheader) + sizeof(list) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto *child = (list *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
+  *offset = 16;
+  auto *child = (list *)(hdr + 2);
   *child = std::move(*ptr);
   *roots = mem;
   return true;
@@ -389,11 +423,14 @@ bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
     *roots = ptr;
     return false;
   }
-  void *mem = kore_alloc(sizeof(blockheader) + sizeof(rangemap));
+  void *mem
+      = kore_alloc(sizeof(blockheader) + sizeof(rangemap) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
   std::string name = get_raw_symbol_name(kllvm::sort_category::RangeMap) + "{}";
   *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
-  auto *child = (rangemap *)(hdr + 1);
+  auto *offset = (uint64_t *)(hdr + 1);
+  *offset = 16;
+  auto *child = (rangemap *)(hdr + 2);
   *child = std::move(*ptr);
   *roots = mem;
   return true;
@@ -402,7 +439,7 @@ bool store_rangemap_for_gc(void **roots, rangemap *ptr) {
 map *load_map_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (map *)(((char *)mem) + sizeof(blockheader));
+    return (map *)(((char *)mem) + sizeof(blockheader) + sizeof(uint64_t));
   }
   return (map *)mem;
 }
@@ -410,7 +447,7 @@ map *load_map_for_gc(void **roots, bool is_block) {
 set *load_set_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (set *)(((char *)mem) + sizeof(blockheader));
+    return (set *)(((char *)mem) + sizeof(blockheader) + sizeof(uint64_t));
   }
   return (set *)mem;
 }
@@ -418,7 +455,7 @@ set *load_set_for_gc(void **roots, bool is_block) {
 list *load_list_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (list *)(((char *)mem) + sizeof(blockheader));
+    return (list *)(((char *)mem) + sizeof(blockheader) + sizeof(uint64_t));
   }
   return (list *)mem;
 }
@@ -426,7 +463,7 @@ list *load_list_for_gc(void **roots, bool is_block) {
 rangemap *load_rangemap_for_gc(void **roots, bool is_block) {
   void *mem = *roots;
   if (is_block) {
-    return (rangemap *)(((char *)mem) + sizeof(blockheader));
+    return (rangemap *)(((char *)mem) + sizeof(blockheader) + sizeof(uint64_t));
   }
   return (rangemap *)mem;
 }
