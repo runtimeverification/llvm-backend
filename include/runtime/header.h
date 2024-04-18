@@ -45,7 +45,9 @@ struct match_log {
 
 extern "C" {
 // llvm: blockheader = type { i64 }
-using blockheader = struct blockheader { uint64_t hdr; };
+using blockheader = struct blockheader {
+  uint64_t hdr;
+};
 
 // A value b of type block* is either a constant or a block.
 // if (((uintptr_t)b) & 3) == 3, then it is a bound variable and
