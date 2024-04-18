@@ -38,8 +38,8 @@ llvm::CallInst *proof_event::emit_serialize_term(
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
   auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
-  llvm::Type *subject_type;
-  llvm::ConstantInt *construct_k_term_inj;
+  llvm::Type *subject_type = nullptr;
+  llvm::ConstantInt *construct_k_term_inj = nullptr;
 
   if (cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable) {
     subject_type = getvalue_type({sort_category::Symbol, 0}, module_);
