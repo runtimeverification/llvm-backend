@@ -449,10 +449,15 @@ void write_bool_to_file(FILE *file, bool b) {
 }
 
 void serialize_term_to_file(
-    FILE *file, block *subject, char const *sort, bool use_intern) {
+    FILE *file, void *subject, char const *sort, bool use_intern,
+    bool k_item_inj) {
+  block *term = k_item_inj ? construct_k_item_inj(subject, sort, true)
+                           : (block *)subject;
+  sort = k_item_inj ? "SortKItem{}" : sort;
+
   char *data = nullptr;
   size_t size = 0;
-  serialize_configuration(subject, sort, &data, &size, true, use_intern);
+  serialize_configuration(term, sort, &data, &size, true, use_intern);
 
   fwrite(data, 1, size, file);
 
@@ -460,8 +465,8 @@ void serialize_term_to_file(
 }
 
 void serialize_raw_term_to_file(
-    FILE *file, void *subject, char const *sort, bool use_intern, bool emit_raw_term) {
-  block *term = emit_raw_term ? construct_raw_term(subject, sort, true) : construct_k_item_inj(subject, sort, true);
+    FILE *file, void *subject, char const *sort, bool use_intern) {
+  block *term = construct_raw_term(subject, sort, true);
 
   char *data = nullptr;
   size_t size = 0;
