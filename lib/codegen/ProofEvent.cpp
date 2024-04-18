@@ -38,22 +38,19 @@ llvm::CallInst *proof_event::emit_serialize_term(
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
   auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
-  llvm::Type *subject_type = nullptr;
   llvm::ConstantInt *construct_k_term_inj = nullptr;
 
   if (cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable) {
-    subject_type = getvalue_type({sort_category::Symbol, 0}, module_);
     construct_k_term_inj = llvm::ConstantInt::getFalse(ctx_);
   } else {
     term = term->getType()->isIntegerTy()
                ? b.CreateIntToPtr(term, i8_ptr_ty)
                : b.CreatePointerCast(term, i8_ptr_ty);
-    subject_type = i8_ptr_ty;
     construct_k_term_inj = llvm::ConstantInt::getTrue(ctx_);
   }
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, subject_type, i8_ptr_ty, i1_ty, i1_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty, i1_ty}, false);
 
   auto *serialize
       = get_or_insert_function(module_, "serialize_term_to_file", func_ty);
