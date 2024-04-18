@@ -460,8 +460,8 @@ void serialize_term_to_file(
 }
 
 void serialize_raw_term_to_file(
-    FILE *file, void *subject, char const *sort, bool use_intern) {
-  block *term = construct_raw_term(subject, sort, true);
+    FILE *file, void *subject, char const *sort, bool use_intern, bool emit_raw_term) {
+  block *term = emit_raw_term ? construct_raw_term(subject, sort, true) : construct_k_item_inj(subject, sort, true);
 
   char *data = nullptr;
   size_t size = 0;

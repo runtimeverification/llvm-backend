@@ -58,14 +58,14 @@ llvm::CallInst *proof_event::emit_serialize_term(
   }
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty, i1_ty}, false);
 
   auto *serialize
       = get_or_insert_function(module_, "serialize_raw_term_to_file", func_ty);
 
   return b.CreateCall(
       serialize,
-      {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_)});
+      {output_file, term, sort_name_ptr, llvm::ConstantInt::getFalse(ctx_), llvm::ConstantInt::getFalse(ctx_)});
 }
 
 llvm::CallInst *proof_event::emit_serialize_configuration(
