@@ -45,9 +45,7 @@ struct match_log {
 
 extern "C" {
 // llvm: blockheader = type { i64 }
-using blockheader = struct blockheader {
-  uint64_t hdr;
-};
+using blockheader = struct blockheader { uint64_t hdr; };
 
 // A value b of type block* is either a constant or a block.
 // if (((uintptr_t)b) & 3) == 3, then it is a bound variable and
@@ -336,7 +334,8 @@ void serialize_configuration_to_file(
 void write_uint64_to_file(FILE *file, uint64_t i);
 void write_bool_to_file(FILE *file, bool b);
 void serialize_term_to_file(
-    FILE *file, void *subject, char const *sort, bool use_intern, bool emit_raw_term = false);
+    FILE *file, void *subject, char const *sort, bool use_intern,
+    bool emit_raw_term = false);
 void serialize_raw_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern);
 void print_variable_to_file(FILE *file, char const *varname);
