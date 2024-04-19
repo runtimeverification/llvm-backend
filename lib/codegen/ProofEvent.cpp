@@ -38,7 +38,8 @@ llvm::CallInst *proof_event::emit_serialize_term(
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
   auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
 
-  llvm::ConstantInt *construct_k_term_inj = llvm::ConstantInt::getBool(ctx_, true);
+  llvm::ConstantInt *construct_k_term_inj
+      = llvm::ConstantInt::getBool(ctx_, true);
 
   if (cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable) {
     construct_k_term_inj = llvm::ConstantInt::getFalse(ctx_);
