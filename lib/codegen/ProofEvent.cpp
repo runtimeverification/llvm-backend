@@ -40,7 +40,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
 
   auto is_sym_or_var
       = cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable;
-  auto construct_k_term_inj = llvm::ConstantInt::getBool(ctx_, !is_sym_or_var);
+  auto *construct_k_term_inj = llvm::ConstantInt::getBool(ctx_, !is_sym_or_var);
 
   if (!is_sym_or_var) {
     term = term->getType()->isIntegerTy()
