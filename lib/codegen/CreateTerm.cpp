@@ -1,5 +1,5 @@
-#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/CreateStaticTerm.h"
+#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/Util.h"
@@ -950,12 +950,11 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
               fn_name, constructor, false, true, false, location_stack),
           true);
     }
-    if (auto cat
-        = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get())
-              ->get_category(definition_)
-              .cat;
+    if (kore_composite_sort *sort
+        = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get());
         symbol_decl->attributes().contains(attribute_set::key::SortInjection)
-        && (cat == sort_category::Symbol)) {
+        && (sort->get_category(definition_).cat == sort_category::Symbol)
+        && !sort->get_arguments().size()) {
       std::pair<llvm::Value *, bool> val = create_allocation(
           constructor->get_arguments()[0].get(), location_stack);
       if (val.second) {
