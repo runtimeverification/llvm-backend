@@ -912,6 +912,7 @@ private:
   kore_composite_sortMapType hooked_sorts_;
   kore_symbolStringMapType fresh_functions_;
   KOREAxiomMapType ordinals_;
+  std::vector<kore_composite_sort *> all_sorts_;
 
   std::vector<sptr<kore_module>> modules_;
   attribute_set attributes_;
@@ -1027,6 +1028,10 @@ public:
     return fresh_functions_;
   }
   kore_symbol *get_inj_symbol() { return inj_symbol_; }
+
+  std::vector<kore_composite_sort *> const &get_all_sorts() const {
+    return all_sorts_;
+  }
 };
 
 void read_multimap(
