@@ -950,11 +950,11 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
               fn_name, constructor, false, true, false, location_stack),
           true);
     }
-    if (kore_composite_sort *sort
+    if (auto *sort
         = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get());
         symbol_decl->attributes().contains(attribute_set::key::SortInjection)
         && (sort->get_category(definition_).cat == sort_category::Symbol)
-        && !sort->get_arguments().size()) {
+        && sort->get_arguments().empty()) {
       std::pair<llvm::Value *, bool> val = create_allocation(
           constructor->get_arguments()[0].get(), location_stack);
       if (val.second) {
