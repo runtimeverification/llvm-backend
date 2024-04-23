@@ -61,7 +61,7 @@ Terms can be divided into two categories:
 
 A string pattern begins with the byte `00`. It is followed by:
 
-1. A 4-byte integer representing the length of the string.
+1. A 8-byte integer representing the length of the string.
 2. The zero-terminated string itself.
 
 Strings in patterns do not utilize the string table because the string table is intended to be generated statically, and the strings that we may wish to serialize do not exist at that point in time.
