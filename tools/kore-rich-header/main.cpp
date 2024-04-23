@@ -44,8 +44,9 @@ int main(int argc, char **argv) {
   std::cout.write(reinterpret_cast<char const *>(&len), 4);
   std::cout.write(name, 4);
 
-  for (uint32_t i = num_tags; i < num_sorts + num_tags; i++) {
-    std::cout.write(reinterpret_cast<char const *>(&i), 4);
+  for (uint32_t i = 0; i < num_sorts; i++) {
+    uint32_t idx = i + num_tags;
+    std::cout.write(reinterpret_cast<char const *>(&idx), 4);
     if (!definition->get_all_sorts()[i]->get_arguments().empty()) {
       throw std::runtime_error(
           "cannot yet serialize sorts with sort parameters");
