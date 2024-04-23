@@ -156,7 +156,7 @@ private:
   std::string name_;
   std::vector<sptr<kore_sort>> arguments_;
   value_type category_;
-  uint32_t ordinal_;
+  uint32_t ordinal_{};
 
 public:
   static sptr<kore_composite_sort> create(
