@@ -39,14 +39,14 @@ int main(int argc, char **argv) {
     std::cout << name;
     std::cout.put('\000');
   }
-  auto name = "\\dv";
+  auto const *name = "\\dv";
   const uint32_t len = 3;
   std::cout.write(reinterpret_cast<char const *>(&len), 4);
   std::cout.write(name, 4);
 
   for (uint32_t i = num_tags; i < num_sorts + num_tags; i++) {
     std::cout.write(reinterpret_cast<char const *>(&i), 4);
-    if (definition->get_all_sorts()[i]->get_arguments().size() != 0) {
+    if (!definition->get_all_sorts()[i]->get_arguments().empty()) {
       throw std::runtime_error(
           "cannot yet serialize sorts with sort parameters");
     }
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 
   for (uint32_t i = 0; i < num_tags; i++) {
     std::cout.write(reinterpret_cast<char const *>(&i), 4);
-    auto &symbol = definition->get_symbols().at(i);
+    auto const &symbol = definition->get_symbols().at(i);
     int const num_params = symbol->get_formal_arguments().size();
     std::cout.put((uint8_t)num_params);
     std::cout.put((uint8_t)symbol->get_arguments().size());

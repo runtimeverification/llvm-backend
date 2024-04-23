@@ -264,9 +264,8 @@ void kore_definition::preprocess() {
     uint32_t first_tag = next_symbol;
     for (auto *symbol : entry.second) {
       if (symbol->is_concrete()) {
-        for (auto &sort : symbol->get_arguments()) {
-          kore_composite_sort *ctr
-              = dynamic_cast<kore_composite_sort *>(sort.get());
+        for (auto const &sort : symbol->get_arguments()) {
+          auto *ctr = dynamic_cast<kore_composite_sort *>(sort.get());
           if (!sorts.contains(*ctr)) {
             sorts.emplace(*ctr, next_sort++);
             all_sorts_.push_back(ctr);
