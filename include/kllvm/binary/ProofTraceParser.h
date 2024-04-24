@@ -260,7 +260,7 @@ public:
 
 class proof_trace_parser {
 public:
-  static constexpr uint32_t expected_version = 8U;
+  static constexpr uint32_t expected_version = 9U;
 
 private:
   bool verbose_;
