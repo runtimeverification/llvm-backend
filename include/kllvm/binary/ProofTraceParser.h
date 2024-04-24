@@ -631,6 +631,24 @@ private:
       return true;
     }
 
+    case side_condition_event_sentinel: {
+      auto side_condition_event = parse_side_condition(ptr, end);
+      if (!side_condition_event) {
+        return false;
+      }
+      event.set_step_event(side_condition_event);
+      return true;
+    }
+
+    case side_condition_end_sentinel: {
+      auto side_condition_end_event = parse_side_condition_end(ptr, end);
+      if (!side_condition_end_event) {
+        return false;
+      }
+      event.set_step_event(side_condition_end_event);
+      return true;
+    }
+
     default: return false;
     }
   }
