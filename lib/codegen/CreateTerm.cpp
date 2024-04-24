@@ -737,14 +737,12 @@ llvm::Value *create_term::create_function_call(
     }
   }
 
-  return create_function_call(
-      name, return_cat, args, sret, tailcc, location_stack);
+  return create_function_call(name, return_cat, args, sret, tailcc);
 }
 
 llvm::Value *create_term::create_function_call(
     std::string const &name, value_type return_cat,
-    std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
-    std::string const &location_stack) {
+    std::vector<llvm::Value *> const &args, bool sret, bool tailcc) {
   llvm::Type *return_type = getvalue_type(return_cat, module_);
   std::vector<llvm::Type *> types;
   bool collection = false;

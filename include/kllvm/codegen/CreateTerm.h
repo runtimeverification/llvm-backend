@@ -71,8 +71,7 @@ public:
     */
   llvm::Value *create_function_call(
       std::string const &name, value_type return_cat,
-      std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
-      std::string const &location_stack = "0");
+      std::vector<llvm::Value *> const &args, bool sret, bool tailcc);
 
   [[nodiscard]] llvm::BasicBlock *get_current_block() const {
     return current_block_;
