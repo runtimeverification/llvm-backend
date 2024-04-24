@@ -805,7 +805,8 @@ llvm::Value *create_term::not_injection_case(
       = get_block_header(module_, definition_, symbol, block_type);
   int idx = 0;
   std::vector<llvm::Value *> children;
-  bool is_injection = symbol_decl->attributes().contains(attribute_set::key::SortInjection);
+  bool is_injection
+      = symbol_decl->attributes().contains(attribute_set::key::SortInjection);
   assert(!is_injection || constructor->get_arguments().size() == 1);
   for (auto const &child : constructor->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
@@ -818,7 +819,9 @@ llvm::Value *create_term::not_injection_case(
     if (idx == 0 && val != nullptr) {
       child_value = val;
     } else {
-      std::string new_location = location_stack.size() ? fmt::format("{}:{}", location_stack, idx) : fmt::format("{}", idx);
+      std::string new_location = location_stack.size()
+                                     ? fmt::format("{}:{}", location_stack, idx)
+                                     : fmt::format("{}", idx);
       if (is_injection) {
         new_location = location_stack;
       }
