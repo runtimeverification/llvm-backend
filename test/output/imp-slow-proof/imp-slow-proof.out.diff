@@ -47,10 +47,29 @@ hook result: kore[51]
 function: LblinitGeneratedCounterCell{} (0:1)
 rule: 2930 0
 config: kore[1372]
+side condition entry: 2876 2
+  VarRho = kore[51]
+  VarX = kore[23]
+hook: BOOL.not (0)
+  hook: SET.in (0:0)
+    function: LblSet'Coln'in{} (0:0)
+      arg: kore[55]
+      hook: MAP.keys (0:0:1)
+        function: Lblkeys'LParUndsRParUnds'MAP'Unds'Set'Unds'Map{} (0:0:1)
+          arg: kore[51]
+        arg: kore[51]
+      hook result: kore[51]
+      arg: kore[51]
+    arg: kore[55]
+    arg: kore[51]
+  hook result: kore[63]
+  arg: kore[63]
+hook result: kore[62]
+side condition exit: 2876 true
 rule: 2876 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'Gen0 = kore[1414]
-  Var'Unds'Gen1 = kore[51]
+  VarRho = kore[51]
   VarX = kore[23]
   VarXs = kore[186]
 hook: MAP.concat (0:0:1:0)
@@ -68,10 +87,29 @@ hook: MAP.concat (0:0:1:0)
   arg: kore[175]
 hook result: kore[175]
 config: kore[2027]
+side condition entry: 2876 2
+  VarRho = kore[175]
+  VarX = kore[25]
+hook: BOOL.not (0)
+  hook: SET.in (0:0)
+    function: LblSet'Coln'in{} (0:0)
+      arg: kore[57]
+      hook: MAP.keys (0:0:1)
+        function: Lblkeys'LParUndsRParUnds'MAP'Unds'Set'Unds'Map{} (0:0:1)
+          arg: kore[175]
+        arg: kore[175]
+      hook result: kore[104]
+      arg: kore[104]
+    arg: kore[57]
+    arg: kore[104]
+  hook result: kore[63]
+  arg: kore[63]
+hook result: kore[62]
+side condition exit: 2876 true
 rule: 2876 5
   Var'Unds'DotVar0 = kore[61]
   Var'Unds'Gen0 = kore[1414]
-  Var'Unds'Gen1 = kore[175]
+  VarRho = kore[175]
   VarX = kore[25]
   VarXs = kore[98]
 hook: MAP.concat (0:0:1:0)

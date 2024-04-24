@@ -222,7 +222,7 @@ empty `int;` declaration as a structural cleanup rather than as
 a computational step.
 
 ```k
-  rule <k> int (X,Xs => Xs);_ </k> <state> _:Map (.Map => X|->0) </state>
+  rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     requires notBool (X in keys(Rho))
   rule int .Ids; S => S
 endmodule
