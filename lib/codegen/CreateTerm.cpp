@@ -323,7 +323,9 @@ llvm::Value *create_term::alloc_arg(
     kore_composite_pattern *pattern, int idx, bool is_hook_arg,
     std::string const &location_stack) {
   kore_pattern *p = pattern->get_arguments()[idx].get();
-  std::string new_location = fmt::format("{}:{}", location_stack, idx);
+  std::string new_location = location_stack.size()
+                                 ? fmt::format("{}:{}", location_stack, idx)
+                                 : fmt::format("{}", idx);
   llvm::Value *ret = create_allocation(p, new_location).first;
   auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
   proof_event e(definition_, module_);
