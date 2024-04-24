@@ -323,9 +323,9 @@ llvm::Value *create_term::alloc_arg(
     kore_composite_pattern *pattern, int idx, bool is_hook_arg,
     std::string const &location_stack) {
   kore_pattern *p = pattern->get_arguments()[idx].get();
-  std::string new_location = location_stack.size()
-                                 ? fmt::format("{}:{}", location_stack, idx)
-                                 : fmt::format("{}", idx);
+  std::string new_location = location_stack.empty()
+                                 ? fmt::format("{}", idx)
+                                 : fmt::format("{}:{}", location_stack, idx);
   llvm::Value *ret = create_allocation(p, new_location).first;
   auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
   proof_event e(definition_, module_);
@@ -819,9 +819,9 @@ llvm::Value *create_term::not_injection_case(
     if (idx == 0 && val != nullptr) {
       child_value = val;
     } else {
-      std::string new_location = location_stack.size()
-                                     ? fmt::format("{}:{}", location_stack, idx)
-                                     : fmt::format("{}", idx);
+      std::string new_location
+          = location_stack.empty() ? fmt::format("{}", idx)
+                                   : fmt::format("{}:{}", location_stack, idx);
       if (is_injection) {
         new_location = location_stack;
       }
