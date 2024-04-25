@@ -33,7 +33,7 @@ argument, because we want to give it a short-circuit semantics.
                  | "(" AExp ")"               [bracket]
                  > AExp "+" AExp              [left, strict, color(pink)]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2}), color(pink)]
+                 | AExp "<=" AExp             [seqstrict, color(pink)]
                  | "!" BExp                   [strict, color(pink)]
                  | "(" BExp ")"               [bracket]
                  > BExp "&&" BExp             [left, strict(1), color(pink)]
@@ -160,8 +160,8 @@ systems.  You can make these rules computational (dropping the attribute
 `structural`) if you do want these to count as computational steps.
 
 ```k
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule {} => .K
+  rule {S} => S
 ```
 
 ### Assignment
@@ -170,7 +170,7 @@ to be declared, otherwise the semantics will get stuck.  At the same time,
 the assignment is dissolved.
 
 ```k
-  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
+  rule <k> X = I:Int; => .K ...</k> <state>... X |-> (_ => I) ...</state>
 ```
 
 ### Sequential composition
@@ -185,7 +185,7 @@ transitions (i.e., hiding the structural rules as unobservable, or
 internal steps).
 
 ```k
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2
 ```
 
 ### Conditional
@@ -205,7 +205,7 @@ We give the semantics of the `while` loop by unrolling.
 Note that we preferred to make the rule below structural.
 
 ```k
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule while (B) S => if (B) {S while (B) S} else {}
 ```
 
 ### Programs
@@ -224,6 +224,6 @@ a computational step.
 ```k
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     requires notBool (X in keys(Rho))
-  rule int .Ids; S => S  [structural]
+  rule int .Ids; S => S
 endmodule
 ```

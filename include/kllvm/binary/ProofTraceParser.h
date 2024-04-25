@@ -260,7 +260,7 @@ public:
 
 class proof_trace_parser {
 public:
-  static constexpr uint32_t expected_version = 8U;
+  static constexpr uint32_t expected_version = 9U;
 
 private:
   bool verbose_;
@@ -628,6 +628,24 @@ private:
         return false;
       }
       event.set_step_event(rule_event);
+      return true;
+    }
+
+    case side_condition_event_sentinel: {
+      auto side_condition_event = parse_side_condition(ptr, end);
+      if (!side_condition_event) {
+        return false;
+      }
+      event.set_step_event(side_condition_event);
+      return true;
+    }
+
+    case side_condition_end_sentinel: {
+      auto side_condition_end_event = parse_side_condition_end(ptr, end);
+      if (!side_condition_end_event) {
+        return false;
+      }
+      event.set_step_event(side_condition_end_event);
       return true;
     }
 
