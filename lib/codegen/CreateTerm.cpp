@@ -323,10 +323,9 @@ llvm::Value *create_term::alloc_arg(
     kore_composite_pattern *pattern, int idx, bool is_hook_arg,
     std::string const &location_stack) {
   kore_pattern *p = pattern->get_arguments()[idx].get();
-  std::string new_location = fmt::format("{}:{}", location_stack, idx);
-  if (is_injection_symbol(p, definition_->get_inj_symbol())) {
-    new_location = location_stack;
-  }
+  std::string new_location = location_stack.empty()
+                                 ? fmt::format("{}", idx)
+                                 : fmt::format("{}:{}", location_stack, idx);
   llvm::Value *ret = create_allocation(p, new_location).first;
   auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
   proof_event e(definition_, module_);
@@ -738,14 +737,12 @@ llvm::Value *create_term::create_function_call(
     }
   }
 
-  return create_function_call(
-      name, return_cat, args, sret, tailcc, location_stack);
+  return create_function_call(name, return_cat, args, sret, tailcc);
 }
 
 llvm::Value *create_term::create_function_call(
     std::string const &name, value_type return_cat,
-    std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
-    std::string const &location_stack) {
+    std::vector<llvm::Value *> const &args, bool sret, bool tailcc) {
   llvm::Type *return_type = getvalue_type(return_cat, module_);
   std::vector<llvm::Type *> types;
   bool collection = false;
@@ -808,6 +805,9 @@ llvm::Value *create_term::not_injection_case(
       = get_block_header(module_, definition_, symbol, block_type);
   int idx = 0;
   std::vector<llvm::Value *> children;
+  bool is_injection
+      = symbol_decl->attributes().contains(attribute_set::key::SortInjection);
+  assert(!is_injection || constructor->get_arguments().size() == 1);
   for (auto const &child : constructor->get_arguments()) {
     auto *sort = dynamic_cast<kore_composite_sort *>(child->get_sort().get());
     auto cat = sort->get_category(definition_);
@@ -819,8 +819,10 @@ llvm::Value *create_term::not_injection_case(
     if (idx == 0 && val != nullptr) {
       child_value = val;
     } else {
-      std::string new_location = fmt::format("{}:{}", location_stack, idx);
-      if (is_injection_symbol(child.get(), definition_->get_inj_symbol())) {
+      std::string new_location
+          = location_stack.empty() ? fmt::format("{}", idx)
+                                   : fmt::format("{}:{}", location_stack, idx);
+      if (is_injection) {
         new_location = location_stack;
       }
       child_value = create_allocation(child.get(), new_location).first;
