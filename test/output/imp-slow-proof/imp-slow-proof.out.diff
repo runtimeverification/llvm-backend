@@ -1,30 +1,30 @@
 version: 9
-hook: MAP.element (0)
-  function: Lbl'UndsPipe'-'-GT-Unds'{} (0)
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
     arg: kore[74]
     arg: kore[1787]
   arg: kore[74]
   arg: kore[1787]
 hook result: kore[1924]
-hook: MAP.unit (0)
-  function: Lbl'Stop'Map{} (0)
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
 hook result: kore[51]
-hook: MAP.concat (0)
-  function: Lbl'Unds'Map'Unds'{} (0)
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
     arg: kore[51]
     arg: kore[1924]
   arg: kore[51]
   arg: kore[1924]
 hook result: kore[1924]
-function: LblinitGeneratedTopCell{} (0)
+function: LblinitGeneratedTopCell{} ()
   arg: kore[1924]
 rule: 2931 1
   VarInit = kore[1924]
-function: LblinitTCell{} (0:0)
+function: LblinitTCell{} (0)
   arg: kore[1924]
 rule: 2934 1
   VarInit = kore[1924]
-function: LblinitKCell{} (0:0)
+function: LblinitKCell{} (0)
   arg: kore[1924]
 rule: 2932 1
   VarInit = kore[1924]
@@ -39,23 +39,23 @@ function: Lblproject'Coln'Pgm{} (0:0)
   arg: kore[1807]
 rule: 3034 1
   VarK = kore[1754]
-function: LblinitStateCell{} (0:1)
+function: LblinitStateCell{} (1)
 rule: 2933 0
-hook: MAP.unit (0:0)
-  function: Lbl'Stop'Map{} (0:0)
+hook: MAP.unit (0)
+  function: Lbl'Stop'Map{} (0)
 hook result: kore[51]
-function: LblinitGeneratedCounterCell{} (0:1)
+function: LblinitGeneratedCounterCell{} (1)
 rule: 2930 0
 config: kore[1372]
 side condition entry: 2876 2
   VarRho = kore[51]
   VarX = kore[23]
-hook: BOOL.not (0)
-  hook: SET.in (0:0)
-    function: LblSet'Coln'in{} (0:0)
+hook: BOOL.not ()
+  hook: SET.in (0)
+    function: LblSet'Coln'in{} (0)
       arg: kore[55]
-      hook: MAP.keys (0:0:1)
-        function: Lblkeys'LParUndsRParUnds'MAP'Unds'Set'Unds'Map{} (0:0:1)
+      hook: MAP.keys (0:1)
+        function: Lblkeys'LParUndsRParUnds'MAP'Unds'Set'Unds'Map{} (0:1)
           arg: kore[51]
         arg: kore[51]
       hook result: kore[51]
@@ -72,11 +72,11 @@ rule: 2876 5
   VarRho = kore[51]
   VarX = kore[23]
   VarXs = kore[186]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
     arg: kore[51]
-    hook: MAP.element (0:0:1:0:1)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:1)
+    hook: MAP.element (0:1:0:1)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:1)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -90,12 +90,12 @@ config: kore[2027]
 side condition entry: 2876 2
   VarRho = kore[175]
   VarX = kore[25]
-hook: BOOL.not (0)
-  hook: SET.in (0:0)
-    function: LblSet'Coln'in{} (0:0)
+hook: BOOL.not ()
+  hook: SET.in (0)
+    function: LblSet'Coln'in{} (0)
       arg: kore[57]
-      hook: MAP.keys (0:0:1)
-        function: Lblkeys'LParUndsRParUnds'MAP'Unds'Set'Unds'Map{} (0:0:1)
+      hook: MAP.keys (0:1)
+        function: Lblkeys'LParUndsRParUnds'MAP'Unds'Set'Unds'Map{} (0:1)
           arg: kore[175]
         arg: kore[175]
       hook result: kore[104]
@@ -112,11 +112,11 @@ rule: 2876 5
   VarRho = kore[175]
   VarX = kore[25]
   VarXs = kore[98]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
     arg: kore[175]
-    hook: MAP.element (0:0:1:0:1)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:1)
+    hook: MAP.element (0:1:0:1)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:1)
         arg: kore[57]
         arg: kore[57]
       arg: kore[57]
@@ -149,10 +149,10 @@ rule: 2880 5
 config: kore[1904]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -168,10 +168,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[58]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[58]
       arg: kore[55]
@@ -185,10 +185,10 @@ hook result: kore[344]
 config: kore[1712]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -204,10 +204,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[57]
       arg: kore[57]
@@ -229,10 +229,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -251,10 +251,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -271,10 +271,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -300,9 +300,9 @@ rule: 2874 6
 config: kore[2915]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -319,10 +319,10 @@ rule: 2851 6
 config: kore[2897]
 side condition entry: 2869 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -334,9 +334,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[57]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -344,8 +344,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -360,8 +360,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -370,9 +370,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -388,10 +388,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -405,15 +405,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -431,10 +431,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -478,10 +478,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -499,10 +499,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -528,9 +528,9 @@ rule: 2874 6
 config: kore[2263]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -547,10 +547,10 @@ rule: 2847 6
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -561,10 +561,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -590,9 +590,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -609,10 +609,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -623,10 +623,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -641,8 +641,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -651,9 +651,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -670,10 +670,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -689,10 +689,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -706,10 +706,10 @@ hook result: kore[345]
 config: kore[1849]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -727,10 +727,10 @@ rule: 2878 5
 config: kore[1931]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -756,9 +756,9 @@ rule: 2874 6
 config: kore[1985]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -775,10 +775,10 @@ rule: 2847 6
 config: kore[1934]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -789,10 +789,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -813,8 +813,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[338]
   Var'Unds'DotVar2 = kore[1392]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -823,9 +823,9 @@ hook result: kore[58]
 config: kore[1936]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -842,10 +842,10 @@ rule: 2848 6
 config: kore[1918]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -856,10 +856,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -874,8 +874,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[58]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[58]
   arg: kore[58]
@@ -884,9 +884,9 @@ hook result: kore[57]
 config: kore[1760]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -903,10 +903,10 @@ rule: 2853 6
 config: kore[1711]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -922,10 +922,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -947,10 +947,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -969,10 +969,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -989,10 +989,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -1018,9 +1018,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -1037,10 +1037,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1052,9 +1052,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1062,8 +1062,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1078,8 +1078,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -1088,9 +1088,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -1106,10 +1106,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -1123,15 +1123,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -1149,10 +1149,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -1196,10 +1196,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -1217,10 +1217,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -1246,9 +1246,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -1265,10 +1265,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -1279,10 +1279,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -1308,9 +1308,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -1327,10 +1327,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -1341,10 +1341,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1359,8 +1359,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -1369,9 +1369,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -1388,10 +1388,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -1407,10 +1407,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -1424,10 +1424,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -1445,10 +1445,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -1474,9 +1474,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -1493,10 +1493,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1507,10 +1507,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -1531,8 +1531,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -1541,9 +1541,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -1560,10 +1560,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1574,10 +1574,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -1592,8 +1592,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -1602,9 +1602,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -1621,10 +1621,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1640,10 +1640,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -1665,10 +1665,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -1687,10 +1687,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -1707,10 +1707,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -1736,9 +1736,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -1755,10 +1755,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1770,9 +1770,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1780,8 +1780,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -1796,8 +1796,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -1806,9 +1806,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -1824,10 +1824,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -1841,15 +1841,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -1867,10 +1867,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -1914,10 +1914,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -1935,10 +1935,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -1964,9 +1964,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -1983,10 +1983,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -1997,10 +1997,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -2026,9 +2026,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -2045,10 +2045,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -2059,10 +2059,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2077,8 +2077,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -2087,9 +2087,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -2106,10 +2106,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -2125,10 +2125,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -2142,10 +2142,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -2163,10 +2163,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -2192,9 +2192,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -2211,10 +2211,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2225,10 +2225,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -2249,8 +2249,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -2259,9 +2259,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -2278,10 +2278,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2292,10 +2292,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -2310,8 +2310,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -2320,9 +2320,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -2339,10 +2339,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2358,10 +2358,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -2383,10 +2383,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -2405,10 +2405,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -2425,10 +2425,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -2454,9 +2454,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -2473,10 +2473,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2488,9 +2488,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2498,8 +2498,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2514,8 +2514,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -2524,9 +2524,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -2542,10 +2542,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -2559,15 +2559,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -2585,10 +2585,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -2632,10 +2632,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -2653,10 +2653,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -2682,9 +2682,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -2701,10 +2701,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -2715,10 +2715,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -2744,9 +2744,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -2763,10 +2763,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -2777,10 +2777,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2795,8 +2795,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -2805,9 +2805,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -2824,10 +2824,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -2843,10 +2843,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -2860,10 +2860,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -2881,10 +2881,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -2910,9 +2910,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -2929,10 +2929,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -2943,10 +2943,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -2967,8 +2967,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -2977,9 +2977,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -2996,10 +2996,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3010,10 +3010,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -3028,8 +3028,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -3038,9 +3038,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -3057,10 +3057,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3076,10 +3076,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -3101,10 +3101,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -3123,10 +3123,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -3143,10 +3143,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -3172,9 +3172,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -3191,10 +3191,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3206,9 +3206,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3216,8 +3216,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3232,8 +3232,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -3242,9 +3242,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -3260,10 +3260,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -3277,15 +3277,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -3303,10 +3303,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -3350,10 +3350,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -3371,10 +3371,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -3400,9 +3400,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -3419,10 +3419,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -3433,10 +3433,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -3462,9 +3462,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -3481,10 +3481,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -3495,10 +3495,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3513,8 +3513,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -3523,9 +3523,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -3542,10 +3542,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -3561,10 +3561,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -3578,10 +3578,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -3599,10 +3599,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -3628,9 +3628,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -3647,10 +3647,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3661,10 +3661,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -3685,8 +3685,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -3695,9 +3695,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -3714,10 +3714,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3728,10 +3728,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -3746,8 +3746,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -3756,9 +3756,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -3775,10 +3775,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3794,10 +3794,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -3819,10 +3819,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -3841,10 +3841,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -3861,10 +3861,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -3890,9 +3890,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -3909,10 +3909,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3924,9 +3924,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3934,8 +3934,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -3950,8 +3950,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -3960,9 +3960,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -3978,10 +3978,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -3995,15 +3995,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -4021,10 +4021,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -4068,10 +4068,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -4089,10 +4089,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -4118,9 +4118,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -4137,10 +4137,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -4151,10 +4151,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -4180,9 +4180,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -4199,10 +4199,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -4213,10 +4213,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4231,8 +4231,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -4241,9 +4241,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -4260,10 +4260,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -4279,10 +4279,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -4296,10 +4296,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -4317,10 +4317,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -4346,9 +4346,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -4365,10 +4365,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4379,10 +4379,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -4403,8 +4403,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -4413,9 +4413,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -4432,10 +4432,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4446,10 +4446,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -4464,8 +4464,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -4474,9 +4474,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -4493,10 +4493,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4512,10 +4512,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -4537,10 +4537,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -4559,10 +4559,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -4579,10 +4579,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -4608,9 +4608,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -4627,10 +4627,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4642,9 +4642,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4652,8 +4652,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4668,8 +4668,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -4678,9 +4678,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -4696,10 +4696,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -4713,15 +4713,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -4739,10 +4739,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -4786,10 +4786,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -4807,10 +4807,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -4836,9 +4836,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -4855,10 +4855,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -4869,10 +4869,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -4898,9 +4898,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -4917,10 +4917,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -4931,10 +4931,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -4949,8 +4949,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -4959,9 +4959,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -4978,10 +4978,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -4997,10 +4997,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -5014,10 +5014,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -5035,10 +5035,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -5064,9 +5064,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -5083,10 +5083,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5097,10 +5097,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -5121,8 +5121,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -5131,9 +5131,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -5150,10 +5150,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5164,10 +5164,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -5182,8 +5182,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -5192,9 +5192,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -5211,10 +5211,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5230,10 +5230,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -5255,10 +5255,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -5277,10 +5277,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -5297,10 +5297,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -5326,9 +5326,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -5345,10 +5345,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5360,9 +5360,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5370,8 +5370,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5386,8 +5386,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -5396,9 +5396,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -5414,10 +5414,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -5431,15 +5431,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -5457,10 +5457,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -5504,10 +5504,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -5525,10 +5525,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -5554,9 +5554,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -5573,10 +5573,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -5587,10 +5587,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -5616,9 +5616,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -5635,10 +5635,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -5649,10 +5649,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5667,8 +5667,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -5677,9 +5677,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -5696,10 +5696,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -5715,10 +5715,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -5732,10 +5732,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -5753,10 +5753,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -5782,9 +5782,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -5801,10 +5801,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5815,10 +5815,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -5839,8 +5839,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -5849,9 +5849,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -5868,10 +5868,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5882,10 +5882,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -5900,8 +5900,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -5910,9 +5910,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -5929,10 +5929,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -5948,10 +5948,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -5973,10 +5973,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -5995,10 +5995,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -6015,10 +6015,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -6044,9 +6044,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -6063,10 +6063,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6078,9 +6078,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6088,8 +6088,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6104,8 +6104,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -6114,9 +6114,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -6132,10 +6132,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -6149,15 +6149,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -6175,10 +6175,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -6222,10 +6222,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -6243,10 +6243,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -6272,9 +6272,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -6291,10 +6291,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -6305,10 +6305,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -6334,9 +6334,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -6353,10 +6353,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -6367,10 +6367,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6385,8 +6385,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -6395,9 +6395,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -6414,10 +6414,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -6433,10 +6433,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -6450,10 +6450,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -6471,10 +6471,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -6500,9 +6500,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -6519,10 +6519,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6533,10 +6533,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -6557,8 +6557,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -6567,9 +6567,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -6586,10 +6586,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6600,10 +6600,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -6618,8 +6618,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -6628,9 +6628,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -6647,10 +6647,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6666,10 +6666,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -6691,10 +6691,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -6713,10 +6713,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -6733,10 +6733,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -6762,9 +6762,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -6781,10 +6781,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6796,9 +6796,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6806,8 +6806,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -6822,8 +6822,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -6832,9 +6832,9 @@ hook result: kore[63]
 config: kore[2742]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -6850,10 +6850,10 @@ rule: 2854 5
 config: kore[2745]
 side condition entry: 2864 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
@@ -6867,15 +6867,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[63]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[63]
 hook result: kore[62]
 config: kore[2658]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -6893,10 +6893,10 @@ rule: 2856 7
 config: kore[2551]
 side condition entry: 2881 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -6940,10 +6940,10 @@ rule: 2880 5
 config: kore[2163]
 side condition entry: 2878 1
   VarHOLE = kore[177]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[231]
     rule: 2976 1
       VarK = kore[231]
@@ -6961,10 +6961,10 @@ rule: 2878 5
 config: kore[2245]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2976 1
       VarK = kore[77]
@@ -6990,9 +6990,9 @@ rule: 2874 6
 config: kore[2264]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -7009,10 +7009,10 @@ rule: 2847 6
 config: kore[2246]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -7023,10 +7023,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -7052,9 +7052,9 @@ rule: 2874 6
 config: kore[2266]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -7071,10 +7071,10 @@ rule: 2848 6
 config: kore[2248]
 side condition entry: 2858 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -7085,10 +7085,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -7103,8 +7103,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1549]
   VarI1 = kore[58]
   VarI2 = kore[57]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[58]
     arg: kore[57]
   arg: kore[58]
@@ -7113,9 +7113,9 @@ hook result: kore[58]
 config: kore[2092]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -7132,10 +7132,10 @@ rule: 2853 6
 config: kore[2043]
 side condition entry: 2878 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -7151,10 +7151,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[58]
   VarI = kore[58]
   VarX = kore[25]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[57]
         arg: kore[58]
       arg: kore[57]
@@ -7168,10 +7168,10 @@ hook result: kore[344]
 config: kore[1848]
 side condition entry: 2878 1
   VarHOLE = kore[194]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[248]
     rule: 2976 1
       VarK = kore[248]
@@ -7189,10 +7189,10 @@ rule: 2878 5
 config: kore[1930]
 side condition entry: 2858 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -7218,9 +7218,9 @@ rule: 2874 6
 config: kore[1983]
 side condition entry: 2847 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -7237,10 +7237,10 @@ rule: 2847 6
 config: kore[1932]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -7251,10 +7251,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[73]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[127]
     rule: 2976 1
       VarK = kore[127]
@@ -7275,8 +7275,8 @@ rule: 2857 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[1391]
   VarI1 = kore[57]
-hook: INT.sub (0:0:0:0:0)
-  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0:0)
+hook: INT.sub (0:0:0:0)
+  function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -7285,9 +7285,9 @@ hook result: kore[58]
 config: kore[1934]
 side condition entry: 2848 1
   Var'Unds'Gen3 = kore[58]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[78]
   rule: 2977 1
     VarKResult = kore[60]
@@ -7304,10 +7304,10 @@ rule: 2848 6
 config: kore[1916]
 side condition entry: 2858 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -7318,10 +7318,10 @@ hook result: kore[63]
 side condition exit: 2858 false
 side condition entry: 2859 1
   VarHOLE = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[78]
     rule: 2977 1
       VarKResult = kore[60]
@@ -7336,8 +7336,8 @@ rule: 2860 5
   Var'Unds'DotVar2 = kore[1217]
   VarI1 = kore[57]
   VarI2 = kore[58]
-hook: INT.add (0:0:0:0:0)
-  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0:0)
+hook: INT.add (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[58]
   arg: kore[57]
@@ -7346,9 +7346,9 @@ hook result: kore[57]
 config: kore[1759]
 side condition entry: 2853 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -7365,10 +7365,10 @@ rule: 2853 6
 config: kore[1710]
 side condition entry: 2878 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -7384,10 +7384,10 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[57]
   VarI = kore[57]
   VarX = kore[23]
-hook: MAP.concat (0:0:1:0)
-  function: Lbl'Unds'Map'Unds'{} (0:0:1:0)
-    hook: MAP.element (0:0:1:0:0)
-      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1:0:0)
+hook: MAP.concat (0:1:0)
+  function: Lbl'Unds'Map'Unds'{} (0:1:0)
+    hook: MAP.element (0:1:0:0)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
         arg: kore[55]
         arg: kore[57]
       arg: kore[55]
@@ -7409,10 +7409,10 @@ rule: 2877 6
 config: kore[2724]
 side condition entry: 2881 1
   VarHOLE = kore[234]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[288]
     rule: 2976 1
       VarK = kore[288]
@@ -7431,10 +7431,10 @@ rule: 2881 6
 config: kore[2864]
 side condition entry: 2864 1
   VarHOLE = kore[181]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[235]
     rule: 2976 1
       VarK = kore[235]
@@ -7451,10 +7451,10 @@ rule: 2864 4
 config: kore[2894]
 side condition entry: 2869 1
   VarHOLE = kore[54]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[75]
     rule: 2976 1
       VarK = kore[75]
@@ -7480,9 +7480,9 @@ rule: 2874 6
 config: kore[2914]
 side condition entry: 2851 1
   Var'Unds'Gen3 = kore[57]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[77]
   rule: 2977 1
     VarKResult = kore[59]
@@ -7499,10 +7499,10 @@ rule: 2851 6
 config: kore[2896]
 side condition entry: 2869 1
   VarHOLE = kore[56]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -7514,9 +7514,9 @@ side condition exit: 2869 false
 side condition entry: 2870 2
   VarHOLE = kore[56]
   VarK0 = kore[56]
-hook: BOOL.and (0)
-  hook: BOOL.and (0:0)
-    function: LblisKResult{} (0:0:0)
+hook: BOOL.and ()
+  hook: BOOL.and (0)
+    function: LblisKResult{} (0:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -7524,8 +7524,8 @@ hook: BOOL.and (0)
     arg: kore[62]
   hook result: kore[62]
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[77]
     rule: 2977 1
       VarKResult = kore[59]
@@ -7540,8 +7540,8 @@ rule: 2871 5
   Var'Unds'DotVar2 = kore[2194]
   VarI1 = kore[57]
   VarI2 = kore[57]
-hook: INT.le (0:0:0:0:0)
-  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0:0)
+hook: INT.le (0:0:0:0)
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0:0:0:0)
     arg: kore[57]
     arg: kore[57]
   arg: kore[57]
@@ -7550,9 +7550,9 @@ hook result: kore[62]
 config: kore[2741]
 side condition entry: 2854 1
   Var'Unds'Gen3 = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[82]
   rule: 2977 1
     VarKResult = kore[64]
@@ -7568,10 +7568,10 @@ rule: 2854 5
 config: kore[2744]
 side condition entry: 2864 1
   VarHOLE = kore[61]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[82]
     rule: 2977 1
       VarKResult = kore[64]
@@ -7585,15 +7585,15 @@ rule: 2865 4
   Var'Unds'DotVar1 = kore[337]
   Var'Unds'DotVar2 = kore[2111]
   VarT = kore[62]
-hook: BOOL.not (0:0:0:0:0)
+hook: BOOL.not (0:0:0:0)
   arg: kore[62]
 hook result: kore[63]
 config: kore[2659]
 side condition entry: 2856 1
   Var'Unds'Gen3 = kore[63]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  function: LblisKResult{} (0:1)
+  function: LblisKResult{} (1)
     arg: kore[83]
   rule: 2977 1
     VarKResult = kore[65]
@@ -7611,10 +7611,10 @@ rule: 2856 7
 config: kore[2552]
 side condition entry: 2881 1
   VarHOLE = kore[62]
-hook: BOOL.and (0)
+hook: BOOL.and ()
   arg: kore[62]
-  hook: BOOL.not (0:1)
-    function: LblisKResult{} (0:1:0)
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
       arg: kore[83]
     rule: 2977 1
       VarKResult = kore[65]
