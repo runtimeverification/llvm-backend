@@ -25,16 +25,16 @@ private:
       std::string const &location_stack);
   llvm::Value *create_hook(
       kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
-      std::string const &location_stack = "0");
+      std::string const &location_stack = "");
   llvm::Value *create_function_call(
       std::string const &name, kore_composite_pattern *pattern, bool sret,
-      bool tailcc, bool is_hook, std::string const &location_stack = "0");
+      bool tailcc, bool is_hook, std::string const &location_stack = "");
   llvm::Value *not_injection_case(
       kore_composite_pattern *constructor, llvm::Value *val,
-      std::string const &location_stack = "0");
+      std::string const &location_stack = "");
   bool populate_static_set(kore_pattern *pattern);
   std::pair<llvm::Value *, bool> create_allocation(
-      kore_pattern *pattern, std::string const &location_stack = "0");
+      kore_pattern *pattern, std::string const &location_stack = "");
 
 public:
   create_term(
@@ -71,8 +71,7 @@ public:
     */
   llvm::Value *create_function_call(
       std::string const &name, value_type return_cat,
-      std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
-      std::string const &location_stack = "0");
+      std::vector<llvm::Value *> const &args, bool sret, bool tailcc);
 
   [[nodiscard]] llvm::BasicBlock *get_current_block() const {
     return current_block_;
