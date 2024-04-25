@@ -106,7 +106,7 @@ void kore_definition::insert_reserved_symbols() {
 
 SubsortMap kore_definition::get_subsorts() {
 
-  if (subsorts_ != nullptr){
+  if (subsorts_ != nullptr) {
     return *subsorts_;
   }
 
@@ -125,6 +125,24 @@ SubsortMap kore_definition::get_subsorts() {
 
   subsorts_ = new SubsortMap(transitive_closure(subsorts));
   return *subsorts_;
+}
+
+SubsortMap kore_definition::get_inverted_subsorts() {
+
+  if (subsorts_inverted_ != nullptr) {
+    return *subsorts_inverted_;
+  }
+
+  auto inverted_subsorts = SubsortMap{};
+
+  for (auto const &[inner, outers] : get_subsorts()) {
+    for (auto *outer : outers) {
+      inverted_subsorts[outer].insert(inner);
+    }
+  }
+
+  subsorts_inverted_ = new SubsortMap(inverted_subsorts);
+  return inverted_subsorts;
 }
 
 SymbolMap kore_definition::get_overloads() const {

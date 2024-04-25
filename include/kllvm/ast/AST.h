@@ -915,6 +915,7 @@ private:
   kore_symbol *inj_symbol_{};
 
   SubsortMap *subsorts_ = nullptr;
+  SubsortMap *subsorts_inverted_ = nullptr;
 
   /*
    * Insert symbols into this definition that have knowable labels, but cannot
@@ -966,6 +967,7 @@ public:
    *   S |-> {T . S is a subsort of T}
    */
   [[nodiscard]] SubsortMap get_subsorts();
+  [[nodiscard]] SubsortMap get_inverted_subsorts();
 
   /*
    * Build this definition's overload relation from axioms that have the
