@@ -59,11 +59,6 @@
             cp -rv ${final.rapidjson-src}/* $out/deps/rapidjson
             cp -rv ${final.pybind11-src}/* $out/deps/pybind11
           '';
-
-          fixupPhase = ''
-            substituteInPlace $out/tools/llvm-backend-version/version.inc.in \
-              --replace '@LLVM_BACKEND_VERSION@' '${self.rev or "dirty"}'
-          '';
         };
 
         llvm-backend-matching-src = prev.lib.cleanSource

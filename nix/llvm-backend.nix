@@ -8,7 +8,8 @@ cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 let python-env = (python310.withPackages (ps: with ps; [ pybind11 ])); in
 stdenv.mkDerivation {
   pname = "llvm-backend";
-  version = "0";
+  version = "${builtins.readFile ../package/version}";
+
   inherit src cmakeBuildType;
 
   nativeBuildInputs = [ cmake flex llvm pkg-config ];
