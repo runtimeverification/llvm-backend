@@ -107,7 +107,7 @@ void kore_definition::insert_reserved_symbols() {
 SubsortMap kore_definition::get_subsorts() {
 
   if (subsorts_.has_value()) {
-    return transitive_closure(*subsorts_);
+    return *subsorts_;
   }
 
   auto subsorts = SubsortMap{};
@@ -123,27 +123,31 @@ SubsortMap kore_definition::get_subsorts() {
     }
   }
 
-  subsorts_ = std::optional<SubsortMap>(SubsortMap(subsorts));
-  return transitive_closure(subsorts);
+  subsorts_ = transitive_closure(subsorts);
+  return *subsorts_;
 }
 
-SubsortMap kore_definition::get_supersort() {
+SubsortMap kore_definition::get_supersorts() {
 
-  if (subsorts_inverted_.has_value()) {
-    return *subsorts_inverted_;
+  if (supersorts_.has_value()) {
+    return *supersorts_;
   }
 
-  auto inverted_subsorts = SubsortMap{};
+  auto supersorts = SubsortMap{};
 
-  for (auto const &[inner, outers] : get_subsorts()) {
-    for (auto *outer : outers) {
-      inverted_subsorts[outer].insert(inner);
+  for (auto *axiom : axioms_) {
+    if (axiom->attributes().contains(attribute_set::key::Subsort)) {
+      auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
+      auto const &inner_sort
+          = att->get_constructor()->get_formal_arguments()[0];
+      auto const &outer_sort
+          = att->get_constructor()->get_formal_arguments()[1];
+      supersorts[outer_sort.get()].insert(inner_sort.get());
     }
   }
 
-  subsorts_inverted_ = std::optional<SubsortMap>(
-      SubsortMap(transitive_closure(inverted_subsorts)));
-  return *subsorts_inverted_;
+  supersorts_ = transitive_closure(supersorts);
+  return *supersorts_;
 }
 
 SymbolMap kore_definition::get_overloads() const {

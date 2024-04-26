@@ -915,7 +915,7 @@ private:
   kore_symbol *inj_symbol_{};
 
   std::optional<SubsortMap> subsorts_;
-  std::optional<SubsortMap> subsorts_inverted_;
+  std::optional<SubsortMap> supersorts_;
 
   /*
    * Insert symbols into this definition that have knowable labels, but cannot
@@ -976,7 +976,7 @@ public:
    *
    * S |-> {T . S is a direct supersort of T}
    */
-  [[nodiscard]] SubsortMap get_supersort();
+  [[nodiscard]] SubsortMap get_supersorts();
 
   /*
    * Build this definition's overload relation from axioms that have the
