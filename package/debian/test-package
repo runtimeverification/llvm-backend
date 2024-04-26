@@ -9,5 +9,4 @@ cp "${pkg}" k-llvm-backend.deb
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade --yes
-apt-get install --yes make lsof
 apt-get install --yes ./k-llvm-backend.deb

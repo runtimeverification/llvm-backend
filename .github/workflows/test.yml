@@ -120,11 +120,11 @@ jobs:
           path: k-llvm-jammy
           submodules: recursive
 
-      - name: 'Set up Docker'
+      - name: 'Build package in Docker'
         uses: ./.github/actions/test-package
         with:
           os: ubuntu
           distro: jammy
           llvm: 15
           build-package: package/debian/build-package jammy
-          test-package: true
+          test-package: package/debian/test-package
