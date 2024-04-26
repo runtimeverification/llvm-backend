@@ -8,7 +8,7 @@ cmakeBuildType ? "FastBuild" # optimized release build, currently: LTO
 let python-env = (python310.withPackages (ps: with ps; [ pybind11 ])); in
 stdenv.mkDerivation {
   pname = "llvm-backend";
-  version = "${builtins.readFile ../package/version}";
+  version = "${lib.removeSuffix "\n" (builtins.readFile ../package/version)}";
 
   inherit src cmakeBuildType;
 

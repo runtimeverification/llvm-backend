@@ -2,6 +2,7 @@ file(
   READ "${PROJECT_SOURCE_DIR}/package/version"
   LLVM_BACKEND_VERSION
 )
+string(STRIP "${LLVM_BACKEND_VERSION}" LLVM_BACKEND_VERSION)
 
 configure_file(version.inc.in version.inc @ONLY)
 
