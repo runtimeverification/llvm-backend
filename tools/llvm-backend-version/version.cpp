@@ -5,7 +5,7 @@
 
 using namespace llvm;
 
-cl::OptionCategory version_cat("kprint options");
+cl::OptionCategory version_cat("llvm-backend-version options");
 
 cl::opt<bool> llvm_library_version(
     "llvm", cl::desc("Print LLVM version rather than backend version"),
