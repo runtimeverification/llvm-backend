@@ -106,7 +106,7 @@ void kore_definition::insert_reserved_symbols() {
 
 SubsortMap kore_definition::get_subsorts() {
 
-  if (subsorts_ != nullptr) {
+  if (subsorts_.has_value()) {
     return *subsorts_;
   }
 
@@ -123,13 +123,14 @@ SubsortMap kore_definition::get_subsorts() {
     }
   }
 
-  subsorts_ = new SubsortMap(transitive_closure(subsorts));
+  subsorts_
+      = std::optional<SubsortMap>(SubsortMap(transitive_closure(subsorts)));
   return *subsorts_;
 }
 
-SubsortMap kore_definition::get_inverted_subsorts() {
+SubsortMap kore_definition::get_supersort() {
 
-  if (subsorts_inverted_ != nullptr) {
+  if (subsorts_inverted_.has_value()) {
     return *subsorts_inverted_;
   }
 
@@ -141,7 +142,7 @@ SubsortMap kore_definition::get_inverted_subsorts() {
     }
   }
 
-  subsorts_inverted_ = new SubsortMap(inverted_subsorts);
+  subsorts_inverted_ = std::optional<SubsortMap>(SubsortMap(inverted_subsorts));
   return inverted_subsorts;
 }
 
