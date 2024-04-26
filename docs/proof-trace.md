@@ -40,6 +40,8 @@ event             ::= hook
 argument          ::= hook
                     | function
                     | rule
+                    | side_cond_entry
+                    | side_cond_exit
                     | kore_term
 
 name              ::= string

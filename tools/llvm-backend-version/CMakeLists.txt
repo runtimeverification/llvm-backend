@@ -1,8 +1,8 @@
-execute_process(
-  COMMAND git rev-parse --short HEAD
-  OUTPUT_VARIABLE LLVM_BACKEND_VERSION
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+file(
+  READ "${PROJECT_SOURCE_DIR}/package/version"
+  LLVM_BACKEND_VERSION
 )
+string(STRIP "${LLVM_BACKEND_VERSION}" LLVM_BACKEND_VERSION)
 
 configure_file(version.inc.in version.inc @ONLY)
 
