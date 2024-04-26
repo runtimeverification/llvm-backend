@@ -28,7 +28,6 @@ version_bump() {
 version_sub() {
     local version
     version="$(cat $version_file)"
-    sed --in-place 's/^version = ".*"$/version = "'${version}'"/' kevm-pyk/pyproject.toml
 }
 
 version_command="$1" ; shift
