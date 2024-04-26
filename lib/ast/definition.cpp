@@ -107,7 +107,7 @@ void kore_definition::insert_reserved_symbols() {
 SubsortMap kore_definition::get_subsorts() {
 
   if (subsorts_.has_value()) {
-    return *subsorts_;
+    return transitive_closure(*subsorts_);
   }
 
   auto subsorts = SubsortMap{};
@@ -123,9 +123,8 @@ SubsortMap kore_definition::get_subsorts() {
     }
   }
 
-  subsorts_
-      = std::optional<SubsortMap>(SubsortMap(transitive_closure(subsorts)));
-  return *subsorts_;
+  subsorts_ = std::optional<SubsortMap>(SubsortMap(subsorts));
+  return transitive_closure(subsorts);
 }
 
 SubsortMap kore_definition::get_supersort() {
@@ -142,8 +141,9 @@ SubsortMap kore_definition::get_supersort() {
     }
   }
 
-  subsorts_inverted_ = std::optional<SubsortMap>(SubsortMap(inverted_subsorts));
-  return inverted_subsorts;
+  subsorts_inverted_ = std::optional<SubsortMap>(
+      SubsortMap(transitive_closure(inverted_subsorts)));
+  return *subsorts_inverted_;
 }
 
 SymbolMap kore_definition::get_overloads() const {
