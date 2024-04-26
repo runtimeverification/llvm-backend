@@ -24,7 +24,7 @@ jobs:
           git config user.email devops@runtimeverification.com
       - name: 'Update version'
         run: |
-          og_version="0.1.0"
+          og_version=$(git show origin/${GITHUB_BASE_REF}:package/version)
           ./package/version.sh bump ${og_version}
           ./package/version.sh sub
           new_version=$(cat package/version)
