@@ -37,26 +37,15 @@ llvm::CallInst *proof_event::emit_serialize_term(
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
   auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
+  auto *i32_ty = llvm::Type::getInt32Ty(ctx_);
 
-  auto is_sym_or_var
-      = cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable;
-  auto *construct_k_term_inj = llvm::ConstantInt::getBool(ctx_, !is_sym_or_var);
-
-  if (!is_sym_or_var) {
-    term = term->getType()->isIntegerTy()
-               ? b.CreateIntToPtr(term, i8_ptr_ty)
-               : b.CreatePointerCast(term, i8_ptr_ty);
-  }
-
-  auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty, i1_ty}, false);
+  auto *func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty, i32_ty}, false);
 
   auto *serialize
-      = get_or_insert_function(module_, "serialize_term_to_file", func_ty);
+      = get_or_insert_function(module_, "serialize_configuration_v2", func_ty);
 
-  return b.CreateCall(
-      serialize, {output_file, term, sort_name_ptr,
-                  llvm::ConstantInt::getFalse(ctx_), construct_k_term_inj});
+  return b.CreateCall(serialize, {output_file, term, sort_name_ptr});
 }
 
 llvm::CallInst *proof_event::emit_write_uint64(
