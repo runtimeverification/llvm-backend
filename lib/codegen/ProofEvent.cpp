@@ -59,26 +59,6 @@ llvm::CallInst *proof_event::emit_serialize_term(
                   llvm::ConstantInt::getFalse(ctx_), construct_k_term_inj});
 }
 
-llvm::CallInst *proof_event::emit_serialize_configuration(
-    llvm::Value *output_file, llvm::Value *config,
-    llvm::BasicBlock *insert_at_end) {
-  auto *void_ty = llvm::Type::getVoidTy(ctx_);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
-  auto *block_ty = getvalue_type({sort_category::Symbol, 0}, module_);
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
-
-  auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, block_ty, i1_ty, i1_ty}, false);
-  auto *serialize = get_or_insert_function(
-      module_, "serialize_configuration_to_file", func_ty);
-
-  return llvm::CallInst::Create(
-      serialize,
-      {output_file, config, llvm::ConstantInt::getTrue(ctx_),
-       llvm::ConstantInt::getFalse(ctx_)},
-      "", insert_at_end);
-}
-
 llvm::CallInst *proof_event::emit_write_uint64(
     llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end) {
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
