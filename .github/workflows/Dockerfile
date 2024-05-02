@@ -16,11 +16,13 @@ RUN     apt-get update                    \
           cmake                           \
           clang-${LLVM_VERSION}           \
           clang-tidy-${LLVM_VERSION}      \
+          debhelper                       \
           llvm-${LLVM_VERSION}-tools      \
           lld-${LLVM_VERSION}             \
           zlib1g-dev                      \
           flex                            \
           locales                         \
+          libboost-dev                    \
           libboost-test-dev               \
           libfmt-dev                      \
           libgmp-dev                      \

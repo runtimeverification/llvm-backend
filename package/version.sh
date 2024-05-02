@@ -28,6 +28,7 @@ version_bump() {
 version_sub() {
     local version
     version="$(cat $version_file)"
+    sed -i 's/^k-llvm-backend (.*) unstable; urgency=medium$/k-llvm-backend ('"$version"') unstable; urgency=medium/' package/debian/changelog
 }
 
 version_command="$1" ; shift
