@@ -1,6 +1,9 @@
 name: "Run LLVM backend tests"
 on:
   pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches:
+      - 'develop'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
