@@ -694,26 +694,32 @@ static llvm::PointerType *make_writer_type(llvm::LLVMContext &ctx) {
 
 static llvm::PointerType *make_visitor_type(
     llvm::LLVMContext &ctx, llvm::Type *file, llvm::Type *item, int num_strs,
-    int num_bools) {
+    int num_bools, bool is_serialize) {
   std::vector<llvm::Type *> types;
   types.push_back(file);
   types.push_back(item);
   for (int i = 0; i < num_strs; i++) {
-    types.push_back(llvm::Type::getInt8PtrTy(ctx));
+    if (is_serialize) {
+      types.push_back(llvm::Type::getInt32Ty(ctx));
+    } else {
+      types.push_back(llvm::Type::getInt8PtrTy(ctx));
+    }
   }
   for (int i = 0; i < num_bools; i++) {
     types.push_back(llvm::Type::getInt1Ty(ctx));
   }
 
-  types.push_back(llvm::Type::getInt8PtrTy(ctx));
+  if (!is_serialize) {
+    types.push_back(llvm::Type::getInt8PtrTy(ctx));
+  }
 
   return llvm::PointerType::getUnqual(
       llvm::FunctionType::get(llvm::Type::getVoidTy(ctx), types, false));
 }
 
 static llvm::StructType *make_packed_visitor_structure_type(
-    llvm::LLVMContext &ctx, llvm::Module *module) {
-  std::string const name = "visitor";
+    llvm::LLVMContext &ctx, llvm::Module *module, bool is_serialize) {
+  std::string const name = is_serialize ? "serialize_visitor" : "visitor";
   static auto types = std::map<llvm::LLVMContext *, llvm::StructType *>{};
 
   auto *file = make_writer_type(ctx);
@@ -721,45 +727,57 @@ static llvm::StructType *make_packed_visitor_structure_type(
   if (types.find(&ctx) == types.end()) {
     auto element_types = std::vector<llvm::Type *>{
         {make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Symbol, 0}, module), 1,
-             1),
+             ctx, file, getvalue_type({sort_category::Symbol, 0}, module), 1, 1,
+             is_serialize),
          make_visitor_type(
              ctx, file,
              llvm::PointerType::getUnqual(
                  getvalue_type({sort_category::Map, 0}, module)),
-             3, 0),
+             3, 0, is_serialize),
          make_visitor_type(
              ctx, file,
              llvm::PointerType::getUnqual(
                  getvalue_type({sort_category::List, 0}, module)),
-             3, 0),
+             3, 0, is_serialize),
          make_visitor_type(
              ctx, file,
              llvm::PointerType::getUnqual(
                  getvalue_type({sort_category::Set, 0}, module)),
-             3, 0),
+             3, 0, is_serialize),
          make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Int, 0}, module), 1, 0),
+             ctx, file, getvalue_type({sort_category::Int, 0}, module), 1, 0,
+             is_serialize),
          make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Float, 0}, module), 1, 0),
+             ctx, file, getvalue_type({sort_category::Float, 0}, module), 1, 0,
+             is_serialize),
          make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Bool, 0}, module), 1, 0),
+             ctx, file, getvalue_type({sort_category::Bool, 0}, module), 1, 0,
+             is_serialize),
          make_visitor_type(
              ctx, file, getvalue_type({sort_category::StringBuffer, 0}, module),
-             1, 0),
-         llvm::PointerType::getUnqual(llvm::FunctionType::get(
+             1, 0, is_serialize),
+         is_serialize ? llvm::PointerType::getUnqual(llvm::FunctionType::get(
              llvm::Type::getVoidTy(ctx),
              {file, llvm::Type::getInt64PtrTy(ctx), llvm::Type::getInt64Ty(ctx),
               llvm::Type::getInt8PtrTy(ctx), llvm::Type::getInt8PtrTy(ctx)},
-             false)),
-         llvm::PointerType::getUnqual(llvm::FunctionType::get(
-             llvm::Type::getVoidTy(ctx), {file, llvm::Type::getInt8PtrTy(ctx)},
-             false)),
-         make_visitor_type(
-             ctx, file,
-             llvm::PointerType::getUnqual(
-                 getvalue_type({sort_category::RangeMap, 0}, module)),
-             3, 0)}};
+             false))
+                      : llvm::PointerType::getUnqual(llvm::FunctionType::get(
+                          llvm::Type::getVoidTy(ctx),
+                          {file, llvm::Type::getInt64PtrTy(ctx),
+                           llvm::Type::getInt64Ty(ctx),
+                           llvm::Type::getInt32Ty(ctx)},
+                          false))}};
+    if (!is_serialize) {
+      element_types.push_back(
+          llvm::PointerType::getUnqual(llvm::FunctionType::get(
+              llvm::Type::getVoidTy(ctx), {file, llvm::Type::getInt8PtrTy(ctx)},
+              false)));
+    }
+    element_types.push_back(make_visitor_type(
+        ctx, file,
+        llvm::PointerType::getUnqual(
+            getvalue_type({sort_category::RangeMap, 0}, module)),
+        3, 0, is_serialize));
 
     auto *struct_ty = llvm::StructType::create(ctx, element_types, name);
     types[&ctx] = struct_ty;
@@ -770,7 +788,7 @@ static llvm::StructType *make_packed_visitor_structure_type(
 
 static void emit_traversal(
     std::string const &name, kore_definition *definition, llvm::Module *module,
-    bool is_visitor,
+    bool is_visitor, bool is_serialize,
     void getter(
         kore_definition *, llvm::Module *, kore_symbol *, llvm::BasicBlock *,
         std::vector<llvm::Value *> const &callbacks)) {
@@ -785,8 +803,11 @@ static void emit_traversal(
     auto *file = make_writer_type(ctx);
     arg_types.push_back(file);
     arg_types.push_back(
-        make_packed_visitor_structure_type(ctx, module)->getPointerTo());
-    arg_types.push_back(llvm::Type::getInt8PtrTy(ctx));
+        make_packed_visitor_structure_type(ctx, module, is_serialize)
+            ->getPointerTo());
+    if (!is_serialize) {
+      arg_types.push_back(llvm::Type::getInt8PtrTy(ctx));
+    }
   } else {
     arg_types.push_back(llvm::PointerType::getUnqual(
         llvm::ArrayType::get(llvm::Type::getInt8PtrTy(ctx), 0)));
@@ -810,7 +831,8 @@ static void emit_traversal(
   auto callbacks = std::vector<llvm::Value *>{};
   if (is_visitor) {
     auto *visitor_struct = func->getArg(2);
-    auto *visitor_type = make_packed_visitor_structure_type(ctx, module);
+    auto *visitor_type
+        = make_packed_visitor_structure_type(ctx, module, is_serialize);
 
     for (auto i = 0; i < visitor_type->getNumElements(); ++i) {
       auto *ptr = llvm::GetElementPtrInst::CreateInBounds(

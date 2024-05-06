@@ -382,6 +382,19 @@ using visitor = struct {
       writer *, rangemap *, char const *, char const *, char const *, void *);
 };
 
+using serialize_visitor = struct {
+  void (*visit_config)(writer *, block *, uint32_t, bool);
+  void (*visit_map)(writer *, map *, uint32_t, uint32_t, uint32_t);
+  void (*visit_list)(writer *, list *, uint32_t, uint32_t, uint32_t);
+  void (*visit_set)(writer *, set *, uint32_t, uint32_t, uint32_t);
+  void (*visit_int)(writer *, mpz_t, uint32_t);
+  void (*visit_float)(writer *, floating *, uint32_t);
+  void (*visit_bool)(writer *, bool, uint32_t);
+  void (*visit_string_buffer)(writer *, stringbuffer *, uint32_t);
+  void (*visit_m_int)(writer *, size_t *, size_t, uint32_t);
+  void (*visit_range_map)(writer *, rangemap *, uint32_t, uint32_t, uint32_t);
+};
+
 void print_map(
     writer *, map *, char const *, char const *, char const *, void *);
 void print_range_map(
@@ -392,6 +405,8 @@ void print_list(
     writer *, list *, char const *, char const *, char const *, void *);
 void visit_children(
     block *subject, writer *file, visitor *printer, void *state);
+void visit_children_for_serialize(
+    block *subject, writer *file, serialize_visitor *printer);
 
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
