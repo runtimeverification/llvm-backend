@@ -466,7 +466,7 @@ void sfwrite(void const *ptr, size_t size, size_t nmemb, writer *file) {
     std::string output;
     output.resize(size * nmemb);
     memcpy(output.data(), ptr, size * nmemb);
-    hook_BUFFER_concat_raw(file->buffer, str.data(), str.size());
+    hook_BUFFER_concat_raw(file->buffer, output.data(), output.size());
   }
 }
 
