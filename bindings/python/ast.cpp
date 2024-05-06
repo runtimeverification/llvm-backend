@@ -439,12 +439,12 @@ void bind_proof_trace(py::module_ &m) {
       .def_property_readonly("trace", &llvm_rewrite_trace::get_trace)
       .def_static(
           "parse",
-          [](py::bytes const &bytes) {
-            proof_trace_parser parser(false, false);
+          [](py::bytes const &bytes, kore_header const &header) {
+            proof_trace_parser parser(false, false, header);
             auto str = std::string(bytes);
             return parser.parse_proof_trace(str);
           },
-          py::arg("bytes"));
+          py::arg("bytes"), py::arg("header"));
 }
 
 PYBIND11_MODULE(_kllvm, m) {

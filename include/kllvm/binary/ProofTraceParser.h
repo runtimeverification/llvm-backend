@@ -265,6 +265,7 @@ public:
 private:
   bool verbose_;
   bool expand_terms_;
+  [[maybe_unused]] kore_header const &header_;
 
   // Caller needs to check that there are at least 8 bytes remaining in the
   // stream before peeking
@@ -736,7 +737,8 @@ private:
   }
 
 public:
-  proof_trace_parser(bool verbose, bool expand_terms);
+  proof_trace_parser(
+      bool verbose, bool expand_terms, kore_header const &header);
 
   std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);
