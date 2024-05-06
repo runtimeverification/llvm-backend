@@ -43,25 +43,31 @@
 namespace kllvm {
 
 static llvm::Constant *get_symbol_name_ptr(
-    kore_symbol *symbol, llvm::BasicBlock *set_block_name,
-    llvm::Module *module) {
+    kore_symbol *symbol, llvm::BasicBlock *set_block_name, llvm::Module *module,
+    bool use_symbol_name) {
   llvm::LLVMContext &ctx = module->getContext();
-  auto name = ast_to_string(*symbol);
-  if (set_block_name) {
-    set_block_name->setName(name);
+  if (use_symbol_name) {
+    auto name = ast_to_string(*symbol);
+    if (set_block_name) {
+      set_block_name->setName(name);
+    }
+    auto *str = llvm::ConstantDataArray::getString(ctx, name, true);
+    auto *global = module->getOrInsertGlobal(
+        fmt::format("sym_name_{}", name), str->getType());
+    auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    if (!global_var->hasInitializer()) {
+      global_var->setInitializer(str);
+    }
+    llvm::Constant *zero
+        = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
+    auto indices = std::vector<llvm::Constant *>{zero, zero};
+    auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
+        str->getType(), global_var, indices);
+    return ptr;
+  } else {
+    return llvm::ConstantInt::get(
+        llvm::Type::getInt32Ty(ctx), symbol->get_tag());
   }
-  auto *str = llvm::ConstantDataArray::getString(ctx, name, true);
-  auto *global = module->getOrInsertGlobal(
-      fmt::format("sym_name_{}", name), str->getType());
-  auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
-  if (!global_var->hasInitializer()) {
-    global_var->setInitializer(str);
-  }
-  llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
-  auto indices = std::vector<llvm::Constant *>{zero, zero};
-  auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-      str->getType(), global_var, indices);
-  return ptr;
 }
 
 static llvm::Function *get_strcmp(llvm::Module *module) {
@@ -90,7 +96,7 @@ static void emit_get_tag_for_symbol_name(
     uint32_t tag = entry.second->get_tag();
     auto *symbol = entry.second;
     current_block->insertInto(func);
-    auto *ptr = get_symbol_name_ptr(symbol, current_block, module);
+    auto *ptr = get_symbol_name_ptr(symbol, current_block, module, true);
     auto *compare = llvm::CallInst::Create(
         strcmp, {func->arg_begin(), ptr}, "", current_block);
     auto *icmp = new llvm::ICmpInst(
@@ -872,12 +878,13 @@ static void get_store(
 
 static void
 emit_store_symbol_children(kore_definition *definition, llvm::Module *module) {
-  emit_traversal("store_symbol_children", definition, module, false, get_store);
+  emit_traversal(
+      "store_symbol_children", definition, module, false, false, get_store);
 }
 
 static llvm::Constant *get_symbol_name(
     kore_definition *definition, llvm::Module *module, kore_symbol *symbol) {
-  return get_symbol_name_ptr(symbol, nullptr, module);
+  return get_symbol_name_ptr(symbol, nullptr, module, true);
 }
 
 static void
@@ -891,7 +898,7 @@ static void visit_collection(
     kore_definition *definition, llvm::Module *module,
     kore_composite_sort *composite_sort, llvm::Function *func,
     llvm::Value *child_ptr, llvm::BasicBlock *case_block, llvm::Value *callback,
-    llvm::Value *state_ptr) {
+    llvm::Value *state_ptr, bool use_sort_name) {
   llvm::LLVMContext &ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
@@ -903,28 +910,39 @@ static void visit_collection(
                        .get(attribute_set::key::Concat)
                        ->get_arguments()[0]
                        .get();
-    concat_ptr
-        = get_symbol_name_ptr(concat->get_constructor(), nullptr, module);
+    concat_ptr = get_symbol_name_ptr(
+        concat->get_constructor(), nullptr, module, use_sort_name);
   } else {
-    concat_ptr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(ctx));
+    if (use_sort_name) {
+      concat_ptr
+          = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(ctx));
+    } else {
+      concat_ptr = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
+    }
   }
   auto *unit = (kore_composite_pattern *)sort_decl->attributes()
                    .get(attribute_set::key::Unit)
                    ->get_arguments()[0]
                    .get();
-  auto *unit_ptr
-      = get_symbol_name_ptr(unit->get_constructor(), nullptr, module);
+  auto *unit_ptr = get_symbol_name_ptr(
+      unit->get_constructor(), nullptr, module, use_sort_name);
   auto *element = (kore_composite_pattern *)sort_decl->attributes()
                       .get(attribute_set::key::Element)
                       ->get_arguments()[0]
                       .get();
-  auto *element_ptr
-      = get_symbol_name_ptr(element->get_constructor(), nullptr, module);
+  auto *element_ptr = get_symbol_name_ptr(
+      element->get_constructor(), nullptr, module, use_sort_name);
   auto *file = make_writer_type(ctx);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx);
+  llvm::Type *sort_type = nullptr;
+  if (use_sort_name) {
+    sort_type = i8_ptr_ty;
+  } else {
+    sort_type = llvm::Type::getInt32Ty(ctx);
+  }
   auto *fn_type = llvm::FunctionType::get(
       llvm::Type::getVoidTy(ctx),
-      {file, child_ptr->getType(), i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i8_ptr_ty},
+      {file, child_ptr->getType(), sort_type, sort_type, sort_type, i8_ptr_ty},
       false);
   llvm::CallInst::Create(
       fn_type, callback,
@@ -936,7 +954,8 @@ static void visit_collection(
 // NOLINTNEXTLINE(*-cognitive-complexity)
 static void get_visitor(
     kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
-    llvm::BasicBlock *case_block, std::vector<llvm::Value *> const &callbacks) {
+    llvm::BasicBlock *case_block, std::vector<llvm::Value *> const &callbacks,
+    bool use_sort_name) {
   llvm::LLVMContext &ctx = module->getContext();
   llvm::Constant *zero = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
   auto indices = std::vector<llvm::Constant *>{zero, zero};
@@ -962,27 +981,38 @@ static void get_visitor(
         "", case_block);
     llvm::Value *child = new llvm::LoadInst(
         getvalue_type(cat, module), child_ptr, "", case_block);
-    auto sort_name = ast_to_string(*sort);
-    auto *str = llvm::ConstantDataArray::getString(ctx, sort_name, true);
-    auto *global = module->getOrInsertGlobal(
-        fmt::format("sort_name_{}", sort_name), str->getType());
-    auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
-    if (!global_var->hasInitializer()) {
-      global_var->setInitializer(str);
+    llvm::Constant *sort_val = nullptr;
+    llvm::Type *sort_type = nullptr;
+    if (use_sort_name) {
+      auto sort_name = ast_to_string(*sort);
+      auto *str = llvm::ConstantDataArray::getString(ctx, sort_name, true);
+      auto *global = module->getOrInsertGlobal(
+          fmt::format("sort_name_{}", sort_name), str->getType());
+      auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+      if (!global_var->hasInitializer()) {
+        global_var->setInitializer(str);
+      }
+      sort_val = llvm::ConstantExpr::getInBoundsGetElementPtr(
+          str->getType(), global, indices);
+      sort_type = llvm::Type::getInt8PtrTy(ctx);
+    } else {
+      const uint32_t num_tags = definition->get_symbols().size();
+      uint32_t ordinal
+          = dynamic_cast<kore_composite_sort *>(sort.get())->get_ordinal();
+      sort_type = llvm::Type::getInt32Ty(ctx);
+      sort_val = llvm::ConstantInt::get(sort_type, ordinal + num_tags);
     }
-    llvm::Constant *char_ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
-        str->getType(), global, indices);
     switch (cat.cat) {
     case sort_category::Variable:
     case sort_category::Symbol:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
-               llvm::Type::getInt1Ty(ctx), llvm::Type::getInt8PtrTy(ctx)},
+              {file, child->getType(), sort_type, llvm::Type::getInt1Ty(ctx),
+               llvm::Type::getInt8PtrTy(ctx)},
               false),
           callbacks.at(0),
-          {func->arg_begin() + 1, child, char_ptr,
+          {func->arg_begin() + 1, child, sort_val,
            llvm::ConstantInt::get(
                llvm::Type::getInt1Ty(ctx), cat.cat == sort_category::Variable),
            state_ptr},
@@ -992,40 +1022,40 @@ static void get_visitor(
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+              {file, child->getType(), sort_type,
                llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(4), {func->arg_begin() + 1, child, char_ptr, state_ptr},
+          callbacks.at(4), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
     case sort_category::Float:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+              {file, child->getType(), sort_type,
                llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(5), {func->arg_begin() + 1, child, char_ptr, state_ptr},
+          callbacks.at(5), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
     case sort_category::Bool:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+              {file, child->getType(), sort_type,
                llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(6), {func->arg_begin() + 1, child, char_ptr, state_ptr},
+          callbacks.at(6), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
     case sort_category::StringBuffer:
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), llvm::Type::getInt8PtrTy(ctx),
+              {file, child->getType(), sort_type,
                llvm::Type::getInt8PtrTy(ctx)},
               false),
-          callbacks.at(7), {func->arg_begin() + 1, child, char_ptr, state_ptr},
+          callbacks.at(7), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
     case sort_category::MInt: {
@@ -1037,14 +1067,14 @@ static void get_visitor(
       auto *fn_type = llvm::FunctionType::get(
           llvm::Type::getVoidTy(ctx),
           {file, llvm::Type::getInt64PtrTy(ctx), llvm::Type::getInt64Ty(ctx),
-           llvm::Type::getInt8PtrTy(ctx), llvm::Type::getInt8PtrTy(ctx)},
+           sort_type, llvm::Type::getInt8PtrTy(ctx)},
           false);
       if (nwords == 0) {
         llvm::CallInst::Create(
             fn_type, func->arg_begin() + 10,
             {func->arg_begin() + 1,
              llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(ctx)),
-             nbits, char_ptr, state_ptr},
+             nbits, sort_val, state_ptr},
             "", case_block);
       } else {
         auto *ptr = allocate_term(
@@ -1079,7 +1109,7 @@ static void get_visitor(
         }
         llvm::CallInst::Create(
             fn_type, callbacks.at(8),
-            {func->arg_begin() + 1, ptr, nbits, char_ptr, state_ptr}, "",
+            {func->arg_begin() + 1, ptr, nbits, sort_val, state_ptr}, "",
             case_block);
       }
       break;
@@ -1087,27 +1117,27 @@ static void get_visitor(
     case sort_category::Map:
       visit_collection(
           definition, module, composite_sort, func, child_ptr, case_block,
-          callbacks.at(1), state_ptr);
+          callbacks.at(1), state_ptr, use_sort_name);
       break;
     case sort_category::RangeMap:
       visit_collection(
           definition, module, composite_sort, func, child_ptr, case_block,
-          callbacks.at(10), state_ptr);
+          callbacks.at(10), state_ptr, use_sort_name);
       break;
     case sort_category::Set:
       visit_collection(
           definition, module, composite_sort, func, child_ptr, case_block,
-          callbacks.at(3), state_ptr);
+          callbacks.at(3), state_ptr, use_sort_name);
       break;
     case sort_category::List: {
       visit_collection(
           definition, module, composite_sort, func, child_ptr, case_block,
-          callbacks.at(2), state_ptr);
+          callbacks.at(2), state_ptr, use_sort_name);
       break;
     }
     case sort_category::Uncomputed: abort();
     }
-    if (i != symbol->get_arguments().size() - 1) {
+    if (i != symbol->get_arguments().size() - 1 && use_sort_name) {
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx), {file, llvm::Type::getInt8PtrTy(ctx)},
@@ -1116,6 +1146,20 @@ static void get_visitor(
     }
     i++;
   }
+}
+
+// NOLINTNEXTLINE(*-cognitive-complexity)
+static void get_visitor(
+    kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
+    llvm::BasicBlock *case_block, std::vector<llvm::Value *> const &callbacks) {
+  get_visitor(definition, module, symbol, case_block, callbacks, true);
+}
+
+// NOLINTNEXTLINE(*-cognitive-complexity)
+static void get_serialize_visitor(
+    kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
+    llvm::BasicBlock *case_block, std::vector<llvm::Value *> const &callbacks) {
+  get_visitor(definition, module, symbol, case_block, callbacks, false);
 }
 
 static llvm::Constant *get_layout_data(
@@ -1216,7 +1260,14 @@ static void emit_layouts(kore_definition *definition, llvm::Module *module) {
 }
 
 static void emit_visit_children(kore_definition *def, llvm::Module *mod) {
-  emit_traversal("visit_children", def, mod, true, get_visitor);
+  emit_traversal("visit_children", def, mod, true, false, get_visitor);
+}
+
+static void
+emit_visit_children_for_serialize(kore_definition *def, llvm::Module *mod) {
+  emit_traversal(
+      "visit_children_for_serialize", def, mod, true, true,
+      get_serialize_visitor);
 }
 
 static void emit_inj_tags(kore_definition *def, llvm::Module *mod) {
@@ -1358,6 +1409,7 @@ void emit_config_parser_functions(
 
   emit_get_symbol_name_for_tag(definition, module);
   emit_visit_children(definition, module);
+  emit_visit_children_for_serialize(definition, module);
 
   emit_layouts(definition, module);
 
