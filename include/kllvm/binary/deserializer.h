@@ -263,6 +263,32 @@ sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
   return term_stack[0];
 }
 
+template <typename It>
+sptr<kore_pattern> read_v2(It &ptr, It end, kore_header const &header) {
+  switch (peek(ptr)) {
+  case 0: {
+    ++ptr;
+    auto len = detail::read<uint64_t>(ptr, end);
+    auto str = std::string((char *)&*ptr, (char *)(&*ptr + len));
+    ptr += len;
+    return kore_string_pattern::create(str);
+  }
+  case 1: {
+    ++ptr;
+    auto offset = detail::read<uint32_t>(ptr, end);
+    auto arity = header.get_arity(offset);
+    auto symbol = header.get_symbol(offset);
+    auto new_pattern = kore_composite_pattern::create(symbol);
+    for (auto i = 0; i < arity; ++i) {
+      auto child = read_v2(ptr, end, header);
+      new_pattern->add_argument(child);
+    }
+    return new_pattern;
+  }
+  default: throw std::runtime_error("Bad term " + std::to_string(*ptr));
+  }
+}
+
 } // namespace detail
 
 std::string file_contents(std::string const &fn, int max_bytes = -1);
