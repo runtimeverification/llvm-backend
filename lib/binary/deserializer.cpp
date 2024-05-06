@@ -37,4 +37,78 @@ sptr<kore_pattern> deserialize_pattern(std::string const &filename) {
   return deserialize_pattern(data.begin(), data.end());
 }
 
+kore_header::kore_header(FILE *in) {
+  if (fgetc(in) != 0x7f || fgetc(in) != 'K' || fgetc(in) != 'R'
+      || fgetc(in) != '2') {
+    throw std::runtime_error("invalid magic");
+  }
+  uint32_t num_entries[3];
+  if (fread(&num_entries, sizeof(uint32_t), 3, in) != 3) {
+    throw std::runtime_error("invalid table header");
+  }
+  uint32_t nstrings = num_entries[0];
+  uint32_t nsorts = num_entries[1];
+  uint32_t nsymbols = num_entries[2];
+
+  std::vector<std::string> strings;
+  strings.reserve(nstrings);
+
+  for (uint32_t i = 0; i < nstrings; ++i) {
+    uint32_t len;
+    if (fread(&len, sizeof(uint32_t), 1, in) != 1) {
+      throw std::runtime_error("invalid string table length");
+    }
+    std::string str;
+    str.resize(len);
+    if (fread(str.data(), 1, len, in) != len) {
+      throw std::runtime_error("invalid string table entry");
+    }
+    fgetc(in);
+    strings.push_back(str);
+  }
+
+  std::vector<sptr<kore_sort>> sorts;
+  sorts.reserve(nsorts);
+
+  for (uint32_t i = 0; i < nsorts; ++i) {
+    uint32_t offset;
+    if (fread(&offset, sizeof(uint32_t), 1, in) != 1) {
+      throw std::runtime_error("invalid string table offset in sort table");
+    }
+    uint8_t nparams = fgetc(in);
+    auto sort = kore_composite_sort::create(strings[offset]);
+    for (uint8_t j = 0; j < nparams; j++) {
+      uint32_t param_offset;
+      if (fread(&param_offset, sizeof(uint32_t), 1, in) != 1
+          || param_offset >= i) {
+        throw std::runtime_error("invalid sort table offset in sort table");
+      }
+      sort->add_argument(sorts[param_offset]);
+    }
+    sorts.push_back(sort);
+  }
+
+  arities_.reserve(nsymbols);
+  symbols_.reserve(nsymbols);
+
+  for (uint32_t i = 0; i < nsymbols; ++i) {
+    uint32_t offset;
+    if (fread(&offset, sizeof(uint32_t), 1, in) != 1) {
+      throw std::runtime_error("invalid string table offset in symbol table");
+    }
+    uint8_t nparams = fgetc(in);
+    uint8_t arity = fgetc(in);
+    auto symbol = kore_symbol::create(strings[offset]);
+    for (uint8_t j = 0; j < nparams; j++) {
+      uint32_t param_offset;
+      if (fread(&param_offset, sizeof(uint32_t), 1, in) != 1) {
+        throw std::runtime_error("invalid sort table offset in symbol table");
+      }
+      symbol->add_argument(sorts[param_offset]);
+    }
+    symbols_.push_back(std::move(symbol));
+    arities_.push_back(arity);
+  }
+}
+
 } // namespace kllvm

@@ -6,12 +6,26 @@
 #include <kllvm/binary/version.h>
 
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <vector>
 
 #include <iostream>
 
 namespace kllvm {
+
+class kore_header {
+private:
+  std::vector<uint8_t> arities_;
+  std::vector<ptr<kore_symbol>> symbols_;
+
+public:
+  kore_header(FILE *in);
+  uint8_t get_arity(uint32_t offset) const { return arities_[offset]; };
+  kore_symbol *get_symbol(uint32_t offset) const {
+    return symbols_[offset].get();
+  };
+};
 
 namespace detail {
 
