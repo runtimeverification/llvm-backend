@@ -360,6 +360,7 @@ bool hook_STRING_eq(SortString, SortString);
 char const *get_symbol_name_for_tag(uint32_t tag);
 char const *get_return_sort_for_tag(uint32_t tag);
 char const **get_argument_sorts_for_tag(uint32_t tag);
+uint32_t *get_argument_sorts_for_tag_v2(uint32_t tag);
 char const *top_sort(void);
 
 bool symbol_is_instantiation(uint32_t tag);

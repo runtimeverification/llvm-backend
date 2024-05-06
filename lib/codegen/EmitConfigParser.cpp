@@ -1311,6 +1311,50 @@ static void emit_inj_tags(kore_definition *def, llvm::Module *mod) {
   }
 }
 
+static void emit_sort_table_v2(kore_definition *def, llvm::Module *mod) {
+  auto getter = [](kore_definition *definition, llvm::Module *module,
+                   kore_symbol *symbol) -> llvm::Constant * {
+    auto &ctx = module->getContext();
+
+    auto *subtable_type = llvm::ArrayType::get(
+        llvm::Type::getInt32Ty(ctx), symbol->get_arguments().size());
+    auto *subtable = module->getOrInsertGlobal(
+        fmt::format("sort_tags_{}", ast_to_string(*symbol)), subtable_type);
+    auto *subtable_var = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
+    init_debug_global(
+        "sort_tags_" + symbol->get_name(),
+        get_array_debug_type(
+            get_int_debug_type(), symbol->get_arguments().size(),
+            llvm::DataLayout(module).getABITypeAlign(
+                llvm::Type::getInt32Ty(ctx))),
+        subtable_var);
+    llvm::Constant *zero
+        = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), 0);
+    auto indices = std::vector<llvm::Constant *>{zero, zero};
+    const uint32_t num_tags = definition->get_symbols().size();
+
+    std::vector<llvm::Constant *> subvalues;
+    for (const auto &i : symbol->get_arguments()) {
+      subvalues.push_back(llvm::ConstantInt::get(
+          llvm::Type::getInt32Ty(ctx),
+          dynamic_cast<kore_composite_sort *>(i.get())->get_ordinal()
+              + num_tags));
+    }
+    subtable_var->setInitializer(
+        llvm::ConstantArray::get(subtable_type, subvalues));
+
+    return llvm::ConstantExpr::getInBoundsGetElementPtr(
+        subtable_type, subtable_var, indices);
+  };
+
+  auto *i32_ty = llvm::Type::getInt32Ty(mod->getContext());
+  auto *entry_ty = llvm::PointerType::getUnqual(i32_ty);
+  auto *debug_ty = get_pointer_debug_type(get_int_debug_type(), "int *");
+
+  emit_data_table_for_symbol(
+      "get_argument_sorts_for_tag_v2", entry_ty, debug_ty, def, mod, getter);
+}
+
 static void emit_sort_table(kore_definition *def, llvm::Module *mod) {
   auto getter = [](kore_definition *definition, llvm::Module *module,
                    kore_symbol *symbol) -> llvm::Constant * {
@@ -1438,6 +1482,7 @@ void emit_config_parser_functions(
   emit_inj_tags(definition, module);
 
   emit_sort_table(definition, module);
+  emit_sort_table_v2(definition, module);
   emit_return_sort_table(definition, module);
   emit_symbol_is_instantiation(definition, module);
 }
