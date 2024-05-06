@@ -331,8 +331,10 @@ void serialize_configurations(
 void serialize_configuration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern);
+void serialize_configuration_v2(FILE *file, block *subject, uint32_t sort);
 void serialize_configuration_to_file(
     FILE *file, block *subject, bool emit_size, bool use_intern);
+void serialize_configuration_to_file_v2(FILE *file, block *subject);
 void write_uint64_to_file(FILE *file, uint64_t i);
 void write_bool_to_file(FILE *file, bool b);
 void serialize_term_to_file(
