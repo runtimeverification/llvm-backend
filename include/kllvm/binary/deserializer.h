@@ -270,7 +270,7 @@ sptr<kore_pattern> read_v2(It &ptr, It end, kore_header const &header) {
     ++ptr;
     auto len = detail::read<uint64_t>(ptr, end);
     auto str = std::string((char *)&*ptr, (char *)(&*ptr + len));
-    ptr += len;
+    ptr += len + 1;
     return kore_string_pattern::create(str);
   }
   case 1: {
