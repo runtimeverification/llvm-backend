@@ -657,7 +657,18 @@ void serialize_term_to_file(
 }
 
 void serialize_term_to_file_v2(FILE *file, void *subject, char const *sort) {
-  block *term = construct_k_item_inj(subject, sort, true);
+  block *term = nullptr;
+  if (!strcmp("SortKItem{}", sort)) {
+    auto tag = get_tag_for_symbol_name("rawTerm{}");
+    std::vector<void *> args{subject};
+    term = static_cast<block *>(construct_composite_pattern(tag, args));
+  } else if (!strcmp("SortK{}", sort)) {
+    auto tag = get_tag_for_symbol_name("rawKTerm{}");
+    std::vector<void *> args{subject};
+    term = static_cast<block *>(construct_composite_pattern(tag, args));
+  } else {
+    term = construct_k_item_inj(subject, sort, true);
+  }
   writer w = {file, nullptr};
 
   serialize_visitor callbacks
