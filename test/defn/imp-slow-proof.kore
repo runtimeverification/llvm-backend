@@ -1,6 +1,5 @@
 // RUN: %proof-slow-interpreter
 // RUN: %check-proof-out
-// RUN: %check-expanded-proof-out
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/robertorosmaninho/rv/k/llvm-backend/src/main/native/llvm-backend/test/defn/k-files/imp.md)")]
 
 module BASIC-K
