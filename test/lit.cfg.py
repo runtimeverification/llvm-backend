@@ -175,8 +175,7 @@ config.substitutions.extend([
     ('%test-diff-out', os.path.join('%output-dir', '%test-basename.out.diff')),
     ('%test-dir-out', os.path.join('%output-dir', '%test-basename')),
     ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
-    ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename', '%test-basename.out.diff')),
-    ('%test-proof-expanded-diff-out', os.path.join('%output-dir', '%test-basename', '%test-basename.expanded.out.diff')),
+    ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename.proof.out.diff')),
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),
