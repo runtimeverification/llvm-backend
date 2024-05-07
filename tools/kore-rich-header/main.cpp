@@ -67,5 +67,14 @@ int main(int argc, char **argv) {
       std::cout.write(reinterpret_cast<char const *>(&ordinal), 4);
     }
   }
+  for (uint32_t i = 0; i < num_sorts; i++) {
+    uint32_t idx = num_strings - 1;
+    std::cout.write(reinterpret_cast<char const *>(&idx), 4);
+    int const num_params = 1;
+    std::cout.put((uint8_t)num_params);
+    std::cout.put((uint8_t)num_params);
+    uint32_t ordinal = definition->get_all_sorts()[i]->get_ordinal();
+    std::cout.write(reinterpret_cast<char const *>(&ordinal), 4);
+  }
   return 0;
 }
