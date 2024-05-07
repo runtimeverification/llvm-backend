@@ -338,10 +338,11 @@ private:
 
   template <typename It>
   sptr<kore_pattern> parse_kore_term(It &ptr, It end, uint64_t &pattern_len) {
-    if (std::distance(ptr, end) < 5U) {
+    if (std::distance(ptr, end) < 9U) {
       return nullptr;
     }
     It old_ptr = ptr;
+    ptr += 4;
     auto result = detail::read_v2(ptr, end, header_);
     pattern_len = ptr - old_ptr;
     return result;

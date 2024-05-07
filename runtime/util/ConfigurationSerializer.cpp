@@ -607,6 +607,7 @@ void serialize_configuration_to_file_v2(FILE *file, block *subject) {
 }
 
 void serialize_configuration_v2(FILE *file, block *subject, uint32_t sort) {
+  fputs("\x7FKR2", file);
   writer w = {file, nullptr};
   serialize_configuration_v2_internal(&w, subject, sort, false);
 }
@@ -669,6 +670,7 @@ void serialize_term_to_file_v2(FILE *file, void *subject, char const *sort) {
   } else {
     term = construct_k_item_inj(subject, sort, true);
   }
+  fputs("\x7FKR2", file);
   writer w = {file, nullptr};
 
   serialize_visitor callbacks
