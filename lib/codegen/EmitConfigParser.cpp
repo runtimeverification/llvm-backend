@@ -932,8 +932,12 @@ static void visit_collection(
                        .get(attribute_set::key::Concat)
                        ->get_arguments()[0]
                        .get();
-    concat_ptr = get_symbol_name_ptr(
-        concat->get_constructor(), nullptr, module, use_sort_name);
+    // the attributes don't have tags associated with them, so we get the
+    // canonical version of the symbol
+    auto *concat_symbol = definition->get_all_symbols().at(
+        concat->get_constructor()->get_name() + "{}");
+    concat_ptr
+        = get_symbol_name_ptr(concat_symbol, nullptr, module, use_sort_name);
   } else {
     if (use_sort_name) {
       concat_ptr
@@ -946,14 +950,22 @@ static void visit_collection(
                    .get(attribute_set::key::Unit)
                    ->get_arguments()[0]
                    .get();
-  auto *unit_ptr = get_symbol_name_ptr(
-      unit->get_constructor(), nullptr, module, use_sort_name);
+  // the attributes don't have tags associated with them, so we get the
+  // canonical version of the symbol
+  auto *unit_symbol = definition->get_all_symbols().at(
+      unit->get_constructor()->get_name() + "{}");
+  auto *unit_ptr
+      = get_symbol_name_ptr(unit_symbol, nullptr, module, use_sort_name);
   auto *element = (kore_composite_pattern *)sort_decl->attributes()
                       .get(attribute_set::key::Element)
                       ->get_arguments()[0]
                       .get();
-  auto *element_ptr = get_symbol_name_ptr(
-      element->get_constructor(), nullptr, module, use_sort_name);
+  // the attributes don't have tags associated with them, so we get the
+  // canonical version of the symbol
+  auto *element_symbol = definition->get_all_symbols().at(
+      element->get_constructor()->get_name() + "{}");
+  auto *element_ptr
+      = get_symbol_name_ptr(element_symbol, nullptr, module, use_sort_name);
   auto *file = make_writer_type(ctx);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx);
   llvm::Type *sort_type = nullptr;
