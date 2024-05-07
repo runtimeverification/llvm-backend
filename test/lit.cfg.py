@@ -184,6 +184,7 @@ config.substitutions.extend([
     ('%kore-convert', 'kore-convert'),
 
     ('%kore-proof-trace', 'kore-proof-trace'),
+    ('%kore-rich-header', 'kore-rich-header'),
 ])
 
 config.recursiveExpansionLimit = 10
