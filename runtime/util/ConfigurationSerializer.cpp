@@ -656,6 +656,25 @@ void serialize_term_to_file(
   free(data);
 }
 
+void serialize_term_to_file_v2(FILE *file, void *subject, char const *sort) {
+  block *term = construct_k_item_inj(subject, sort, true);
+  writer w = {file, nullptr};
+
+  serialize_visitor callbacks
+      = {serialize_configuration_v2_internal,
+         serialize_map_v2,
+         serialize_list_v2,
+         serialize_set_v2,
+         serialize_int_v2,
+         serialize_float_v2,
+         serialize_bool_v2,
+         serialize_string_buffer_v2,
+         serialize_m_int_v2,
+         serialize_range_map_v2};
+
+  visit_children_for_serialize(term, &w, &callbacks);
+}
+
 void serialize_raw_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern) {
   block *term = construct_raw_term(subject, sort, true);

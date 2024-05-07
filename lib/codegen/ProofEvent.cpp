@@ -43,7 +43,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty, i32_ty}, false);
 
   auto *serialize
-      = get_or_insert_function(module_, "serialize_configuration_v2", func_ty);
+      = get_or_insert_function(module_, "serialize_term_to_file_v2", func_ty);
 
   return b.CreateCall(serialize, {output_file, term, sort_name_ptr});
 }
