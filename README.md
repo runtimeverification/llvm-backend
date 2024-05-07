@@ -10,4 +10,10 @@ the [`docs/`](docs) directory.
 
 For developer setup instructions, refer to [INSTALL.md](INSTALL.md).
 
+## Git Workflow
+
+PRs to this repository should target the `develop` branch, rather than `master`.
+When a PR is merged to `develop`, a version update and release happens
+automatically in CI.
+
 [K]: https://github.com/runtimeverification/k
