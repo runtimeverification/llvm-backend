@@ -42,13 +42,18 @@ kore_header::kore_header(FILE *in) {
       || fgetc(in) != '2') {
     throw std::runtime_error("invalid magic");
   }
-  uint32_t num_entries[3];
-  if (fread(&num_entries, sizeof(uint32_t), 3, in) != 3) {
+  uint32_t num_entries[4];
+  if (fread(&num_entries, sizeof(uint32_t), 4, in) != 4) {
     throw std::runtime_error("invalid table header");
   }
-  uint32_t nstrings = num_entries[0];
-  uint32_t nsorts = num_entries[1];
-  uint32_t nsymbols = num_entries[2];
+  uint32_t version = num_entries[0];
+  uint32_t nstrings = num_entries[1];
+  uint32_t nsorts = num_entries[2];
+  uint32_t nsymbols = num_entries[3];
+
+  if (version != 1) {
+    throw std::runtime_error("invalid binary version");
+  }
 
   std::vector<std::string> strings;
   strings.reserve(nstrings);
