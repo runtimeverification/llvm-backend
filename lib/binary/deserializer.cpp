@@ -109,7 +109,7 @@ kore_header::kore_header(FILE *in) {
       if (fread(&param_offset, sizeof(uint32_t), 1, in) != 1) {
         throw std::runtime_error("invalid sort table offset in symbol table");
       }
-      symbol->add_argument(sorts[param_offset]);
+      symbol->add_formal_argument(sorts[param_offset]);
     }
     symbols_.push_back(std::move(symbol));
     arities_.push_back(arity);
