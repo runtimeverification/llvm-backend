@@ -271,7 +271,7 @@ if $link; then
       mkdir -p "$python_path"
 
       script_name="$(basename "$output_file").py"
-      cp "$LIBDIR/lldb/klldb.py" "$python_path/$script_name"
+      cp -f "$LIBDIR/lldb/klldb.py" "$python_path/$script_name"
     fi
   fi
 fi

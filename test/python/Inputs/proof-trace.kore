@@ -1,7 +1,3 @@
-// RUN: %proof-interpreter
-// RUN: %run-proof-out
-// RUN: %kore-proof-trace-test %t.out.bin
-
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/theo/builds/llvm-backend/test/defn/k-files/test-proof-trace.k)")]
 
 module BASIC-K
