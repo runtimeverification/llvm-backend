@@ -35,7 +35,7 @@ void llvm_rewrite_event::print_substitution(
   for (auto const &p : substitution_) {
     if (expand_terms) {
       out << fmt::format("{}{} = kore[", indent, p.first);
-      p.second.first->print(out);
+      p.second.first->strip_injections()->print(out);
       out << fmt::format("]\n");
     } else {
       out << fmt::format("{}{} = kore[{}]\n", indent, p.first, p.second.second);
@@ -87,7 +87,7 @@ void llvm_hook_event::print(
   }
   if (expand_terms) {
     out << fmt::format("{}hook result: kore[", indent);
-    kore_pattern_->print(out);
+    kore_pattern_->strip_injections()->print(out);
     out << fmt::format("]\n");
   } else {
     out << fmt::format("{}hook result: kore[{}]\n", indent, pattern_length_);
@@ -102,7 +102,7 @@ void llvm_event::print(
     std::string indent(ind * indent_size, ' ');
     if (expand_terms) {
       out << fmt::format("{}{}: kore[", indent, is_arg ? "arg" : "config");
-      kore_pattern_->print(out);
+      kore_pattern_->strip_injections()->print(out);
       out << fmt::format("]\n");
     } else {
       out << fmt::format(
