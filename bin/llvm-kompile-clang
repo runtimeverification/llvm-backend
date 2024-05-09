@@ -226,23 +226,38 @@ else
 fi
 
 if $link; then
+  runtime_components=(
+    "$LIBDIR"/libarithmetic.a
+    "$LIBDIR"/libutil.a
+    "$LIBDIR"/libstrings.a
+    "$LIBDIR"/libnumeric_strings.a
+    "$LIBDIR"/libio.a
+    "$LIBDIR"/libcollections.a
+    "$LIBDIR"/libBindingsCore.a
+    "$LIBDIR"/libKOREPrinter.a
+    "$LIBDIR"/liballoc.a
+    "$LIBDIR"/libcollect.a
+    "$LIBDIR"/libmeta.a
+    "$LIBDIR"/libjson.a
+  )
+
+  components=(
+    "$LIBDIR"/libParser.a
+    "$LIBDIR"/libAST.a
+    "$LIBDIR"/libBinaryKore.a
+  )
+
+  # If we're linking a Python AST bindings module, then we don't want to include
+  # the backend's runtime components. On some platforms and build type
+  # combinations, the linker won't strip undefined symbols for us, which
+  # produces an error on trying to load the Python library.
+  if [ "$main" != "python_ast" ]; then
+    components=("${components[@]}" "${runtime_components[@]}")
+  fi
+
   run @CMAKE_CXX_COMPILER@ -Wno-override-module -Wno-return-type-c-linkage "$modopt" "${files[@]}" \
-    "$LIBDIR"/libarithmetic.a \
     "$MAINFILES" \
-    "$LIBDIR"/libutil.a \
-    "$LIBDIR"/libstrings.a \
-    "$LIBDIR"/libnumeric_strings.a \
-    "$LIBDIR"/libio.a \
-    "$LIBDIR"/libcollections.a \
-    "$LIBDIR"/libParser.a \
-    "$LIBDIR"/libAST.a \
-    "$LIBDIR"/libBindingsCore.a \
-    "$LIBDIR"/libBinaryKore.a \
-    "$LIBDIR"/libKOREPrinter.a \
-    "$LIBDIR"/liballoc.a \
-    "$LIBDIR"/libcollect.a \
-    "$LIBDIR"/libmeta.a \
-    "$LIBDIR"/libjson.a \
+    "${components[@]}" \
     "${flags[@]}" \
     "${all_libraries[@]}" \
     -I "$(dirname "$0")"/../include/kllvm \
@@ -256,7 +271,7 @@ if $link; then
       mkdir -p "$python_path"
 
       script_name="$(basename "$output_file").py"
-      cp "$LIBDIR/lldb/klldb.py" "$python_path/$script_name"
+      cp -f "$LIBDIR/lldb/klldb.py" "$python_path/$script_name"
     fi
   fi
 fi

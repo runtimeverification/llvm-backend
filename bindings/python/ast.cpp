@@ -384,7 +384,7 @@ void bind_proof_trace(py::module_ &m) {
 
   auto rewrite_event
       = py::class_<llvm_rewrite_event, std::shared_ptr<llvm_rewrite_event>>(
-            proof_trace, "LLVMREwriteEvent", step_event)
+            proof_trace, "llvm_rewrite_event", step_event)
             .def_property_readonly(
                 "rule_ordinal", &llvm_rewrite_event::get_rule_ordinal)
             .def_property_readonly(
