@@ -955,11 +955,10 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
     if (auto *sort
         = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get());
         symbol_decl->attributes().contains(attribute_set::key::SortInjection)
-        && (sort->get_category(definition_).cat == sort_category::Symbol)
-        && definition_->get_supersorts()[sort].empty()) {
+        && (sort->get_category(definition_).cat == sort_category::Symbol)) {
       std::pair<llvm::Value *, bool> val = create_allocation(
           constructor->get_arguments()[0].get(), location_stack);
-      if (val.second) {
+      if (val.second && !definition_->get_supersorts()[sort].empty()) {
         llvm::Instruction *tag = llvm::CallInst::Create(
             get_or_insert_function(
                 module_, "get_tag", llvm::Type::getInt32Ty(ctx_),
