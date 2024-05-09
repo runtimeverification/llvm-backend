@@ -156,6 +156,7 @@ private:
   std::string name_;
   std::vector<sptr<kore_sort>> arguments_;
   value_type category_;
+  uint32_t ordinal_{};
 
 public:
   static sptr<kore_composite_sort> create(
@@ -168,11 +169,13 @@ public:
   value_type get_category(kore_definition *definition);
   std::string get_hook(kore_definition *definition) const;
   static value_type get_category(std::string const &hook_name);
+  uint32_t get_ordinal() const { return ordinal_; }
 
   bool is_concrete() const override;
   sptr<kore_sort> substitute(substitution const &subst) override;
 
   void add_argument(sptr<kore_sort> const &argument);
+  void set_ordinal(uint32_t ordinal) { ordinal_ = ordinal; }
   void print(std::ostream &out, unsigned indent = 0) const override;
   void pretty_print(std::ostream &out) const override;
   void serialize_to(serializer &s) const override;
@@ -909,6 +912,7 @@ private:
   kore_composite_sortMapType hooked_sorts_;
   kore_symbolStringMapType fresh_functions_;
   KOREAxiomMapType ordinals_;
+  std::vector<kore_composite_sort *> all_sorts_;
 
   std::vector<sptr<kore_module>> modules_;
   attribute_set attributes_;
@@ -1024,6 +1028,10 @@ public:
     return fresh_functions_;
   }
   kore_symbol *get_inj_symbol() { return inj_symbol_; }
+
+  std::vector<kore_composite_sort *> const &get_all_sorts() const {
+    return all_sorts_;
+  }
 };
 
 void read_multimap(
