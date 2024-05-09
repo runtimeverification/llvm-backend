@@ -17,7 +17,6 @@ BOOST_AUTO_TEST_CASE(insert_contains) {
   subsortMap[sort.get()].insert(subsort.get());
   subsortMap[sort.get()].insert(subsort2.get());
 
-
   BOOST_CHECK(subsortMap[sort.get()].contains(subsort.get()));
   BOOST_CHECK(subsortMap[sort.get()].contains(subsort2.get()));
   BOOST_CHECK(subsortMap[sort.get()].size() == 2);
@@ -30,7 +29,8 @@ BOOST_AUTO_TEST_CASE(subsorts_supersorts) {
   auto subsort1 = kore_sort_variable::create("bar");
   auto subsort2 = kore_sort_variable::create("baz");
 
-  auto pat = sptr<kore_composite_pattern>(kore_composite_pattern::create("subsort"));
+  auto pat
+      = sptr<kore_composite_pattern>(kore_composite_pattern::create("subsort"));
   pat->get_constructor()->add_formal_argument(subsort1);
   pat->get_constructor()->add_formal_argument(subsort2);
 
@@ -44,7 +44,71 @@ BOOST_AUTO_TEST_CASE(subsorts_supersorts) {
   def->add_module(mod);
 
   auto subsorts_ = def->get_subsorts();
+  auto supersorts_ = def->get_supersorts();
+
+  // Check bar <: baz
+  // Check bar !<: bar
+  // Check baz !<: baz
+  // Check baz !<: bar
   BOOST_CHECK(subsorts_[subsort1.get()].contains(subsort2.get()));
+  BOOST_CHECK(!subsorts_[subsort1.get()].contains(subsort1.get()));
+  BOOST_CHECK(!subsorts_[subsort2.get()].contains(subsort2.get()));
+  BOOST_CHECK(!subsorts_[subsort2.get()].contains(subsort1.get()));
+
+  // Check baz :> bar
+  // Check bar !:> baz
+  // Check bar !:> bar
+  // Check baz !:> baz
+  BOOST_CHECK(supersorts_[subsort2.get()].contains(subsort1.get()));
+  BOOST_CHECK(!supersorts_[subsort1.get()].contains(subsort2.get()));
+  BOOST_CHECK(!supersorts_[subsort1.get()].contains(subsort1.get()));
+  BOOST_CHECK(!supersorts_[subsort2.get()].contains(subsort2.get()));
+}
+
+BOOST_AUTO_TEST_CASE(transitive_subsorts_supersorts) {
+  auto subsort1 = kore_sort_variable::create("foo");
+  auto subsort2 = kore_sort_variable::create("bar");
+  auto subsort3 = kore_sort_variable::create("baz");
+
+  auto pat1
+      = sptr<kore_composite_pattern>(kore_composite_pattern::create("subsort"));
+  pat1->get_constructor()->add_formal_argument(subsort1);
+  pat1->get_constructor()->add_formal_argument(subsort2);
+
+  auto pat2
+      = sptr<kore_composite_pattern>(kore_composite_pattern::create("subsort"));
+  pat2->get_constructor()->add_formal_argument(subsort2);
+  pat2->get_constructor()->add_formal_argument(subsort3);
+
+  sptr<kore_axiom_declaration> decl1 = kore_axiom_declaration::create();
+  decl1->attributes().add(pat1);
+
+  sptr<kore_axiom_declaration> decl2 = kore_axiom_declaration::create();
+  decl2->attributes().add(pat2);
+
+  auto mod = sptr<kore_module>(kore_module::create("FooModule"));
+  mod->add_declaration(decl1);
+  mod->add_declaration(decl2);
+
+  auto def = kore_definition::create();
+  def->add_module(mod);
+
+  auto subsorts_ = def->get_subsorts();
+  auto supersorts_ = def->get_supersorts();
+
+  // Check foo <: bar
+  // Check bar <: baz
+  // Check foo <: baz
+  BOOST_CHECK(subsorts_[subsort1.get()].contains(subsort2.get()));
+  BOOST_CHECK(subsorts_[subsort2.get()].contains(subsort3.get()));
+  BOOST_CHECK(subsorts_[subsort1.get()].contains(subsort3.get()));
+
+  // Check baz :> bar
+  // Check bar :> foo
+  // Check baz :> foo
+  BOOST_CHECK(supersorts_[subsort2.get()].contains(subsort1.get()));
+  BOOST_CHECK(supersorts_[subsort3.get()].contains(subsort2.get()));
+  BOOST_CHECK(supersorts_[subsort3.get()].contains(subsort1.get()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
