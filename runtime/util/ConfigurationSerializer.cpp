@@ -657,19 +657,15 @@ void serialize_term_to_file(
   free(data);
 }
 
-void serialize_term_to_file_v2(FILE *file, void *subject, char const *sort) {
-  block *term = nullptr;
-  if (!strcmp("SortKItem{}", sort)) {
-    auto tag = get_tag_for_symbol_name("rawTerm{}");
-    std::vector<void *> args{subject};
-    term = static_cast<block *>(construct_composite_pattern(tag, args));
-  } else if (!strcmp("SortK{}", sort)) {
-    auto tag = get_tag_for_symbol_name("rawKTerm{}");
-    std::vector<void *> args{subject};
-    term = static_cast<block *>(construct_composite_pattern(tag, args));
-  } else {
-    term = construct_k_item_inj(subject, sort, true);
-  }
+void serialize_term_to_file_v2(
+    FILE *file, void *subject, uint64_t block_header, bool indirect) {
+  void *arg = indirect ? (void *)&subject : subject;
+  struct blockheader header_val {
+    block_header
+  };
+  auto *term = (block *)kore_alloc(size_hdr(block_header));
+  term->h = header_val;
+  store_symbol_children(term, &arg);
   fputs("\x7FKR2", file);
   writer w = {file, nullptr};
 

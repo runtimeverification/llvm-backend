@@ -340,7 +340,7 @@ void write_bool_to_file(FILE *file, bool b);
 void serialize_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern,
     bool k_item_inj = false);
-void serialize_term_to_file_v2(FILE *file, void *subject, char const *sort);
+void serialize_term_to_file_v2(FILE *file, void *subject, uint64_t, bool);
 void serialize_raw_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern);
 void print_variable_to_file(FILE *file, char const *varname);

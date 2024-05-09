@@ -31,21 +31,36 @@ llvm::CallInst *proof_event::emit_serialize_term(
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
-  auto cat = sort.get_category(definition_);
-  auto *sort_name_ptr = create_global_sort_string_ptr(b, sort, module_);
+  std::string sort_name = ast_to_string(sort);
+  bool indirect
+      = sort_name == "SortBool{}" || sort_name.substr(0, 9) == "SortMInt{";
+  std::string inj_name;
+  if (sort_name == "SortKItem{}") {
+    inj_name = "rawTerm{}";
+  } else if (sort_name == "SortK{}") {
+    inj_name = "rawKTerm{}";
+  } else {
+    inj_name = "inj{" + sort_name + ", SortKItem{}}";
+  }
+  auto symbol = definition_->get_all_symbols().at(inj_name);
+  uint64_t block_header = get_block_header_val(
+      module_, symbol, get_block_type(module_, definition_, symbol));
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
   auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
-  auto *i32_ty = llvm::Type::getInt32Ty(ctx_);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
-  auto *func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty, i32_ty}, false);
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
 
   auto *serialize
       = get_or_insert_function(module_, "serialize_term_to_file_v2", func_ty);
 
-  return b.CreateCall(serialize, {output_file, term, sort_name_ptr});
+  return b.CreateCall(
+      serialize,
+      {output_file, term, llvm::ConstantInt::get(i64_ty, block_header),
+       llvm::ConstantInt::get(i1_ty, indirect)});
 }
 
 llvm::CallInst *proof_event::emit_write_uint64(
