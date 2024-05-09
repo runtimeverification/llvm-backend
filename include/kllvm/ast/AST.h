@@ -966,7 +966,7 @@ public:
   SubsortMap get_subsorts();
 
   /*
-   * Build this definition's inverted subsort relation from axioms that have the
+   * Build this definition's supersort relation from axioms that have the
    * `subsort` attribute.
    *
    * The returned map is as follows:
