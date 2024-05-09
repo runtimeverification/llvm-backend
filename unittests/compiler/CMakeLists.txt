@@ -1,6 +1,7 @@
 add_kllvm_unittest(compiler-tests
   asttest.cpp
   pattern_matching.cpp
+  subsortmap.cpp
   main.cpp
 )
 

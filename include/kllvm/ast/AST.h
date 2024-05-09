@@ -963,7 +963,17 @@ public:
    *
    *   S |-> {T . S is a subsort of T}
    */
-  [[nodiscard]] SubsortMap get_subsorts() const;
+  SubsortMap get_subsorts();
+
+  /*
+   * Build this definition's supersort relation from axioms that have the
+   * `subsort` attribute.
+   *
+   * The returned map is as follows:
+   *
+   * S |-> {T . S is a direct supersort of T}
+   */
+  SubsortMap get_supersorts();
 
   /*
    * Build this definition's overload relation from axioms that have the
