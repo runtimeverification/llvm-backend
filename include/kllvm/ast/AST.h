@@ -966,7 +966,7 @@ public:
    *
    *   S |-> {T . S is a subsort of T}
    */
-  [[nodiscard]] SubsortMap get_subsorts();
+  SubsortMap get_subsorts();
 
   /*
    * Build this definition's inverted subsort relation from axioms that have the
@@ -976,7 +976,7 @@ public:
    *
    * S |-> {T . S is a direct supersort of T}
    */
-  [[nodiscard]] SubsortMap get_supersorts();
+  SubsortMap get_supersorts();
 
   /*
    * Build this definition's overload relation from axioms that have the

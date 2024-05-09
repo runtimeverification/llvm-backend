@@ -166,6 +166,8 @@ SymbolMap kore_definition::get_overloads() const {
 
 // NOLINTNEXTLINE(*-function-cognitive-complexity)
 void kore_definition::preprocess() {
+  get_subsorts();
+  get_supersorts();
   for (auto *axiom : axioms_) {
     axiom->pattern_ = axiom->pattern_->expand_aliases(this);
   }
