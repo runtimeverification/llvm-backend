@@ -1,6 +1,7 @@
 #ifndef AST_SERIALIZER_H
 #define AST_SERIALIZER_H
 
+#include <kllvm/ast/AST.h>
 #include <kllvm/binary/version.h>
 
 #include <array>
@@ -137,6 +138,8 @@ void serializer::emit(T val) {
   buffer_.append(reinterpret_cast<char *>(&val), sizeof(T));
   next_idx_ += sizeof(T);
 }
+
+void emit_kore_rich_header(std::ostream &os, kore_definition *definition);
 
 } // namespace kllvm
 

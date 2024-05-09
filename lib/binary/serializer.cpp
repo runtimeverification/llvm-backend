@@ -144,4 +144,70 @@ void serializer::emit_direct_string(std::string const &s) {
   next_idx_ += s.size();
 }
 
+void emit_kore_rich_header(std::ostream &os, kore_definition *definition) {
+  const uint32_t version = 1;
+  const uint32_t num_tags = definition->get_symbols().size();
+  const uint32_t num_sorts = definition->get_all_sorts().size();
+  const uint32_t num_strings = num_tags + num_sorts + 1;
+  const uint32_t num_symbols = num_tags + num_sorts;
+
+  os.write("\177KR2", 4);
+  os.write(reinterpret_cast<char const *>(&version), 4);
+  os.write(reinterpret_cast<char const *>(&num_strings), 4);
+  os.write(reinterpret_cast<char const *>(&num_sorts), 4);
+  os.write(reinterpret_cast<char const *>(&num_symbols), 4);
+
+  for (uint32_t i = 0; i < num_tags; i++) {
+    auto name = definition->get_symbols().at(i)->get_name();
+    const uint32_t len = name.size();
+    os.write(reinterpret_cast<char const *>(&len), 4);
+    os << name;
+    os.put('\000');
+  }
+  for (uint32_t i = 0; i < num_sorts; i++) {
+    auto name = definition->get_all_sorts()[i]->get_name();
+    const uint32_t len = name.size();
+    os.write(reinterpret_cast<char const *>(&len), 4);
+    os << name;
+    os.put('\000');
+  }
+  auto const *name = "\\dv";
+  const uint32_t len = 3;
+  os.write(reinterpret_cast<char const *>(&len), 4);
+  os.write(name, 4);
+
+  for (uint32_t i = 0; i < num_sorts; i++) {
+    uint32_t idx = i + num_tags;
+    os.write(reinterpret_cast<char const *>(&idx), 4);
+    if (!definition->get_all_sorts()[i]->get_arguments().empty()) {
+      throw std::runtime_error(
+          "cannot yet serialize sorts with sort parameters");
+    }
+    os.put('\000');
+  }
+
+  for (uint32_t i = 0; i < num_tags; i++) {
+    os.write(reinterpret_cast<char const *>(&i), 4);
+    auto const &symbol = definition->get_symbols().at(i);
+    int const num_params = symbol->get_formal_arguments().size();
+    os.put((uint8_t)num_params);
+    os.put((uint8_t)symbol->get_arguments().size());
+    for (int j = 0; j < num_params; j++) {
+      uint32_t ordinal = dynamic_cast<kore_composite_sort *>(
+                             symbol->get_formal_arguments()[j].get())
+                             ->get_ordinal();
+      os.write(reinterpret_cast<char const *>(&ordinal), 4);
+    }
+  }
+  for (uint32_t i = 0; i < num_sorts; i++) {
+    uint32_t idx = num_strings - 1;
+    os.write(reinterpret_cast<char const *>(&idx), 4);
+    int const num_params = 1;
+    os.put((uint8_t)num_params);
+    os.put((uint8_t)num_params);
+    uint32_t ordinal = definition->get_all_sorts()[i]->get_ordinal();
+    os.write(reinterpret_cast<char const *>(&ordinal), 4);
+  }
+}
+
 } // namespace kllvm
