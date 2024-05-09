@@ -420,6 +420,7 @@ public:
       SubsortMap const &subsorts, SymbolMap const &overloads,
       std::vector<ptr<kore_declaration>> const &axioms, bool reverse);
   virtual sptr<kore_pattern> unflatten_and_or() = 0;
+  virtual sptr<kore_pattern> strip_injections() = 0;
 
   /*
    * Recursively expands productions of the form:
@@ -506,6 +507,7 @@ public:
   }
 
   sptr<kore_pattern> unflatten_and_or() override { return shared_from_this(); }
+  sptr<kore_pattern> strip_injections() override { return shared_from_this(); }
 
   bool matches(
       substitution &subst, SubsortMap const &, SymbolMap const &,
@@ -585,6 +587,7 @@ public:
   std::map<std::string, int> gather_var_counts() override;
   sptr<kore_pattern> desugar_associative() override;
   sptr<kore_pattern> unflatten_and_or() override;
+  sptr<kore_pattern> strip_injections() override;
   sptr<kore_pattern> filter_substitution(
       pretty_print_data const &data,
       std::set<std::string> const &vars) override;
@@ -648,6 +651,7 @@ public:
   }
 
   sptr<kore_pattern> unflatten_and_or() override { return shared_from_this(); }
+  sptr<kore_pattern> strip_injections() override { return shared_from_this(); }
 
   sptr<kore_pattern> filter_substitution(
       pretty_print_data const &data,
