@@ -10,9 +10,9 @@ BOOST_AUTO_TEST_CASE(insert_contains) {
   SymbolSet symbolSet;
   auto subsortMap = SubsortMap{};
 
-  auto sort = kore_sort_variable::create("Sort");
-  auto subsort1 = kore_sort_variable::create("Subsort");
-  auto subsort2 = kore_sort_variable::create("Subsort");
+  auto sort = kore_composite_sort::create("Sort");
+  auto subsort1 = kore_composite_sort::create("Subsort");
+  auto subsort2 = kore_composite_sort::create("Subsort");
 
   subsortMap[sort.get()].insert(subsort1.get());
   subsortMap[sort.get()].insert(subsort2.get());
@@ -26,8 +26,8 @@ BOOST_AUTO_TEST_CASE(insert_contains) {
 }
 
 BOOST_AUTO_TEST_CASE(subsorts_supersorts) {
-  auto subsort1 = kore_sort_variable::create("bar");
-  auto subsort2 = kore_sort_variable::create("baz");
+  auto subsort1 = kore_composite_sort::create("bar");
+  auto subsort2 = kore_composite_sort::create("baz");
 
   auto pat
       = sptr<kore_composite_pattern>(kore_composite_pattern::create("subsort"));
@@ -66,9 +66,9 @@ BOOST_AUTO_TEST_CASE(subsorts_supersorts) {
 }
 
 BOOST_AUTO_TEST_CASE(transitive_subsorts_supersorts) {
-  auto subsort1 = kore_sort_variable::create("foo");
-  auto subsort2 = kore_sort_variable::create("bar");
-  auto subsort3 = kore_sort_variable::create("baz");
+  auto subsort1 = kore_composite_sort::create("foo");
+  auto subsort2 = kore_composite_sort::create("bar");
+  auto subsort3 = kore_composite_sort::create("baz");
 
   auto pat1
       = sptr<kore_composite_pattern>(kore_composite_pattern::create("subsort"));
