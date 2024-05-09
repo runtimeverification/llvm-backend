@@ -1122,6 +1122,19 @@ sptr<kore_pattern> kore_composite_pattern::unflatten_and_or() {
   return result;
 }
 
+sptr<kore_pattern> kore_composite_pattern::strip_injections() {
+  if (constructor_->get_name() == "inj" && arguments_.size() == 1) {
+    return arguments_[0]->strip_injections();
+  }
+  auto result = kore_composite_pattern::create(constructor_.get());
+
+  for (auto &arg : arguments_) {
+    result->add_argument(arg->strip_injections());
+  }
+
+  return result;
+}
+
 sptr<kore_pattern> kore_composite_pattern::expand_macros(
     SubsortMap const &subsorts, SymbolMap const &overloads,
     std::vector<ptr<kore_declaration>> const &macros, bool reverse,
