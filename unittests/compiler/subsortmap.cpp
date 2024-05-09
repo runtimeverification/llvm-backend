@@ -11,15 +11,15 @@ BOOST_AUTO_TEST_CASE(insert_contains) {
   auto subsortMap = SubsortMap{};
 
   auto sort = kore_sort_variable::create("Sort");
-  auto subsort = kore_sort_variable::create("Subsort 1");
-  auto subsort2 = kore_sort_variable::create("Subsort 2");
+  auto subsort1 = kore_sort_variable::create("Subsort");
+  auto subsort2 = kore_sort_variable::create("Subsort");
 
-  subsortMap[sort.get()].insert(subsort.get());
+  subsortMap[sort.get()].insert(subsort1.get());
   subsortMap[sort.get()].insert(subsort2.get());
 
-  BOOST_CHECK(subsortMap[sort.get()].contains(subsort.get()));
+  BOOST_CHECK(subsortMap[sort.get()].contains(subsort1.get()));
   BOOST_CHECK(subsortMap[sort.get()].contains(subsort2.get()));
-  BOOST_CHECK(subsortMap[sort.get()].size() == 2);
+  BOOST_CHECK(subsortMap[sort.get()].size() == 1); // subsort1 == subsort2
   BOOST_CHECK(subsortMap.size() == 1);
   BOOST_CHECK(!subsortMap[sort.get()].contains(sort.get()));
   BOOST_CHECK(!subsortMap[sort.get()].empty());
