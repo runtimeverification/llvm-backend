@@ -104,7 +104,7 @@ void kore_definition::insert_reserved_symbols() {
   add_module(std::move(mod));
 }
 
-SubsortMap kore_definition::get_subsorts() const {
+SubsortMap kore_definition::get_subsorts() {
   auto subsorts = SubsortMap{};
 
   for (auto *axiom : axioms_) {
@@ -119,6 +119,23 @@ SubsortMap kore_definition::get_subsorts() const {
   }
 
   return transitive_closure(subsorts);
+}
+
+SubsortMap kore_definition::get_supersorts() {
+  auto supersorts = SubsortMap{};
+
+  for (auto *axiom : axioms_) {
+    if (axiom->attributes().contains(attribute_set::key::Subsort)) {
+      auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
+      auto const &inner_sort
+          = att->get_constructor()->get_formal_arguments()[0];
+      auto const &outer_sort
+          = att->get_constructor()->get_formal_arguments()[1];
+      supersorts[outer_sort.get()].insert(inner_sort.get());
+    }
+  }
+
+  return transitive_closure(supersorts);
 }
 
 SymbolMap kore_definition::get_overloads() const {
