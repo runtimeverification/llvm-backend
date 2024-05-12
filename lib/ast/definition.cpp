@@ -176,7 +176,8 @@ void kore_definition::preprocess() {
       ++iter;
     }
     auto ordinal_att = kore_composite_pattern::create("ordinal");
-    auto pattern = kore_string_pattern::create(std::to_string(axiom->get_ordinal()));
+    auto pattern
+        = kore_string_pattern::create(std::to_string(axiom->get_ordinal()));
     ordinal_att->add_argument(std::move(pattern));
     axiom->attributes().add(std::move(ordinal_att));
   }
