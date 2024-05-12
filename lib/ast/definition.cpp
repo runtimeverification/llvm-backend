@@ -144,6 +144,23 @@ SubsortMap kore_definition::get_supersorts() {
   return *supersorts_;
 }
 
+SubsortMap kore_definition::get_supersorts() {
+  auto supersorts = SubsortMap{};
+
+  for (auto *axiom : axioms_) {
+    if (axiom->attributes().contains(attribute_set::key::Subsort)) {
+      auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
+      auto const &inner_sort
+          = att->get_constructor()->get_formal_arguments()[0];
+      auto const &outer_sort
+          = att->get_constructor()->get_formal_arguments()[1];
+      supersorts[outer_sort.get()].insert(inner_sort.get());
+    }
+  }
+
+  return transitive_closure(supersorts);
+}
+
 SymbolMap kore_definition::get_overloads() const {
   auto overloads = SymbolMap{};
 
@@ -260,7 +277,9 @@ void kore_definition::preprocess() {
   }
 
   uint32_t next_symbol = 0;
+  uint32_t next_sort = 0;
   uint16_t next_layout = 1;
+  auto sorts = std::unordered_map<kore_composite_sort, uint32_t, hash_sort>{};
   auto instantiations
       = std::unordered_map<kore_symbol, uint32_t, hash_symbol>{};
   auto layouts = std::unordered_map<std::string, uint16_t>{};
@@ -270,6 +289,14 @@ void kore_definition::preprocess() {
     uint32_t first_tag = next_symbol;
     for (auto *symbol : entry.second) {
       if (symbol->is_concrete()) {
+        for (auto const &sort : symbol->get_arguments()) {
+          auto *ctr = dynamic_cast<kore_composite_sort *>(sort.get());
+          if (!sorts.contains(*ctr)) {
+            sorts.emplace(*ctr, next_sort++);
+            all_sorts_.push_back(ctr);
+          }
+          ctr->set_ordinal(sorts[*ctr]);
+        }
         if (!instantiations.contains(*symbol)) {
           instantiations.emplace(*symbol, next_symbol++);
         }
