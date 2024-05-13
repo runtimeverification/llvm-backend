@@ -12,4 +12,4 @@ definition=$(realpath "$1")
 mode="$2"
 shift; shift
 ( cd "@PROJECT_SOURCE_DIR@"/matching && mvn exec:java -Dexec.args="$definition qbaL $dt_dir 1" -q )
-llvm-kompile "$definition" "$dt_dir" "$mode" "$@" -g
+llvm-kompile "$definition" "$dt_dir" "$mode" -- "$@" -g
