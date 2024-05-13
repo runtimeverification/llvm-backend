@@ -37,12 +37,14 @@ sptr<kore_pattern> deserialize_pattern(std::string const &filename) {
   return deserialize_pattern(data.begin(), data.end());
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 kore_header::kore_header(FILE *in) {
+  // NOLINTNEXTLINE(misc-redundant-expression)
   if (fgetc(in) != 0x7f || fgetc(in) != 'K' || fgetc(in) != 'R'
       || fgetc(in) != '2') {
     throw std::runtime_error("invalid magic");
   }
-  std::array<uint32_t, 4> num_entries;
+  std::array<uint32_t, 4> num_entries{};
   if (fread(num_entries.data(), sizeof(uint32_t), 4, in) != 4) {
     throw std::runtime_error("invalid table header");
   }
