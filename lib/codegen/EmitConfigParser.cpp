@@ -64,10 +64,8 @@ static llvm::Constant *get_symbol_name_ptr(
     auto *ptr = llvm::ConstantExpr::getInBoundsGetElementPtr(
         str->getType(), global_var, indices);
     return ptr;
-  } else {
-    return llvm::ConstantInt::get(
-        llvm::Type::getInt32Ty(ctx), symbol->get_tag());
   }
+  return llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), symbol->get_tag());
 }
 
 static llvm::Function *get_strcmp(llvm::Module *module) {

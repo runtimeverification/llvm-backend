@@ -42,7 +42,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
   } else {
     inj_name = "inj{" + sort_name + ", SortKItem{}}";
   }
-  auto symbol = definition_->get_all_symbols().at(inj_name);
+  auto *symbol = definition_->get_all_symbols().at(inj_name);
   uint64_t block_header = get_block_header_val(
       module_, symbol, get_block_type(module_, definition_, symbol));
 

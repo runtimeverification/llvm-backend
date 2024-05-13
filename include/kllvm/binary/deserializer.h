@@ -21,8 +21,10 @@ private:
 
 public:
   kore_header(FILE *in);
-  uint8_t get_arity(uint32_t offset) const { return arities_[offset]; };
-  kore_symbol *get_symbol(uint32_t offset) const {
+  [[nodiscard]] uint8_t get_arity(uint32_t offset) const {
+    return arities_[offset];
+  };
+  [[nodiscard]] kore_symbol *get_symbol(uint32_t offset) const {
     return symbols_[offset].get();
   };
 };
