@@ -104,6 +104,8 @@ config.substitutions.extend([
     ('%arity', 'kore-arity'),
     ('%apply-rule', 'k-rule-apply'),
     ('%find-rule', 'k-rule-find'),
+    ('%compute-loc', 'llvm-kompile-compute-loc %S'),
+    ('%compute-ordinal', 'llvm-kompile-compute-ordinal %S'),
 
     ('%kllvm-clang', 'clang -I %include-path -I Inputs Inputs/api.c'),
 
