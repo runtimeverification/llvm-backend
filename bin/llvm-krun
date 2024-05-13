@@ -17,8 +17,8 @@ trap 'cleanup' INT TERM EXIT
 
 initializer="LblinitGeneratedTopCell{}"
 dir=.
-debug=
-debug_command=
+debug=()
+debug_command=()
 depth=-1
 verbose=0
 binary_input=false
@@ -164,22 +164,34 @@ do
     ;;
 
     --debug)
-    debug="gdb --args "
-    shift;
-    ;;
-
-    --debug-command)
-    debug_command="$2"
-    if [[ -z $debug ]]; then
-      debug="gdb -x ${debug_command} --args "
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      debug=("lldb" "--")
     else
-      debug="${debug/--args /} -x ${debug_command} --args "
+      debug=("gdb" "--args")
     fi
     shift;
     ;;
 
+    --debug-command)
+    debug_command+=("$2")
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      debug=("lldb" "-s")
+    else
+      debug=("gdb" "-x")
+    fi
+    debug+=("${debug_command[@]}")
+    debug+=("--args")
+    shift;
+    shift
+    ;;
+
     --debug-batch)
-    debug="gdb --batch --args "
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      debug=("lldb" "--batch" "--")
+    else
+      debug=("gdb" "batch" "--args")
+    fi
+    shift
     ;;
 
     --depth)
@@ -472,7 +484,7 @@ set +e
 if [ "$verbose" -ge 1 ]; then
   set -x
 fi
-$debug "$dir"/interpreter "$expanded_input_file" "$depth" "$output_file" "${interpreter_flags[@]}"
+debug+=("${dir}/interpreter" "$expanded_input_file" "$depth" "$output_file" "${interpreter_flags[@]}")
 )
 EXIT=$?
 set -e
