@@ -105,37 +105,43 @@ void kore_definition::insert_reserved_symbols() {
 }
 
 SubsortMap kore_definition::get_subsorts() {
-  auto subsorts = SubsortMap{};
+  if (!subsorts_) {
+    auto subsorts = SubsortMap{};
 
-  for (auto *axiom : axioms_) {
-    if (axiom->attributes().contains(attribute_set::key::Subsort)) {
-      auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
-      auto const &inner_sort
-          = att->get_constructor()->get_formal_arguments()[0];
-      auto const &outer_sort
-          = att->get_constructor()->get_formal_arguments()[1];
-      subsorts[inner_sort.get()].insert(outer_sort.get());
+    for (auto *axiom : axioms_) {
+      if (axiom->attributes().contains(attribute_set::key::Subsort)) {
+        auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
+        auto const &inner_sort
+            = att->get_constructor()->get_formal_arguments()[0];
+        auto const &outer_sort
+            = att->get_constructor()->get_formal_arguments()[1];
+        subsorts[inner_sort.get()].insert(outer_sort.get());
+      }
     }
+    subsorts_ = transitive_closure(subsorts);
   }
 
-  return transitive_closure(subsorts);
+  return *subsorts_;
 }
 
 SubsortMap kore_definition::get_supersorts() {
-  auto supersorts = SubsortMap{};
+  if (!supersorts_) {
+    auto supersorts = SubsortMap{};
 
-  for (auto *axiom : axioms_) {
-    if (axiom->attributes().contains(attribute_set::key::Subsort)) {
-      auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
-      auto const &inner_sort
-          = att->get_constructor()->get_formal_arguments()[0];
-      auto const &outer_sort
-          = att->get_constructor()->get_formal_arguments()[1];
-      supersorts[outer_sort.get()].insert(inner_sort.get());
+    for (auto *axiom : axioms_) {
+      if (axiom->attributes().contains(attribute_set::key::Subsort)) {
+        auto const &att = axiom->attributes().get(attribute_set::key::Subsort);
+        auto const &inner_sort
+            = att->get_constructor()->get_formal_arguments()[0];
+        auto const &outer_sort
+            = att->get_constructor()->get_formal_arguments()[1];
+        supersorts[outer_sort.get()].insert(inner_sort.get());
+      }
     }
+    supersorts_ = transitive_closure(supersorts);
   }
 
-  return transitive_closure(supersorts);
+  return *supersorts_;
 }
 
 SymbolMap kore_definition::get_overloads() const {
@@ -160,6 +166,8 @@ SymbolMap kore_definition::get_overloads() const {
 
 // NOLINTNEXTLINE(*-function-cognitive-complexity)
 void kore_definition::preprocess() {
+  get_subsorts();
+  get_supersorts();
   for (auto *axiom : axioms_) {
     axiom->pattern_ = axiom->pattern_->expand_aliases(this);
   }
