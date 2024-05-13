@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
       = is_k_line ? get_k_location(definition) : get_kore_location(definition);
 
   if (location != -1) {
-    std::cerr << location << "\n";
+    std::cout << location << "\n";
     return 0;
   }
 
