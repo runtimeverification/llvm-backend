@@ -21,7 +21,7 @@ private:
 
 public:
   kore_header(FILE *in);
-  static std::unique_ptr<kore_header> create(std::string path) {
+  static std::unique_ptr<kore_header> create(std::string const &path) {
     FILE *f = fopen(path.c_str(), "rb");
     auto *result = new kore_header(f);
     fclose(f);
