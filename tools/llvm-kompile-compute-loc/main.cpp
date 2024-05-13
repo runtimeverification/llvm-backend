@@ -11,17 +11,17 @@
 using namespace llvm;
 using namespace kllvm;
 
-cl::OptionCategory ordinal_cat("llvm-kompile-compute-ordinal options");
+cl::OptionCategory loc_cat("llvm-kompile-compute-loc options");
 
 cl::opt<std::string> kompiled_dir(
     cl::Positional, cl::desc("<kompiled-dir>"), cl::Required,
-    cl::cat(ordinal_cat));
+    cl::cat(loc_cat));
 
 cl::opt<std::string> ordinal(
-    cl::Positional, cl::desc("<ordinal>"), cl::Required, cl::cat(ordinal_cat));
+    cl::Positional, cl::desc("<ordinal>"), cl::Required, cl::cat(loc_cat));
 
 cl::opt<bool>
-    is_k_line(cl::Positional, cl::desc("<is-k-line>"), cl::cat(ordinal_cat));
+    is_k_line(cl::Positional, cl::desc("<is-k-line>"), cl::cat(loc_cat));
 
 int64_t get_location(kore_axiom_declaration *axiom) {
   auto *location_att
@@ -78,7 +78,7 @@ int64_t get_kore_location(std::string &definition) {
 }
 
 int main(int argc, char **argv) {
-  cl::HideUnrelatedOptions({&ordinal_cat});
+  cl::HideUnrelatedOptions({&loc_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
   auto definition = kompiled_dir + "/definition.kore";
