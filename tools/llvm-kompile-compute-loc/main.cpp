@@ -3,10 +3,10 @@
 
 #include <llvm/Support/CommandLine.h>
 
-#include <string>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 using namespace llvm;
 using namespace kllvm;
@@ -14,14 +14,13 @@ using namespace kllvm;
 cl::OptionCategory loc_cat("llvm-kompile-compute-loc options");
 
 cl::opt<std::string> kompiled_dir(
-    cl::Positional, cl::desc("<kompiled-dir>"), cl::Required,
-    cl::cat(loc_cat));
+    cl::Positional, cl::desc("<kompiled-dir>"), cl::Required, cl::cat(loc_cat));
 
 cl::opt<std::string> ordinal(
     cl::Positional, cl::desc("<ordinal>"), cl::Required, cl::cat(loc_cat));
 
-cl::opt<bool>
-    is_k_line(cl::Positional, cl::desc("<is-k-line>"), cl::cat(loc_cat));
+cl::opt<bool> is_k_line(
+    cl::Positional, cl::desc("[is-k-line]"), cl::init(false), cl::cat(loc_cat));
 
 int64_t get_location(kore_axiom_declaration *axiom) {
   auto *location_att
@@ -66,7 +65,7 @@ int64_t get_kore_location(std::string &definition) {
     line_num++;
     if (line.starts_with("  axiom") || line.starts_with("    axiom")) {
       if (ordinal_num == std::stoi(ordinal)) {
-        file.colse();
+        file.close();
         return line_num;
       }
       ordinal_num++;
@@ -83,8 +82,8 @@ int main(int argc, char **argv) {
 
   auto definition = kompiled_dir + "/definition.kore";
 
-  int64_t location = is_k_line ? get_k_location(definition)
-                               : get_kore_location(definition);
+  int64_t location
+      = is_k_line ? get_k_location(definition) : get_kore_location(definition);
 
   if (location != -1) {
     std::cerr << location << "\n";

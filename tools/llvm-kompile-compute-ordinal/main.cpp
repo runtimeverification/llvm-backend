@@ -20,8 +20,8 @@ cl::opt<std::string> kompiled_dir(
 cl::opt<std::string> line(
     cl::Positional, cl::desc("<line>"), cl::Required, cl::cat(ordinal_cat));
 
-cl::opt<bool>
-    is_k_line(cl::Positional, cl::desc("<is-k-line>"), cl::cat(ordinal_cat));
+cl::opt<bool> is_k_line(
+    cl::Positional, cl::desc("[is-k-line]"), cl::init(false), cl::cat(ordinal_cat));
 
 int64_t get_location(kore_axiom_declaration *axiom) {
   auto *location_att
