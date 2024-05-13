@@ -23,6 +23,7 @@ endmacro(kllvm_add_tool)
 
 add_subdirectory(llvm-backend-version)
 add_subdirectory(llvm-kompile-codegen)
+add_subdirectory(llvm-kompile-compute-ordinal)
 add_subdirectory(llvm-kompile-gc-stats)
 add_subdirectory(kprint)
 add_subdirectory(kore-arity)
