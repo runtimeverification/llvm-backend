@@ -21,7 +21,8 @@ cl::opt<std::string> line(
     cl::Positional, cl::desc("<line>"), cl::Required, cl::cat(ordinal_cat));
 
 cl::opt<bool> is_k_line(
-    cl::Positional, cl::desc("[is-k-line]"), cl::init(false), cl::cat(ordinal_cat));
+    cl::Positional, cl::desc("[is-k-line]"), cl::init(false),
+    cl::cat(ordinal_cat));
 
 int64_t get_location(kore_axiom_declaration *axiom) {
   auto *location_att
@@ -92,8 +93,6 @@ int main(int argc, char **argv) {
   if (location != -1) {
     std::cerr << location << "\n";
     return 0;
-  } else {
-    std::cerr << "Location not found\n";
   }
 
   return 1;
