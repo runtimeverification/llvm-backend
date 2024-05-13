@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 params=()
 pretty=()
@@ -484,7 +485,7 @@ set +e
 if [ "$verbose" -ge 1 ]; then
   set -x
 fi
-debug+=("${dir}/interpreter" "$expanded_input_file" "$depth" "$output_file" "${interpreter_flags[@]}")
+"${debug[@]}" "${dir}/interpreter" "$expanded_input_file" "$depth" "$output_file" "${interpreter_flags[@]}"
 )
 EXIT=$?
 set -e
