@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <definition.kore> [main|library|search|static|python|pythonast|c] <clang flags>"
+  echo "Usage: $0 <definition.kore> [main|library|search|static|python|pythonast|c] <llvm-kompile flags> [--] <clang flags>"
   echo "See llvm-kompile -h for help"
   exit 1
 fi
@@ -12,4 +12,23 @@ definition=$(realpath "$1")
 mode="$2"
 shift; shift
 ( cd "@PROJECT_SOURCE_DIR@"/matching && mvn exec:java -Dexec.args="$definition qbaL $dt_dir 1" -q )
-llvm-kompile "$definition" "$dt_dir" "$mode" -- "$@" -g
+
+llvm_kompile_flags=()
+clang_flags=()
+
+while [ $# -gt 0 ]; do
+  if [ "$1" = "--" ]; then
+    clang_flags+=("--")
+    shift
+    break
+  fi
+  llvm_kompile_flags+=("$1")
+  shift
+done
+
+while [ $# -gt 0 ]; do
+  clang_flags+=("$1")
+  shift
+done
+
+llvm-kompile "$definition" "$dt_dir" "$mode" "${llvm_kompile_flags[@]}" "${clang_flags[@]}" -g
