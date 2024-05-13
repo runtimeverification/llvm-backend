@@ -445,6 +445,10 @@ void bind_proof_trace(py::module_ &m) {
             return parser.parse_proof_trace(str);
           },
           py::arg("bytes"), py::arg("header"));
+
+  py::class_<kore_header, std::shared_ptr<kore_header>>(
+      proof_trace, "kore_header")
+      .def(py::init(&kore_header::create), py::arg("path"));
 }
 
 PYBIND11_MODULE(_kllvm, m) {

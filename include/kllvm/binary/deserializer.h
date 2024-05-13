@@ -21,6 +21,13 @@ private:
 
 public:
   kore_header(FILE *in);
+  static std::unique_ptr<kore_header> create(std::string path) {
+    FILE *f = fopen(path.c_str(), "rb");
+    auto *result = new kore_header(f);
+    fclose(f);
+    return std::unique_ptr<kore_header>(result);
+  }
+
   [[nodiscard]] uint8_t get_arity(uint32_t offset) const {
     return arities_[offset];
   };
