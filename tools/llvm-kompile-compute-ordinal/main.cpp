@@ -69,12 +69,14 @@ int64_t get_kore_location(std::string &definition) {
     line_num++;
     if (l.starts_with("  axiom") || l.starts_with("    axiom")) {
       if (line_num == std::stoi(line)) {
+        file.close();
         return ordinal_num;
       }
       ordinal_num++;
     }
   }
 
+  file.close();
   return -1;
 }
 
