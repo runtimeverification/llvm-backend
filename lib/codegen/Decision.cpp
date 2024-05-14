@@ -1136,10 +1136,10 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   auto *root_ty = llvm::ArrayType::get(
       llvm::Type::getInt8PtrTy(module->getContext()), 256);
   auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
-  auto *global_var = llvm::cast<llvm::GlobalVariable>(arr);
-  global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
-  if (!global_var->hasInitializer()) {
-    global_var->setInitializer(llvm::ConstantAggregateZero::get(root_ty));
+  auto *arr_var = llvm::cast<llvm::GlobalVariable>(arr);
+  arr_var->setLinkage(llvm::GlobalValue::InternalLinkage);
+  if (!arr_var->hasInitializer()) {
+    arr_var->setInitializer(llvm::ConstantAggregateZero::get(root_ty));
   }
   std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
   std::vector<llvm::Value *> are_block;
