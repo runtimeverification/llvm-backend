@@ -56,6 +56,8 @@ static std::string drop_back(std::string const &s, int n) {
 
 void serialize_configuration_internal(
     writer *file, block *subject, char const *sort, bool is_var, void *state);
+void serialize_configuration_v2_internal(
+    writer *file, block *subject, uint32_t sort, bool is_var);
 
 /**
  * Emit a symbol of the form ctor{...}(...); this should be preceded by the
@@ -70,6 +72,15 @@ static void emit_symbol(
 
   instance.emit(header_byte<kore_composite_pattern>);
   instance.emit_length(arity);
+}
+
+const uint8_t COMPOSITE = 0x01;
+const uint8_t STRING = 0x00;
+const uint8_t NULL_BYTE = 0x00;
+
+static void emit_symbol_v2(writer *file, int32_t tag) {
+  sfwrite(&COMPOSITE, sizeof(COMPOSITE), 1, file);
+  sfwrite(&tag, sizeof(tag), 1, file);
 }
 
 /**
@@ -108,6 +119,15 @@ static void emit_token(
   instance.emit_length(1);
 }
 
+static void
+emit_token_v2(writer *file, uint32_t sort, char const *str, size_t len) {
+  emit_symbol_v2(file, sort);
+  sfwrite(&STRING, sizeof(STRING), 1, file);
+  sfwrite(&len, sizeof(len), 1, file);
+  sfwrite(str, 1, len, file);
+  sfwrite(&NULL_BYTE, sizeof(NULL_BYTE), 1, file);
+}
+
 void serialize_map(
     writer *file, map *map, char const *unit, char const *element,
     char const *concat, void *state) {
@@ -132,6 +152,28 @@ void serialize_map(
     if (iter != map->begin()) {
       emit_symbol(instance, concat, 2);
     }
+  }
+}
+
+void serialize_map_v2(
+    writer *file, map *map, uint32_t unit, uint32_t element, uint32_t concat) {
+  size_t size = map->size();
+  if (size == 0) {
+    emit_symbol_v2(file, unit);
+    return;
+  }
+
+  auto *arg_sorts = get_argument_sorts_for_tag_v2(element);
+
+  for (size_t i = 0; i < size - 1; ++i) {
+    emit_symbol_v2(file, concat);
+  }
+
+  for (auto iter = map->begin(); iter != map->end(); ++iter) {
+    emit_symbol_v2(file, element);
+    serialize_configuration_v2_internal(file, iter->first, arg_sorts[0], false);
+    serialize_configuration_v2_internal(
+        file, iter->second, arg_sorts[1], false);
   }
 }
 
@@ -169,6 +211,37 @@ void serialize_range_map(
   }
 }
 
+void serialize_range_map_v2(
+    writer *file, rangemap *map, uint32_t unit, uint32_t element,
+    uint32_t concat) {
+  size_t size = map->size();
+  if (size == 0) {
+    emit_symbol_v2(file, unit);
+    return;
+  }
+
+  auto *arg_sorts = get_argument_sorts_for_tag_v2(element);
+  const static auto range_tag
+      = get_tag_for_symbol_name("LblRangemap'Coln'Range{}");
+  const static auto *range_sorts = get_argument_sorts_for_tag_v2(range_tag);
+
+  for (size_t i = 0; i < size - 1; ++i) {
+    emit_symbol_v2(file, concat);
+  }
+
+  for (auto iter = rng_map::ConstRangeMapIterator<k_elem, k_elem>(*map);
+       iter.has_next(); ++iter) {
+    emit_symbol_v2(file, element);
+    emit_symbol_v2(file, range_tag);
+    serialize_configuration_v2_internal(
+        file, iter->first.start(), range_sorts[0], false);
+    serialize_configuration_v2_internal(
+        file, iter->first.end(), range_sorts[1], false);
+    serialize_configuration_v2_internal(
+        file, iter->second, arg_sorts[1], false);
+  }
+}
+
 void serialize_list(
     writer *file, list *list, char const *unit, char const *element,
     char const *concat, void *state) {
@@ -190,6 +263,27 @@ void serialize_list(
     if (iter != list->begin()) {
       emit_symbol(instance, concat, 2);
     }
+  }
+}
+
+void serialize_list_v2(
+    writer *file, list *list, uint32_t unit, uint32_t element,
+    uint32_t concat) {
+  size_t size = list->size();
+  if (size == 0) {
+    emit_symbol_v2(file, unit);
+    return;
+  }
+
+  auto *arg_sorts = get_argument_sorts_for_tag_v2(element);
+
+  for (size_t i = 0; i < size - 1; ++i) {
+    emit_symbol_v2(file, concat);
+  }
+
+  for (auto iter = list->begin(); iter != list->end(); ++iter) {
+    emit_symbol_v2(file, element);
+    serialize_configuration_v2_internal(file, *iter, arg_sorts[0], false);
   }
 }
 
@@ -217,11 +311,36 @@ void serialize_set(
   }
 }
 
+void serialize_set_v2(
+    writer *file, set *set, uint32_t unit, uint32_t element, uint32_t concat) {
+  size_t size = set->size();
+  if (size == 0) {
+    emit_symbol_v2(file, unit);
+    return;
+  }
+
+  auto *arg_sorts = get_argument_sorts_for_tag_v2(element);
+
+  for (size_t i = 0; i < size - 1; ++i) {
+    emit_symbol_v2(file, concat);
+  }
+
+  for (auto iter = set->begin(); iter != set->end(); ++iter) {
+    emit_symbol_v2(file, element);
+    serialize_configuration_v2_internal(file, *iter, arg_sorts[0], false);
+  }
+}
+
 void serialize_int(writer *file, mpz_t i, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   auto str = int_to_string(i);
   emit_token(instance, sort, str.c_str());
+}
+
+void serialize_int_v2(writer *file, mpz_t i, uint32_t sort) {
+  auto str = int_to_string(i);
+  emit_token_v2(file, sort, str.data(), str.length());
 }
 
 void serialize_float(writer *file, floating *f, char const *sort, void *state) {
@@ -231,6 +350,11 @@ void serialize_float(writer *file, floating *f, char const *sort, void *state) {
   emit_token(instance, sort, str.c_str());
 }
 
+void serialize_float_v2(writer *file, floating *f, uint32_t sort) {
+  auto str = float_to_string(f);
+  emit_token_v2(file, sort, str.data(), str.length());
+}
+
 void serialize_bool(writer *file, bool b, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
@@ -238,11 +362,20 @@ void serialize_bool(writer *file, bool b, char const *sort, void *state) {
   emit_token(instance, sort, str);
 }
 
+void serialize_bool_v2(writer *file, bool b, uint32_t sort) {
+  std::string str = b ? "true" : "false";
+  emit_token_v2(file, sort, str.data(), str.length());
+}
+
 void serialize_string_buffer(
     writer *file, stringbuffer *b, char const *sort, void *state) {
   auto &instance = static_cast<serialization_state *>(state)->instance;
 
   emit_token(instance, sort, b->contents->data, b->strlen);
+}
+
+void serialize_string_buffer_v2(writer *file, stringbuffer *b, uint32_t sort) {
+  emit_token_v2(file, sort, b->contents->data, b->strlen);
 }
 
 void serialize_m_int(
@@ -254,6 +387,14 @@ void serialize_m_int(
 
   auto buffer = fmt::format("{}p{}", str, bits);
   emit_token(instance, sort, buffer.c_str());
+}
+
+void serialize_m_int_v2(writer *file, size_t *i, size_t bits, uint32_t sort) {
+  auto str = (i == nullptr) ? std::string("0")
+                            : int_to_string(hook_MINT_import(i, bits, false));
+
+  auto buffer = fmt::format("{}p{}", str, bits);
+  emit_token_v2(file, sort, buffer.data(), buffer.length());
 }
 
 void serialize_comma(writer *file, void *state) { }
@@ -378,6 +519,48 @@ void serialize_configuration_internal(
   }
 }
 
+void serialize_configuration_v2_internal(
+    writer *file, block *subject, uint32_t sort, bool is_var) {
+  if (is_var) {
+    throw std::invalid_argument("does not support bound variables yet");
+  }
+  uint8_t is_constant = ((uintptr_t)subject) & 3;
+
+  if (is_constant) {
+    uint32_t tag = ((uintptr_t)subject) >> 32;
+    if (is_constant == 3) {
+      throw std::invalid_argument("does not support bound variables yet");
+    }
+
+    emit_symbol_v2(file, tag);
+    return;
+  }
+
+  uint16_t layout = get_layout(subject);
+  if (!layout) {
+    auto *str = (string *)subject;
+    emit_token_v2(file, sort, str->data, len(subject));
+    return;
+  }
+
+  uint32_t tag = tag_hdr(subject->h.hdr);
+  emit_symbol_v2(file, tag);
+
+  serialize_visitor callbacks
+      = {serialize_configuration_v2_internal,
+         serialize_map_v2,
+         serialize_list_v2,
+         serialize_set_v2,
+         serialize_int_v2,
+         serialize_float_v2,
+         serialize_bool_v2,
+         serialize_string_buffer_v2,
+         serialize_m_int_v2,
+         serialize_range_map_v2};
+
+  visit_children_for_serialize(subject, file, &callbacks);
+}
+
 void serialize_configurations(
     FILE *file, std::unordered_set<block *, hash_block, k_eq> results) {
   auto state = serialization_state();
@@ -417,6 +600,16 @@ void serialize_configuration_to_file(
   fwrite(data, 1, size, file);
 
   free(data);
+}
+
+void serialize_configuration_to_file_v2(FILE *file, block *subject) {
+  serialize_configuration_v2(file, subject, 0);
+}
+
+void serialize_configuration_v2(FILE *file, block *subject, uint32_t sort) {
+  fputs("\x7FKR2", file);
+  writer w = {file, nullptr};
+  serialize_configuration_v2_internal(&w, subject, sort, false);
 }
 
 void serialize_configuration(
@@ -462,6 +655,33 @@ void serialize_term_to_file(
   fwrite(data, 1, size, file);
 
   free(data);
+}
+
+void serialize_term_to_file_v2(
+    FILE *file, void *subject, uint64_t block_header, bool indirect) {
+  void *arg = indirect ? (void *)&subject : subject;
+  struct blockheader header_val {
+    block_header
+  };
+  auto *term = (block *)kore_alloc(size_hdr(block_header));
+  term->h = header_val;
+  store_symbol_children(term, &arg);
+  fputs("\x7FKR2", file);
+  writer w = {file, nullptr};
+
+  serialize_visitor callbacks
+      = {serialize_configuration_v2_internal,
+         serialize_map_v2,
+         serialize_list_v2,
+         serialize_set_v2,
+         serialize_int_v2,
+         serialize_float_v2,
+         serialize_bool_v2,
+         serialize_string_buffer_v2,
+         serialize_m_int_v2,
+         serialize_range_map_v2};
+
+  visit_children_for_serialize(term, &w, &callbacks);
 }
 
 void serialize_raw_term_to_file(

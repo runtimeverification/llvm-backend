@@ -6,7 +6,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 declare tailcc %block* @k_step(%block*)
 declare tailcc %block** @step_all(%block*, i64*)
-declare void @serialize_configuration_to_file(i8*, %block*, i1, i1)
+declare void @serialize_configuration_to_file_v2(i8*, %block*)
 declare void @write_uint64_to_file(i8*, i64)
 
 @proof_output = external global i1
@@ -51,7 +51,7 @@ define %block* @take_steps(i64 %depth, %block* %subject) {
 if:
   %output_file = load i8*, i8** @output_file
   call void @write_uint64_to_file(i8* %output_file, i64 18446744073709551615)
-  call void @serialize_configuration_to_file(i8* %output_file, %block* %subject, i1 1, i1 1)
+  call void @serialize_configuration_to_file_v2(i8* %output_file, %block* %subject)
   call void @write_uint64_to_file(i8* %output_file, i64 14757395258967641292)
   br label %merge
 merge:
