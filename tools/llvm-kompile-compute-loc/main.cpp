@@ -55,10 +55,9 @@ int64_t get_k_location(std::string &definition) {
 
 // trim the string from the start
 inline void trim(std::string &s) {
-  s.erase(
-      s.begin(),
-      std::find_if(
-          s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c) {
+            return !std::isspace(c);
+          }));
 }
 
 int64_t get_kore_location(std::string &definition) {
