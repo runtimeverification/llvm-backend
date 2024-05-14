@@ -30,7 +30,7 @@ void add_boolean_flag(
   }
 
   if (debug) {
-    init_debug_global(strict_bytes, get_bool_debug_type(), global_var);
+    init_debug_global(name, get_bool_debug_type(), global_var);
   }
 }
 
