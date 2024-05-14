@@ -1363,7 +1363,6 @@ void make_match_reason_function(
       llvm::Type::getVoidTy(module->getContext()), {block_type}, false);
   std::string name = "intern_match_" + std::to_string(axiom->get_ordinal());
   llvm::Function *match_func = get_or_insert_function(module, name, func_type);
-  match_func->setLinkage(llvm::GlobalValue::InternalLinkage);
   std::string debug_name = name;
   if (axiom->attributes().contains(attribute_set::key::Label)) {
     debug_name
