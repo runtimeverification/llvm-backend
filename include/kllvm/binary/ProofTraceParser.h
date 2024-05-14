@@ -342,7 +342,12 @@ private:
       return nullptr;
     }
     It old_ptr = ptr;
-    ptr += 4;
+    if (detail::read<char>(ptr, end) != '\x7F'
+        || detail::read<char>(ptr, end) != 'K'
+        || detail::read<char>(ptr, end) != 'R'
+        || detail::read<char>(ptr, end) != '2') {
+      return nullptr;
+    }
     auto result = detail::read_v2(ptr, end, header_);
     pattern_len = ptr - old_ptr;
     return result;
