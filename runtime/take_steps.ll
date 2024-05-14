@@ -16,8 +16,6 @@ declare void @write_uint64_to_file(i8*, i64)
 @current_interval = thread_local global i64 0
 @GC_THRESHOLD = thread_local global i64 @GC_THRESHOLD@
 
-@gc_roots = global [256 x i8 *] zeroinitializer
-
 define void @set_gc_threshold(i64 %threshold) {
   store i64 %threshold, i64* @GC_THRESHOLD
   ret void
