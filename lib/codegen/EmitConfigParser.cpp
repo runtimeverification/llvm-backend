@@ -54,6 +54,7 @@ static llvm::Constant *get_symbol_name_ptr(
   auto *global = module->getOrInsertGlobal(
       fmt::format("sym_name_{}", name), str->getType());
   auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+  global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(str);
   }
@@ -140,6 +141,7 @@ static void emit_data_table_for_symbol(
   auto *table_type = llvm::ArrayType::get(ty, syms.size());
   auto *table = module->getOrInsertGlobal("table_" + name, table_type);
   auto *global_var = llvm::cast<llvm::GlobalVariable>(table);
+  global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
   init_debug_global(
       "table_" + name,
       get_array_debug_type(
@@ -438,6 +440,7 @@ emit_get_tag_for_fresh_sort(kore_definition *definition, llvm::Module *module) {
     auto *global
         = module->getOrInsertGlobal("sort_name_" + name, str->getType());
     auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+    global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
     if (!global_var->hasInitializer()) {
       global_var->setInitializer(str);
     }
@@ -509,6 +512,7 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
     auto *global
         = module->getOrInsertGlobal("sort_name_" + name, str->getType());
     auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
     if (!global_var->hasInitializer()) {
       global_var->setInitializer(str);
     }
@@ -536,6 +540,7 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
       auto *str = llvm::ConstantDataArray::getString(ctx, "true", false);
       auto *global = module->getOrInsertGlobal("bool_true", str->getType());
       auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+      global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
       if (!global_var->hasInitializer()) {
         global_var->setInitializer(str);
       }
@@ -967,6 +972,7 @@ static void get_visitor(
     auto *global = module->getOrInsertGlobal(
         fmt::format("sort_name_{}", sort_name), str->getType());
     auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
     if (!global_var->hasInitializer()) {
       global_var->setInitializer(str);
     }
@@ -1147,6 +1153,7 @@ static llvm::Constant *get_layout_data(
   auto *global = module->getOrInsertGlobal(
       "layout_item_" + std::to_string(layout), arr->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(arr);
   }
@@ -1159,6 +1166,7 @@ static llvm::Constant *get_layout_data(
       name,
       llvm::StructType::getTypeByName(module->getContext(), layout_struct));
   auto *global_var2 = llvm::cast<llvm::GlobalVariable>(global2);
+  global_var2->setLinkage(llvm::GlobalValue::InternalLinkage);
   init_debug_global(name, get_forward_decl(layout_struct), global_var2);
   if (!global_var2->hasInitializer()) {
     global_var2->setInitializer(llvm::ConstantStruct::get(
@@ -1248,6 +1256,7 @@ static void emit_sort_table(kore_definition *def, llvm::Module *mod) {
     auto *subtable = module->getOrInsertGlobal(
         fmt::format("sorts_{}", ast_to_string(*symbol)), subtable_type);
     auto *subtable_var = llvm::dyn_cast<llvm::GlobalVariable>(subtable);
+    subtable_var->setLinkage(llvm::GlobalValue::InternalLinkage);
     init_debug_global(
         "sorts_" + symbol->get_name(),
         get_array_debug_type(

@@ -1078,6 +1078,7 @@ bool make_function(
   llvm::FunctionType *func_type
       = llvm::FunctionType::get(return_type, param_types, false);
   llvm::Function *apply_rule = get_or_insert_function(module, name, func_type);
+  apply_rule->setLinkage(llvm::GlobalValue::InternalLinkage);
   init_debug_axiom(axiom->attributes());
   std::string debug_name = name;
   if (axiom->attributes().contains(attribute_set::key::Label)) {
@@ -1192,6 +1193,7 @@ std::string make_apply_rule_function(
       false, true, axiom, ".rhs");
 
   llvm::Function *apply_rule = get_or_insert_function(module, name, func_type);
+  apply_rule->setLinkage(llvm::GlobalValue::InternalLinkage);
   init_debug_axiom(axiom->attributes());
   init_debug_function(
       name, name,
@@ -1243,6 +1245,7 @@ std::string make_apply_rule_function(
   llvm::Function *step = get_or_insert_function(
       module, "step_" + std::to_string(axiom->get_ordinal()),
       llvm::FunctionType::get(block_type, types, false));
+  step->setLinkage(llvm::GlobalValue::InternalLinkage);
   auto *retval
       = llvm::CallInst::Create(step, args, "", creator.get_current_block());
   set_debug_loc(retval);

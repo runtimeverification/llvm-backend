@@ -693,6 +693,7 @@ llvm::Constant *decision::string_literal(std::string const &str) {
   auto *global
       = module_->getOrInsertGlobal("str_lit_" + str, str_cst->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(str_cst);
   }
@@ -1190,6 +1191,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   auto *layout = module->getOrInsertGlobal(
       "layout_item_rule_" + std::to_string(ordinal), layout_arr->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(layout);
+  global_var->setLinkage(llvm::GlobalValue::InternalLinkage);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(layout_arr);
   }
@@ -1329,6 +1331,7 @@ void make_match_reason_function_wrapper(
   std::string wrapper_name = "match_" + std::to_string(axiom->get_ordinal());
   llvm::Function *match_func
       = get_or_insert_function(module, wrapper_name, func_type);
+  match_func->setLinkage(llvm::GlobalValue::InternalLinkage);
   std::string debug_name = name;
   if (axiom->attributes().contains(attribute_set::key::Label)) {
     debug_name = axiom->attributes().get_string(attribute_set::key::Label)
@@ -1360,6 +1363,7 @@ void make_match_reason_function(
       llvm::Type::getVoidTy(module->getContext()), {block_type}, false);
   std::string name = "intern_match_" + std::to_string(axiom->get_ordinal());
   llvm::Function *match_func = get_or_insert_function(module, name, func_type);
+  match_func->setLinkage(llvm::GlobalValue::InternalLinkage);
   std::string debug_name = name;
   if (axiom->attributes().contains(attribute_set::key::Label)) {
     debug_name
@@ -1480,6 +1484,7 @@ void make_step_function(
       = llvm::FunctionType::get(block_type, arg_types, false);
   std::string name = "step_" + std::to_string(axiom->get_ordinal());
   llvm::Function *match_func = get_or_insert_function(module, name, func_type);
+  match_func->setLinkage(llvm::GlobalValue::InternalLinkage);
   reset_debug_loc();
   init_debug_function(
       name, name, get_debug_function_type(block_debug_type, debug_types),

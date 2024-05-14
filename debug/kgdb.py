@@ -375,13 +375,13 @@ class termPrinter:
         self.kompiled_dir = getKompiledDir()
 
     def getSymbolNameForTag(self, tag):
-        return gdb.lookup_global_symbol("table_getSymbolNameForTag").value()[tag]
+        return gdb.lookup_static_symbol("table_getSymbolNameForTag").value()[tag]
 
     def isSymbolABinder(self, tag):
-        return gdb.lookup_global_symbol("table_isSymbolABinder").value()[tag]
+        return gdb.lookup_static_symbol("table_isSymbolABinder").value()[tag]
 
     def getLayoutData(self, layout):
-        return gdb.lookup_global_symbol("layout_" + str(layout)).value()
+        return gdb.lookup_static_symbol("layout_" + str(layout)).value()
 
     def to_string(self):
         try:
@@ -610,7 +610,7 @@ class termPrinter:
             argData = layoutData['args'] + i
             arg = subject.cast(self.long_int) + int(argData.dereference()['offset'])
             cat = argData.dereference()['cat']
-            sort = gdb.lookup_global_symbol("table_getArgumentSortsForTag").value()[tag][i].string("iso-8859-1")
+            sort = gdb.lookup_static_symbol("table_getArgumentSortsForTag").value()[tag][i].string("iso-8859-1")
             if cat == @MAP_LAYOUT@:
                 self.appendMap(arg.cast(self.map_ptr), sort)
             elif cat == @RANGEMAP_LAYOUT@:
@@ -751,7 +751,7 @@ Does not actually take a step if matching succeeds.
             gdb.lookup_global_symbol("resetMatchReason").value()()
             if (len(argv) != 2):
                 raise gdb.GdbError("k match takes two arguments.")
-            fun = gdb.lookup_global_symbol(argv[0] + '.match')
+            fun = gdb.lookup_static_symbol(argv[0] + '.match')
             if fun is None:
                 raise gdb.GdbError("Rule with label " + argv[0] + " does not exist.")
             try:
