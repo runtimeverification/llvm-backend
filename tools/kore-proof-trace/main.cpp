@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
 
   FILE *in = fopen(header_path.getValue().c_str(), "r");
   kore_header header(in);
+  fclose(in);
 
   proof_trace_parser parser(verbose_output, expand_terms_in_output, header);
   auto trace = parser.parse_proof_trace_from_file(input_filename);
