@@ -286,6 +286,9 @@ sptr<kore_pattern> read_v2(It &ptr, It end, kore_header const &header) {
     ++ptr;
     auto offset = detail::read<uint32_t>(ptr, end);
     auto arity = header.get_arity(offset);
+    // TODO: we need to check if this PR is an `inj` symbol and adjust the
+    // second sort parameter of the symbol to be equal to the sort of the
+    // current pattern.
     auto symbol = header.get_symbol(offset);
     auto new_pattern = kore_composite_pattern::create(symbol);
     for (auto i = 0; i < arity; ++i) {
