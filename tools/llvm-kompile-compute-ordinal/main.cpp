@@ -39,7 +39,7 @@ int64_t get_location(kore_axiom_declaration *axiom) {
   return std::stoi(location.substr(l_paren + 1, length));
 }
 
-int64_t get_k_location(std::string &definition) {
+int64_t get_k_ordinal(std::string &definition) {
   // Parse the definition.kore to get the AST.
   kllvm::parser::kore_parser parser(definition);
   auto kore_ast = parser.definition();
@@ -58,7 +58,13 @@ int64_t get_k_location(std::string &definition) {
   return -1;
 }
 
-int64_t get_kore_location(std::string &definition) {
+// trim the string from the start
+inline void trim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+            std::not1(std::ptr_fun<int, int>(std::isspace))));
+}
+
+int64_t get_kore_ordinal(std::string &definition) {
 
   int64_t line_num = 0;
   int64_t ordinal_num = 0;
@@ -68,7 +74,8 @@ int64_t get_kore_location(std::string &definition) {
 
   while (std::getline(file, l)) {
     line_num++;
-    if (l.starts_with("  axiom") || l.starts_with("    axiom")) {
+    trim(l);
+    if (l.starts_with("axiom")) {
       if (line_num == std::stoi(line)) {
         file.close();
         return ordinal_num;
@@ -88,7 +95,7 @@ int main(int argc, char **argv) {
   auto definition = kompiled_dir + "/definition.kore";
 
   int64_t location
-      = is_k_line ? get_k_location(definition) : get_kore_location(definition);
+      = is_k_line ? get_k_ordinal(definition) : get_kore_ordinal(definition);
 
   if (location != -1) {
     std::cout << location << "\n";

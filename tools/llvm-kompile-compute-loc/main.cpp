@@ -53,6 +53,12 @@ int64_t get_k_location(std::string &definition) {
   return -1;
 }
 
+// trim the string from the start
+inline void trim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+            std::not1(std::ptr_fun<int, int>(std::isspace))));
+}
+
 int64_t get_kore_location(std::string &definition) {
 
   int64_t line_num = 0;
@@ -63,7 +69,8 @@ int64_t get_kore_location(std::string &definition) {
 
   while (std::getline(file, line)) {
     line_num++;
-    if (line.starts_with("  axiom") || line.starts_with("    axiom")) {
+    trim(line);
+    if (line.starts_with("axiom")) {
       if (ordinal_num == std::stoi(ordinal)) {
         file.close();
         return line_num;
