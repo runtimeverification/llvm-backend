@@ -165,6 +165,11 @@ if [ "$main" != "python_ast" ]; then
       if ! $link; then
         modasm="$output_file"
       fi
+      if $visibility_hidden; then
+        modhidden="$tmpdir/hidden.bc"
+        run @OPT@ "$modopt" -load-pass-plugin "$LIBDIR/SetVisibilityHidden.so" -set-visibility-hidden -o "$modhidden"
+        modopt="$modhidden"
+      fi
       run @LLC@ \
         "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ \
         -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$modasm"
@@ -173,6 +178,11 @@ if [ "$main" != "python_ast" ]; then
     if $link; then
       for file in "$LIBDIR"/llvm/*.ll; do
         tmp="$tmpdir/$(basename "$file").o"
+        if $visibility_hidden; then
+          tmphidden="$tmpdir/$(basename "$file").hidden.bc"
+	  run @OPT@ "$file" -load-pass-plugin "$LIBDIR/SetVisibilityHidden.so" -set-visibility-hidden -o "$tmphidden"
+	  file="$tmphidden"
+        fi
         run @LLC@ \
           "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ \
           -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$tmp"
