@@ -460,9 +460,9 @@ void function_node::codegen(decision *d) {
     } else if (is_side_condition) {
       size_t ordinal = std::stoll(function_.substr(15));
       auto axiom = d->definition_->get_axiom_by_ordinal(ordinal);
-      if (axiom->attributes().contains(attribute_set::key::Label)) {
+      if (axiom.attributes().contains(attribute_set::key::Label)) {
         debug_name
-            = axiom->attributes().get_string(attribute_set::key::Label) + ".sc";
+            = axiom.attributes().get_string(attribute_set::key::Label) + ".sc";
       }
     }
     std::vector<llvm::Value *> function_args;
@@ -595,10 +595,10 @@ void leaf_node::codegen(decision *d) {
   auto axiom = d->definition_->get_axiom_by_ordinal(ordinal);
 
   auto vars = std::map<std::string, kore_variable_pattern *>{};
-  for (kore_pattern *lhs : axiom->get_left_hand_side()) {
+  for (kore_pattern *lhs : axiom.get_left_hand_side()) {
     lhs->mark_variables(vars);
   }
-  axiom->get_right_hand_side()->mark_variables(vars);
+  axiom.get_right_hand_side()->mark_variables(vars);
 
   auto subst = llvm::StringMap<llvm::Value *>{};
   auto i = 0;
