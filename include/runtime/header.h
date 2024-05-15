@@ -331,13 +331,16 @@ void serialize_configurations(
 void serialize_configuration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern);
+void serialize_configuration_v2(FILE *file, block *subject, uint32_t sort);
 void serialize_configuration_to_file(
     FILE *file, block *subject, bool emit_size, bool use_intern);
+void serialize_configuration_to_file_v2(FILE *file, block *subject);
 void write_uint64_to_file(FILE *file, uint64_t i);
 void write_bool_to_file(FILE *file, bool b);
 void serialize_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern,
     bool k_item_inj = false);
+void serialize_term_to_file_v2(FILE *file, void *subject, uint64_t, bool);
 void serialize_raw_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern);
 void print_variable_to_file(FILE *file, char const *varname);
@@ -360,6 +363,7 @@ bool hook_STRING_eq(SortString, SortString);
 char const *get_symbol_name_for_tag(uint32_t tag);
 char const *get_return_sort_for_tag(uint32_t tag);
 char const **get_argument_sorts_for_tag(uint32_t tag);
+uint32_t *get_argument_sorts_for_tag_v2(uint32_t tag);
 char const *top_sort(void);
 
 bool symbol_is_instantiation(uint32_t tag);
@@ -382,6 +386,19 @@ using visitor = struct {
       writer *, rangemap *, char const *, char const *, char const *, void *);
 };
 
+using serialize_visitor = struct {
+  void (*visit_config)(writer *, block *, uint32_t, bool);
+  void (*visit_map)(writer *, map *, uint32_t, uint32_t, uint32_t);
+  void (*visit_list)(writer *, list *, uint32_t, uint32_t, uint32_t);
+  void (*visit_set)(writer *, set *, uint32_t, uint32_t, uint32_t);
+  void (*visit_int)(writer *, mpz_t, uint32_t);
+  void (*visit_float)(writer *, floating *, uint32_t);
+  void (*visit_bool)(writer *, bool, uint32_t);
+  void (*visit_string_buffer)(writer *, stringbuffer *, uint32_t);
+  void (*visit_m_int)(writer *, size_t *, size_t, uint32_t);
+  void (*visit_range_map)(writer *, rangemap *, uint32_t, uint32_t, uint32_t);
+};
+
 void print_map(
     writer *, map *, char const *, char const *, char const *, void *);
 void print_range_map(
@@ -392,6 +409,8 @@ void print_list(
     writer *, list *, char const *, char const *, char const *, void *);
 void visit_children(
     block *subject, writer *file, visitor *printer, void *state);
+void visit_children_for_serialize(
+    block *subject, writer *file, serialize_visitor *printer);
 
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
@@ -439,6 +458,18 @@ void sfprintf(writer *file, char const *fmt, Args &&...args) {
   } else {
     auto str = fmt::sprintf(fmt, args...);
     hook_BUFFER_concat_raw(file->buffer, str.data(), str.size());
+  }
+}
+
+template <typename... Args>
+void sfwrite(void const *ptr, size_t size, size_t nmemb, writer *file) {
+  if (file->file) {
+    fwrite(ptr, size, nmemb, file->file);
+  } else {
+    std::string output;
+    output.resize(size * nmemb);
+    memcpy(output.data(), ptr, size * nmemb);
+    hook_BUFFER_concat_raw(file->buffer, output.data(), output.size());
   }
 }
 

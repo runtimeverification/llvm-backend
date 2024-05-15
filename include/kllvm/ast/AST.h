@@ -922,6 +922,9 @@ private:
 
   kore_symbol *inj_symbol_{};
 
+  std::optional<SubsortMap> subsorts_;
+  std::optional<SubsortMap> supersorts_;
+
   /*
    * Insert symbols into this definition that have knowable labels, but cannot
    * be directly referenced in user code:

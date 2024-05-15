@@ -6,12 +6,35 @@
 #include <kllvm/binary/version.h>
 
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <vector>
 
 #include <iostream>
 
 namespace kllvm {
+
+class kore_header {
+private:
+  std::vector<uint8_t> arities_;
+  std::vector<ptr<kore_symbol>> symbols_;
+
+public:
+  kore_header(FILE *in);
+  static std::unique_ptr<kore_header> create(std::string const &path) {
+    FILE *f = fopen(path.c_str(), "rb");
+    auto *result = new kore_header(f);
+    fclose(f);
+    return std::unique_ptr<kore_header>(result);
+  }
+
+  [[nodiscard]] uint8_t get_arity(uint32_t offset) const {
+    return arities_[offset];
+  };
+  [[nodiscard]] kore_symbol *get_symbol(uint32_t offset) const {
+    return symbols_[offset].get();
+  };
+};
 
 namespace detail {
 
@@ -247,6 +270,35 @@ sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
   }
 
   return term_stack[0];
+}
+
+template <typename It>
+sptr<kore_pattern> read_v2(It &ptr, It end, kore_header const &header) {
+  switch (peek(ptr)) {
+  case 0: {
+    ++ptr;
+    auto len = detail::read<uint64_t>(ptr, end);
+    auto str = std::string((char *)&*ptr, (char *)(&*ptr + len));
+    ptr += len + 1;
+    return kore_string_pattern::create(str);
+  }
+  case 1: {
+    ++ptr;
+    auto offset = detail::read<uint32_t>(ptr, end);
+    auto arity = header.get_arity(offset);
+    // TODO: we need to check if this PR is an `inj` symbol and adjust the
+    // second sort parameter of the symbol to be equal to the sort of the
+    // current pattern.
+    auto symbol = header.get_symbol(offset);
+    auto new_pattern = kore_composite_pattern::create(symbol);
+    for (auto i = 0; i < arity; ++i) {
+      auto child = read_v2(ptr, end, header);
+      new_pattern->add_argument(child);
+    }
+    return new_pattern;
+  }
+  default: throw std::runtime_error("Bad term " + std::to_string(*ptr));
+  }
 }
 
 } // namespace detail

@@ -3,6 +3,7 @@
 # RUN: export IN=$(realpath Inputs/proof-trace.in)
 # RUN: cd %t && %kompile "$KORE_DEF" main --proof-hint-instrumentation-slow -o interpreter
 # RUN: rm -f proof_trace.bin && ./interpreter "$IN" -1 proof_trace.bin --proof-output
+# RUN: kore-rich-header "$KORE_DEF" > %t/header.bin
 
 
 # RUN: %python %s
@@ -22,7 +23,9 @@ class TestParser(unittest.TestCase):
     def test_file(self):
         binary_proof_trace = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
-            "Output", "test_proof_trace_slow.py.tmp", "proof_trace.bin")
+            "Output", "test_proof_trace_slow.py.tmp", "header.bin")
+        header = kllvm.prooftrace.kore_header(binary_header_path)
+
         definition_file = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "Inputs", "proof-trace.kore")
@@ -36,7 +39,7 @@ class TestParser(unittest.TestCase):
 
         with open(binary_proof_trace, 'rb') as f:
            data = f.read()
-           trace = kllvm.prooftrace.llvm_rewrite_trace.parse(data)
+           trace = kllvm.prooftrace.llvm_rewrite_trace.parse(data, header)
            self.assertFalse(trace is None)
 
            # check that there is a initial configuration
