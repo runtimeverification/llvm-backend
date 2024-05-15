@@ -1,5 +1,6 @@
 #include <kllvm/codegen/ApplyPasses.h>
 #include <kllvm/codegen/Options.h>
+#include <kllvm/codegen/SetVisibilityHidden.h>
 
 #include "runtime/header.h"
 
@@ -35,11 +36,14 @@ CodeGenOpt::Level get_opt_level() {
   }
 }
 
-void apply_kllvm_opt_passes(llvm::Module &mod) {
+void apply_kllvm_opt_passes(llvm::Module &mod, bool hidden_visibility) {
   auto pm = legacy::PassManager();
 
   pm.add(createPromoteMemoryToRegisterPass());
   pm.add(createTailCallEliminationPass());
+  if (hidden_visibility) {
+    pm.add(new LegacySetVisibilityHidden());
+  }
 
   pm.run(mod);
 }

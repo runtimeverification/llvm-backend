@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
   }
 
   if (!no_optimize) {
-    apply_kllvm_opt_passes(*mod);
+    apply_kllvm_opt_passes(*mod, hidden_visibility);
   }
 
   perform_output([&](auto &os) {
