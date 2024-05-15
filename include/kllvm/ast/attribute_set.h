@@ -4,7 +4,7 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <unordered_map>
+#include <map>
 
 namespace kllvm {
 
@@ -29,7 +29,7 @@ class kore_composite_pattern;
  */
 class attribute_set {
 public:
-  using storage_t = std::unordered_map<
+  using storage_t = std::map<
       std::string, std::shared_ptr<kore_composite_pattern>>;
 
   enum class key {
