@@ -21,6 +21,9 @@ class TestParser(unittest.TestCase):
         return definition_text[line-1].strip()
 
     def test_file(self):
+        binary_proof_trace = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "Output", "test_proof_trace.py.tmp", "proof_trace.bin")
         binary_header_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "Output", "test_proof_trace.py.tmp", "header.bin")
@@ -37,7 +40,7 @@ class TestParser(unittest.TestCase):
             definition.preprocess()
             definition_text = definition.__repr__().split("\n")
 
-        with open(binary_header_path, 'rb') as f:
+        with open(binary_proof_trace, 'rb') as f:
            data = f.read()
            trace = kllvm.prooftrace.llvm_rewrite_trace.parse(data, header)
            self.assertFalse(trace is None)
