@@ -321,8 +321,8 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
 }
 
 llvm::BasicBlock *proof_event::side_condition_event_pre(
-    const sptr<kore_axiom_declaration> &axiom, std::vector<llvm::Value *> const &args,
-    llvm::BasicBlock *current_block) {
+    const sptr<kore_axiom_declaration> &axiom,
+    std::vector<llvm::Value *> const &args, llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
   }
