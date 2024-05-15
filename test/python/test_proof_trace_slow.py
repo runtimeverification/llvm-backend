@@ -38,7 +38,7 @@ class TestParser(unittest.TestCase):
             definition = kllvm.parser.Parser.from_string(data).definition()
         
             definition.preprocess()
-            definition_text = definition.__repr__().split("\n")
+            definition_text = repr(definition).split("\n")
 
         with open(binary_proof_trace, 'rb') as f:
            data = f.read()
@@ -54,7 +54,7 @@ class TestParser(unittest.TestCase):
            # check that the first event is the rewrite a() => b()
            self.assertTrue(trace.trace[0].is_step_event())
            rule_ordinal = trace.trace[0].step_event.rule_ordinal
-           axiom = definition.get_axiom_by_ordinal(rule_ordinal).__repr__()
+           axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
            axiom_expected = self.get_pattern_from_ordinal(definition_text, rule_ordinal)
            self.assertEqual(axiom, axiom_expected)
 
@@ -64,7 +64,7 @@ class TestParser(unittest.TestCase):
            # check that the third event is the rewrite b() => c()
            self.assertTrue(trace.trace[2].is_step_event())
            rule_ordinal = trace.trace[2].step_event.rule_ordinal
-           axiom = definition.get_axiom_by_ordinal(rule_ordinal).__repr__()
+           axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
            axiom_expected = self.get_pattern_from_ordinal(definition_text, rule_ordinal)
            self.assertEqual(axiom, axiom_expected)
 

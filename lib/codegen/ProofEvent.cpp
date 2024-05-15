@@ -230,7 +230,7 @@ llvm::BasicBlock *proof_event::argument(
  */
 
 llvm::BasicBlock *proof_event::rewrite_event_pre(
-    sptr<kore_axiom_declaration> &axiom, uint64_t arity,
+    const sptr<kore_axiom_declaration> &axiom, uint64_t arity,
     std::map<std::string, kore_variable_pattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
@@ -321,7 +321,7 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
 }
 
 llvm::BasicBlock *proof_event::side_condition_event_pre(
-    sptr<kore_axiom_declaration> &axiom, std::vector<llvm::Value *> const &args,
+    const sptr<kore_axiom_declaration> &axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
@@ -360,7 +360,7 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 }
 
 llvm::BasicBlock *proof_event::side_condition_event_post(
-    sptr<kore_axiom_declaration> &axiom, llvm::Value *check_result,
+    const sptr<kore_axiom_declaration> &axiom, llvm::Value *check_result,
     llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
