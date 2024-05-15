@@ -125,9 +125,11 @@ void llvm_rewrite_trace::print(
   }
 }
 
-proof_trace_parser::proof_trace_parser(bool verbose, bool expand_terms)
+proof_trace_parser::proof_trace_parser(
+    bool verbose, bool expand_terms, kore_header const &header)
     : verbose_(verbose)
-    , expand_terms_(expand_terms) { }
+    , expand_terms_(expand_terms)
+    , header_(header) { }
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace(std::string const &data) {

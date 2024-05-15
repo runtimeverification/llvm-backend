@@ -76,12 +76,19 @@ std::string get_raw_symbol_name(sort_category cat) {
 
 void kore_definition::insert_reserved_symbols() {
   auto mod = kore_module::create("K-RAW-TERM");
+  // syntax KItem ::= rawTerm(KItem)
   auto decl = kore_symbol_declaration::create("rawTerm", true);
+  // syntax KItem ::= rawKTerm(K)
+  auto k_decl = kore_symbol_declaration::create("rawKTerm", true);
   auto kitem = kore_composite_sort::create("SortKItem");
+  auto k = kore_composite_sort::create("SortK");
 
   decl->get_symbol()->add_sort(kitem);
   decl->get_symbol()->add_argument(kitem);
+  k_decl->get_symbol()->add_sort(kitem);
+  k_decl->get_symbol()->add_argument(k);
   mod->add_declaration(std::move(decl));
+  mod->add_declaration(std::move(k_decl));
 
   for (auto const &cat : hooked_sorts_) {
     switch (cat.first.cat) {

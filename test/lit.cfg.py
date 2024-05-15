@@ -151,7 +151,8 @@ config.substitutions.extend([
 
     ('%check-proof-out', one_line('''
         %run-proof-out
-        %kore-proof-trace --verbose --expand-terms %t.out.bin | diff - %test-proof-diff-out
+        %kore-rich-header %s > %t.header.bin
+        %kore-proof-trace --verbose --expand-terms %t.header.bin %t.out.bin | diff - %test-proof-diff-out
         result="$?"
         if [ "$result" -ne 0 ]; then
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
@@ -183,6 +184,7 @@ config.substitutions.extend([
     ('%kore-convert', 'kore-convert'),
 
     ('%kore-proof-trace', 'kore-proof-trace'),
+    ('%kore-rich-header', 'kore-rich-header'),
 ])
 
 config.recursiveExpansionLimit = 10

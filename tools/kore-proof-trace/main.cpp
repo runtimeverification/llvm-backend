@@ -2,12 +2,17 @@
 
 #include <llvm/Support/CommandLine.h>
 
+#include <fstream>
 #include <string>
 
 using namespace llvm;
 using namespace kllvm;
 
 cl::OptionCategory kore_proof_trace_cat("kore-proof-trace options");
+
+cl::opt<std::string> header_path(
+    cl::Positional, cl::desc("<header file>"), cl::Required,
+    cl::cat(kore_proof_trace_cat));
 
 cl::opt<std::string> input_filename(
     cl::Positional, cl::desc("<input file>"), cl::Required,
@@ -26,7 +31,11 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&kore_proof_trace_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  proof_trace_parser parser(verbose_output, expand_terms_in_output);
+  FILE *in = fopen(header_path.getValue().c_str(), "r");
+  kore_header header(in);
+  fclose(in);
+
+  proof_trace_parser parser(verbose_output, expand_terms_in_output, header);
   auto trace = parser.parse_proof_trace_from_file(input_filename);
   if (trace.has_value()) {
     return 0;
