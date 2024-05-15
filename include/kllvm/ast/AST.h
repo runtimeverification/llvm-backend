@@ -1020,9 +1020,9 @@ public:
   [[nodiscard]] std::list<kore_axiom_declaration *> const &get_axioms() const {
     return axioms_;
   }
-  [[nodiscard]] kore_axiom_declaration *
+  [[nodiscard]] sptr<kore_axiom_declaration>
   get_axiom_by_ordinal(size_t ordinal) const {
-    return ordinals_.at(ordinal);
+    return std::make_shared<kore_axiom_declaration>(*ordinals_.at(ordinal));
   }
   [[nodiscard]] kore_symbolStringMapType const &get_fresh_functions() const {
     return fresh_functions_;

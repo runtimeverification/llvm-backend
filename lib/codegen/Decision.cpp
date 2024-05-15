@@ -431,8 +431,7 @@ void function_node::codegen(decision *d) {
   if (is_side_condition) {
     proof_event p(d->definition_, d->module_);
     size_t ordinal = std::stoll(function_.substr(15));
-    kore_axiom_declaration *axiom
-        = d->definition_->get_axiom_by_ordinal(ordinal);
+    auto axiom = d->definition_->get_axiom_by_ordinal(ordinal);
     d->current_block_
         = p.side_condition_event_pre(axiom, args, d->current_block_);
   }
@@ -447,8 +446,7 @@ void function_node::codegen(decision *d) {
   if (is_side_condition) {
     proof_event p(d->definition_, d->module_);
     size_t ordinal = std::stoll(function_.substr(15));
-    kore_axiom_declaration *axiom
-        = d->definition_->get_axiom_by_ordinal(ordinal);
+    auto axiom = d->definition_->get_axiom_by_ordinal(ordinal);
     d->current_block_
         = p.side_condition_event_post(axiom, call, d->current_block_);
   }
@@ -461,8 +459,7 @@ void function_node::codegen(decision *d) {
                    + function_.substr(function_.find_first_of('_', 5) + 1);
     } else if (is_side_condition) {
       size_t ordinal = std::stoll(function_.substr(15));
-      kore_axiom_declaration *axiom
-          = d->definition_->get_axiom_by_ordinal(ordinal);
+      auto axiom = d->definition_->get_axiom_by_ordinal(ordinal);
       if (axiom->attributes().contains(attribute_set::key::Label)) {
         debug_name
             = axiom->attributes().get_string(attribute_set::key::Label) + ".sc";
@@ -595,7 +592,7 @@ void leaf_node::codegen(decision *d) {
   // retrieve the corresponding ordinal we drop the apply_rule_ prefix.
   auto ordinal = std::stoll(name_.substr(11));
   auto arity = apply_rule->arg_end() - apply_rule->arg_begin();
-  auto *axiom = d->definition_->get_axiom_by_ordinal(ordinal);
+  auto axiom = d->definition_->get_axiom_by_ordinal(ordinal);
 
   auto vars = std::map<std::string, kore_variable_pattern *>{};
   for (kore_pattern *lhs : axiom->get_left_hand_side()) {
