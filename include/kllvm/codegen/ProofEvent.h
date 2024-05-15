@@ -104,7 +104,7 @@ public:
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *rewrite_event_pre(
-      const sptr<kore_axiom_declaration> &axiom, uint64_t arity,
+      sptr<kore_axiom_declaration> const &axiom, uint64_t arity,
       std::map<std::string, kore_variable_pattern *> vars,
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
@@ -121,11 +121,11 @@ public:
   function_event_post(llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_pre(
-      const sptr<kore_axiom_declaration> &axiom,
+      sptr<kore_axiom_declaration> const &axiom,
       std::vector<llvm::Value *> const &args, llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_post(
-      const sptr<kore_axiom_declaration> &axiom, llvm::Value *check_result,
+      sptr<kore_axiom_declaration> const &axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
   proof_event(kore_definition *definition, llvm::Module *module)
