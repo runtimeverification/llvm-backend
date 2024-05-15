@@ -32,11 +32,11 @@ class TestParser(unittest.TestCase):
         definition_file = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "Inputs", "proof-trace.kore")
-       
+
         with open(definition_file, 'rb') as f:
             data = f.read()
             definition = kllvm.parser.Parser.from_string(data).definition()
-        
+
             definition.preprocess()
             definition_text = repr(definition).split("\n")
 
