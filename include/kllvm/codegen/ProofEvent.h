@@ -121,8 +121,8 @@ public:
   function_event_post(llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_pre(
-      sptr<kore_axiom_declaration> axiom, std::vector<llvm::Value *> const &args,
-      llvm::BasicBlock *current_block);
+      sptr<kore_axiom_declaration> axiom,
+      std::vector<llvm::Value *> const &args, llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_post(
       sptr<kore_axiom_declaration> axiom, llvm::Value *check_result,
