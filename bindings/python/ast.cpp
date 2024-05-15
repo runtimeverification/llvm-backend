@@ -218,6 +218,8 @@ void bind_ast(py::module_ &m) {
              std::shared_ptr<kore_composite_pattern> const &arg) {
             decl.attributes().add(arg);
           })
+      .def("preprocess", &kore_definition::preprocess)
+      .def("get_axiom_by_ordinal", &kore_definition::get_axiom_by_ordinal)
       .def_property_readonly("attributes", [](kore_definition &decl) {
         return decl.attributes().underlying();
       });
