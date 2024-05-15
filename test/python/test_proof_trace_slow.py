@@ -33,7 +33,7 @@ class TestParser(unittest.TestCase):
         
             definition.preprocess()
             definition_text = definition.__repr__().split("\n")
-        
+
         with open(binary_proof_trace, 'rb') as f:
            data = f.read()
            trace = kllvm.prooftrace.llvm_rewrite_trace.parse(data)
