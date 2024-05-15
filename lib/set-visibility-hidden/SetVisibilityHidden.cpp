@@ -3,15 +3,16 @@
 using namespace llvm;
 
 namespace kllvm {
-__attribute__((visibility("default"))) bool runSetVisibilityHidden(Module &M) {
+__attribute__((visibility("default"))) bool
+run_set_visibility_hidden(Module &m) {
   bool dirty = false;
-  for (auto &global : M.globals()) {
+  for (auto &global : m.globals()) {
     if (!global.isDeclaration()) {
       global.setVisibility(GlobalValue::HiddenVisibility);
       dirty = true;
     }
   }
-  for (auto &func : M.functions()) {
+  for (auto &func : m.functions()) {
     if (!func.isDeclaration()) {
       func.setVisibility(GlobalValue::HiddenVisibility);
       dirty = true;
@@ -24,26 +25,27 @@ __attribute__((visibility("default"))) bool runSetVisibilityHidden(Module &M) {
 
 using namespace kllvm;
 
-__attribute__((visibility("default"))) char LegacySetVisibilityHidden::ID = 0;
+__attribute__((visibility("default"))) char legacy_set_visibility_hidden::ID
+    = 0;
 
-static RegisterPass<LegacySetVisibilityHidden>
-    X("set-visibility-hidden", "Set visibility of all global values to hidden",
+static RegisterPass<legacy_set_visibility_hidden>
+    x("set-visibility-hidden", "Set visibility of all global values to hidden",
       false /* Only looks at CFG */, false /* Analysis Pass */);
 
 /* New PM Registration */
 llvm::PassPluginLibraryInfo getSetVisibilityHiddenPluginInfo() {
   return {
       LLVM_PLUGIN_API_VERSION, "SetVisibilityHidden", LLVM_VERSION_STRING,
-      [](PassBuilder &PB) {
-        PB.registerPipelineStartEPCallback(
-            [](llvm::ModulePassManager &PM, OptimizationLevel Level) {
-              PM.addPass(SetVisibilityHidden());
+      [](PassBuilder &pb) {
+        pb.registerPipelineStartEPCallback(
+            [](llvm::ModulePassManager &pm, OptimizationLevel level) {
+              pm.addPass(set_visibility_hidden());
             });
-        PB.registerPipelineParsingCallback(
-            [](StringRef Name, llvm::ModulePassManager &PM,
+        pb.registerPipelineParsingCallback(
+            [](StringRef name, llvm::ModulePassManager &pm,
                ArrayRef<llvm::PassBuilder::PipelineElement>) {
-              if (Name == "set-visibility-hidden") {
-                PM.addPass(SetVisibilityHidden());
+              if (name == "set-visibility-hidden") {
+                pm.addPass(set_visibility_hidden());
                 return true;
               }
               return false;

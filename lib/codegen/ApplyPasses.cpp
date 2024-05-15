@@ -42,7 +42,7 @@ void apply_kllvm_opt_passes(llvm::Module &mod, bool hidden_visibility) {
   pm.add(createPromoteMemoryToRegisterPass());
   pm.add(createTailCallEliminationPass());
   if (hidden_visibility) {
-    pm.add(new LegacySetVisibilityHidden());
+    pm.add(new legacy_set_visibility_hidden());
   }
 
   pm.run(mod);

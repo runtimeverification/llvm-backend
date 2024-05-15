@@ -11,20 +11,20 @@
 
 namespace kllvm {
 
-bool runSetVisibilityHidden(llvm::Module &M);
+bool run_set_visibility_hidden(llvm::Module &m);
 
-struct LegacySetVisibilityHidden : llvm::ModulePass {
+struct legacy_set_visibility_hidden : llvm::ModulePass {
   static char ID;
-  LegacySetVisibilityHidden()
+  legacy_set_visibility_hidden()
       : llvm::ModulePass(ID) { }
-  bool runOnModule(llvm::Module &M) override {
-    return runSetVisibilityHidden(M);
+  bool runOnModule(llvm::Module &m) override {
+    return run_set_visibility_hidden(m);
   }
 };
 
-struct SetVisibilityHidden : llvm::PassInfoMixin<SetVisibilityHidden> {
-  llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &) {
-    if (!runSetVisibilityHidden(M))
+struct set_visibility_hidden : llvm::PassInfoMixin<set_visibility_hidden> {
+  llvm::PreservedAnalyses run(llvm::Module &m, llvm::ModuleAnalysisManager &) {
+    if (!run_set_visibility_hidden(m))
       return llvm::PreservedAnalyses::all();
     return llvm::PreservedAnalyses::none();
   }
