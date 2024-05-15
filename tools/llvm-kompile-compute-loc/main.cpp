@@ -20,7 +20,10 @@ cl::opt<std::string> ordinal(
     cl::Positional, cl::desc("<ordinal>"), cl::Required, cl::cat(loc_cat));
 
 cl::opt<bool> is_k_line(
-    cl::Positional, cl::desc("[is-k-line]"), cl::init(false), cl::cat(loc_cat));
+    "k-line",
+    cl::desc("The tool will look for the line passed as an argument in the K "
+             "definition"),
+    cl::init(false), cl::cat(loc_cat));
 
 int64_t get_location(kore_axiom_declaration *axiom) {
   auto *location_att

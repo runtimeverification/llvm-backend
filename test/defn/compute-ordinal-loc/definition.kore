@@ -1,7 +1,7 @@
-// RUN: %compute-ordinal $(cat %S/line_number_rule) true > %t0
-// RUN: %compute-loc $(cat %t0) true | diff - %S/line_number_rule
-// RUN: %compute-loc $(cat %t0) false > %t1
-// RUN: %compute-ordinal $(cat %t1) false | diff - %t0
+// RUN: %compute-ordinal $(cat %S/line_number_rule) --k-line > %t0
+// RUN: %compute-loc $(cat %t0) --k-line | diff - %S/line_number_rule
+// RUN: %compute-loc $(cat %t0) > %t1
+// RUN: %compute-ordinal $(cat %t1) | diff - %t0
 
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/robertorosmaninho/rv/k/llvm-backend/src/main/native/llvm-backend/temp/inc.k)")]
 
