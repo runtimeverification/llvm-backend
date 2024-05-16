@@ -14,6 +14,7 @@ namespace kllvm {
 bool run_set_visibility_hidden(llvm::Module &m);
 
 struct legacy_set_visibility_hidden : llvm::ModulePass {
+  // NOLINTNEXTLINE(*-identifier-naming)
   static char ID;
   legacy_set_visibility_hidden()
       : llvm::ModulePass(ID) { }
