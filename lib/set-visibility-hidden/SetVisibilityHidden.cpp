@@ -33,7 +33,7 @@ static RegisterPass<legacy_set_visibility_hidden>
       false /* Only looks at CFG */, false /* Analysis Pass */);
 
 /* New PM Registration */
-llvm::PassPluginLibraryInfo getSetVisibilityHiddenPluginInfo() {
+llvm::PassPluginLibraryInfo get_set_visibility_hidden_plugin_info() {
   return {
       LLVM_PLUGIN_API_VERSION, "SetVisibilityHidden", LLVM_VERSION_STRING,
       [](PassBuilder &pb) {
@@ -57,6 +57,6 @@ llvm::PassPluginLibraryInfo getSetVisibilityHiddenPluginInfo() {
 extern "C" __attribute__((visibility("default")))
 LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
-  return getSetVisibilityHiddenPluginInfo();
+  return get_set_visibility_hidden_plugin_info();
 }
 #endif

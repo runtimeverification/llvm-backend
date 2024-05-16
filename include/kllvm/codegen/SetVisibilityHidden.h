@@ -23,9 +23,11 @@ struct legacy_set_visibility_hidden : llvm::ModulePass {
 };
 
 struct set_visibility_hidden : llvm::PassInfoMixin<set_visibility_hidden> {
-  llvm::PreservedAnalyses run(llvm::Module &m, llvm::ModuleAnalysisManager &) {
-    if (!run_set_visibility_hidden(m))
+  static llvm::PreservedAnalyses
+  run(llvm::Module &m, llvm::ModuleAnalysisManager &) {
+    if (!run_set_visibility_hidden(m)) {
       return llvm::PreservedAnalyses::all();
+    }
     return llvm::PreservedAnalyses::none();
   }
 };
