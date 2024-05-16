@@ -26,7 +26,8 @@ cl::opt<bool> is_k_line(
              "definition"),
     cl::init(false), cl::cat(ordinal_cat));
 
-std::optional<int64_t> get_start_line_location(kore_axiom_declaration const &axiom) {
+std::optional<int64_t>
+get_start_line_location(kore_axiom_declaration const &axiom) {
   auto location_att = axiom.attributes().get(attribute_set::key::Location);
   assert(location_att->get_arguments().size() == 1);
 
