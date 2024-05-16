@@ -1,10 +1,10 @@
 #ifndef KLLVM_ATTRIBUTES_H
 #define KLLVM_ATTRIBUTES_H
 
+#include <map>
 #include <memory>
 #include <optional>
 #include <string>
-#include <map>
 
 namespace kllvm {
 
@@ -29,8 +29,8 @@ class kore_composite_pattern;
  */
 class attribute_set {
 public:
-  using storage_t = std::map<
-      std::string, std::shared_ptr<kore_composite_pattern>>;
+  using storage_t
+      = std::map<std::string, std::shared_ptr<kore_composite_pattern>>;
 
   enum class key {
     Alias,
