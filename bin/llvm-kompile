@@ -183,6 +183,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --hidden-visibility)
+      codegen_flags+=("--hidden-visibility")
       kompile_clang_flags+=("--hidden-visibility")
       shift
       ;;
