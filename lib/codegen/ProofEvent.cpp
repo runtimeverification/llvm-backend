@@ -31,52 +31,36 @@ llvm::CallInst *proof_event::emit_serialize_term(
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
-  auto cat = sort.get_category(definition_);
-  auto *sort_name_ptr = create_global_sort_string_ptr(b, sort, module_);
+  std::string sort_name = ast_to_string(sort);
+  bool indirect
+      = sort_name == "SortBool{}" || sort_name.substr(0, 9) == "SortMInt{";
+  std::string inj_name;
+  if (sort_name == "SortKItem{}") {
+    inj_name = "rawTerm{}";
+  } else if (sort_name == "SortK{}") {
+    inj_name = "rawKTerm{}";
+  } else {
+    inj_name = "inj{" + sort_name + ", SortKItem{}}";
+  }
+  auto *symbol = definition_->get_all_symbols().at(inj_name);
+  uint64_t block_header = get_block_header_val(
+      module_, symbol, get_block_type(module_, definition_, symbol));
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
   auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
-
-  auto is_sym_or_var
-      = cat.cat == sort_category::Symbol || cat.cat == sort_category::Variable;
-  auto *construct_k_term_inj = llvm::ConstantInt::getBool(ctx_, !is_sym_or_var);
-
-  if (!is_sym_or_var) {
-    term = term->getType()->isIntegerTy()
-               ? b.CreateIntToPtr(term, i8_ptr_ty)
-               : b.CreatePointerCast(term, i8_ptr_ty);
-  }
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i1_ty, i1_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
 
   auto *serialize
-      = get_or_insert_function(module_, "serialize_term_to_file", func_ty);
+      = get_or_insert_function(module_, "serialize_term_to_file_v2", func_ty);
 
   return b.CreateCall(
-      serialize, {output_file, term, sort_name_ptr,
-                  llvm::ConstantInt::getFalse(ctx_), construct_k_term_inj});
-}
-
-llvm::CallInst *proof_event::emit_serialize_configuration(
-    llvm::Value *output_file, llvm::Value *config,
-    llvm::BasicBlock *insert_at_end) {
-  auto *void_ty = llvm::Type::getVoidTy(ctx_);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
-  auto *block_ty = getvalue_type({sort_category::Symbol, 0}, module_);
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
-
-  auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, block_ty, i1_ty, i1_ty}, false);
-  auto *serialize = get_or_insert_function(
-      module_, "serialize_configuration_to_file", func_ty);
-
-  return llvm::CallInst::Create(
       serialize,
-      {output_file, config, llvm::ConstantInt::getTrue(ctx_),
-       llvm::ConstantInt::getFalse(ctx_)},
-      "", insert_at_end);
+      {output_file, term, llvm::ConstantInt::get(i64_ty, block_header),
+       llvm::ConstantInt::get(i1_ty, indirect)});
 }
 
 llvm::CallInst *proof_event::emit_write_uint64(
@@ -246,7 +230,7 @@ llvm::BasicBlock *proof_event::argument(
  */
 
 llvm::BasicBlock *proof_event::rewrite_event_pre(
-    kore_axiom_declaration *axiom, uint64_t arity,
+    kore_axiom_declaration const &axiom, uint64_t arity,
     std::map<std::string, kore_variable_pattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
@@ -258,7 +242,7 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
       = event_prelude("rewrite_pre", current_block);
 
   emit_write_uint64(outputFile, detail::word(0x22), true_block);
-  emit_write_uint64(outputFile, axiom->get_ordinal(), true_block);
+  emit_write_uint64(outputFile, axiom.get_ordinal(), true_block);
   emit_write_uint64(outputFile, arity, true_block);
   for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
     auto key = entry->getKey();
@@ -337,7 +321,7 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
 }
 
 llvm::BasicBlock *proof_event::side_condition_event_pre(
-    kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
+    kore_axiom_declaration const &axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
@@ -346,14 +330,14 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
   auto [true_block, merge_block, outputFile]
       = event_prelude("side_condition_pre", current_block);
 
-  size_t ordinal = axiom->get_ordinal();
+  size_t ordinal = axiom.get_ordinal();
   size_t arity = args.size();
 
   emit_write_uint64(outputFile, detail::word(0xEE), true_block);
   emit_write_uint64(outputFile, ordinal, true_block);
   emit_write_uint64(outputFile, arity, true_block);
 
-  kore_pattern *pattern = axiom->get_requires();
+  kore_pattern *pattern = axiom.get_requires();
   std::map<std::string, kore_variable_pattern *> vars;
   pattern->mark_variables(vars);
 
@@ -376,7 +360,7 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 }
 
 llvm::BasicBlock *proof_event::side_condition_event_post(
-    kore_axiom_declaration *axiom, llvm::Value *check_result,
+    kore_axiom_declaration const &axiom, llvm::Value *check_result,
     llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
@@ -385,7 +369,7 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
   auto [true_block, merge_block, outputFile]
       = event_prelude("side_condition_post", current_block);
 
-  size_t ordinal = axiom->get_ordinal();
+  size_t ordinal = axiom.get_ordinal();
 
   emit_write_uint64(outputFile, detail::word(0x33), true_block);
   emit_write_uint64(outputFile, ordinal, true_block);

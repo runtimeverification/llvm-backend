@@ -265,6 +265,7 @@ public:
 private:
   bool verbose_;
   bool expand_terms_;
+  [[maybe_unused]] kore_header const &header_;
 
   // Caller needs to check that there are at least 8 bytes remaining in the
   // stream before peeking
@@ -337,30 +338,19 @@ private:
 
   template <typename It>
   sptr<kore_pattern> parse_kore_term(It &ptr, It end, uint64_t &pattern_len) {
-    if (std::distance(ptr, end) < 11U) {
+    if (std::distance(ptr, end) < 9U) {
       return nullptr;
     }
+    It old_ptr = ptr;
     if (detail::read<char>(ptr, end) != '\x7F'
         || detail::read<char>(ptr, end) != 'K'
-        || detail::read<char>(ptr, end) != 'O'
         || detail::read<char>(ptr, end) != 'R'
-        || detail::read<char>(ptr, end) != 'E') {
+        || detail::read<char>(ptr, end) != '2') {
       return nullptr;
     }
-    auto version = detail::read_version(ptr, end);
-
-    if (!read_uint64(ptr, end, pattern_len)) {
-      return nullptr;
-    }
-
-    if (std::distance(ptr, end) < pattern_len) {
-      return nullptr;
-    }
-    if (pattern_len > 0 && std::distance(ptr, end) > pattern_len) {
-      end = std::next(ptr, pattern_len);
-    }
-
-    return detail::read(ptr, end, version);
+    auto result = detail::read_v2(ptr, end, header_);
+    pattern_len = ptr - old_ptr;
+    return result;
   }
 
   template <typename It>
@@ -736,7 +726,8 @@ private:
   }
 
 public:
-  proof_trace_parser(bool verbose, bool expand_terms);
+  proof_trace_parser(
+      bool verbose, bool expand_terms, kore_header const &header);
 
   std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);

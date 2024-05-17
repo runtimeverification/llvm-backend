@@ -53,15 +53,6 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `config` to the specified `outputFile` as
-   * binary KORE. This function does not require a sort, but the configuration
-   * passed must be a top-level configuration.
-   */
-  llvm::CallInst *emit_serialize_configuration(
-      llvm::Value *output_file, llvm::Value *config,
-      llvm::BasicBlock *insert_at_end);
-
-  /*
    * Emit a call that will serialize `value` to the specified `outputFile`.
    */
   llvm::CallInst *emit_write_uint64(
@@ -113,7 +104,7 @@ public:
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *rewrite_event_pre(
-      kore_axiom_declaration *axiom, uint64_t arity,
+      kore_axiom_declaration const &axiom, uint64_t arity,
       std::map<std::string, kore_variable_pattern *> vars,
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
@@ -130,11 +121,11 @@ public:
   function_event_post(llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_pre(
-      kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
-      llvm::BasicBlock *current_block);
+      kore_axiom_declaration const &axiom,
+      std::vector<llvm::Value *> const &args, llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_post(
-      kore_axiom_declaration *axiom, llvm::Value *check_result,
+      kore_axiom_declaration const &axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
   proof_event(kore_definition *definition, llvm::Module *module)
