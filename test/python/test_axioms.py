@@ -7,7 +7,7 @@ import unittest
 class TestAxioms(unittest.TestCase):
 
     def test_is_required(self):
-        parser = kllvm.parser.Parser(input_path("proof-trace.kore"))
+        parser = kllvm.parser.Parser(input_path("is-required.kore"))
         definition = parser.definition()
         self.assertTrue(definition.modules[1].declarations[4].is_required)
         self.assertTrue(definition.modules[1].declarations[5].is_required)
