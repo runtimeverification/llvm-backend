@@ -1,0 +1,46 @@
+version: 9
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 110 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())]
+function: LblinitKCell{} (0)
+rule: 111 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}()]
+rule: 150 1
+  VarK = kore[Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}()]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 109 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 105 1
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+rule: 106 1
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} (0:0:0)
+rule: 159 2
+  VarT1 = kore[Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
+  VarT2 = kore[Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
+function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} (0)
+rule: 157 1
+  Var'Unds'Gen0 = kore[Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
+function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} (1)
+rule: 156 1
+  Var'Unds'Gen0 = kore[Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblnode'LParUndsCommUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree'Unds'Tree{}(Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}(),Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

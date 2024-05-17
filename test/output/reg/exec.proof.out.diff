@@ -1,0 +1,642 @@
+version: 9
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}())]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 3205 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}())]
+function: LblinitTCell{} (0)
+rule: 3213 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}())]
+function: LblinitKCell{} (0)
+rule: 3207 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}())]
+function: Lblproject'Coln'ControlCommand{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}()]
+rule: 3318 1
+  VarK = kore[Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}()]
+function: LblinitPcCell{} (1)
+rule: 3208 0
+function: LblinitR0Cell{} (2)
+rule: 3209 0
+function: LblinitR1Cell{} (3)
+rule: 3210 0
+function: LblinitR2Cell{} (4)
+rule: 3211 0
+function: LblinitR3Cell{} (5)
+rule: 3212 0
+function: LblinitImemCell{} (6)
+rule: 3206 0
+hook: MAP.concat (0)
+  function: Lbl'Unds'Map'Unds'{} (0)
+    hook: MAP.concat (0:0)
+      function: Lbl'Unds'Map'Unds'{} (0:0)
+        hook: MAP.concat (0:0:0)
+          function: Lbl'Unds'Map'Unds'{} (0:0:0)
+            hook: MAP.concat (0:0:0:0)
+              function: Lbl'Unds'Map'Unds'{} (0:0:0:0)
+                hook: MAP.concat (0:0:0:0:0)
+                  function: Lbl'Unds'Map'Unds'{} (0:0:0:0:0)
+                    hook: MAP.concat (0:0:0:0:0:0)
+                      function: Lbl'Unds'Map'Unds'{} (0:0:0:0:0:0)
+                        hook: MAP.element (0:0:0:0:0:0:0)
+                          function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:0:0:0:0:0)
+                          arg: kore[\dv{SortInt{}}("0")]
+                          arg: kore[Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0"))]
+                        hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))]
+                        hook: MAP.element (0:0:0:0:0:0:1)
+                          function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:0:0:0:0:1)
+                          arg: kore[\dv{SortInt{}}("1")]
+                          arg: kore[Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())]
+                        hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))]
+                      arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))]
+                      arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))]
+                    hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())))]
+                    hook: MAP.element (0:0:0:0:0:1)
+                      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:0:0:0:1)
+                      arg: kore[\dv{SortInt{}}("2")]
+                      arg: kore[Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))]
+                    hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6"))))]
+                  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())))]
+                  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6"))))]
+                hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())))]
+                hook: MAP.element (0:0:0:0:1)
+                  function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:0:0:1)
+                  arg: kore[\dv{SortInt{}}("3")]
+                  arg: kore[Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}())]
+                hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))]
+              arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())))]
+              arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))]
+            hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())))]
+            hook: MAP.element (0:0:0:1)
+              function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:0:1)
+              arg: kore[\dv{SortInt{}}("4")]
+              arg: kore[Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1"))]
+            hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))]
+          arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())))]
+          arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))]
+        hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1"))))]
+        hook: MAP.element (0:0:1)
+          function: Lbl'UndsPipe'-'-GT-Unds'{} (0:0:1)
+          arg: kore[\dv{SortInt{}}("5")]
+          arg: kore[Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))]
+        hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))]
+      arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1"))))]
+      arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))]
+    hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))]
+    hook: MAP.element (0:1)
+      function: Lbl'UndsPipe'-'-GT-Unds'{} (0:1)
+      arg: kore[\dv{SortInt{}}("6")]
+      arg: kore[Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}())]
+    hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))]
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))]
+function: LblinitDmemCell{} (7)
+rule: 3203 0
+function: LblinitGeneratedCounterCell{} (1)
+rule: 3204 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())),Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))),Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 3099 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[dotk{}()]
+  Var'Unds'DotVar3 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  Var'Unds'Gen8 = kore[Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}()]
+  VarA = kore[\dv{SortInt{}}("0")]
+  VarI = kore[Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0"))]
+hook: INT.add (0:1:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:1:0)
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("1")]
+side condition entry: 3127 1
+  VarHOLE = kore[Lblr0'Unds'REG-SYNTAX'Unds'Register{}()]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3263 1
+      VarK = kore[kseq{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),dotk{}())]
+    arg: kore[\dv{SortBool{}}("false")]
+  hook result: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3127 true
+rule: 3127 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[Lblr0'Unds'REG-SYNTAX'Unds'Register{}()]
+  VarK0 = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+  VarK2 = kore[\dv{SortInt{}}("0")]
+rule: 3146 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lbl'Hash'freezerle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand1'Unds'{}(kseq{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),dotk{}()),kseq{}(\dv{SortInt{}}("0"),dotk{}())),kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}()))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarV = kore[\dv{SortInt{}}("0")]
+side condition entry: 3105 1
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  function: LblisKResult{} (1)
+  rule: 3264 1
+    VarKResult = kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3105 true
+rule: 3105 13
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+  VarK0 = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+  VarK2 = kore[\dv{SortInt{}}("0")]
+side condition entry: 3127 1
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3264 1
+      VarKResult = kore[\dv{SortInt{}}("0")]
+    arg: kore[\dv{SortBool{}}("true")]
+  hook result: kore[\dv{SortBool{}}("false")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3127 false
+side condition entry: 3128 1
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3264 1
+      VarKResult = kore[\dv{SortInt{}}("0")]
+    arg: kore[\dv{SortBool{}}("true")]
+  hook result: kore[\dv{SortBool{}}("false")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3128 false
+side condition entry: 3129 2
+  VarV1 = kore[\dv{SortInt{}}("0")]
+  VarV2 = kore[\dv{SortInt{}}("0")]
+hook: BOOL.not ()
+  hook: INT.le (0)
+    function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0)
+    arg: kore[\dv{SortInt{}}("0")]
+    arg: kore[\dv{SortInt{}}("0")]
+  hook result: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3129 false
+side condition entry: 3130 2
+  VarV1 = kore[\dv{SortInt{}}("0")]
+  VarV2 = kore[\dv{SortInt{}}("0")]
+hook: INT.le ()
+  function: Lbl'Unds-LT-Eqls'Int'Unds'{} ()
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("0")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3130 true
+rule: 3130 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarR = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+  VarV1 = kore[\dv{SortInt{}}("0")]
+  VarV2 = kore[\dv{SortInt{}}("0")]
+side condition entry: 3152 1
+  VarHOLE = kore[\dv{SortInt{}}("1")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3264 1
+      VarKResult = kore[\dv{SortInt{}}("1")]
+    arg: kore[\dv{SortBool{}}("true")]
+  hook result: kore[\dv{SortBool{}}("false")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3152 false
+rule: 3155 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarV = kore[\dv{SortInt{}}("1")]
+rule: 3099 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[dotk{}()]
+  Var'Unds'DotVar3 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  Var'Unds'Gen8 = kore[Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}()]
+  VarA = kore[\dv{SortInt{}}("1")]
+  VarI = kore[Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}())]
+hook: INT.add (0:1:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:1:0)
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("2")]
+side condition entry: 3138 1
+  VarHOLE = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3263 1
+      VarK = kore[kseq{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),dotk{}())]
+    arg: kore[\dv{SortBool{}}("false")]
+  hook result: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3138 true
+rule: 3138 11
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("2"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+  VarK0 = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+rule: 3148 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lbl'Hash'freezernot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand1'Unds'{}(kseq{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),dotk{}())),kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}()))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("2"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarV = kore[\dv{SortInt{}}("1")]
+side condition entry: 3111 1
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("1")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  function: LblisKResult{} (1)
+  rule: 3264 1
+    VarKResult = kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3111 true
+rule: 3111 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("2"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("1")]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[\dv{SortInt{}}("1")]
+  VarK0 = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+side condition entry: 3138 1
+  VarHOLE = kore[\dv{SortInt{}}("1")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3264 1
+      VarKResult = kore[\dv{SortInt{}}("1")]
+    arg: kore[\dv{SortBool{}}("true")]
+  hook result: kore[\dv{SortBool{}}("false")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3138 false
+side condition entry: 3139 1
+  VarV = kore[\dv{SortInt{}}("1")]
+hook: INT.eq ()
+  function: Lbl'UndsEqlsEqls'Int'Unds'{} ()
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3139 true
+rule: 3139 11
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("2"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("1"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarR = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+  VarV = kore[\dv{SortInt{}}("1")]
+side condition entry: 3152 1
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3264 1
+      VarKResult = kore[\dv{SortInt{}}("0")]
+    arg: kore[\dv{SortBool{}}("true")]
+  hook result: kore[\dv{SortBool{}}("false")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3152 false
+rule: 3155 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("1")]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("2"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarV = kore[\dv{SortInt{}}("0")]
+rule: 3099 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[dotk{}()]
+  Var'Unds'DotVar3 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}())),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  Var'Unds'Gen8 = kore[Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}()]
+  VarA = kore[\dv{SortInt{}}("2")]
+  VarI = kore[Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))]
+hook: INT.add (0:1:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:1:0)
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("3")]
+side condition entry: 3119 1
+  VarHOLE = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3263 1
+      VarK = kore[kseq{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),dotk{}())]
+    arg: kore[\dv{SortBool{}}("false")]
+  hook result: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3119 true
+rule: 3119 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("3"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[Lblr2'Unds'REG-SYNTAX'Unds'Register{}()]
+  VarK1 = kore[Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3"))]
+  VarK2 = kore[Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6"))]
+rule: 3148 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lbl'Hash'freezerbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address0'Unds'{}(kseq{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),dotk{}()),kseq{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")),dotk{}())),kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}()))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("3"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarV = kore[\dv{SortInt{}}("0")]
+side condition entry: 3102 1
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  function: LblisKResult{} (1)
+  rule: 3264 1
+    VarKResult = kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3102 true
+rule: 3102 13
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("3"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+  VarK1 = kore[Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3"))]
+  VarK2 = kore[Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6"))]
+side condition entry: 3119 1
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3264 1
+      VarKResult = kore[\dv{SortInt{}}("0")]
+    arg: kore[\dv{SortBool{}}("true")]
+  hook result: kore[\dv{SortBool{}}("false")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3119 false
+side condition entry: 3120 1
+  VarI = kore[\dv{SortInt{}}("0")]
+hook: INT.eq ()
+  function: Lbl'UndsEqlsEqls'Int'Unds'{} ()
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3120 false
+side condition entry: 3121 1
+  VarI = kore[\dv{SortInt{}}("0")]
+hook: INT.eq ()
+  function: Lbl'UndsEqlsEqls'Int'Unds'{} ()
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("0")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3121 true
+rule: 3121 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("3"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen7 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarA = kore[Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6"))]
+  VarI = kore[\dv{SortInt{}}("0")]
+rule: 3125 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("3")]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarA = kore[\dv{SortInt{}}("6")]
+rule: 3099 12
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[dotk{}()]
+  Var'Unds'DotVar3 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  Var'Unds'Gen8 = kore[Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}()]
+  VarA = kore[\dv{SortInt{}}("6")]
+  VarI = kore[Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}())]
+hook: INT.add (0:1:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:1:0)
+  arg: kore[\dv{SortInt{}}("6")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("7")]
+side condition entry: 3141 1
+  VarHOLE = kore[Lblr1'Unds'REG-SYNTAX'Unds'Register{}()]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3263 1
+      VarK = kore[kseq{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),dotk{}())]
+    arg: kore[\dv{SortBool{}}("false")]
+  hook result: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3141 true
+rule: 3141 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("7"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[Lblr1'Unds'REG-SYNTAX'Unds'Register{}()]
+rule: 3147 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lbl'Hash'freezerret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand0'Unds'{}(),kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}()))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("7"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen11 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarV = kore[\dv{SortInt{}}("0")]
+side condition entry: 3112 1
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  function: LblisKResult{} (1)
+  rule: 3264 1
+    VarKResult = kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 3112 true
+rule: 3112 11
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[kseq{}(Lblexec'Unds'REG-SYNTAX'Unds'ControlCommand{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("7"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen10 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'Gen6 = kore[Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())]
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+side condition entry: 3141 1
+  VarHOLE = kore[\dv{SortInt{}}("0")]
+hook: BOOL.and ()
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: BOOL.not (1)
+    function: LblisKResult{} (1:0)
+    rule: 3264 1
+      VarKResult = kore[\dv{SortInt{}}("0")]
+    arg: kore[\dv{SortBool{}}("true")]
+  hook result: kore[\dv{SortBool{}}("false")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 3141 false
+rule: 3142 10
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0"))))))]
+  Var'Unds'DotVar2 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("7")]
+  Var'Unds'Gen1 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen2 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen3 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen4 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen5 = kore[Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}()]
+  VarV = kore[\dv{SortInt{}}("0")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblret'LParUndsRParUnds'REG-SYNTAX'Unds'ControlCommand'Unds'Int{}(\dv{SortInt{}}("0")),dotk{}())),Lbl'-LT-'pc'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r0'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r1'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'r3'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'imem'-GT-'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),Lblbr'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand'Unds'Address'Unds'Address{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("3")),Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("6")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr1'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("0"),Lblle'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("0")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),Lblnot'UndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand{}(Lblr2'Unds'REG-SYNTAX'Unds'Register{}(),Lblr2'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("6"),Lblret'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Operand{}(Lblr1'Unds'REG-SYNTAX'Unds'Register{}()))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),Lbladd'UndsCommUndsCommUndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Register'Unds'Operand'Unds'Operand{}(Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),Lblr0'Unds'REG-SYNTAX'Unds'Register{}(),\dv{SortInt{}}("-1")))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),Lbljump'UndsUnds'REG-SYNTAX'Unds'Instruction'Unds'Address{}(Lblabs'LParUndsRParUnds'REG-SYNTAX'Unds'Address'Unds'Int{}(\dv{SortInt{}}("0")))))),Lbl'-LT-'dmem'-GT-'{}(Lbl'Stop'SMap'Unds'SMAP'Unds'SMap{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

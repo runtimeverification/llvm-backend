@@ -1,0 +1,181 @@
+version: 9
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'Stop'Map{}()]
+  VarM2 = kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'Stop'Map{}()]
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'Stop'Map{}()]
+  VarM2 = kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'Stop'Map{}()]
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("5")]
+  arg: kore[\dv{SortInt{}}("6")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("4")]
+  arg: kore[\dv{SortInt{}}("5")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("11")]
+  arg: kore[\dv{SortInt{}}("12")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("9")]
+  arg: kore[\dv{SortInt{}}("10")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))]
+  VarM2 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("3")]
+  arg: kore[\dv{SortInt{}}("4")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))]
+  VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))]
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("7")]
+  arg: kore[\dv{SortInt{}}("8")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))]
+  VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))]
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+  VarM2 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[\dv{SortInt{}}("3")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3"))]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3"))]
+  VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3"))]
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+  VarM2 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("2")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))]
+function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Unds'Map{} ()
+rule: 185 2
+  VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))]
+  VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))]
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+  arg: kore[Lbl'Stop'Map{}()]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+  arg: kore[Lbl'Stop'Map{}()]
+hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3"))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
+function: LblinitGeneratedTopCell{} ()
+rule: 154 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
+function: LblinitKCell{} (0)
+rule: 155 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3"))]
+rule: 199 1
+  VarK = kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3"))]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 153 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 119 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
+  VarKey = kore[\dv{SortInt{}}("3")]
+  VarVal = kore[\dv{SortInt{}}("4")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("4"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
