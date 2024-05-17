@@ -40,6 +40,7 @@ Options:
   --mutable-bytes                   Use the faster, unsound (mutable) semantics for objects of sort
                                     Bytes at run time, rather than the slower, sound
                                     (immutable) that are enabled by default.
+  --hidden-visibility               Set the visibility of all global symbols in generated code to "hidden"
   -O[0123]                          Set the optimization level for code generation.
 
 Any option not listed above will be passed through to clang; use '--' to
@@ -179,6 +180,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     --mutable-bytes)
       codegen_flags+=("--mutable-bytes")
+      shift
+      ;;
+    --hidden-visibility)
+      codegen_flags+=("--hidden-visibility")
+      kompile_clang_flags+=("--hidden-visibility")
       shift
       ;;
     -O*)
