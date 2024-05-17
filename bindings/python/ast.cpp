@@ -178,6 +178,8 @@ void bind_ast(py::module_ &m) {
           py::init(&kore_axiom_declaration::create),
           py::arg("is_claim") = false)
       .def_property_readonly("is_claim", &kore_axiom_declaration::is_claim)
+      .def_property_readonly(
+          "is_required", &kore_axiom_declaration::is_required)
       .def("add_pattern", &kore_axiom_declaration::add_pattern)
       .def_property_readonly("pattern", &kore_axiom_declaration::get_pattern)
       .def_property_readonly("requires", &kore_axiom_declaration::get_requires);
