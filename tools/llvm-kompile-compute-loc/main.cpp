@@ -27,20 +27,14 @@ cl::opt<bool> is_k_line(
     cl::init(false), cl::cat(loc_cat));
 
 std::optional<int64_t>
-get_k_location(std::string &definition, int const &line) {
+get_k_location(std::string &definition, int const &ordinal) {
   // Parse the definition.kore to get the AST.
   kllvm::parser::kore_parser parser(definition);
   auto kore_ast = parser.definition();
   kore_ast->preprocess();
 
-  // Iterate through axioms.
   auto axiom = kore_ast->get_axiom_by_ordinal(ordinal);
-  if (axiom) {
-    auto start_line = get_start_line_location(*axiom);
-    return start_line;
-  }
-
-  return std::nullopt;
+  return get_start_line_location(axiom);
 }
 
 std::optional<int64_t>
