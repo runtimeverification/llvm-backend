@@ -34,7 +34,7 @@ get_k_location(std::string &definition, int const &line) {
   kore_ast->preprocess();
 
   // Iterate through axioms.
-  auto *axiom = kore_ast->get_axiom_by_ordinal(ordinal);
+  auto axiom = kore_ast->get_axiom_by_ordinal(ordinal);
   if (axiom) {
     auto start_line = get_start_line_location(*axiom);
     return start_line;
