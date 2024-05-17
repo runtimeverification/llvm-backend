@@ -1,5 +1,6 @@
 #include "kllvm/ast/util.h"
 
+#include <algorithm>
 #include <string>
 
 using namespace kllvm;
