@@ -1,4 +1,5 @@
 #include <kllvm/ast/AST.h>
+#include <kllvm/ast/util.h>
 #include <kllvm/parser/KOREParser.h>
 
 #include <llvm/Support/CommandLine.h>
@@ -26,21 +27,6 @@ cl::opt<bool> is_k_line(
     cl::init(false), cl::cat(loc_cat));
 
 std::optional<int64_t>
-get_start_line_location(kore_axiom_declaration const &axiom) {
-  auto location_att = axiom.attributes().get(attribute_set::key::Location);
-  assert(location_att->get_arguments().size() == 1);
-
-  auto str_pattern = std::dynamic_pointer_cast<kore_string_pattern>(
-      location_att->get_arguments()[0]);
-  std::string location = str_pattern->get_contents();
-
-  size_t l_paren = location.find_first_of('(');
-  size_t first_comma = location.find_first_of(',');
-  size_t length = first_comma - l_paren - 1;
-  return std::stoi(location.substr(l_paren + 1, length));
-}
-
-std::optional<int64_t>
 get_k_location(std::string &definition, int const &line) {
   // Parse the definition.kore to get the AST.
   kllvm::parser::kore_parser parser(definition);
@@ -55,14 +41,6 @@ get_k_location(std::string &definition, int const &line) {
   }
 
   return std::nullopt;
-}
-
-// trim the string from the start
-std::string trim(std::string s) {
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c) {
-            return !std::isspace(c);
-          }));
-  return s;
 }
 
 std::optional<int64_t>
