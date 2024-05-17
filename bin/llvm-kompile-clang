@@ -151,6 +151,12 @@ if ! $save_temps; then
   trap 'rm -rf "$tmpdir"' INT TERM EXIT
 fi
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  set_visibility_hidden="$LIBDIR/libSetVisibilityHidden.dylib"
+else
+  set_visibility_hidden="$LIBDIR/libSetVisibilityHidden.so"
+fi
+
 # When building the Python AST module, there's no runtime and no main file, so
 # we skip this entire step. The library code is just C++, so we can skip
 # straight to invoking the C++ compiler.
@@ -167,7 +173,7 @@ if [ "$main" != "python_ast" ]; then
       fi
       if $visibility_hidden; then
         modhidden="$tmpdir/hidden.bc"
-        run @OPT@ "$modopt" -load-pass-plugin "$LIBDIR/libSetVisibilityHidden.so" -set-visibility-hidden -o "$modhidden"
+        run @OPT@ "$modopt" -load-pass-plugin "$set_visibility_hidden" -set-visibility-hidden -o "$modhidden"
         modopt="$modhidden"
       fi
       run @LLC@ \
@@ -180,7 +186,7 @@ if [ "$main" != "python_ast" ]; then
         tmp="$tmpdir/$(basename "$file").o"
         if $visibility_hidden; then
           tmphidden="$tmpdir/$(basename "$file").hidden.bc"
-	  run @OPT@ "$file" -load-pass-plugin "$LIBDIR/libSetVisibilityHidden.so" -set-visibility-hidden -o "$tmphidden"
+	  run @OPT@ "$file" -load-pass-plugin "$set_visibility_hidden" -set-visibility-hidden -o "$tmphidden"
 	  file="$tmphidden"
         fi
         run @LLC@ \
