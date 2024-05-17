@@ -2,7 +2,7 @@ kllvm_add_tool(llvm-kompile-codegen
   main.cpp
 )
 
-target_link_libraries(llvm-kompile-codegen PUBLIC Codegen Parser AST gmp mpfr yaml)
+target_link_libraries(llvm-kompile-codegen PUBLIC Codegen Parser AST SetVisibilityHiddenInternal gmp mpfr yaml)
 
 install(
   TARGETS llvm-kompile-codegen

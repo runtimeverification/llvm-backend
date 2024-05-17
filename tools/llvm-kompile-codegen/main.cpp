@@ -66,6 +66,11 @@ cl::opt<bool> mutable_bytes(
     cl::desc("Enable unsound reference semantics for objects of sort Bytes"),
     cl::init(false), cl::cat(codegen_tool_cat));
 
+cl::opt<bool> hidden_visibility(
+    "hidden-visibility",
+    cl::desc("Set visibility of all global symbols to hidden"), cl::init(false),
+    cl::cat(codegen_tool_cat));
+
 cl::opt<bool> safe_partial(
     "safe-partial",
     cl::desc("Do not terminate the process when a partial function is "
@@ -225,7 +230,7 @@ int main(int argc, char **argv) {
   }
 
   if (!no_optimize) {
-    apply_kllvm_opt_passes(*mod);
+    apply_kllvm_opt_passes(*mod, hidden_visibility);
   }
 
   perform_output([&](auto &os) {
