@@ -230,7 +230,7 @@ llvm::BasicBlock *proof_event::argument(
  */
 
 llvm::BasicBlock *proof_event::rewrite_event_pre(
-    kore_axiom_declaration *axiom, uint64_t arity,
+    kore_axiom_declaration const &axiom, uint64_t arity,
     std::map<std::string, kore_variable_pattern *> vars,
     llvm::StringMap<llvm::Value *> const &subst,
     llvm::BasicBlock *current_block) {
@@ -242,7 +242,7 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
       = event_prelude("rewrite_pre", current_block);
 
   emit_write_uint64(outputFile, detail::word(0x22), true_block);
-  emit_write_uint64(outputFile, axiom->get_ordinal(), true_block);
+  emit_write_uint64(outputFile, axiom.get_ordinal(), true_block);
   emit_write_uint64(outputFile, arity, true_block);
   for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
     auto key = entry->getKey();
@@ -321,7 +321,7 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
 }
 
 llvm::BasicBlock *proof_event::side_condition_event_pre(
-    kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
+    kore_axiom_declaration const &axiom, std::vector<llvm::Value *> const &args,
     llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
@@ -330,14 +330,14 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
   auto [true_block, merge_block, outputFile]
       = event_prelude("side_condition_pre", current_block);
 
-  size_t ordinal = axiom->get_ordinal();
+  size_t ordinal = axiom.get_ordinal();
   size_t arity = args.size();
 
   emit_write_uint64(outputFile, detail::word(0xEE), true_block);
   emit_write_uint64(outputFile, ordinal, true_block);
   emit_write_uint64(outputFile, arity, true_block);
 
-  kore_pattern *pattern = axiom->get_requires();
+  kore_pattern *pattern = axiom.get_requires();
   std::map<std::string, kore_variable_pattern *> vars;
   pattern->mark_variables(vars);
 
@@ -360,7 +360,7 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 }
 
 llvm::BasicBlock *proof_event::side_condition_event_post(
-    kore_axiom_declaration *axiom, llvm::Value *check_result,
+    kore_axiom_declaration const &axiom, llvm::Value *check_result,
     llvm::BasicBlock *current_block) {
   if (!proof_hint_instrumentation) {
     return current_block;
@@ -369,7 +369,7 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
   auto [true_block, merge_block, outputFile]
       = event_prelude("side_condition_post", current_block);
 
-  size_t ordinal = axiom->get_ordinal();
+  size_t ordinal = axiom.get_ordinal();
 
   emit_write_uint64(outputFile, detail::word(0x33), true_block);
   emit_write_uint64(outputFile, ordinal, true_block);
