@@ -3,8 +3,6 @@
 
 #include <kllvm/ast/AST.h>
 
-#include <string>
-
 namespace kllvm {
 
 /*

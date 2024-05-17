@@ -1,5 +1,7 @@
 #include "kllvm/ast/util.h"
 
+#include <string>
+
 using namespace kllvm;
 
 [[nodiscard]] std::optional<int64_t>
