@@ -1023,7 +1023,7 @@ public:
   [[nodiscard]] std::list<kore_axiom_declaration *> const &get_axioms() const {
     return axioms_;
   }
-  [[nodiscard]] kore_axiom_declaration
+  [[nodiscard]] kore_axiom_declaration const &
   get_axiom_by_ordinal(size_t ordinal) const {
     return *ordinals_.at(ordinal);
   }
