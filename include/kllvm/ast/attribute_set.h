@@ -58,6 +58,7 @@ public:
     MacroRec,
     Nat,
     NonExecutable,
+    Ordinal,
     Priorities,
     Priority,
     Right,
