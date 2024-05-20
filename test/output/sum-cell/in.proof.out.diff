@@ -1,0 +1,43 @@
+version: 9
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[\dv{SortInt{}}("42")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+function: LblinitGeneratedTopCell{} ()
+rule: 156 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+function: LblinitKCell{} (0)
+rule: 157 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+function: Lblproject'Coln'Int{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[\dv{SortInt{}}("42")]
+rule: 198 1
+  VarK = kore[\dv{SortInt{}}("42")]
+function: LblinitSumCell{} (1)
+rule: 158 0
+function: LblinitGeneratedCounterCell{} (2)
+rule: 155 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("42"),dotk{}())),Lbl'-LT-'sum'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 121 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  VarI = kore[\dv{SortInt{}}("42")]
+  VarSUM = kore[\dv{SortInt{}}("0")]
+hook: INT.add (1:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (1:0)
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("42")]
+hook result: kore[\dv{SortInt{}}("42")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'sum'-GT-'{}(\dv{SortInt{}}("42")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

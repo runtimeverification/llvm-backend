@@ -1,0 +1,44 @@
+version: 9
+function: Lblbar1'LParUndsRParUnds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo'Unds'Foo{} ()
+rule: 92 1
+  VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+function: Lblbar2'Unds'fun{} ()
+rule: 93 1
+  VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+function: Lblbaz1'LParUndsRParUnds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo'Unds'Foo{} ()
+rule: 94 1
+  VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+function: Lblbaz2'LParUndsRParUnds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo'Unds'Foo{} ()
+rule: 95 1
+  VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 98 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
+function: LblinitKCell{} (0)
+rule: 99 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+rule: 139 1
+  VarK = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 97 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
