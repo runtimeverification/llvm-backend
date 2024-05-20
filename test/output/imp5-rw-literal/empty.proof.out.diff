@@ -1,0 +1,38 @@
+version: 9
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}())]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 249 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}())]
+function: LblinitKCell{} (0)
+rule: 250 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}())]
+function: Lblproject'Coln'Pgm{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}()]
+rule: 318 1
+  VarK = kore[Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}()]
+function: LblinitSCell{} (1)
+rule: 251 0
+function: LblinitGeneratedCounterCell{} (2)
+rule: 248 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'LBraRBraUnds'IMP5-RW-LITERAL-SYNTAX'Unds'Block{}(),dotk{}())),Lbl'-LT-'s'-GT-'{}(Lbl'UndsCommUndsCommUndsCommUndsCommUndsCommUndsUnds'IMP5-RW-LITERAL'Unds'Vars5'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 224 3
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'s'-GT-'{}(Lbl'UndsCommUndsCommUndsCommUndsCommUndsCommUndsUnds'IMP5-RW-LITERAL'Unds'Vars5'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}()))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'s'-GT-'{}(Lbl'UndsCommUndsCommUndsCommUndsCommUndsCommUndsUnds'IMP5-RW-LITERAL'Unds'Vars5'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt'Unds'IInt{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}(),Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'IInt{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

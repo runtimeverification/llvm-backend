@@ -1,0 +1,47 @@
+version: 9
+function: Lblid'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'JSON'Unds'JSON{} ()
+rule: 216 1
+  VarJ = kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+hook: JSON.string2json ()
+  function: LblString2JSON{} ()
+    hook: JSON.json2string (0)
+      function: LblJSON2String{} (0)
+      arg: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+    hook result: kore[\dv{SortString{}}("{\x22key\x22:2}")]
+  arg: kore[\dv{SortString{}}("{\x22key\x22:2}")]
+hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
+function: LblinitGeneratedTopCell{} ()
+rule: 218 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
+function: LblinitKCell{} (0)
+rule: 219 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
+rule: 276 1
+  VarK = kore[Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 217 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 170 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  VarI = kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
