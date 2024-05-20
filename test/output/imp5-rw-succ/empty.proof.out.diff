@@ -1,0 +1,56 @@
+version: 9
+hook: MAP.element ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
+hook: MAP.unit ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 533 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
+function: LblinitTCell{} (0)
+rule: 536 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
+function: LblinitKCell{} (0)
+rule: 534 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
+function: Lblproject'Coln'Pgm{} (0:0)
+  hook: MAP.lookup (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}()]
+rule: 644 1
+  VarK = kore[Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}()]
+function: LblinitX1Cell{} (1)
+rule: 537 0
+function: LblinitX2Cell{} (2)
+rule: 538 0
+function: LblinitX3Cell{} (3)
+rule: 539 0
+function: LblinitX4Cell{} (4)
+rule: 540 0
+function: LblinitX5Cell{} (5)
+rule: 541 0
+function: LblinitRetCell{} (6)
+rule: 535 0
+function: LblinitGeneratedCounterCell{} (1)
+rule: 532 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}(),dotk{}())),Lbl'-LT-'x1'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x2'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x3'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x4'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x5'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'ret'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 467 8
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar2 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'x1'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'x2'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'x3'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'x4'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'x5'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'ret'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'x1'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x2'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x3'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x4'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'x5'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}()),Lbl'-LT-'ret'-GT-'{}(Lbl0'Unds'INTERNAL-DOMAIN-SYNTAX'Unds'Nat{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

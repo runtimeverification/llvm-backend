@@ -162,6 +162,22 @@ config.substitutions.extend([
         fi
     ''')),
 
+    ('%check-dir-proof-out', one_line('''
+        %kore-rich-header %s > %t.header.bin
+        for out in %test-dir-out/*.proof.out.diff; do
+            in=%test-dir-in/`basename $out .proof.out.diff`.in
+            rm -f %t.out.bin
+            hint=%t.`basename $out .proof.out.diff`.hint
+            %t.interpreter $in -1 $hint --proof-output
+            %kore-proof-trace --verbose --expand-terms %t.header.bin $hint | diff - $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
+                exit 1
+            fi
+        done
+    ''')),
+
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
