@@ -45,10 +45,11 @@ public:
   virtual int peek(void) = 0;
   virtual uint64_t peek_word(void) = 0;
   bool check_word(uint64_t w) {
-    if (!has_word()) {
-      return false;
+    uint64_t next = 0;
+    if (read_uint64(next)) {
+      return next == w;
     }
-    return peek_word() == w;
+    return false;
   }
   virtual bool read_uint32(uint32_t &i) = 0;
   virtual bool read_uint64(uint64_t &i) = 0;
@@ -58,7 +59,8 @@ public:
     if (eof()) {
       return false;
     }
-    return read();
+    b = read();
+    return true;
   }
 };
 
@@ -167,7 +169,7 @@ public:
     return off >= 8;
   }
 
-  bool eof(void) override { return file_.eof(); }
+  bool eof(void) override { return file_.eof() || file_.peek() == EOF; }
 
   int peek(void) override { return file_.peek(); }
 
