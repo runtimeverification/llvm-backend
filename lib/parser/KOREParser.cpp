@@ -402,6 +402,16 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
   return result;
 }
 
+ptr<kore_symbol> kore_parser::symbol() {
+  std::string symbol = consume(token::Id);
+  consume(token::LeftBrace);
+  auto pat = kore_composite_pattern::create(symbol);
+  sorts(pat->get_constructor());
+  pat->get_constructor()->init_pattern_arguments();
+  consume(token::RightBrace);
+  return std::make_unique<kore_symbol>(*pat->get_constructor());
+}
+
 ptr<kore_composite_pattern>
 kore_parser::application_pattern_internal(std::string const &name) {
   consume(token::LeftBrace);

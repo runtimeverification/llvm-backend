@@ -373,9 +373,12 @@ void bind_parser(py::module_ &mod) {
           "pattern",
           [](kore_parser &parser) { return std::shared_ptr(parser.pattern()); })
       .def("sort", [](kore_parser &parser) { return parser.sort(); })
-      .def("definition", [](kore_parser &parser) {
-        return std::shared_ptr(parser.definition());
-      });
+      .def(
+          "definition",
+          [](kore_parser &parser) {
+            return std::shared_ptr(parser.definition());
+          })
+      .def("symbol", &kore_parser::symbol);
 }
 
 void bind_proof_trace(py::module_ &m) {
