@@ -1,13 +1,13 @@
-version: 9
-hook: MAP.element ()
+version: 10
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lblint'UndsSClnUndsUnds'IMP5-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids'QuotRBraUnds'Ids{}()))))),Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("12345")),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("10"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("100"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("200"))),Lblif'LParUndsRParUnds'else'UndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block'Unds'Block{}(Lbl'Unds-GT-UndsUnds'IMP5-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1")))))))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblint'UndsSClnUndsUnds'IMP5-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids'QuotRBraUnds'Ids{}()))))),Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("12345")),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("10"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("100"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("200"))),Lblif'LParUndsRParUnds'else'UndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block'Unds'Block{}(Lbl'Unds-GT-UndsUnds'IMP5-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1"))))))))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblint'UndsSClnUndsUnds'IMP5-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids'QuotRBraUnds'Ids{}()))))),Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("12345")),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("10"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("100"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("200"))),Lblif'LParUndsRParUnds'else'UndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block'Unds'Block{}(Lbl'Unds-GT-UndsUnds'IMP5-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1"))))))))]
@@ -22,7 +22,7 @@ function: LblinitKCell{} (0)
 rule: 723 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblint'UndsSClnUndsUnds'IMP5-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids'QuotRBraUnds'Ids{}()))))),Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("12345")),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("10"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("100"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("200"))),Lblif'LParUndsRParUnds'else'UndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block'Unds'Block{}(Lbl'Unds-GT-UndsUnds'IMP5-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1"))))))))]
 function: Lblproject'Coln'Pgm{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblint'UndsSClnUndsUnds'IMP5-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP5-SYNTAX'Unds'Ids'Unds'Id2'Unds'Ids'QuotRBraUnds'Ids{}()))))),Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx1'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("12345")),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("10"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("100"))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("200"))),Lblif'LParUndsRParUnds'else'UndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block'Unds'Block{}(Lbl'Unds-GT-UndsUnds'IMP5-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1"))))))))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]
@@ -66,9 +66,9 @@ rule: 684 5
   VarS2 = kore[Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("10"))]
 side condition entry: 677 1
   VarHOLE = kore[\dv{SortInt{}}("12345")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("12345")]
@@ -89,9 +89,9 @@ rule: 679 9
   VarI = kore[\dv{SortInt{}}("12345")]
 side condition entry: 677 1
   VarHOLE = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("10")]
@@ -112,9 +112,9 @@ rule: 680 9
   VarI = kore[\dv{SortInt{}}("10")]
 side condition entry: 677 1
   VarHOLE = kore[\dv{SortInt{}}("100")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("100")]
@@ -135,9 +135,9 @@ rule: 681 9
   VarI = kore[\dv{SortInt{}}("100")]
 side condition entry: 677 1
   VarHOLE = kore[\dv{SortInt{}}("200")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("200")]
@@ -158,9 +158,9 @@ rule: 682 9
   VarI = kore[\dv{SortInt{}}("200")]
 side condition entry: 685 1
   VarHOLE = kore[Lbl'Unds-GT-UndsUnds'IMP5-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}())]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lbl'Unds-GT-UndsUnds'IMP5-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()),dotk{}())]
@@ -178,9 +178,9 @@ rule: 685 6
   VarK2 = kore[Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1"))))]
 side condition entry: 664 1
   VarHOLE = kore[Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())]
@@ -207,7 +207,7 @@ rule: 671 9
   VarI = kore[\dv{SortInt{}}("10")]
 side condition entry: 626 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -224,9 +224,9 @@ rule: 626 6
   VarK1 = kore[Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()]
 side condition entry: 664 1
   VarHOLE = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("10")]
@@ -238,8 +238,8 @@ side condition exit: 664 false
 side condition entry: 665 2
   VarHOLE = kore[Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()]
   VarK0 = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
-  hook: BOOL.and (0)
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
     function: LblisKResult{} (0:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("10")]
@@ -247,7 +247,7 @@ hook: BOOL.and ()
     arg: kore[\dv{SortBool{}}("true")]
   hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())]
@@ -274,7 +274,7 @@ rule: 672 9
   VarI = kore[\dv{SortInt{}}("100")]
 side condition entry: 627 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("100")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -291,9 +291,9 @@ rule: 627 6
   VarK0 = kore[\dv{SortInt{}}("10")]
 side condition entry: 664 1
   VarHOLE = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("10")]
@@ -305,8 +305,8 @@ side condition exit: 664 false
 side condition entry: 665 2
   VarHOLE = kore[\dv{SortInt{}}("100")]
   VarK0 = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
-  hook: BOOL.and (0)
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
     function: LblisKResult{} (0:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("10")]
@@ -314,7 +314,7 @@ hook: BOOL.and ()
     arg: kore[\dv{SortBool{}}("true")]
   hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("100")]
@@ -329,14 +329,14 @@ rule: 666 5
   Var'Unds'DotVar2 = kore[kseq{}(Lbl'Hash'freezerif'LParUndsRParUnds'else'UndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block'Unds'Block0'Unds'{}(kseq{}(Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("0"))),dotk{}()),kseq{}(Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1")))),dotk{}())),dotk{}())]
   VarI1 = kore[\dv{SortInt{}}("10")]
   VarI2 = kore[\dv{SortInt{}}("100")]
-hook: INT.gt (0:0:0:0)
+hook: INT.gt Lbl'Unds-GT-'Int'Unds'{} (0:0:0:0)
   function: Lbl'Unds-GT-'Int'Unds'{} (0:0:0:0)
   arg: kore[\dv{SortInt{}}("10")]
   arg: kore[\dv{SortInt{}}("100")]
 hook result: kore[\dv{SortBool{}}("false")]
 side condition entry: 630 1
   Var'Unds'Gen3 = kore[\dv{SortBool{}}("false")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -354,9 +354,9 @@ rule: 630 7
   VarK2 = kore[Lbl'LBraUndsRBraUnds'IMP5-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))),Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1"))))]
 side condition entry: 685 1
   VarHOLE = kore[\dv{SortBool{}}("false")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortBool{}}("false")]
@@ -390,9 +390,9 @@ rule: 684 5
   VarS2 = kore[Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()))]
 side condition entry: 677 1
   VarHOLE = kore[Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lbl'Unds'-'UndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()),dotk{}())]
@@ -409,9 +409,9 @@ rule: 677 5
   VarK0 = kore[Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()]
 side condition entry: 641 1
   VarHOLE = kore[Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())]
@@ -438,7 +438,7 @@ rule: 672 9
   VarI = kore[\dv{SortInt{}}("100")]
 side condition entry: 613 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("100")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -455,9 +455,9 @@ rule: 613 6
   VarK1 = kore[Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()]
 side condition entry: 641 1
   VarHOLE = kore[\dv{SortInt{}}("100")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("100")]
@@ -469,8 +469,8 @@ side condition exit: 641 false
 side condition entry: 642 2
   VarHOLE = kore[Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()]
   VarK0 = kore[\dv{SortInt{}}("100")]
-hook: BOOL.and ()
-  hook: BOOL.and (0)
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
     function: LblisKResult{} (0:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("100")]
@@ -478,7 +478,7 @@ hook: BOOL.and ()
     arg: kore[\dv{SortBool{}}("true")]
   hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())]
@@ -505,7 +505,7 @@ rule: 671 9
   VarI = kore[\dv{SortInt{}}("10")]
 side condition entry: 614 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -522,9 +522,9 @@ rule: 614 6
   VarK0 = kore[\dv{SortInt{}}("100")]
 side condition entry: 641 1
   VarHOLE = kore[\dv{SortInt{}}("100")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("100")]
@@ -536,8 +536,8 @@ side condition exit: 641 false
 side condition entry: 642 2
   VarHOLE = kore[\dv{SortInt{}}("10")]
   VarK0 = kore[\dv{SortInt{}}("100")]
-hook: BOOL.and ()
-  hook: BOOL.and (0)
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
     function: LblisKResult{} (0:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("100")]
@@ -545,7 +545,7 @@ hook: BOOL.and ()
     arg: kore[\dv{SortBool{}}("true")]
   hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("10")]
@@ -560,14 +560,14 @@ rule: 643 5
   Var'Unds'DotVar2 = kore[kseq{}(Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp1'Unds'{}(kseq{}(Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())),kseq{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())),kseq{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1")),dotk{}())))]
   VarI1 = kore[\dv{SortInt{}}("100")]
   VarI2 = kore[\dv{SortInt{}}("10")]
-hook: INT.sub (0:0:0:0)
+hook: INT.sub Lbl'Unds'-Int'Unds'{} (0:0:0:0)
   function: Lbl'Unds'-Int'Unds'{} (0:0:0:0)
   arg: kore[\dv{SortInt{}}("100")]
   arg: kore[\dv{SortInt{}}("10")]
 hook result: kore[\dv{SortInt{}}("90")]
 side condition entry: 623 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("90")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -584,9 +584,9 @@ rule: 623 6
   VarK0 = kore[Lblx3'Unds'IMP5-SYNTAX'Unds'Id2{}()]
 side condition entry: 677 1
   VarHOLE = kore[\dv{SortInt{}}("90")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("90")]
@@ -607,9 +607,9 @@ rule: 681 9
   VarI = kore[\dv{SortInt{}}("90")]
 side condition entry: 677 1
   VarHOLE = kore[Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}())]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lbl'UndsPlusUndsUnds'IMP5-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()),dotk{}())]
@@ -626,9 +626,9 @@ rule: 677 5
   VarK0 = kore[Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}()]
 side condition entry: 638 1
   VarHOLE = kore[Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}()]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())]
@@ -655,7 +655,7 @@ rule: 673 9
   VarI = kore[\dv{SortInt{}}("200")]
 side condition entry: 611 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("200")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -672,9 +672,9 @@ rule: 611 6
   VarK1 = kore[Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()]
 side condition entry: 638 1
   VarHOLE = kore[\dv{SortInt{}}("200")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("200")]
@@ -686,8 +686,8 @@ side condition exit: 638 false
 side condition entry: 639 2
   VarHOLE = kore[Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}()]
   VarK0 = kore[\dv{SortInt{}}("200")]
-hook: BOOL.and ()
-  hook: BOOL.and (0)
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
     function: LblisKResult{} (0:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("200")]
@@ -695,7 +695,7 @@ hook: BOOL.and ()
     arg: kore[\dv{SortBool{}}("true")]
   hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 757 1
       VarK = kore[kseq{}(Lblx2'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())]
@@ -722,7 +722,7 @@ rule: 671 9
   VarI = kore[\dv{SortInt{}}("10")]
 side condition entry: 612 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("10")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -739,9 +739,9 @@ rule: 612 6
   VarK0 = kore[\dv{SortInt{}}("200")]
 side condition entry: 638 1
   VarHOLE = kore[\dv{SortInt{}}("200")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("200")]
@@ -753,8 +753,8 @@ side condition exit: 638 false
 side condition entry: 639 2
   VarHOLE = kore[\dv{SortInt{}}("10")]
   VarK0 = kore[\dv{SortInt{}}("200")]
-hook: BOOL.and ()
-  hook: BOOL.and (0)
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
     function: LblisKResult{} (0:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("200")]
@@ -762,7 +762,7 @@ hook: BOOL.and ()
     arg: kore[\dv{SortBool{}}("true")]
   hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("10")]
@@ -777,14 +777,14 @@ rule: 640 5
   Var'Unds'DotVar2 = kore[kseq{}(Lbl'Hash'freezer'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp1'Unds'{}(kseq{}(Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}(),dotk{}())),kseq{}(Lbl'UndsEqlsUndsSClnUnds'IMP5-SYNTAX'Unds'Stmt'Unds'Id2'Unds'AExp{}(Lblret'Unds'IMP5-SYNTAX'Unds'Id2{}(),\dv{SortInt{}}("1")),dotk{}()))]
   VarI1 = kore[\dv{SortInt{}}("200")]
   VarI2 = kore[\dv{SortInt{}}("10")]
-hook: INT.add (0:0:0:0)
+hook: INT.add Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
   function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
   arg: kore[\dv{SortInt{}}("200")]
   arg: kore[\dv{SortInt{}}("10")]
 hook result: kore[\dv{SortInt{}}("210")]
 side condition entry: 623 1
   Var'Unds'Gen3 = kore[\dv{SortInt{}}("210")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   function: LblisKResult{} (1)
   rule: 758 1
@@ -801,9 +801,9 @@ rule: 623 6
   VarK0 = kore[Lblx4'Unds'IMP5-SYNTAX'Unds'Id2{}()]
 side condition entry: 677 1
   VarHOLE = kore[\dv{SortInt{}}("210")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("210")]
@@ -824,9 +824,9 @@ rule: 682 9
   VarI = kore[\dv{SortInt{}}("210")]
 side condition entry: 677 1
   VarHOLE = kore[\dv{SortInt{}}("1")]
-hook: BOOL.and ()
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
-  hook: BOOL.not (1)
+  hook: BOOL.not LblnotBool'Unds'{} (1)
     function: LblisKResult{} (1:0)
     rule: 758 1
       VarKResult = kore[\dv{SortInt{}}("1")]

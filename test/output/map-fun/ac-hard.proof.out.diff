@@ -1,20 +1,20 @@
-version: 9
-hook: MAP.element ()
+version: 10
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("5")]
   arg: kore[\dv{SortInt{}}("6")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("4")]
   arg: kore[\dv{SortInt{}}("5")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("11")]
   arg: kore[\dv{SortInt{}}("12")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("9")]
   arg: kore[\dv{SortInt{}}("10")]
@@ -23,12 +23,12 @@ function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Und
 rule: 185 2
   VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))]
   VarM2 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))]
 hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("3")]
   arg: kore[\dv{SortInt{}}("4")]
@@ -37,12 +37,12 @@ function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Und
 rule: 185 2
   VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))]
   VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))]
   arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
 hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("7")]
   arg: kore[\dv{SortInt{}}("8")]
@@ -51,7 +51,7 @@ function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Und
 rule: 185 2
   VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))]
   VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))]
   arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
@@ -60,12 +60,12 @@ function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Und
 rule: 185 2
   VarM1 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
   VarM2 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))]
 hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("2")]
   arg: kore[\dv{SortInt{}}("3")]
@@ -74,7 +74,7 @@ function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Und
 rule: 185 2
   VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3"))]
   VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3"))]
   arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
@@ -83,12 +83,12 @@ function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Und
 rule: 185 2
   VarM1 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
   VarM2 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))]
 hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("1")]
   arg: kore[\dv{SortInt{}}("2")]
@@ -97,20 +97,20 @@ function: Lblmerge'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'Map'Unds'Map'Und
 rule: 185 2
   VarM1 = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))]
   VarM2 = kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))]
   arg: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
 hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10")))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3"))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
@@ -122,7 +122,7 @@ function: LblinitKCell{} (0)
 rule: 155 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("7"),\dv{SortInt{}}("8"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("5"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("6"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("11"),\dv{SortInt{}}("12"))),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("9"),\dv{SortInt{}}("10"))),\dv{SortInt{}}("3")))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]

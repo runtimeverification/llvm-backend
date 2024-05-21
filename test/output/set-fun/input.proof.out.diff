@@ -1,22 +1,22 @@
-version: 9
-hook: SET.element ()
+version: 10
+hook: SET.element LblSetItem{} ()
   function: LblSetItem{} ()
   arg: kore[Lblc'Unds'SET-FUN-SYNTAX'Unds'Key{}()]
 hook result: kore[LblSetItem{}(Lblc'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
-hook: SET.element ()
+hook: SET.element LblSetItem{} ()
   function: LblSetItem{} ()
   arg: kore[Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}()]
 hook result: kore[LblSetItem{}(Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
-hook: SET.element ()
+hook: SET.element LblSetItem{} ()
   function: LblSetItem{} ()
   arg: kore[Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}()]
 hook result: kore[LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
-hook: SET.concat ()
+hook: SET.concat Lbl'Unds'Set'Unds'{} ()
   function: Lbl'Unds'Set'Unds'{} ()
   arg: kore[LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
   arg: kore[LblSetItem{}(Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
 hook result: kore[Lbl'Unds'Set'Unds'{}(LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}()),LblSetItem{}(Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}()))]
-hook: SET.concat ()
+hook: SET.concat Lbl'Unds'Set'Unds'{} ()
   function: Lbl'Unds'Set'Unds'{} ()
   arg: kore[Lbl'Unds'Set'Unds'{}(LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}()),LblSetItem{}(Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}()))]
   arg: kore[LblSetItem{}(Lblc'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
@@ -25,24 +25,24 @@ function: Lbl'Hash'hasKey'LParUndsCommUndsRParUnds'SET-FUN-SYNTAX'Unds'Bool'Unds
 rule: 98 2
   VarK = kore[Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}()]
   VarS = kore[Lbl'Unds'Set'Unds'{}(Lbl'Unds'Set'Unds'{}(LblSetItem{}(Lblc'Unds'SET-FUN-SYNTAX'Unds'Key{}()),LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())),LblSetItem{}(Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}()))]
-hook: SET.in ()
+hook: SET.in LblSet'Coln'in{} ()
   function: LblSet'Coln'in{} ()
-    hook: SET.element (0)
+    hook: SET.element LblSetItem{} (0)
       function: LblSetItem{} (0)
       arg: kore[Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}()]
     hook result: kore[LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
   arg: kore[LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
   arg: kore[Lbl'Unds'Set'Unds'{}(Lbl'Unds'Set'Unds'{}(LblSetItem{}(Lblc'Unds'SET-FUN-SYNTAX'Unds'Key{}()),LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())),LblSetItem{}(Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}()))]
 hook result: kore[\dv{SortBool{}}("false")]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
@@ -54,7 +54,7 @@ function: LblinitKCell{} (0)
 rule: 103 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]
