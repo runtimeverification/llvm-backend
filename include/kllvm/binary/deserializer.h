@@ -75,8 +75,6 @@ public:
       : ptr_(ptr)
       , end_(end) { }
 
-  virtual ~proof_trace_memory_buffer() = default;
-
   bool read(void *out, size_t len) override {
     if (end_ - ptr_ < len) {
       return false;
@@ -153,8 +151,6 @@ private:
 public:
   proof_trace_file_buffer(std::ifstream &file)
       : file_(file) { }
-
-  virtual ~proof_trace_file_buffer() = default;
 
   bool read(void *ptr, size_t len) override {
     file_.read((char *)ptr, len);

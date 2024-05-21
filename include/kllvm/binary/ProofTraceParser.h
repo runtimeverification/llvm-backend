@@ -269,7 +269,7 @@ private:
 
   sptr<kore_pattern>
   parse_kore_term(proof_trace_buffer &buffer, uint64_t &pattern_len) {
-    std::array<char, 4> magic;
+    std::array<char, 4> magic{};
     if (!buffer.read(magic.data(), sizeof(magic))) {
       return nullptr;
     }
