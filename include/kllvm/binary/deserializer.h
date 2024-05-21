@@ -8,9 +8,9 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <vector>
-
+#include <fstream>
 #include <iostream>
+#include <vector>
 
 namespace kllvm {
 
@@ -34,6 +34,170 @@ public:
   [[nodiscard]] kore_symbol *get_symbol(uint32_t offset) const {
     return symbols_[offset].get();
   };
+};
+
+class proof_trace_buffer {
+public:
+  virtual bool read(void *ptr, size_t len) = 0;
+  virtual int read(void) = 0;
+  virtual bool has_word(void) = 0;
+  virtual bool eof(void) = 0;
+  virtual int peek(void) = 0;
+  virtual uint64_t peek_word(void) = 0;
+  bool check_word(uint64_t w) {
+    if (!has_word()) {
+      return false;
+    }
+    return peek_word() == w;
+  }
+  virtual bool read_uint32(uint32_t &i) = 0;
+  virtual bool read_uint64(uint64_t &i) = 0;
+  virtual bool read_string(std::string &str) = 0;
+  virtual bool read_string(std::string &str, size_t len) = 0;
+  bool read_bool(bool &b) {
+    if (eof()) {
+      return false;
+    }
+    return read();
+  }
+};
+
+class proof_trace_memory_buffer : public proof_trace_buffer {
+private:
+  char const *ptr_;
+  char const *const end_;
+
+public:
+  proof_trace_memory_buffer(char const *ptr, char const *end)
+      : ptr_(ptr)
+      , end_(end) { }
+
+  bool read(void *out, size_t len) override {
+    if (end_ - ptr_ < len) {
+      return false;
+    }
+    memcpy(out, ptr_, len);
+    ptr_ += len;
+    return true;
+  }
+
+  int read(void) override {
+    if (ptr_ == end_) {
+      return -1;
+    }
+    return *(ptr_++);
+  }
+
+  bool has_word(void) override { return end_ - ptr_ >= 8; }
+
+  bool eof(void) override { return ptr_ == end_; }
+
+  int peek(void) override {
+    if (eof()) {
+      return -1;
+    }
+    return *ptr_;
+  }
+
+  uint64_t peek_word(void) override { return *(uint64_t *)ptr_; }
+
+  bool read_uint32(uint32_t &i) override {
+    if (end_ - ptr_ < sizeof(uint32_t)) {
+      return false;
+    }
+    i = *(uint32_t *)ptr_;
+    ptr_ += sizeof(uint32_t);
+    return true;
+  }
+
+  bool read_uint64(uint64_t &i) override {
+    if (end_ - ptr_ < sizeof(uint64_t)) {
+      return false;
+    }
+    i = *(uint64_t *)ptr_;
+    ptr_ += sizeof(uint64_t);
+    return true;
+  }
+
+  bool read_string(std::string &str) override {
+    size_t len = strnlen(ptr_, end_ - ptr_);
+    if (len == end_ - ptr_) {
+      return false;
+    }
+    str.resize(len);
+    memcpy(str.data(), ptr_, len);
+    ptr_ += len + 1;
+    return true;
+  }
+
+  bool read_string(std::string &str, size_t len) override {
+    if (end_ - ptr_ < len) {
+      return false;
+    }
+    str.resize(len);
+    memcpy(str.data(), ptr_, len);
+    ptr_ += len;
+    return true;
+  }
+};
+
+class proof_trace_file_buffer : public proof_trace_buffer {
+private:
+  std::ifstream &file_;
+
+public:
+  proof_trace_file_buffer(std::ifstream &file)
+      : file_(file) { }
+
+  bool read(void *ptr, size_t len) override {
+    file_.read((char *)ptr, len);
+    return !file_.fail();
+  }
+
+  int read(void) override { return file_.get(); }
+
+  bool has_word(void) override {
+    if (eof()) {
+      return false;
+    }
+    std::streampos pos = file_.tellg();
+    file_.seekg(0, std::ios::end);
+    std::streamoff off = file_.tellg() - pos;
+    file_.seekg(pos);
+    return off >= 8;
+  }
+
+  bool eof(void) override { return file_.eof(); }
+
+  int peek(void) override { return file_.peek(); }
+
+  uint64_t peek_word(void) override {
+    uint64_t word;
+    file_.read((char *)&word, sizeof(word));
+    file_.seekg(-sizeof(word), std::ios::cur);
+    return word;
+  }
+
+  bool read_uint32(uint32_t &i) override {
+    file_.read((char *)&i, sizeof(i));
+    return !file_.fail();
+  }
+
+  bool read_uint64(uint64_t &i) override {
+    file_.read((char *)&i, sizeof(i));
+    return !file_.fail();
+  }
+
+  bool read_string(std::string &str) override {
+    std::getline(file_, str, '\0');
+    return !file_.fail() && !file_.eof();
+  }
+
+  bool read_string(std::string &str, size_t len) override {
+    str.resize(len);
+    file_.read(str.data(), len);
+    return !file_.fail();
+  }
 };
 
 namespace detail {
