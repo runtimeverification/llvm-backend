@@ -85,7 +85,7 @@ public:
 
   int read(void) override {
     if (ptr_ == end_) {
-      return -1;
+      return EOF;
     }
     return *(ptr_++);
   }
@@ -96,7 +96,7 @@ public:
 
   int peek(void) override {
     if (eof()) {
-      return -1;
+      return EOF;
     }
     return *ptr_;
   }
