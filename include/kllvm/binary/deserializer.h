@@ -38,12 +38,13 @@ public:
 
 class proof_trace_buffer {
 public:
+  virtual ~proof_trace_buffer() = default;
   virtual bool read(void *ptr, size_t len) = 0;
-  virtual int read(void) = 0;
-  virtual bool has_word(void) = 0;
-  virtual bool eof(void) = 0;
-  virtual int peek(void) = 0;
-  virtual uint64_t peek_word(void) = 0;
+  virtual int read() = 0;
+  virtual bool has_word() = 0;
+  virtual bool eof() = 0;
+  virtual int peek() = 0;
+  virtual uint64_t peek_word() = 0;
   bool check_word(uint64_t w) {
     uint64_t next = 0;
     if (read_uint64(next)) {
@@ -74,6 +75,8 @@ public:
       : ptr_(ptr)
       , end_(end) { }
 
+  virtual ~proof_trace_memory_buffer() = default;
+
   bool read(void *out, size_t len) override {
     if (end_ - ptr_ < len) {
       return false;
@@ -83,25 +86,25 @@ public:
     return true;
   }
 
-  int read(void) override {
+  int read() override {
     if (ptr_ == end_) {
       return EOF;
     }
     return *(ptr_++);
   }
 
-  bool has_word(void) override { return end_ - ptr_ >= 8; }
+  bool has_word() override { return end_ - ptr_ >= 8; }
 
-  bool eof(void) override { return ptr_ == end_; }
+  bool eof() override { return ptr_ == end_; }
 
-  int peek(void) override {
+  int peek() override {
     if (eof()) {
       return EOF;
     }
     return *ptr_;
   }
 
-  uint64_t peek_word(void) override { return *(uint64_t *)ptr_; }
+  uint64_t peek_word() override { return *(uint64_t *)ptr_; }
 
   bool read_uint32(uint32_t &i) override {
     if (end_ - ptr_ < sizeof(uint32_t)) {
@@ -151,14 +154,16 @@ public:
   proof_trace_file_buffer(std::ifstream &file)
       : file_(file) { }
 
+  virtual ~proof_trace_file_buffer() = default;
+
   bool read(void *ptr, size_t len) override {
     file_.read((char *)ptr, len);
     return !file_.fail();
   }
 
-  int read(void) override { return file_.get(); }
+  int read() override { return file_.get(); }
 
-  bool has_word(void) override {
+  bool has_word() override {
     if (eof()) {
       return false;
     }
@@ -169,12 +174,12 @@ public:
     return off >= 8;
   }
 
-  bool eof(void) override { return file_.eof() || file_.peek() == EOF; }
+  bool eof() override { return file_.eof() || file_.peek() == EOF; }
 
-  int peek(void) override { return file_.peek(); }
+  int peek() override { return file_.peek(); }
 
-  uint64_t peek_word(void) override {
-    uint64_t word;
+  uint64_t peek_word() override {
+    uint64_t word = 0;
     file_.read((char *)&word, sizeof(word));
     file_.seekg(-sizeof(word), std::ios::cur);
     return word;

@@ -269,8 +269,8 @@ private:
 
   sptr<kore_pattern>
   parse_kore_term(proof_trace_buffer &buffer, uint64_t &pattern_len) {
-    char magic[4];
-    if (!buffer.read(magic, sizeof(magic))) {
+    std::array<char, 4> magic;
+    if (!buffer.read(magic.data(), sizeof(magic))) {
       return nullptr;
     }
     if (magic[0] != '\x7F' || magic[1] != 'K' || magic[2] != 'R'
@@ -282,9 +282,9 @@ private:
     return result;
   }
 
-  bool parse_header(proof_trace_buffer &buffer, uint32_t &version) {
-    char magic[4];
-    if (!buffer.read(magic, sizeof(magic))) {
+  static bool parse_header(proof_trace_buffer &buffer, uint32_t &version) {
+    std::array<char, 4> magic{};
+    if (!buffer.read(magic.data(), sizeof(magic))) {
       return false;
     }
     if (magic[0] != 'H' || magic[1] != 'I' || magic[2] != 'N'
@@ -463,8 +463,8 @@ private:
     return event;
   }
 
-  sptr<llvm_side_condition_end_event>
-  parse_side_condition_end(proof_trace_buffer &buffer) {
+  sptr<llvm_side_condition_end_event> static parse_side_condition_end(
+      proof_trace_buffer &buffer) {
     if (!buffer.check_word(side_condition_end_sentinel)) {
       return nullptr;
     }

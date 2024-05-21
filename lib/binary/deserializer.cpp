@@ -125,7 +125,7 @@ sptr<kore_pattern> read_v2(
     uint64_t &pattern_len) {
   switch (buffer.read()) {
   case 0: {
-    uint64_t len;
+    uint64_t len = 0;
     if (!buffer.read_uint64(len)) {
       throw std::runtime_error("invalid length");
     }
@@ -138,7 +138,7 @@ sptr<kore_pattern> read_v2(
     return kore_string_pattern::create(str);
   }
   case 1: {
-    uint32_t offset;
+    uint32_t offset = 0;
     if (!buffer.read_uint32(offset)) {
       throw std::runtime_error("invalid offset");
     }
@@ -146,7 +146,7 @@ sptr<kore_pattern> read_v2(
     // TODO: we need to check if this PR is an `inj` symbol and adjust the
     // second sort parameter of the symbol to be equal to the sort of the
     // current pattern.
-    auto symbol = header.get_symbol(offset);
+    auto *symbol = header.get_symbol(offset);
     auto new_pattern = kore_composite_pattern::create(symbol);
     for (auto i = 0; i < arity; ++i) {
       auto child = read_v2(buffer, header, pattern_len);
