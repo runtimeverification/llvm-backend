@@ -2,6 +2,7 @@ add_library(AST
   AST.cpp
   attribute_set.cpp
   pattern_matching.cpp
+  util.cpp
   definition.cpp
 )
 
