@@ -267,115 +267,32 @@ private:
   bool expand_terms_;
   [[maybe_unused]] kore_header const &header_;
 
-  // Caller needs to check that there are at least 8 bytes remaining in the
-  // stream before peeking
-  template <typename It>
-  uint64_t peek_word(It const &it) {
-    return detail::from_bytes<uint64_t>(reinterpret_cast<char const *>(&*it));
-  }
-
-  template <typename It>
-  bool check_word(It &ptr, It end, uint64_t w) {
-    if (std::distance(ptr, end) < sizeof(uint64_t)) {
-      return false;
-    }
-
-    return detail::read<uint64_t>(ptr, end) == w;
-  }
-
-  template <typename It>
-  bool read_uint32(It &ptr, It end, uint32_t &i) {
-    if (std::distance(ptr, end) < sizeof(uint32_t)) {
-      return false;
-    }
-
-    i = detail::read<uint32_t>(ptr, end);
-    return true;
-  }
-
-  template <typename It>
-  bool read_uint64(It &ptr, It end, uint64_t &i) {
-    if (std::distance(ptr, end) < sizeof(uint64_t)) {
-      return false;
-    }
-
-    i = detail::read<uint64_t>(ptr, end);
-    return true;
-  }
-
-  template <typename It>
-  bool read_string(It &ptr, It end, std::string &str) {
-    while (ptr != end) {
-      char c = detail::read<char>(ptr, end);
-      if (c == '\0') {
-        return true;
-      }
-      str.push_back(c);
-    }
-
-    return false;
-  }
-
-  template <typename It>
-  bool parse_ordinal(It &ptr, It end, uint64_t &ordinal) {
-    return read_uint64(ptr, end, ordinal);
-  }
-
-  template <typename It>
-  bool parse_arity(It &ptr, It end, uint64_t &arity) {
-    return read_uint64(ptr, end, arity);
-  }
-
-  template <typename It>
-  bool parse_bool(It &ptr, It end, bool &b) {
-    if (std::distance(ptr, end) < 1U) {
-      return false;
-    }
-
-    b = detail::read<bool>(ptr, end);
-    return true;
-  }
-
-  template <typename It>
-  sptr<kore_pattern> parse_kore_term(It &ptr, It end, uint64_t &pattern_len) {
-    if (std::distance(ptr, end) < 9U) {
+  sptr<kore_pattern>
+  parse_kore_term(proof_trace_buffer &buffer, uint64_t &pattern_len) {
+    char magic[4];
+    if (!buffer.read(magic, sizeof(magic))) {
       return nullptr;
     }
-    It old_ptr = ptr;
-    if (detail::read<char>(ptr, end) != '\x7F'
-        || detail::read<char>(ptr, end) != 'K'
-        || detail::read<char>(ptr, end) != 'R'
-        || detail::read<char>(ptr, end) != '2') {
+    if (magic[0] != '\x7F' || magic[1] != 'K' || magic[2] != 'R'
+        || magic[3] != '2') {
       return nullptr;
     }
-    auto result = detail::read_v2(ptr, end, header_);
-    pattern_len = ptr - old_ptr;
+    auto result = detail::read_v2(buffer, header_, pattern_len);
+    pattern_len += 4;
     return result;
   }
 
-  template <typename It>
-  bool parse_name(It &ptr, It end, std::string &name) {
-    return read_string(ptr, end, name);
-  }
-
-  template <typename It>
-  bool parse_location(It &ptr, It end, std::string &location) {
-    return read_string(ptr, end, location);
-  }
-
-  template <typename It>
-  bool parse_header(It &ptr, It end, uint32_t &version) {
-    if (std::distance(ptr, end) < 4U) {
+  bool parse_header(proof_trace_buffer &buffer, uint32_t &version) {
+    char magic[4];
+    if (!buffer.read(magic, sizeof(magic))) {
       return false;
     }
-    if (detail::read<char>(ptr, end) != 'H'
-        || detail::read<char>(ptr, end) != 'I'
-        || detail::read<char>(ptr, end) != 'N'
-        || detail::read<char>(ptr, end) != 'T') {
+    if (magic[0] != 'H' || magic[1] != 'I' || magic[2] != 'N'
+        || magic[3] != 'T') {
       return false;
     }
 
-    if (!read_uint32(ptr, end, version)) {
+    if (!buffer.read_uint32(version)) {
       return false;
     }
 
@@ -386,57 +303,55 @@ private:
     return true;
   }
 
-  template <typename It>
-  bool parse_variable(It &ptr, It end, sptr<llvm_rewrite_event> const &event) {
+  bool parse_variable(
+      proof_trace_buffer &buffer, sptr<llvm_rewrite_event> const &event) {
     std::string name;
-    if (!parse_name(ptr, end, name)) {
+    if (!buffer.read_string(name)) {
       return false;
     }
 
     uint64_t pattern_len = 0;
-    auto kore_term = parse_kore_term(ptr, end, pattern_len);
+    auto kore_term = parse_kore_term(buffer, pattern_len);
     if (!kore_term) {
       return false;
     }
 
     event->add_substitution(name, kore_term, pattern_len);
 
-    return check_word(ptr, end, kore_end_sentinel);
+    return buffer.check_word(kore_end_sentinel);
   }
 
-  template <typename It>
-  sptr<llvm_hook_event> parse_hook(It &ptr, It end) {
-    if (!check_word(ptr, end, hook_event_sentinel)) {
+  sptr<llvm_hook_event> parse_hook(proof_trace_buffer &buffer) {
+    if (!buffer.check_word(hook_event_sentinel)) {
       return nullptr;
     }
 
     std::string name;
-    if (!parse_name(ptr, end, name)) {
+    if (!buffer.read_string(name)) {
       return nullptr;
     }
 
     std::string location;
-    if (!parse_location(ptr, end, location)) {
+    if (!buffer.read_string(location)) {
       return nullptr;
     }
 
     auto event = llvm_hook_event::create(name, location);
 
-    while (std::distance(ptr, end) < 8U
-           || peek_word(ptr) != hook_result_sentinel) {
+    while (!buffer.has_word() || buffer.peek_word() != hook_result_sentinel) {
       llvm_event argument;
-      if (!parse_argument(ptr, end, argument)) {
+      if (!parse_argument(buffer, argument)) {
         return nullptr;
       }
       event->add_argument(argument);
     }
 
-    if (!check_word(ptr, end, hook_result_sentinel)) {
+    if (!buffer.check_word(hook_result_sentinel)) {
       return nullptr;
     }
 
     uint64_t pattern_len = 0;
-    auto kore_term = parse_kore_term(ptr, end, pattern_len);
+    auto kore_term = parse_kore_term(buffer, pattern_len);
     if (!kore_term) {
       return nullptr;
     }
@@ -445,78 +360,75 @@ private:
     return event;
   }
 
-  template <typename It>
-  sptr<llvm_function_event> parse_function(It &ptr, It end) {
-    if (!check_word(ptr, end, function_event_sentinel)) {
+  sptr<llvm_function_event> parse_function(proof_trace_buffer &buffer) {
+    if (!buffer.check_word(function_event_sentinel)) {
       return nullptr;
     }
 
     std::string name;
-    if (!parse_name(ptr, end, name)) {
+    if (!buffer.read_string(name)) {
       return nullptr;
     }
 
     std::string location;
-    if (!parse_location(ptr, end, location)) {
+    if (!buffer.read_string(location)) {
       return nullptr;
     }
 
     auto event = llvm_function_event::create(name, location);
 
-    while (std::distance(ptr, end) < 8U
-           || peek_word(ptr) != function_end_sentinel) {
+    while (!buffer.has_word() || buffer.peek_word() != function_end_sentinel) {
       llvm_event argument;
-      if (!parse_argument(ptr, end, argument)) {
+      if (!parse_argument(buffer, argument)) {
         return nullptr;
       }
       event->add_argument(argument);
     }
 
-    if (!check_word(ptr, end, function_end_sentinel)) {
+    if (!buffer.check_word(function_end_sentinel)) {
       return nullptr;
     }
 
     return event;
   }
 
-  template <typename It>
-  sptr<kore_pattern> parse_config(It &ptr, It end, uint64_t &pattern_len) {
-    if (!check_word(ptr, end, config_sentinel)) {
+  sptr<kore_pattern>
+  parse_config(proof_trace_buffer &buffer, uint64_t &pattern_len) {
+    if (!buffer.check_word(config_sentinel)) {
       return nullptr;
     }
 
-    auto kore_term = parse_kore_term(ptr, end, pattern_len);
+    auto kore_term = parse_kore_term(buffer, pattern_len);
     if (!kore_term) {
       return nullptr;
     }
 
-    if (!check_word(ptr, end, kore_end_sentinel)) {
+    if (!buffer.check_word(kore_end_sentinel)) {
       return nullptr;
     }
 
     return kore_term;
   }
 
-  template <typename It>
-  sptr<llvm_rule_event> parse_rule(It &ptr, It end) {
-    if (!check_word(ptr, end, rule_event_sentinel)) {
+  sptr<llvm_rule_event> parse_rule(proof_trace_buffer &buffer) {
+    if (!buffer.check_word(rule_event_sentinel)) {
       return nullptr;
     }
 
     uint64_t ordinal = 0;
-    if (!parse_ordinal(ptr, end, ordinal)) {
+    if (!buffer.read_uint64(ordinal)) {
       return nullptr;
     }
 
     uint64_t arity = 0;
-    if (!parse_arity(ptr, end, arity)) {
+    if (!buffer.read_uint64(arity)) {
       return nullptr;
     }
 
     auto event = llvm_rule_event::create(ordinal);
 
     for (auto i = 0; i < arity; i++) {
-      if (!parse_variable(ptr, end, event)) {
+      if (!parse_variable(buffer, event)) {
         return nullptr;
       }
     }
@@ -524,26 +436,26 @@ private:
     return event;
   }
 
-  template <typename It>
-  sptr<llvm_side_condition_event> parse_side_condition(It &ptr, It end) {
-    if (!check_word(ptr, end, side_condition_event_sentinel)) {
+  sptr<llvm_side_condition_event>
+  parse_side_condition(proof_trace_buffer &buffer) {
+    if (!buffer.check_word(side_condition_event_sentinel)) {
       return nullptr;
     }
 
     uint64_t ordinal = 0;
-    if (!parse_ordinal(ptr, end, ordinal)) {
+    if (!buffer.read_uint64(ordinal)) {
       return nullptr;
     }
 
     uint64_t arity = 0;
-    if (!parse_arity(ptr, end, arity)) {
+    if (!buffer.read_uint64(arity)) {
       return nullptr;
     }
 
     auto event = llvm_side_condition_event::create(ordinal);
 
     for (auto i = 0; i < arity; i++) {
-      if (!parse_variable(ptr, end, event)) {
+      if (!parse_variable(buffer, event)) {
         return nullptr;
       }
     }
@@ -551,20 +463,19 @@ private:
     return event;
   }
 
-  template <typename It>
   sptr<llvm_side_condition_end_event>
-  parse_side_condition_end(It &ptr, It end) {
-    if (!check_word(ptr, end, side_condition_end_sentinel)) {
+  parse_side_condition_end(proof_trace_buffer &buffer) {
+    if (!buffer.check_word(side_condition_end_sentinel)) {
       return nullptr;
     }
 
     uint64_t ordinal = 0;
-    if (!parse_ordinal(ptr, end, ordinal)) {
+    if (!buffer.read_uint64(ordinal)) {
       return nullptr;
     }
 
     bool side_condition_result = false;
-    auto result = parse_bool(ptr, end, side_condition_result);
+    auto result = buffer.read_bool(side_condition_result);
     if (!result) {
       return nullptr;
     }
@@ -575,11 +486,10 @@ private:
     return event;
   }
 
-  template <typename It>
-  bool parse_argument(It &ptr, It end, llvm_event &event) {
-    if (std::distance(ptr, end) >= 1U && detail::peek(ptr) == '\x7F') {
+  bool parse_argument(proof_trace_buffer &buffer, llvm_event &event) {
+    if (!buffer.eof() && buffer.peek() == '\x7F') {
       uint64_t pattern_len = 0;
-      auto kore_term = parse_kore_term(ptr, end, pattern_len);
+      auto kore_term = parse_kore_term(buffer, pattern_len);
       if (!kore_term) {
         return false;
       }
@@ -588,14 +498,14 @@ private:
       return true;
     }
 
-    if (std::distance(ptr, end) < 8U) {
+    if (!buffer.has_word()) {
       return false;
     }
 
-    switch (peek_word(ptr)) {
+    switch (buffer.peek_word()) {
 
     case hook_event_sentinel: {
-      auto hook_event = parse_hook(ptr, end);
+      auto hook_event = parse_hook(buffer);
       if (!hook_event) {
         return false;
       }
@@ -604,7 +514,7 @@ private:
     }
 
     case function_event_sentinel: {
-      auto function_event = parse_function(ptr, end);
+      auto function_event = parse_function(buffer);
       if (!function_event) {
         return false;
       }
@@ -613,7 +523,7 @@ private:
     }
 
     case rule_event_sentinel: {
-      auto rule_event = parse_rule(ptr, end);
+      auto rule_event = parse_rule(buffer);
       if (!rule_event) {
         return false;
       }
@@ -622,7 +532,7 @@ private:
     }
 
     case side_condition_event_sentinel: {
-      auto side_condition_event = parse_side_condition(ptr, end);
+      auto side_condition_event = parse_side_condition(buffer);
       if (!side_condition_event) {
         return false;
       }
@@ -631,7 +541,7 @@ private:
     }
 
     case side_condition_end_sentinel: {
-      auto side_condition_end_event = parse_side_condition_end(ptr, end);
+      auto side_condition_end_event = parse_side_condition_end(buffer);
       if (!side_condition_end_event) {
         return false;
       }
@@ -643,43 +553,41 @@ private:
     }
   }
 
-  template <typename It>
-  sptr<llvm_step_event> parse_step_event(It &ptr, It end) {
-    if (std::distance(ptr, end) < 8U) {
+  sptr<llvm_step_event> parse_step_event(proof_trace_buffer &buffer) {
+    if (!buffer.has_word()) {
       return nullptr;
     }
 
-    switch (peek_word(ptr)) {
+    switch (buffer.peek_word()) {
 
-    case hook_event_sentinel: return parse_hook(ptr, end);
+    case hook_event_sentinel: return parse_hook(buffer);
 
-    case function_event_sentinel: return parse_function(ptr, end);
+    case function_event_sentinel: return parse_function(buffer);
 
-    case rule_event_sentinel: return parse_rule(ptr, end);
+    case rule_event_sentinel: return parse_rule(buffer);
 
-    case side_condition_event_sentinel: return parse_side_condition(ptr, end);
+    case side_condition_event_sentinel: return parse_side_condition(buffer);
 
-    case side_condition_end_sentinel: return parse_side_condition_end(ptr, end);
+    case side_condition_end_sentinel: return parse_side_condition_end(buffer);
 
     default: return nullptr;
     }
   }
 
-  template <typename It>
-  bool parse_event(It &ptr, It end, llvm_event &event) {
-    if (std::distance(ptr, end) < 8U) {
+  bool parse_event(proof_trace_buffer &buffer, llvm_event &event) {
+    if (!buffer.has_word()) {
       return false;
     }
 
-    if (peek_word(ptr) == config_sentinel) {
+    if (buffer.peek_word() == config_sentinel) {
       uint64_t pattern_len = 0;
-      auto config = parse_config(ptr, end, pattern_len);
+      auto config = parse_config(buffer, pattern_len);
       if (!config) {
         return false;
       }
       event.setkore_pattern(config, pattern_len);
     } else {
-      auto step_event = parse_step_event(ptr, end);
+      auto step_event = parse_step_event(buffer);
       if (!step_event) {
         return false;
       }
@@ -689,24 +597,23 @@ private:
     return true;
   }
 
-  template <typename It>
-  bool parse_trace(It &ptr, It end, llvm_rewrite_trace &trace) {
+  bool parse_trace(proof_trace_buffer &buffer, llvm_rewrite_trace &trace) {
     uint32_t version = 0;
-    if (!parse_header(ptr, end, version)) {
+    if (!parse_header(buffer, version)) {
       return false;
     }
     trace.set_version(version);
 
-    while (std::distance(ptr, end) >= 8U && peek_word(ptr) != config_sentinel) {
+    while (buffer.has_word() && buffer.peek_word() != config_sentinel) {
       llvm_event event;
-      if (!parse_event(ptr, end, event)) {
+      if (!parse_event(buffer, event)) {
         return false;
       }
       trace.add_pre_trace_event(event);
     }
 
     uint64_t pattern_len = 0;
-    auto config = parse_config(ptr, end, pattern_len);
+    auto config = parse_config(buffer, pattern_len);
     if (!config) {
       return false;
     }
@@ -714,9 +621,9 @@ private:
     config_event.setkore_pattern(config, pattern_len);
     trace.set_initial_config(config_event);
 
-    while (ptr != end) {
+    while (!buffer.eof()) {
       llvm_event event;
-      if (!parse_event(ptr, end, event)) {
+      if (!parse_event(buffer, event)) {
         return false;
       }
       trace.add_trace_event(event);
