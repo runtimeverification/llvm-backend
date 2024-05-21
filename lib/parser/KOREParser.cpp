@@ -353,7 +353,7 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
       sptr<kore_pattern> accum = pats[0];
       for (auto i = 1U; i < pats.size(); i++) {
         sptr<kore_composite_pattern> new_accum
-            = kore_composite_pattern::create(sym);
+            = kore_composite_pattern::create(sym.get());
         new_accum->add_argument(accum);
         new_accum->add_argument(pats[i]);
         accum = new_accum;
@@ -363,7 +363,7 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
     sptr<kore_pattern> accum = pats[pats.size() - 1];
     for (int i = pats.size() - 2; i >= 0; i--) {
       sptr<kore_composite_pattern> new_accum
-          = kore_composite_pattern::create(sym);
+          = kore_composite_pattern::create(sym.get());
       new_accum->add_argument(pats[i]);
       new_accum->add_argument(accum);
       accum = new_accum;
