@@ -424,8 +424,7 @@ void bind_proof_trace(py::module_ &m) {
   py::class_<llvm_hook_event, std::shared_ptr<llvm_hook_event>>(
       proof_trace, "llvm_hook_event", step_event)
       .def_property_readonly("name", &llvm_hook_event::get_name)
-      .def_property_readonly(
-          "symbol_name", &llvm_hook_event::get_symbol_name)
+      .def_property_readonly("symbol_name", &llvm_hook_event::get_symbol_name)
       .def_property_readonly(
           "relative_position", &llvm_hook_event::get_relative_position)
       .def_property_readonly("args", &llvm_hook_event::get_arguments)
