@@ -343,12 +343,7 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
     consume(token::LeftBrace);
     consume(token::RightBrace);
     consume(token::LeftParen);
-    std::string symbol = consume(token::Id);
-    consume(token::LeftBrace);
-    auto pat = kore_composite_pattern::create(symbol);
-    sorts(pat->get_constructor());
-    pat->get_constructor()->init_pattern_arguments();
-    consume(token::RightBrace);
+    auto sym = symbol();
     consume(token::LeftParen);
     std::vector<sptr<kore_pattern>> pats;
     patterns(pats);
@@ -358,7 +353,7 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
       sptr<kore_pattern> accum = pats[0];
       for (auto i = 1U; i < pats.size(); i++) {
         sptr<kore_composite_pattern> new_accum
-            = kore_composite_pattern::create(pat->get_constructor());
+            = kore_composite_pattern::create(sym);
         new_accum->add_argument(accum);
         new_accum->add_argument(pats[i]);
         accum = new_accum;
@@ -368,7 +363,7 @@ sptr<kore_pattern> kore_parser::application_pattern(std::string const &name) {
     sptr<kore_pattern> accum = pats[pats.size() - 1];
     for (int i = pats.size() - 2; i >= 0; i--) {
       sptr<kore_composite_pattern> new_accum
-          = kore_composite_pattern::create(pat->get_constructor());
+          = kore_composite_pattern::create(sym);
       new_accum->add_argument(pats[i]);
       new_accum->add_argument(accum);
       accum = new_accum;

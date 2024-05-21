@@ -82,7 +82,8 @@ void llvm_function_event::print(
 void llvm_hook_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
-  out << fmt::format("{}hook: {} {} ({})\n", indent, name_, symbol_name_, relative_position_);
+  out << fmt::format(
+      "{}hook: {} {} ({})\n", indent, name_, symbol_name_, relative_position_);
   for (auto const &arg : arguments_) {
     arg.print(out, expand_terms, true, ind + 1U);
   }
