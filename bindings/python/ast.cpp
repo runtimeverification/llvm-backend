@@ -425,6 +425,8 @@ void bind_proof_trace(py::module_ &m) {
       proof_trace, "llvm_hook_event", step_event)
       .def_property_readonly("name", &llvm_hook_event::get_name)
       .def_property_readonly(
+          "symbol_name", &llvm_hook_event::get_symbol_name)
+      .def_property_readonly(
           "relative_position", &llvm_hook_event::get_relative_position)
       .def_property_readonly("args", &llvm_hook_event::get_arguments)
       .def_property_readonly("result", &llvm_hook_event::getkore_pattern);

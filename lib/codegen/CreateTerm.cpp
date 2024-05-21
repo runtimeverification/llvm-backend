@@ -938,7 +938,8 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
         std::string name = str_pattern->get_contents();
 
         proof_event p(definition_, module_);
-        current_block_ = p.hook_event_pre(name, current_block_, location_stack);
+        current_block_ = p.hook_event_pre(
+            name, constructor, current_block_, location_stack);
         llvm::Value *val = create_hook(
             symbol_decl->attributes().get(attribute_set::key::Hook).get(),
             constructor, location_stack);
