@@ -658,6 +658,23 @@ public:
   std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);
   std::optional<llvm_rewrite_trace> parse_proof_trace(std::string const &data);
+
+  friend class llvm_rewrite_trace_iterator;
+};
+
+class llvm_rewrite_trace_iterator {
+private:
+  uint32_t version_{};
+  proof_trace_buffer &buffer_;
+  llvm_event_type type_ = llvm_event_type::pre_trace;
+  proof_trace_parser parser_;
+
+public:
+  llvm_rewrite_trace_iterator(
+      proof_trace_buffer &buffer, kore_header const &header);
+  [[nodiscard]] uint32_t get_version() const { return version_; }
+  std::optional<annotated_llvm_event> const get_next_event(void);
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U);
 };
 
 } // namespace kllvm
