@@ -339,7 +339,7 @@ private:
     }
 
     std::string symbol_name;
-    if (!parse_name(ptr, end, symbol_name)) {
+    if (!buffer.read_string(symbol_name)) {
       return nullptr;
     }
 
