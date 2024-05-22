@@ -1,13 +1,13 @@
-version: 9
-hook: MAP.element ()
+version: 10
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}()]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
@@ -19,7 +19,7 @@ function: LblinitKCell{} (0)
 rule: 2813 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]
@@ -28,7 +28,7 @@ rule: 2907 1
   VarK = kore[Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}()]
 function: LblinitMessagesCell{} (1)
 rule: 2815 0
-hook: MAP.unit (0)
+hook: MAP.unit Lbl'Stop'MessageCellMap{} (0)
   function: Lbl'Stop'MessageCellMap{} (0)
 hook result: kore[Lbl'Stop'MessageCellMap{}()]
 function: LblinitGeneratedCounterCell{} (2)
@@ -45,9 +45,9 @@ rule: 2760 6
   VarID = kore[\dv{SortInt{}}("0")]
   VarREC = kore[\dv{SortString{}}("fooAccount")]
   VarVAL = kore[\dv{SortInt{}}("100")]
-hook: MAP.concat (1:0)
+hook: MAP.concat Lbl'Unds'MessageCellMap'Unds'{} (1:0)
   function: Lbl'Unds'MessageCellMap'Unds'{} (1:0)
-    hook: MAP.element (1:0:0)
+    hook: MAP.element LblMessageCellMapItem{} (1:0:0)
       function: LblMessageCellMapItem{} (1:0:0)
       arg: kore[Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0"))]
       arg: kore[Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))]
@@ -62,9 +62,9 @@ rule: 2760 6
   VarID = kore[\dv{SortInt{}}("1")]
   VarREC = kore[\dv{SortString{}}("barAccount")]
   VarVAL = kore[\dv{SortInt{}}("50")]
-hook: MAP.concat (1:0)
+hook: MAP.concat Lbl'Unds'MessageCellMap'Unds'{} (1:0)
   function: Lbl'Unds'MessageCellMap'Unds'{} (1:0)
-    hook: MAP.element (1:0:0)
+    hook: MAP.element LblMessageCellMapItem{} (1:0:0)
       function: LblMessageCellMapItem{} (1:0:0)
       arg: kore[Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1"))]
       arg: kore[Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount")))]
@@ -79,9 +79,9 @@ rule: 2760 6
   VarID = kore[\dv{SortInt{}}("2")]
   VarREC = kore[\dv{SortString{}}("oofAccount")]
   VarVAL = kore[\dv{SortInt{}}("200")]
-hook: MAP.concat (1:0)
+hook: MAP.concat Lbl'Unds'MessageCellMap'Unds'{} (1:0)
   function: Lbl'Unds'MessageCellMap'Unds'{} (1:0)
-    hook: MAP.element (1:0:0)
+    hook: MAP.element LblMessageCellMapItem{} (1:0:0)
       function: LblMessageCellMapItem{} (1:0:0)
       arg: kore[Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2"))]
       arg: kore[Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))]
@@ -106,7 +106,7 @@ function: LblfindMsg'LParUndsCommUndsRParUnds'CELL-VALUE'Unds'Bool'Unds'Int'Unds
 side condition entry: 2805 2
   VarID = kore[\dv{SortInt{}}("1")]
   VarID'Apos' = kore[\dv{SortInt{}}("2")]
-hook: INT.ne ()
+hook: INT.ne Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
   function: Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("1")]
   arg: kore[\dv{SortInt{}}("2")]
@@ -122,7 +122,7 @@ function: LblfindMsg'LParUndsCommUndsRParUnds'CELL-VALUE'Unds'Bool'Unds'Int'Unds
 side condition entry: 2805 2
   VarID = kore[\dv{SortInt{}}("1")]
   VarID'Apos' = kore[\dv{SortInt{}}("0")]
-hook: INT.ne ()
+hook: INT.ne Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
   function: Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("1")]
   arg: kore[\dv{SortInt{}}("0")]

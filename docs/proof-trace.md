@@ -48,7 +48,8 @@ name              ::= string
 location          ::= string
 function          ::= WORD(0xDD) name location arg* WORD(0x11) // the arg list is ommited in normal mode
 
-hook              ::= WORD(0xAA) name location arg* WORD(0xBB) kore_term
+symbol_name       ::= string
+hook              ::= WORD(0xAA) name symbol_name location arg* WORD(0xBB) kore_term
 
 ordinal           ::= uint64
 arity             ::= uint64

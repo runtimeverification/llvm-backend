@@ -1,30 +1,30 @@
-version: 9
+version: 10
 function: Lblabs'LParUndsRParUnds'BUILTIN-FUNCTIONS-SYNTAX'Unds'Int'Unds'Int{} ()
 rule: 210 1
   VarI = kore[\dv{SortInt{}}("-5")]
-hook: KEQUAL.ite ()
-  hook: INT.lt (0)
+hook: KEQUAL.ite Lblite{SortInt{}} ()
+  hook: INT.lt Lbl'Unds-LT-'Int'Unds'{} (0)
     function: Lbl'Unds-LT-'Int'Unds'{} (0)
     arg: kore[\dv{SortInt{}}("-5")]
     arg: kore[\dv{SortInt{}}("0")]
   hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: INT.sub (1)
+  hook: INT.sub Lbl'Unds'-Int'Unds'{} (1)
     function: Lbl'Unds'-Int'Unds'{} (1)
     arg: kore[\dv{SortInt{}}("0")]
     arg: kore[\dv{SortInt{}}("-5")]
   hook result: kore[\dv{SortInt{}}("5")]
   arg: kore[\dv{SortInt{}}("5")]
 hook result: kore[\dv{SortInt{}}("5")]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[\dv{SortInt{}}("5")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
@@ -36,7 +36,7 @@ function: LblinitKCell{} (0)
 rule: 223 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]

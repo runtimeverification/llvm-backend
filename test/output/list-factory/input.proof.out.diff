@@ -1,4 +1,4 @@
-version: 9
+version: 10
 function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCodes{} ()
 rule: 2692 1
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())))]
@@ -20,15 +20,15 @@ rule: 2694 3
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
 rule: 2693 1
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))))]
@@ -40,7 +40,7 @@ function: LblinitKCell{} (0)
 rule: 2746 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]

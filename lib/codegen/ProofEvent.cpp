@@ -166,8 +166,8 @@ proof_event::event_prelude(
  */
 
 llvm::BasicBlock *proof_event::hook_event_pre(
-    std::string const &name, llvm::BasicBlock *current_block,
-    std::string const &location_stack) {
+    std::string const &name, kore_composite_pattern *pattern,
+    llvm::BasicBlock *current_block, std::string const &location_stack) {
   if (!proof_hint_instrumentation) {
     return current_block;
   }
@@ -177,6 +177,8 @@ llvm::BasicBlock *proof_event::hook_event_pre(
 
   emit_write_uint64(outputFile, detail::word(0xAA), true_block);
   emit_write_string(outputFile, name, true_block);
+  emit_write_string(
+      outputFile, ast_to_string(*pattern->get_constructor()), true_block);
   emit_write_string(outputFile, location_stack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);

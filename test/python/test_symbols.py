@@ -28,6 +28,17 @@ class TestSymbols(unittest.TestCase):
         b1 = kllvm.ast.Symbol("B")
         self.assertNotEqual(a1, b1)
 
+    def test_parse_symbol_name(self):
+        sym_base = kllvm.ast.Symbol("Lbl'Plus")
+        self.assertEqual(str(sym_base), "Lbl'Plus{}")
+        
+        parser = kllvm.parser.Parser.from_string(str(sym_base))
+        sym_parsed = parser.symbol()
+        self.assertEqual(sym_base, sym_parsed)
+        
+        self.assertEqual(sym_parsed.name, "Lbl'Plus")
+        self.assertTrue(sym_parsed.is_concrete)
+        self.assertFalse(sym_parsed.is_builtin)
 
 class TestVariables(unittest.TestCase):
 
