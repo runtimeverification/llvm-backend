@@ -1134,19 +1134,13 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
   std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
   std::vector<llvm::Value *> are_block;
-  llvm::Instruction *are_block_val = llvm::CallInst::CreateMalloc(
+  auto *are_block_val = create_malloc(
       collect, llvm::Type::getInt64Ty(block->getContext()),
       llvm::Type::getInt1Ty(module->getContext()),
       llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 1),
       llvm::ConstantInt::get(
           llvm::Type::getInt64Ty(module->getContext()), nroots),
       nullptr);
-
-#if LLVM_VERSION_MAJOR < 16
-  are_block_val->insertAfter(&collect->back());
-#else
-  are_block_val->insertInto(collect, collect->end());
-#endif
 
   store_ptrs_for_gc(
       nroots, module, root_ty, arr, are_block_val, collect, roots, types,

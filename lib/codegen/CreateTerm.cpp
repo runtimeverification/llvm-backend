@@ -265,20 +265,11 @@ llvm::Value *allocate_term(
 llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
     char const *alloc_fn) {
-  llvm::Instruction *malloc = llvm::CallInst::CreateMalloc(
+  auto *malloc = create_malloc(
       block, llvm::Type::getInt64Ty(block->getContext()), alloc_type, len,
       nullptr, kore_heap_alloc(alloc_fn, block->getModule()));
 
-  if (!block->empty()) {
-    set_debug_loc(&block->back());
-  }
-
-#if LLVM_VERSION_MAJOR < 16
-  malloc->insertAfter(&block->back());
-#else
-  malloc->insertInto(block, block->end());
-#endif
-
+  set_debug_loc(malloc);
   return malloc;
 }
 
