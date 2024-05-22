@@ -54,7 +54,7 @@ void decision::operator()(decision_node *entry) {
           "_1", getvalue_type({sort_category::Symbol, 0}, module_)));
       fail_subject_->addIncoming(
           new llvm::BitCastInst(
-              val, llvm::Type::getInt8PtrTy(ctx_), "", current_block_),
+              val, llvm::PointerType::getUnqual(ctx_), "", current_block_),
           current_block_);
       fail_pattern_->addIncoming(
           string_literal("\\bottom{SortGeneratedTopCell{}}()"), current_block_);
@@ -72,7 +72,7 @@ llvm::Value *decision::ptr_term(llvm::Value *val) {
     val = allocate_term(val->getType(), current_block_, "kore_alloc_always_gc");
   }
   return new llvm::BitCastInst(
-      val, llvm::Type::getInt8PtrTy(ctx_), "", current_block_);
+      val, llvm::PointerType::getUnqual(ctx_), "", current_block_);
 }
 
 bool decision_node::begin_node(decision *d, std::string const &name) {
@@ -490,16 +490,16 @@ void function_node::codegen(decision *d) {
       function_args.push_back(d->string_literal(str));
     }
     function_args.push_back(
-        llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(d->ctx_)));
+        llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(d->ctx_)));
 
     auto *call = llvm::CallInst::Create(
         get_or_insert_function(
             d->module_, "add_match_function",
             llvm::FunctionType::get(
                 llvm::Type::getVoidTy(d->ctx_),
-                {llvm::Type::getInt8PtrTy(d->ctx_),
-                 llvm::Type::getInt8PtrTy(d->ctx_),
-                 llvm::Type::getInt8PtrTy(d->ctx_)},
+                {llvm::PointerType::getUnqual(d->ctx_),
+                 llvm::PointerType::getUnqual(d->ctx_),
+                 llvm::PointerType::getUnqual(d->ctx_)},
                 true)),
         function_args, "", d->current_block_);
     set_debug_loc(call);
@@ -709,7 +709,7 @@ static void init_choice_buffer(
   std::unordered_set<leaf_node *> leaves;
   dt->preprocess(leaves);
   auto *ty = llvm::ArrayType::get(
-      llvm::Type::getInt8PtrTy(module->getContext()),
+      llvm::PointerType::getUnqual(module->getContext()),
       dt->get_choice_depth() + 1);
   auto *choice_buffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
   auto *choice_depth = new llvm::AllocaInst(
@@ -928,7 +928,7 @@ static void store_ptrs_for_gc(
   auto *zero
       = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
   llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
-      llvm::Type::getInt8PtrTy(module->getContext()));
+      llvm::PointerType::getUnqual(module->getContext()));
   for (unsigned i = 0; i < nroots; i++) {
     auto *ptr = llvm::GetElementPtrInst::CreateInBounds(
         root_ty, arr,
@@ -1031,7 +1031,7 @@ static void load_ptrs_for_gc(
     std::vector<value_type> const &types,
     std::vector<llvm::Value *> const &are_block) {
   llvm::Type *voidptrptr = llvm::PointerType::getUnqual(
-      llvm::Type::getInt8PtrTy(module->getContext()));
+      llvm::PointerType::getUnqual(module->getContext()));
   unsigned i = 0;
   for (auto [ptr, pointee_ty] : root_ptrs) {
     llvm::Value *loaded = nullptr;
@@ -1130,7 +1130,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
     i++;
   }
   auto *root_ty = llvm::ArrayType::get(
-      llvm::Type::getInt8PtrTy(module->getContext()), 256);
+      llvm::PointerType::getUnqual(module->getContext()), 256);
   auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
   std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
   std::vector<llvm::Value *> are_block;
@@ -1198,7 +1198,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       llvm::FunctionType::get(
           llvm::Type::getVoidTy(module->getContext()),
           {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptr_ty,
-           llvm::Type::getInt1PtrTy(module->getContext())},
+           llvm::PointerType::getUnqual(module->getContext())},
           false));
   auto *call = llvm::CallInst::Create(
       kore_collect,
@@ -1379,11 +1379,13 @@ void make_match_reason_function(
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", match_func);
   llvm::PHINode *fail_subject = llvm::PHINode::Create(
-      llvm::Type::getInt8PtrTy(module->getContext()), 0, "subject", fail);
+      llvm::PointerType::getUnqual(module->getContext()), 0, "subject", fail);
   llvm::PHINode *fail_pattern = llvm::PHINode::Create(
-      llvm::Type::getInt8PtrTy(module->getContext()), 0, "pattern", fail);
+      llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(module->getContext())),
+      0, "pattern", fail);
   llvm::PHINode *fail_sort = llvm::PHINode::Create(
-      llvm::Type::getInt8PtrTy(module->getContext()), 0, "sort", fail);
+      llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(module->getContext())),
+      0, "sort", fail);
   auto *call = llvm::CallInst::Create(
       get_or_insert_function(
           module, "add_match_fail_reason",

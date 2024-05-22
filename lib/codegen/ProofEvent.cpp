@@ -47,7 +47,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
       module_, symbol, get_block_type(module_, definition_, symbol));
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
   auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
@@ -66,7 +66,7 @@ llvm::CallInst *proof_event::emit_serialize_term(
 llvm::CallInst *proof_event::emit_write_uint64(
     llvm::Value *output_file, uint64_t value, llvm::BasicBlock *insert_at_end) {
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
   auto *i64_ptr_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty
@@ -85,7 +85,7 @@ llvm::CallInst *proof_event::emit_bool_term(
   auto b = llvm::IRBuilder(insert_at_end);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
 
   term = b.CreateIntToPtr(term, i8_ptr_ty);
 
@@ -104,7 +104,7 @@ llvm::CallInst *proof_event::emit_write_string(
   auto b = llvm::IRBuilder(insert_at_end);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
 
   auto *func_ty
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
@@ -126,7 +126,7 @@ llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
 
 llvm::LoadInst *
 proof_event::emit_get_output_file_name(llvm::BasicBlock *insert_at_end) {
-  auto *i8_ptr_ty = llvm::Type::getInt8PtrTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
   auto *file_name_pointer
       = module_->getOrInsertGlobal("output_file", i8_ptr_ty);
   return new llvm::LoadInst(
