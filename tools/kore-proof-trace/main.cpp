@@ -48,13 +48,13 @@ int main(int argc, char **argv) {
       it.print(std::cout, expand_terms_in_output);
     }
     return 0;
-  } else {
-    proof_trace_parser parser(verbose_output, expand_terms_in_output, header);
-    auto trace = parser.parse_proof_trace_from_file(input_filename);
-    if (trace.has_value()) {
-      return 0;
-    }
-
-    return 1;
   }
+
+  proof_trace_parser parser(verbose_output, expand_terms_in_output, header);
+  auto trace = parser.parse_proof_trace_from_file(input_filename);
+  if (trace.has_value()) {
+    return 0;
+  }
+
+  return 1;
 }

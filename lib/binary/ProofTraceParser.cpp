@@ -119,18 +119,18 @@ llvm_rewrite_trace_iterator::llvm_rewrite_trace_iterator(
     proof_trace_buffer &buffer, kore_header const &header)
     : buffer_(buffer)
     , parser_(false, false, header) {
-  if (!parser_.parse_header(buffer_, version_)) {
+  if (!proof_trace_parser::parse_header(buffer_, version_)) {
     throw std::runtime_error("invalid header");
   }
 }
 
-std::optional<annotated_llvm_event> const
-llvm_rewrite_trace_iterator::get_next_event(void) {
+std::optional<annotated_llvm_event>
+llvm_rewrite_trace_iterator::get_next_event() {
   if (buffer_.eof()) {
     return std::nullopt;
   }
   switch (type_) {
-  case llvm_event_type::pre_trace: {
+  case llvm_event_type::PreTrace: {
     if (buffer_.has_word() && buffer_.peek_word() != config_sentinel) {
       llvm_event event;
       if (!parser_.parse_event(buffer_, event)) {
@@ -145,10 +145,10 @@ llvm_rewrite_trace_iterator::get_next_event(void) {
     }
     llvm_event config_event;
     config_event.setkore_pattern(config, pattern_len);
-    type_ = llvm_event_type::trace;
-    return {{llvm_event_type::initial_config, config_event}};
+    type_ = llvm_event_type::Trace;
+    return {{llvm_event_type::InitialConfig, config_event}};
   }
-  case llvm_event_type::trace: {
+  case llvm_event_type::Trace: {
     llvm_event event;
     if (!parser_.parse_event(buffer_, event)) {
       throw std::runtime_error("could not parse trace event");
