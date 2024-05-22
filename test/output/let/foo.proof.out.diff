@@ -1,9 +1,9 @@
-version: 9
+version: 10
 function: Lblexp'LParUndsRParUnds'LET-SYNTAX'Unds'Int'Unds'Int{} ()
 rule: 151 1
   VarX = kore[\dv{SortInt{}}("10")]
 function: Lbl'Hash'lambda'UndsUnds'{} ()
-  hook: INT.mul (0)
+  hook: INT.mul Lbl'UndsStar'Int'Unds'{} (0)
     function: Lbl'UndsStar'Int'Unds'{} (0)
     arg: kore[\dv{SortInt{}}("10")]
     arg: kore[\dv{SortInt{}}("10")]
@@ -12,7 +12,7 @@ rule: 118 2
   VarS = kore[\dv{SortInt{}}("100")]
   VarX = kore[\dv{SortInt{}}("10")]
 function: Lbl'Hash'lambda'UndsUnds'2{} ()
-  hook: INT.mul (0)
+  hook: INT.mul Lbl'UndsStar'Int'Unds'{} (0)
     function: Lbl'UndsStar'Int'Unds'{} (0)
     arg: kore[\dv{SortInt{}}("2")]
     arg: kore[\dv{SortInt{}}("100")]
@@ -20,20 +20,20 @@ function: Lbl'Hash'lambda'UndsUnds'2{} ()
 rule: 119 2
   VarD = kore[\dv{SortInt{}}("200")]
   VarX = kore[\dv{SortInt{}}("10")]
-hook: INT.sub ()
+hook: INT.sub Lbl'Unds'-Int'Unds'{} ()
   function: Lbl'Unds'-Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("200")]
   arg: kore[\dv{SortInt{}}("10")]
 hook result: kore[\dv{SortInt{}}("190")]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[\dv{SortInt{}}("190")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("190"))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("190"))]
@@ -45,7 +45,7 @@ function: LblinitKCell{} (0)
 rule: 156 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("190"))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("190"))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]

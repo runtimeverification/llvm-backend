@@ -92,8 +92,8 @@ private:
 
 public:
   [[nodiscard]] llvm::BasicBlock *hook_event_pre(
-      std::string const &name, llvm::BasicBlock *current_block,
-      std::string const &location_stack);
+      std::string const &name, kore_composite_pattern *pattern,
+      llvm::BasicBlock *current_block, std::string const &location_stack);
 
   [[nodiscard]] llvm::BasicBlock *hook_event_post(
       llvm::Value *val, kore_composite_sort *sort,

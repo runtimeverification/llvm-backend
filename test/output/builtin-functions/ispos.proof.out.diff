@@ -1,21 +1,21 @@
-version: 9
+version: 10
 function: LblisPos'LParUndsRParUnds'BUILTIN-FUNCTIONS-SYNTAX'Unds'Bool'Unds'Int{} ()
 rule: 255 1
   VarI = kore[\dv{SortInt{}}("0")]
-hook: INT.gt ()
+hook: INT.gt Lbl'Unds-GT-'Int'Unds'{} ()
   function: Lbl'Unds-GT-'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("0")]
   arg: kore[\dv{SortInt{}}("0")]
 hook result: kore[\dv{SortBool{}}("false")]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
@@ -27,7 +27,7 @@ function: LblinitKCell{} (0)
 rule: 223 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]

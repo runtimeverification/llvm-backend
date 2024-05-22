@@ -1,13 +1,13 @@
-version: 9
-hook: MAP.element ()
+version: 10
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3")))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
@@ -19,7 +19,7 @@ function: LblinitKCell{} (0)
 rule: 162 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]
@@ -36,7 +36,7 @@ rule: 124 3
 function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (0:0:0:0)
 side condition entry: 156 1
   VarX = kore[\dv{SortInt{}}("3")]
-hook: INT.ge ()
+hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   function: Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("3")]
   arg: kore[\dv{SortInt{}}("1")]
@@ -44,17 +44,17 @@ hook result: kore[\dv{SortBool{}}("true")]
 side condition exit: 156 true
 rule: 156 1
   VarX = kore[\dv{SortInt{}}("3")]
-hook: INT.mul ()
+hook: INT.mul Lbl'UndsStar'Int'Unds'{} ()
   function: Lbl'UndsStar'Int'Unds'{} ()
     function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (1)
-      hook: INT.sub (1:0)
+      hook: INT.sub Lbl'Unds'-Int'Unds'{} (1:0)
         function: Lbl'Unds'-Int'Unds'{} (1:0)
         arg: kore[\dv{SortInt{}}("3")]
         arg: kore[\dv{SortInt{}}("1")]
       hook result: kore[\dv{SortInt{}}("2")]
     side condition entry: 156 1
       VarX = kore[\dv{SortInt{}}("2")]
-    hook: INT.ge ()
+    hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
       function: Lbl'Unds-GT-Eqls'Int'Unds'{} ()
       arg: kore[\dv{SortInt{}}("2")]
       arg: kore[\dv{SortInt{}}("1")]
@@ -62,17 +62,17 @@ hook: INT.mul ()
     side condition exit: 156 true
     rule: 156 1
       VarX = kore[\dv{SortInt{}}("2")]
-    hook: INT.mul ()
+    hook: INT.mul Lbl'UndsStar'Int'Unds'{} ()
       function: Lbl'UndsStar'Int'Unds'{} ()
         function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (1)
-          hook: INT.sub (1:0)
+          hook: INT.sub Lbl'Unds'-Int'Unds'{} (1:0)
             function: Lbl'Unds'-Int'Unds'{} (1:0)
             arg: kore[\dv{SortInt{}}("2")]
             arg: kore[\dv{SortInt{}}("1")]
           hook result: kore[\dv{SortInt{}}("1")]
         side condition entry: 156 1
           VarX = kore[\dv{SortInt{}}("1")]
-        hook: INT.ge ()
+        hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
           function: Lbl'Unds-GT-Eqls'Int'Unds'{} ()
           arg: kore[\dv{SortInt{}}("1")]
           arg: kore[\dv{SortInt{}}("1")]
@@ -80,17 +80,17 @@ hook: INT.mul ()
         side condition exit: 156 true
         rule: 156 1
           VarX = kore[\dv{SortInt{}}("1")]
-        hook: INT.mul ()
+        hook: INT.mul Lbl'UndsStar'Int'Unds'{} ()
           function: Lbl'UndsStar'Int'Unds'{} ()
             function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (1)
-              hook: INT.sub (1:0)
+              hook: INT.sub Lbl'Unds'-Int'Unds'{} (1:0)
                 function: Lbl'Unds'-Int'Unds'{} (1:0)
                 arg: kore[\dv{SortInt{}}("1")]
                 arg: kore[\dv{SortInt{}}("1")]
               hook result: kore[\dv{SortInt{}}("0")]
             side condition entry: 156 1
               VarX = kore[\dv{SortInt{}}("0")]
-            hook: INT.ge ()
+            hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
               function: Lbl'Unds-GT-Eqls'Int'Unds'{} ()
               arg: kore[\dv{SortInt{}}("0")]
               arg: kore[\dv{SortInt{}}("1")]

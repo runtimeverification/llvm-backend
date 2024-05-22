@@ -159,20 +159,27 @@ public:
 class llvm_hook_event : public llvm_step_event {
 private:
   std::string name_;
+  std::string symbol_name_;
   std::string relative_position_;
   std::vector<llvm_event> arguments_;
   sptr<kore_pattern> kore_pattern_;
   uint64_t pattern_length_{0U};
 
-  llvm_hook_event(std::string name, std::string relative_position);
+  llvm_hook_event(
+      std::string name, std::string symbol_name, std::string relative_position);
 
 public:
-  static sptr<llvm_hook_event>
-  create(std::string const &name, std::string const &relative_position) {
-    return sptr<llvm_hook_event>(new llvm_hook_event(name, relative_position));
+  static sptr<llvm_hook_event> create(
+      std::string const &name, std::string const &symbol_name,
+      std::string const &relative_position) {
+    return sptr<llvm_hook_event>(
+        new llvm_hook_event(name, symbol_name, relative_position));
   }
 
   [[nodiscard]] std::string const &get_name() const { return name_; }
+  [[nodiscard]] std::string const &get_symbol_name() const {
+    return symbol_name_;
+  }
   [[nodiscard]] std::string const &get_relative_position() const {
     return relative_position_;
   }
@@ -260,7 +267,7 @@ public:
 
 class proof_trace_parser {
 public:
-  static constexpr uint32_t expected_version = 9U;
+  static constexpr uint32_t expected_version = 10U;
 
 private:
   bool verbose_;
@@ -415,12 +422,17 @@ private:
       return nullptr;
     }
 
+    std::string symbol_name;
+    if (!parse_name(ptr, end, symbol_name)) {
+      return nullptr;
+    }
+
     std::string location;
     if (!parse_location(ptr, end, location)) {
       return nullptr;
     }
 
-    auto event = llvm_hook_event::create(name, location);
+    auto event = llvm_hook_event::create(name, symbol_name, location);
 
     while (std::distance(ptr, end) < 8U
            || peek_word(ptr) != hook_result_sentinel) {

@@ -168,6 +168,7 @@ config.substitutions.extend([
             in=%test-dir-in/`basename $out .proof.out.diff`.in
             rm -f %t.out.bin
             hint=%t.`basename $out .proof.out.diff`.hint
+            rm -f $hint
             %t.interpreter $in -1 $hint --proof-output
             %kore-proof-trace --verbose --expand-terms %t.header.bin $hint | diff - $out
             result="$?"

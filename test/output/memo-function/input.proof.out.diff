@@ -1,19 +1,19 @@
-version: 9
+version: 10
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 127 0
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 128 0
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 127 0
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}()]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}())]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}())]
@@ -25,7 +25,7 @@ function: LblinitKCell{} (0)
 rule: 97 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}())]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}())]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]
