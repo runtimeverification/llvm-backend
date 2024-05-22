@@ -172,8 +172,7 @@ public:
   static sptr<llvm_hook_event> create(
       std::string const &name, std::string const &symbol_name,
       std::string const &relative_position) {
-    return sptr<llvm_hook_event>(
-        new llvm_hook_event(name, symbol_name, relative_position));
+    return std::make_shared<llvm_hook_event>(name, symbol_name, relative_position);
   }
 
   [[nodiscard]] std::string const &get_name() const { return name_; }
