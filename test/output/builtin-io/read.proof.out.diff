@@ -1,13 +1,13 @@
-version: 9
-hook: MAP.element ()
+version: 10
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[\dv{SortString{}}("input_file")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
@@ -19,7 +19,7 @@ function: LblinitKCell{} (0)
 rule: 2762 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
 function: Lblproject'Coln'String{} (0:0:0)
-  hook: MAP.lookup (0:0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]
@@ -41,7 +41,7 @@ rule: 2712 4
 function: Lbl'Hash'open'LParUndsRParUnds'K-IO'Unds'IOInt'Unds'String{} (0:0:0:0)
 rule: 2702 1
   VarS = kore[\dv{SortString{}}("input_file")]
-hook: IO.open ()
+hook: IO.open Lbl'Hash'open'LParUndsCommUndsRParUnds'K-IO'Unds'IOInt'Unds'String'Unds'String{} ()
   function: Lbl'Hash'open'LParUndsCommUndsRParUnds'K-IO'Unds'IOInt'Unds'String'Unds'String{} ()
   arg: kore[\dv{SortString{}}("input_file")]
   arg: kore[\dv{SortString{}}("r+")]

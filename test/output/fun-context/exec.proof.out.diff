@@ -1,13 +1,13 @@
-version: 9
-hook: MAP.element ()
+version: 10
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl'Hash'exec'Unds'FUN-CONTEXT-SYNTAX'Unds'KItem{}()]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'FUN-CONTEXT-SYNTAX'Unds'KItem{}())]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'FUN-CONTEXT-SYNTAX'Unds'KItem{}())]
@@ -19,7 +19,7 @@ function: LblinitKCell{} (0)
 rule: 160 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'FUN-CONTEXT-SYNTAX'Unds'KItem{}())]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'FUN-CONTEXT-SYNTAX'Unds'KItem{}())]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]

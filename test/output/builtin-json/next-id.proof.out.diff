@@ -1,24 +1,24 @@
-version: 9
+version: 10
 function: Lblid'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'JSON'Unds'JSON{} ()
 rule: 216 1
   VarJ = kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
-hook: JSON.string2json ()
+hook: JSON.string2json LblString2JSON{} ()
   function: LblString2JSON{} ()
-    hook: JSON.json2string (0)
+    hook: JSON.json2string LblJSON2String{} (0)
       function: LblJSON2String{} (0)
       arg: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
     hook result: kore[\dv{SortString{}}("{\x22key\x22:2}")]
   arg: kore[\dv{SortString{}}("{\x22key\x22:2}")]
 hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
-hook: MAP.element ()
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
   function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
-hook: MAP.unit ()
+hook: MAP.unit Lbl'Stop'Map{} ()
   function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
-hook: MAP.concat ()
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
@@ -30,7 +30,7 @@ function: LblinitKCell{} (0)
 rule: 219 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup (0:0:0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
     function: LblMap'Coln'lookup{} (0:0:0:0)
     arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
     arg: kore[\dv{SortKConfigVar{}}("$PGM")]
