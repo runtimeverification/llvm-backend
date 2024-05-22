@@ -234,6 +234,13 @@ public:
       unsigned indent = 0U) const;
 };
 
+enum class llvm_event_type { pre_trace, initial_config, trace };
+
+struct annotated_llvm_event {
+  llvm_event_type type;
+  llvm_event event;
+};
+
 class llvm_rewrite_trace {
 private:
   uint32_t version_{};
