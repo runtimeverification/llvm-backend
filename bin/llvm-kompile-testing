@@ -11,7 +11,17 @@ trap 'rm -rf "$dt_dir"' INT TERM EXIT
 definition=$(realpath "$1")
 mode="$2"
 shift; shift
-( cd "@PROJECT_SOURCE_DIR@"/matching && mvn exec:java -Dexec.args="$definition qbaL $dt_dir 1" -q )
+
+matching_dir="@PROJECT_SOURCE_DIR@/matching"
+installed_jar="$matching_dir/target/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
+
+if [ ! -f "$installed_jar" ]; then
+  echo "Pattern matching compiler isn't installed!"
+  echo "  looking for a jar file at $installed_jar"
+  exit 1
+fi
+
+java -jar "$installed_jar" "$definition" qbaL "$dt_dir" 1
 
 llvm_kompile_flags=()
 clang_flags=()
