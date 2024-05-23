@@ -160,6 +160,12 @@ config.substitutions.extend([
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
             exit 1
         fi
+        %kore-proof-trace --streaming-parser --verbose --expand-terms %t.header.bin %t.out.bin | diff - %test-proof-diff-out -q
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
+            exit 1
+        fi
     ''')),
 
     ('%check-dir-proof-out', one_line('''
@@ -173,6 +179,12 @@ config.substitutions.extend([
             result="$?"
             if [ "$result" -ne 0 ]; then
                 echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
+                exit 1
+            fi
+            %kore-proof-trace --streaming-parser --verbose --expand-terms %t.header.bin $hint | diff - $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
                 exit 1
             fi
         done
