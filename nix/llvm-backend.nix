@@ -1,4 +1,4 @@
-{ lib, src, cmake, flex, fmt, pkg-config, llvm, libllvm, libcxxabi, stdenv, boost, gmp
+{ lib, src, cmake, flex, fmt, pkg-config, llvm, libllvm, libcxx, stdenv, boost, gmp
 , jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python310, unixtools,
 # Runtime dependencies:
 host,
@@ -41,7 +41,7 @@ stdenv.mkDerivation {
       --replace '"-lncurses"' '"-L${ncurses}/lib" "-lncurses"' \
       --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
       --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
-      --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib' \
+      --replace '-L@BREW_PREFIX@/lib' '-L${libcxx}/lib' \
       --replace '-I "$(dirname "$0")"/../include/kllvm' \
                 '-I "$(dirname "$0")"/../include/kllvm -I ${boost.dev}/include -I ${fmt.dev}/include'
   '';
