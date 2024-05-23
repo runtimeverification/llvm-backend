@@ -118,4 +118,46 @@ kore_header::kore_header(FILE *in) {
   }
 }
 
+namespace detail {
+
+sptr<kore_pattern> read_v2(
+    proof_trace_buffer &buffer, kore_header const &header,
+    uint64_t &pattern_len) {
+  switch (buffer.read()) {
+  case 0: {
+    uint64_t len = 0;
+    if (!buffer.read_uint64(len)) {
+      throw std::runtime_error("invalid length");
+    }
+    std::string str;
+    if (!buffer.read_string(str, len)) {
+      throw std::runtime_error("invalid string data");
+    }
+    buffer.read();
+    pattern_len += 2 + sizeof(len) + len;
+    return kore_string_pattern::create(str);
+  }
+  case 1: {
+    uint32_t offset = 0;
+    if (!buffer.read_uint32(offset)) {
+      throw std::runtime_error("invalid offset");
+    }
+    auto arity = header.get_arity(offset);
+    // TODO: we need to check if this PR is an `inj` symbol and adjust the
+    // second sort parameter of the symbol to be equal to the sort of the
+    // current pattern.
+    auto *symbol = header.get_symbol(offset);
+    auto new_pattern = kore_composite_pattern::create(symbol);
+    for (auto i = 0; i < arity; ++i) {
+      auto child = read_v2(buffer, header, pattern_len);
+      new_pattern->add_argument(child);
+    }
+    return new_pattern;
+  }
+  default: throw std::runtime_error("Bad term");
+  }
+}
+
+} // namespace detail
+
 } // namespace kllvm

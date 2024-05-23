@@ -1,6 +1,7 @@
 #include <kllvm/binary/ProofTraceParser.h>
 
 #include <fmt/format.h>
+#include <fstream>
 
 namespace kllvm {
 
@@ -135,11 +136,11 @@ proof_trace_parser::proof_trace_parser(
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace(std::string const &data) {
-  auto ptr = data.begin();
+  proof_trace_memory_buffer buffer(data.data(), data.data() + data.length());
   llvm_rewrite_trace trace;
-  bool result = parse_trace(ptr, data.end(), trace);
+  bool result = parse_trace(buffer, trace);
 
-  if (!result || ptr != data.end()) {
+  if (!result || !buffer.eof()) {
     return std::nullopt;
   }
 
@@ -152,8 +153,20 @@ proof_trace_parser::parse_proof_trace(std::string const &data) {
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
-  auto data = file_contents(filename);
-  return parse_proof_trace(data);
+  std::ifstream file(filename, std::ios_base::binary);
+  proof_trace_file_buffer buffer(file);
+  llvm_rewrite_trace trace;
+  bool result = parse_trace(buffer, trace);
+
+  if (!result || !buffer.eof()) {
+    return std::nullopt;
+  }
+
+  if (verbose_) {
+    trace.print(std::cout, expand_terms_);
+  }
+
+  return trace;
 }
 
 } // namespace kllvm

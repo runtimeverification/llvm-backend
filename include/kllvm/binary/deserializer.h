@@ -8,9 +8,9 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <vector>
-
+#include <fstream>
 #include <iostream>
+#include <vector>
 
 namespace kllvm {
 
@@ -34,6 +34,173 @@ public:
   [[nodiscard]] kore_symbol *get_symbol(uint32_t offset) const {
     return symbols_[offset].get();
   };
+};
+
+class proof_trace_buffer {
+public:
+  virtual ~proof_trace_buffer() = default;
+  virtual bool read(void *ptr, size_t len) = 0;
+  virtual int read() = 0;
+  virtual bool has_word() = 0;
+  virtual bool eof() = 0;
+  virtual int peek() = 0;
+  virtual uint64_t peek_word() = 0;
+  bool check_word(uint64_t w) {
+    uint64_t next = 0;
+    if (read_uint64(next)) {
+      return next == w;
+    }
+    return false;
+  }
+  virtual bool read_uint32(uint32_t &i) = 0;
+  virtual bool read_uint64(uint64_t &i) = 0;
+  virtual bool read_string(std::string &str) = 0;
+  virtual bool read_string(std::string &str, size_t len) = 0;
+  bool read_bool(bool &b) {
+    if (eof()) {
+      return false;
+    }
+    b = read();
+    return true;
+  }
+};
+
+class proof_trace_memory_buffer : public proof_trace_buffer {
+private:
+  char const *ptr_;
+  char const *const end_;
+
+public:
+  proof_trace_memory_buffer(char const *ptr, char const *end)
+      : ptr_(ptr)
+      , end_(end) { }
+
+  bool read(void *out, size_t len) override {
+    if (end_ - ptr_ < len) {
+      return false;
+    }
+    memcpy(out, ptr_, len);
+    ptr_ += len;
+    return true;
+  }
+
+  int read() override {
+    if (ptr_ == end_) {
+      return EOF;
+    }
+    return *(ptr_++);
+  }
+
+  bool has_word() override { return end_ - ptr_ >= 8; }
+
+  bool eof() override { return ptr_ == end_; }
+
+  int peek() override {
+    if (eof()) {
+      return EOF;
+    }
+    return *ptr_;
+  }
+
+  uint64_t peek_word() override { return *(uint64_t *)ptr_; }
+
+  bool read_uint32(uint32_t &i) override {
+    if (end_ - ptr_ < sizeof(uint32_t)) {
+      return false;
+    }
+    i = *(uint32_t *)ptr_;
+    ptr_ += sizeof(uint32_t);
+    return true;
+  }
+
+  bool read_uint64(uint64_t &i) override {
+    if (end_ - ptr_ < sizeof(uint64_t)) {
+      return false;
+    }
+    i = *(uint64_t *)ptr_;
+    ptr_ += sizeof(uint64_t);
+    return true;
+  }
+
+  bool read_string(std::string &str) override {
+    size_t len = strnlen(ptr_, end_ - ptr_);
+    if (len == end_ - ptr_) {
+      return false;
+    }
+    str.resize(len);
+    memcpy(str.data(), ptr_, len);
+    ptr_ += len + 1;
+    return true;
+  }
+
+  bool read_string(std::string &str, size_t len) override {
+    if (end_ - ptr_ < len) {
+      return false;
+    }
+    str.resize(len);
+    memcpy(str.data(), ptr_, len);
+    ptr_ += len;
+    return true;
+  }
+};
+
+class proof_trace_file_buffer : public proof_trace_buffer {
+private:
+  std::ifstream &file_;
+
+public:
+  proof_trace_file_buffer(std::ifstream &file)
+      : file_(file) { }
+
+  bool read(void *ptr, size_t len) override {
+    file_.read((char *)ptr, len);
+    return !file_.fail();
+  }
+
+  int read() override { return file_.get(); }
+
+  bool has_word() override {
+    if (eof()) {
+      return false;
+    }
+    std::streampos pos = file_.tellg();
+    file_.seekg(0, std::ios::end);
+    std::streamoff off = file_.tellg() - pos;
+    file_.seekg(pos);
+    return off >= 8;
+  }
+
+  bool eof() override { return file_.eof() || file_.peek() == EOF; }
+
+  int peek() override { return file_.peek(); }
+
+  uint64_t peek_word() override {
+    uint64_t word = 0;
+    file_.read((char *)&word, sizeof(word));
+    file_.seekg(-sizeof(word), std::ios::cur);
+    return word;
+  }
+
+  bool read_uint32(uint32_t &i) override {
+    file_.read((char *)&i, sizeof(i));
+    return !file_.fail();
+  }
+
+  bool read_uint64(uint64_t &i) override {
+    file_.read((char *)&i, sizeof(i));
+    return !file_.fail();
+  }
+
+  bool read_string(std::string &str) override {
+    std::getline(file_, str, '\0');
+    return !file_.fail() && !file_.eof();
+  }
+
+  bool read_string(std::string &str, size_t len) override {
+    str.resize(len);
+    file_.read(str.data(), len);
+    return !file_.fail();
+  }
 };
 
 namespace detail {
@@ -272,34 +439,9 @@ sptr<kore_pattern> read(It &ptr, It end, binary_version version) {
   return term_stack[0];
 }
 
-template <typename It>
-sptr<kore_pattern> read_v2(It &ptr, It end, kore_header const &header) {
-  switch (peek(ptr)) {
-  case 0: {
-    ++ptr;
-    auto len = detail::read<uint64_t>(ptr, end);
-    auto str = std::string((char *)&*ptr, (char *)(&*ptr + len));
-    ptr += len + 1;
-    return kore_string_pattern::create(str);
-  }
-  case 1: {
-    ++ptr;
-    auto offset = detail::read<uint32_t>(ptr, end);
-    auto arity = header.get_arity(offset);
-    // TODO: we need to check if this PR is an `inj` symbol and adjust the
-    // second sort parameter of the symbol to be equal to the sort of the
-    // current pattern.
-    auto symbol = header.get_symbol(offset);
-    auto new_pattern = kore_composite_pattern::create(symbol);
-    for (auto i = 0; i < arity; ++i) {
-      auto child = read_v2(ptr, end, header);
-      new_pattern->add_argument(child);
-    }
-    return new_pattern;
-  }
-  default: throw std::runtime_error("Bad term " + std::to_string(*ptr));
-  }
-}
+sptr<kore_pattern> read_v2(
+    proof_trace_buffer &buffer, kore_header const &header,
+    uint64_t &pattern_len);
 
 } // namespace detail
 
