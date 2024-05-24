@@ -24,28 +24,35 @@ jobs:
             --target ${{ github.sha }}
 
 
-  build-jammy-package:
-    name: 'Build Ubuntu Jammy Package'
+  build-ubuntu-packages:
+    name: 'Build Ubuntu Packages'
     runs-on: [self-hosted, linux, normal]
     needs: draft-release
+    strategy:
+      matrix:
+        include:
+          - distro: jammy
+            llvm: 15
+          - distro: noble
+            llvm: 17
 
     steps:
       - uses: actions/checkout@v4
       - name: 'Check out code'
         uses: actions/checkout@v4
         with:
-          path: k-llvm-jammy
+          path: k-llvm-${{ matrix.distro }}
           submodules: recursive
 
       - name: 'Build package in Docker'
         uses: ./.github/actions/test-package
         with:
           os: ubuntu
-          distro: jammy
-          llvm: 15
-          build-package: package/debian/build-package jammy
+          distro: ${{ matrix.distro }}
+          llvm: ${{ matrix.llvm }}
+          build-package: package/debian/build-package ${{ matrix.distro }}
           test-package: package/debian/test-package
-          pkg-name: k-llvm-backend_amd64_ubuntu_jammy.deb
+          pkg-name: k-llvm-backend_amd64_ubuntu_${{ matrix.distro }}.deb
 
       - name: 'Upload to release'
         env:
@@ -53,11 +60,11 @@ jobs:
         run: |
           set -x
           VERSION=v$(cat package/version)
-          cp k-llvm-backend_amd64_ubuntu_jammy.deb k-llvm-backend_${VERSION}_amd64_ubuntu_jammy.deb
+          cp k-llvm-backend_amd64_ubuntu_${{ matrix.distro }}.deb k-llvm-backend_${VERSION}_amd64_ubuntu_${{ matrix.distro }}.deb
           gh release upload ${VERSION}                        \
             --repo runtimeverification/llvm-backend           \
             --clobber                                         \
-            k-llvm-backend_${VERSION}_amd64_ubuntu_jammy.deb
+            k-llvm-backend_${VERSION}_amd64_ubuntu_${{ matrix.distro }}.deb
 
       - name: 'On failure, delete drafted release'
         if: failure()
@@ -76,7 +83,7 @@ jobs:
     name: 'Publish Release'
     runs-on: ubuntu-latest
     environment: production
-    needs: build-jammy-package
+    needs: build-ubuntu-packages
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
