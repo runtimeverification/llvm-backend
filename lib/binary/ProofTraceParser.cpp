@@ -1,6 +1,7 @@
 #include <kllvm/binary/ProofTraceParser.h>
 
 #include <fmt/format.h>
+#include <fstream>
 
 namespace kllvm {
 
@@ -114,6 +115,59 @@ void llvm_event::print(
   }
 }
 
+llvm_rewrite_trace_iterator::llvm_rewrite_trace_iterator(
+    proof_trace_buffer &buffer, kore_header const &header)
+    : buffer_(buffer)
+    , parser_(false, false, header) {
+  if (!proof_trace_parser::parse_header(buffer_, version_)) {
+    throw std::runtime_error("invalid header");
+  }
+}
+
+std::optional<annotated_llvm_event>
+llvm_rewrite_trace_iterator::get_next_event() {
+  if (buffer_.eof()) {
+    return std::nullopt;
+  }
+  switch (type_) {
+  case llvm_event_type::PreTrace: {
+    if (buffer_.has_word() && buffer_.peek_word() != config_sentinel) {
+      llvm_event event;
+      if (!parser_.parse_event(buffer_, event)) {
+        throw std::runtime_error("could not parse pre-trace event");
+      }
+      return {{type_, event}};
+    }
+    uint64_t pattern_len = 0;
+    auto config = parser_.parse_config(buffer_, pattern_len);
+    if (!config) {
+      throw std::runtime_error("could not parse config event");
+    }
+    llvm_event config_event;
+    config_event.setkore_pattern(config, pattern_len);
+    type_ = llvm_event_type::Trace;
+    return {{llvm_event_type::InitialConfig, config_event}};
+  }
+  case llvm_event_type::Trace: {
+    llvm_event event;
+    if (!parser_.parse_event(buffer_, event)) {
+      throw std::runtime_error("could not parse trace event");
+    }
+    return {{type_, event}};
+  }
+  default: throw std::runtime_error("should be unreachable");
+  }
+}
+
+void llvm_rewrite_trace_iterator::print(
+    std::ostream &out, bool expand_terms, unsigned ind) {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format("{}version: {}\n", indent, version_);
+  while (auto event = get_next_event()) {
+    event.value().event.print(out, expand_terms, false, ind);
+  }
+}
+
 void llvm_rewrite_trace::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
@@ -135,11 +189,11 @@ proof_trace_parser::proof_trace_parser(
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace(std::string const &data) {
-  auto ptr = data.begin();
+  proof_trace_memory_buffer buffer(data.data(), data.data() + data.length());
   llvm_rewrite_trace trace;
-  bool result = parse_trace(ptr, data.end(), trace);
+  bool result = parse_trace(buffer, trace);
 
-  if (!result || ptr != data.end()) {
+  if (!result || !buffer.eof()) {
     return std::nullopt;
   }
 
@@ -152,8 +206,20 @@ proof_trace_parser::parse_proof_trace(std::string const &data) {
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
-  auto data = file_contents(filename);
-  return parse_proof_trace(data);
+  std::ifstream file(filename, std::ios_base::binary);
+  proof_trace_file_buffer buffer(file);
+  llvm_rewrite_trace trace;
+  bool result = parse_trace(buffer, trace);
+
+  if (!result || !buffer.eof()) {
+    return std::nullopt;
+  }
+
+  if (verbose_) {
+    trace.print(std::cout, expand_terms_);
+  }
+
+  return trace;
 }
 
 } // namespace kllvm

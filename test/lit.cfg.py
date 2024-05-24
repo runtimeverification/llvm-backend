@@ -160,13 +160,18 @@ config.substitutions.extend([
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
             exit 1
         fi
+        %kore-proof-trace --streaming-parser --verbose --expand-terms %t.header.bin %t.out.bin | diff - %test-proof-diff-out -q
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
+            exit 1
+        fi
     ''')),
 
     ('%check-dir-proof-out', one_line('''
         %kore-rich-header %s > %t.header.bin
         for out in %test-dir-out/*.proof.out.diff; do
             in=%test-dir-in/`basename $out .proof.out.diff`.in
-            rm -f %t.out.bin
             hint=%t.`basename $out .proof.out.diff`.hint
             rm -f $hint
             %t.interpreter $in -1 $hint --proof-output
@@ -174,6 +179,12 @@ config.substitutions.extend([
             result="$?"
             if [ "$result" -ne 0 ]; then
                 echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
+                exit 1
+            fi
+            %kore-proof-trace --streaming-parser --verbose --expand-terms %t.header.bin $hint | diff - $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
                 exit 1
             fi
         done
