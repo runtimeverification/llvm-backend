@@ -8,5 +8,5 @@ file(
 )
 
 add_subdirectory(base64)
-add_subdirectory(fmt)
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
 add_subdirectory(pybind11)

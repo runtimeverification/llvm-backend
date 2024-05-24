@@ -27,12 +27,20 @@ using namespace llvm;
 
 namespace kllvm {
 
-CodeGenOpt::Level get_opt_level() {
+#if LLVM_VERSION_MAJOR >= 18
+#define CODEGEN_OPT_LEVEL CodeGenOptLevel
+#define CODEGEN_OBJECT_FILE ObjectFile
+#else
+#define CODEGEN_OPT_LEVEL CodeGenOpt
+#define CODEGEN_OBJECT_FILE CGFT_ObjectFile
+#endif
+
+auto get_opt_level() {
   switch (optimization_level) {
-  case opt_level::O0: return CodeGenOpt::None;
-  case opt_level::O1: return CodeGenOpt::Less;
-  case opt_level::O2: return CodeGenOpt::Default;
-  case opt_level::O3: return CodeGenOpt::Aggressive;
+  case opt_level::O0: return CODEGEN_OPT_LEVEL::None;
+  case opt_level::O1: return CODEGEN_OPT_LEVEL::Less;
+  case opt_level::O2: return CODEGEN_OPT_LEVEL::Default;
+  case opt_level::O3: return CODEGEN_OPT_LEVEL::Aggressive;
   }
 }
 
@@ -88,8 +96,8 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
   auto pm = legacy::PassManager{};
   mod.setDataLayout(target_machine->createDataLayout());
   target_machine->addPassesToEmitFile(
-      pm, (raw_pwrite_stream &)os, nullptr, CodeGenFileType::CGFT_ObjectFile,
-      true, nullptr);
+      pm, (raw_pwrite_stream &)os, nullptr,
+      CodeGenFileType::CODEGEN_OBJECT_FILE, true, nullptr);
 
   pm.run(mod);
 }
