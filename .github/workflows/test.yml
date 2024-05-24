@@ -60,6 +60,14 @@ jobs:
   build-from-source:
     name: 'Build LLVM backend from source'
     runs-on: [self-hosted, linux, normal]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: jammy
+            llvm: 15
+          - distro: noble
+            llvm: 18
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -71,12 +79,12 @@ jobs:
         with:
           tag: llvm-backend-ci-${{ github.sha }}
           os: ubuntu
-          distro: jammy
-          llvm: 15
+          distro: ${{ matrix.distro }}
+          llvm: ${{ matrix.llvm }}
 
       - name: 'Run backend tests'
         run: |
-          docker exec -t llvm-backend-ci-${GITHUB_SHA} .github/workflows/ci-tests.sh
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} .github/workflows/ci-tests.sh ${{ matrix.llvm }}
 
       - name: 'Tear down Docker'
         if: always()

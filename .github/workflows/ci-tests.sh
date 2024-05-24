@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
+llvm_version="$1"
+shift
+
 mkdir build
 
 pushd build
@@ -12,5 +15,5 @@ pushd matching
 mvn package
 popd
 
-export PATH="$(realpath ./build/install/bin):$(realpath ./build/bin):/usr/lib/llvm-15/bin:$PATH"
+export PATH="$(realpath ./build/install/bin):$(realpath ./build/bin):/usr/lib/llvm-${llvm_version}/bin:$PATH"
 lit -v test
