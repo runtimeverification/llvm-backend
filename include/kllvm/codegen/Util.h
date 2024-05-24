@@ -19,6 +19,11 @@ llvm::Constant *get_offset_of_member(llvm::Module *, llvm::StructType *, int);
 // one does not yet exist
 llvm::Function *kore_heap_alloc(std::string const &name, llvm::Module *module);
 
+llvm::Instruction *create_malloc(
+    llvm::BasicBlock *block, llvm::Type *int_ptr_ty, llvm::Type *alloc_ty,
+    llvm::Value *alloc_size, llvm::Value *array_size, llvm::Function *malloc_f,
+    std::string const &name = "");
+
 // getOrInsertFunction on module, aborting on failure
 template <class... Ts>
 llvm::Function *get_or_insert_function(llvm::Module *module, Ts &&...args) {

@@ -5,7 +5,7 @@ add_library(BinaryKore
 )
 
 target_link_libraries(BinaryKore
-  PUBLIC AST fmt::fmt
+  PUBLIC AST fmt::fmt-header-only
 )
 
 install(

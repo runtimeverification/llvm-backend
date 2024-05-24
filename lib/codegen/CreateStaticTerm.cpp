@@ -194,7 +194,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
                   module_->getContext(), int_struct),
               num_limbs, mp_size,
               llvm::ConstantExpr::getPointerCast(
-                  limbs_var, llvm::Type::getInt64PtrTy(ctx_)))));
+                  limbs_var, llvm::PointerType::getUnqual(ctx_)))));
       mpz_clear(value);
     }
     std::vector<llvm::Constant *> idxs
@@ -290,7 +290,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
               llvm::ConstantStruct::getAnon(
                   {mpfr_prec, mpfr_sign, mpfr_exp,
                    llvm::ConstantExpr::getPointerCast(
-                       limbs_var, llvm::Type::getInt64PtrTy(ctx_))}))));
+                       limbs_var, llvm::PointerType::getUnqual(ctx_))}))));
       mpfr_clear(value);
     }
     std::vector<llvm::Constant *> idxs

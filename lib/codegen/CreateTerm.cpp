@@ -265,20 +265,11 @@ llvm::Value *allocate_term(
 llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
     char const *alloc_fn) {
-  llvm::Instruction *malloc = llvm::CallInst::CreateMalloc(
+  auto *malloc = create_malloc(
       block, llvm::Type::getInt64Ty(block->getContext()), alloc_type, len,
       nullptr, kore_heap_alloc(alloc_fn, block->getModule()));
 
-  if (!block->empty()) {
-    set_debug_loc(&block->back());
-  }
-
-#if LLVM_VERSION_MAJOR < 16
-  malloc->insertAfter(&block->back());
-#else
-  malloc->insertInto(block, block->end());
-#endif
-
+  set_debug_loc(malloc);
   return malloc;
 }
 
@@ -521,7 +512,7 @@ llvm::Value *create_term::create_hook(
         get_or_insert_function(
             module_, "hook_MINT_import",
             getvalue_type({sort_category::Int, 0}, module_),
-            llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
+            llvm::PointerType::getUnqual(ctx_), llvm::Type::getInt64Ty(ctx_),
             llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getFalse(ctx_)},
@@ -573,7 +564,7 @@ llvm::Value *create_term::create_hook(
         get_or_insert_function(
             module_, "hook_MINT_import",
             getvalue_type({sort_category::Int, 0}, module_),
-            llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
+            llvm::PointerType::getUnqual(ctx_), llvm::Type::getInt64Ty(ctx_),
             llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getTrue(ctx_)},
@@ -589,7 +580,7 @@ llvm::Value *create_term::create_hook(
     auto *type = getvalue_type(cat, module_);
     llvm::Instruction *ptr = llvm::CallInst::Create(
         get_or_insert_function(
-            module_, "hook_MINT_export", llvm::Type::getInt64PtrTy(ctx_),
+            module_, "hook_MINT_export", llvm::PointerType::getUnqual(ctx_),
             getvalue_type({sort_category::Int, 0}, module_),
             llvm::Type::getInt64Ty(ctx_)),
         {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits)},
