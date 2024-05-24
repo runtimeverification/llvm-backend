@@ -1374,12 +1374,21 @@ void make_match_reason_function(
       = llvm::BasicBlock::Create(module->getContext(), "fail", match_func);
   llvm::PHINode *fail_subject = llvm::PHINode::Create(
       llvm::PointerType::getUnqual(module->getContext()), 0, "subject", fail);
+
+  // The pointer types created here for the failure pattern and sort need to be
+  // given an explicit element type on LLVM 15 (LLVM_VERSION_MAJOR <= 15). This
+  // is because the constants that eventually flow into the Phi nodes still get
+  // type `i8*` on LLVM 15, rather than `ptr` as would be assigned here.
+  //
+  // In newer versions, the string constants also get type `ptr` and these
+  // explicit element types become no-ops that we can remove.
   llvm::PHINode *fail_pattern = llvm::PHINode::Create(
       llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(module->getContext())),
       0, "pattern", fail);
   llvm::PHINode *fail_sort = llvm::PHINode::Create(
       llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(module->getContext())),
       0, "sort", fail);
+
   auto *call = llvm::CallInst::Create(
       get_or_insert_function(
           module, "add_match_fail_reason",
