@@ -7,7 +7,12 @@ shift
 mkdir build
 
 pushd build
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=install ..
+cmake ..                                          \
+  -DCMAKE_C_COMPILER="clang-${llvm_version}"      \
+  -DCMAKE_CXX_COMPILER="clang++-${llvm_version}"  \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=On              \
+  -DBUILD_TESTS=On                                \
+  -DCMAKE_INSTALL_PREFIX=install
 make -j$(nproc) install
 popd
 
