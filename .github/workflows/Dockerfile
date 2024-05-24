@@ -35,6 +35,7 @@ RUN     apt-get update                    \
           pkg-config                      \
           pipx                            \
           python3                         \
+          python3-dev                     \
           python3-pybind11                \
           xxd
 
