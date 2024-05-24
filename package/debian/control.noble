@@ -2,7 +2,7 @@ Source: k-llvm-backend
 Section: devel
 Priority: optional
 Maintainer: Bruce Collie <bruce.collie@runtimeverification.com>
-Build-Depends: clang-18 , cmake , debhelper (>=10) , flex , libboost-dev , libboost-test-dev , libfmt-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , llvm-18-tools , pkg-config , python3 , python3-dev , xxd
+Build-Depends: clang-17 , cmake , debhelper (>=10) , flex , libboost-dev , libboost-test-dev , libfmt-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , llvm-17-tools , pkg-config , python3 , python3-dev , xxd
 Standards-Version: 3.9.6
 Homepage: https://github.com/runtimeverification/llvm-backend
 
@@ -10,7 +10,7 @@ Package: k-llvm-backend
 Architecture: any
 Section: devel
 Priority: optional
-Depends: clang-18 , flex , libboost-dev , libffi-dev , libfmt-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-0-2 , lld-18 , llvm-18 , pkg-config
+Depends: clang-17 , flex , libboost-dev , libffi-dev , libfmt-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-0-2 , lld-17 , llvm-17 , pkg-config
 Description: K Framework LLVM backend
  Fast concrete execution backend for programming language semantics implemented using the K Framework.
 Homepage: https://github.com/runtimeverification/llvm-backend

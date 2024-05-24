@@ -67,7 +67,7 @@ jobs:
           - distro: jammy
             llvm: 15
           - distro: noble
-            llvm: 18
+            llvm: 17
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -102,7 +102,7 @@ jobs:
           - distro: jammy
             llvm: 15
           - distro: noble
-            llvm: 18
+            llvm: 17
 
     steps:
       - uses: actions/checkout@v4
