@@ -288,7 +288,7 @@ inline SortString hook_STRING_replace(
   auto *start = &haystack->data[0];
   auto *pos = start;
   auto *end = &haystack->data[len(haystack)];
-  size_t matches[len(haystack)];
+  auto matches = std::vector<size_t>(len(haystack));
   int i = 0;
   while (i < uoccurences) {
     pos = std::search(pos, end, &needle->data[0], &needle->data[len(needle)]);
