@@ -92,23 +92,31 @@ jobs:
           docker stop --time=0 llvm-backend-ci-${GITHUB_SHA}
           docker container rm --force llvm-backend-ci-${GITHUB_SHA} || true
 
-  build-jammy-package:
-    name: 'Build Ubuntu Jammy package'
+  build-ubuntu-package:
+    name: 'Build Ubuntu package'
     runs-on: [self-hosted, linux, normal]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: jammy
+            llvm: 15
+          - distro: noble
+            llvm: 18
 
     steps:
       - uses: actions/checkout@v4
       - name: 'Check out code'
         uses: actions/checkout@v4
         with:
-          path: k-llvm-jammy
+          path: k-llvm-${{ matrix.distro }}
           submodules: recursive
 
       - name: 'Build package in Docker'
         uses: ./.github/actions/test-package
         with:
           os: ubuntu
-          distro: jammy
-          llvm: 15
-          build-package: package/debian/build-package jammy
+          distro: ${{ matrix.distro }}
+          llvm: ${{ matrix.llvm }}
+          build-package: package/debian/build-package ${{ matrix.distro }}
           test-package: package/debian/test-package
