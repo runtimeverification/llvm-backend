@@ -2,12 +2,15 @@
 
 This document describes the format for the binary proof trace that gets emitted
 when the `--proof-output` flag gets passed to the interpreter. In order for the trace
-to be emitted, an appropriate instrumentation flag should have been passed to `llvm-kompile`.
+to be emitted, an appropriate instrumentation flag should have been passed to `kompile`
+or directly to `llvm-kompile`.
+
 We currently offer two modes of instrumentation: the default one is enabled with the flag
-`--proof-hint-instrumentation`, while a slower one that generates a longer trace is enabled with
-the flag `--proof-hint-instrumentation-slow`. Note that this trace
-format is in its early stages and will probably change quite a bit as development on it
-continues.
+`--proof-hint-instrumentation`, while a slower one that generates a longer trace with all
+intermediate configurations is enabled with the flag `--proof-hint-instrumentation-slow`.
+Note that this trace format is in its early stages and will probably change quite a bit as 
+development on it continues. Watch for the version of the trace format in the header of
+the trace.
 
 ## Overview
 
@@ -74,3 +77,20 @@ uint64            ::= <64-bit unsigned little endian integer>
   are related to configuration initialization.
 - The `relative_position` is a null terminated string of positive integers
   separated by `:` (ie. `0:1:1`)
+- The `arg*` in the `function` and `hook` event is a list of arguments that
+  are either `hook`, `function`, `rule`, `side_cond_entry`, `side_cond_exit`, or `kore_term`.
+
+
+## Tools
+
+As mentioned above, the proof trace is in binary format and can be generated using the
+appropriated flags to `kompile` or directly to `llvm-kompile`. We provide a tool to
+desserialize the binary trace to a human readable format. The `kore-proof-trace` is
+located in the `tools` directory of the LLVM Backend repository and can be built with
+the `make` command. The tool takes two argument, the path to the binary header and to
+binary trace file. It can take 3 flags:
+ - `--verbose` for verbose output,
+ - `--expand-terms` for printing the kore terms in the trace instead of their sizes, and 
+ - `--streaming-parser` to use the streaming parser instead of the default one.
+ 
+The tool will output the trace in a human readable format to the standard output.
