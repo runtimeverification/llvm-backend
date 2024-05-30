@@ -1,16 +1,16 @@
 # Proof Trace Format
 
 This document describes the format for the binary proof trace that gets emitted
-when the `--proof-output` flag gets passed to the interpreter. In order for the trace
-to be emitted, an appropriate instrumentation flag should have been passed to `kompile`
-or directly to `llvm-kompile`.
+when the `--proof-output` flag gets passed to the interpreter or `--proof-hint`
+is passed to `krun`. In order for the trace to be emitted, an appropriate instrumentation
+flag should have been passed to `kompile` or directly to `llvm-kompile`.
 
 We currently offer two modes of instrumentation: the default one is enabled with the flag
 `--proof-hint-instrumentation`, while a slower one that generates a longer trace with all
 intermediate configurations is enabled with the flag `--proof-hint-instrumentation-slow`.
 Note that this trace format is in its early stages and will probably change quite a bit as 
 development on it continues. Watch for the version of the trace format in the header of
-the trace.
+the trace. 
 
 ## Overview
 
