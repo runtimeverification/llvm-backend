@@ -24,8 +24,8 @@ jobs:
             --target ${{ github.sha }}
 
 
-  build-ubuntu-packages:
-    name: 'Build Ubuntu Packages'
+  build-ubuntu-package:
+    name: 'Build Ubuntu package'
     runs-on: [self-hosted, linux, normal]
     needs: draft-release
     strategy:
