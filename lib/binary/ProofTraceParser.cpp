@@ -116,30 +116,30 @@ void llvm_event::print(
 }
 
 llvm_rewrite_trace_iterator::llvm_rewrite_trace_iterator(
-    proof_trace_buffer &buffer, kore_header const &header)
-    : buffer_(buffer)
+    std::unique_ptr<proof_trace_buffer> buffer, kore_header const &header)
+    : buffer_(std::move(buffer))
     , parser_(false, false, header) {
-  if (!proof_trace_parser::parse_header(buffer_, version_)) {
+  if (!proof_trace_parser::parse_header(*buffer_, version_)) {
     throw std::runtime_error("invalid header");
   }
 }
 
 std::optional<annotated_llvm_event>
 llvm_rewrite_trace_iterator::get_next_event() {
-  if (buffer_.eof()) {
+  if (buffer_->eof()) {
     return std::nullopt;
   }
   switch (type_) {
   case llvm_event_type::PreTrace: {
-    if (buffer_.has_word() && buffer_.peek_word() != config_sentinel) {
+    if (buffer_->has_word() && buffer_->peek_word() != config_sentinel) {
       llvm_event event;
-      if (!parser_.parse_event(buffer_, event)) {
+      if (!parser_.parse_event(*buffer_, event)) {
         throw std::runtime_error("could not parse pre-trace event");
       }
       return {{type_, event}};
     }
     uint64_t pattern_len = 0;
-    auto config = parser_.parse_config(buffer_, pattern_len);
+    auto config = parser_.parse_config(*buffer_, pattern_len);
     if (!config) {
       throw std::runtime_error("could not parse config event");
     }
@@ -150,7 +150,7 @@ llvm_rewrite_trace_iterator::get_next_event() {
   }
   case llvm_event_type::Trace: {
     llvm_event event;
-    if (!parser_.parse_event(buffer_, event)) {
+    if (!parser_.parse_event(*buffer_, event)) {
       throw std::runtime_error("could not parse trace event");
     }
     return {{type_, event}};
@@ -207,7 +207,7 @@ proof_trace_parser::parse_proof_trace(std::string const &data) {
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
   std::ifstream file(filename, std::ios_base::binary);
-  proof_trace_file_buffer buffer(file);
+  proof_trace_file_buffer buffer(std::move(file));
   llvm_rewrite_trace trace;
   bool result = parse_trace(buffer, trace);
 
