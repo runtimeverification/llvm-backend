@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 
   if (use_streaming_parser) {
     std::ifstream file(input_filename, std::ios_base::binary);
-    auto buffer = new proof_trace_file_buffer(std::move(file));
+    auto *buffer = new proof_trace_file_buffer(std::move(file));
     llvm_rewrite_trace_iterator it(
         std::unique_ptr<proof_trace_file_buffer>(buffer), header);
     if (verbose_output) {
