@@ -52,7 +52,6 @@ if:
   %output_file = load i8*, i8** @output_file
   call void @write_uint64_to_file(i8* %output_file, i64 18446744073709551615)
   call void @serialize_configuration_to_file_v2(i8* %output_file, %block* %subject)
-  call void @write_uint64_to_file(i8* %output_file, i64 14757395258967641292)
   br label %merge
 merge:
   store i64 %depth, i64* @depth

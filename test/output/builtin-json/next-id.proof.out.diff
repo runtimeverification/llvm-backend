@@ -1,4 +1,4 @@
-version: 10
+version: 11
 function: Lblid'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'JSON'Unds'JSON{} ()
 rule: 216 1
   VarJ = kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
