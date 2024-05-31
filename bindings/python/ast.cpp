@@ -475,9 +475,9 @@ void bind_proof_trace(py::module_ &m) {
           "from_file",
           [](std::string const &filename, kore_header const &header) {
             std::ifstream file(filename, std::ios_base::binary);
-            auto *buffer = new proof_trace_file_buffer(std::move(file));
             return llvm_rewrite_trace_iterator(
-                std::unique_ptr<proof_trace_file_buffer>(buffer), header);
+                std::make_unique<proof_trace_file_buffer>(std::move(file)),
+                header);
           },
           py::arg("filename"), py::arg("header"))
       .def_property_readonly(
