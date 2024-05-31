@@ -48,7 +48,6 @@ int32_t get_exit_code(block *);
   } else if (!error && !proof_hint_instrumentation_slow) {
     write_uint64_to_file(output_file, 0xFFFFFFFFFFFFFFFF);
     serialize_configuration_to_file_v2(output_file, subject);
-    write_uint64_to_file(output_file, 0xCCCCCCCCCCCCCCCC);
   }
 
   auto exit_code = error ? 113 : get_exit_code(subject);

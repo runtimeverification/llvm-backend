@@ -26,7 +26,6 @@ static_assert(word(0xAA) == 0xAAAAAAAAAAAAAAAA);
 } // namespace detail
 
 constexpr uint64_t config_sentinel = detail::word(0xFF);
-constexpr uint64_t kore_end_sentinel = detail::word(0xCC);
 constexpr uint64_t function_event_sentinel = detail::word(0xDD);
 constexpr uint64_t function_end_sentinel = detail::word(0x11);
 constexpr uint64_t hook_event_sentinel = detail::word(0xAA);
@@ -274,7 +273,7 @@ public:
 
 class proof_trace_parser {
 public:
-  static constexpr uint32_t expected_version = 10U;
+  static constexpr uint32_t expected_version = 11U;
 
 private:
   bool verbose_;
@@ -332,7 +331,7 @@ private:
 
     event->add_substitution(name, kore_term, pattern_len);
 
-    return buffer.check_word(kore_end_sentinel);
+    return true;
   }
 
   sptr<llvm_hook_event> parse_hook(proof_trace_buffer &buffer) {
@@ -419,10 +418,6 @@ private:
 
     auto kore_term = parse_kore_term(buffer, pattern_len);
     if (!kore_term) {
-      return nullptr;
-    }
-
-    if (!buffer.check_word(kore_end_sentinel)) {
       return nullptr;
     }
 

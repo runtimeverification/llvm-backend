@@ -255,7 +255,6 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
 
     emit_write_string(outputFile, key.str(), true_block);
     emit_serialize_term(*sort, outputFile, val, true_block);
-    emit_write_uint64(outputFile, detail::word(0xCC), true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -277,7 +276,6 @@ llvm::BasicBlock *proof_event::rewrite_event_post(
 
   emit_write_uint64(output_file, detail::word(0xFF), true_block);
   emit_serialize_term(*return_sort, output_file, return_value, true_block);
-  emit_write_uint64(output_file, detail::word(0xCC), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -353,7 +351,6 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 
     emit_write_string(outputFile, var_name, true_block);
     emit_serialize_term(*sort, outputFile, val, true_block);
-    emit_write_uint64(outputFile, detail::word(0xCC), true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
