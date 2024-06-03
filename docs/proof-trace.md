@@ -86,9 +86,9 @@ uint64            ::= <64-bit unsigned little endian integer>
 As mentioned above, the proof trace is in binary format and can be generated using the
 appropriated flags to `kompile` and `krun `or directly to `llvm-kompile` and `llvm-krun`.
 We provide a tool to deserialize the binary trace to a human-readable format. The
-`kore-proof-trace` is located in the `tools` directory of the LLVM Backend repository and
-can be built with the `make` command. The tool takes two arguments: the path to the binary
-header and to the binary trace file. It can take 3 flags:
+`kore-proof-trace` is located in the `tools` directory of the LLVM Backend repository
+and it takes two arguments: the path to the binary header and to the binary trace file.
+It can take 3 flags:
  - `--verbose` for verbose output,
  - `--expand-terms` for printing the KORE terms in the trace instead of their sizes and 
  - `--streaming-parser` to use the streaming parser instead of the default one.
