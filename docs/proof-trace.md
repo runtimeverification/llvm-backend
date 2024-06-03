@@ -20,10 +20,8 @@ for that rule, and finally the configuration at the end of the execution. If slo
 has been enabled, the trace additionally contains the intermediate configurations after each rewrite
 event, as well as the kore terms that are passed as arguments in function events.
 
-The format of the kore terms themselves are in binary format, and in the proof trace we delimit
-them with 64-bit sentinel values of 0xffffffffffffffff at the beginning. Recent changes to the
-binary kore format that include the length of the binary term have rendered this unnecessary,
-but the change hasn't been implemented yet.
+The format of the kore terms themselves are in binary format, and in the proof trace, we delimit
+them with 64-bit sentinel values of 0xffffffffffffffff at the beginning.
 
 ## Grammar
 
