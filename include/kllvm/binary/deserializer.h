@@ -146,11 +146,11 @@ public:
 
 class proof_trace_file_buffer : public proof_trace_buffer {
 private:
-  std::ifstream &file_;
+  std::ifstream file_;
 
 public:
-  proof_trace_file_buffer(std::ifstream &file)
-      : file_(file) { }
+  proof_trace_file_buffer(std::ifstream file)
+      : file_(std::move(file)) { }
 
   bool read(void *ptr, size_t len) override {
     file_.read((char *)ptr, len);

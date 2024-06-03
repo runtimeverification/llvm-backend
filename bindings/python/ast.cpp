@@ -457,6 +457,32 @@ void bind_proof_trace(py::module_ &m) {
   py::class_<kore_header, std::shared_ptr<kore_header>>(
       proof_trace, "kore_header")
       .def(py::init(&kore_header::create), py::arg("path"));
+
+  py::enum_<llvm_event_type>(proof_trace, "LLVMEventType")
+      .value("PreTrace", llvm_event_type::PreTrace)
+      .value("InitialConfig", llvm_event_type::InitialConfig)
+      .value("Trace", llvm_event_type::Trace);
+
+  py::class_<annotated_llvm_event>(proof_trace, "annotated_llvm_event")
+      .def_readonly("type", &annotated_llvm_event::type)
+      .def_readonly("event", &annotated_llvm_event::event);
+
+  py::class_<
+      llvm_rewrite_trace_iterator,
+      std::shared_ptr<llvm_rewrite_trace_iterator>>(
+      proof_trace, "llvm_rewrite_trace_iterator")
+      .def_static(
+          "from_file",
+          [](std::string const &filename, kore_header const &header) {
+            std::ifstream file(filename, std::ios_base::binary);
+            return llvm_rewrite_trace_iterator(
+                std::make_unique<proof_trace_file_buffer>(std::move(file)),
+                header);
+          },
+          py::arg("filename"), py::arg("header"))
+      .def_property_readonly(
+          "version", &llvm_rewrite_trace_iterator::get_version)
+      .def("get_next_event", &llvm_rewrite_trace_iterator::get_next_event);
 }
 
 PYBIND11_MODULE(_kllvm, m) {
