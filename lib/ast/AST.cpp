@@ -255,17 +255,19 @@ std::string kore_symbol::layout_string(kore_definition *definition) const {
     value_type cat = sort->get_category(definition);
     switch (cat.cat) {
     case sort_category::Map: result.push_back('1'); break;
-    case sort_category::RangeMap: result.push_back('b'); break;
     case sort_category::List: result.push_back('2'); break;
     case sort_category::Set: result.push_back('3'); break;
     case sort_category::Int: result.push_back('4'); break;
     case sort_category::Float: result.push_back('5'); break;
     case sort_category::StringBuffer: result.push_back('6'); break;
     case sort_category::Bool: result.push_back('7'); break;
-    case sort_category::Variable: result.push_back('8'); break;
+    case sort_category::Symbol: result.push_back('8'); break;
+    case sort_category::Variable: result.push_back('9'); break;
+    case sort_category::RangeMap: result.push_back('a'); break;
+    case sort_category::SetIter: result.push_back('b'); break;
+    case sort_category::MapIter: result.push_back('c'); break;
     case sort_category::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");
-    case sort_category::Symbol: result.push_back('0'); break;
     case sort_category::Uncomputed: abort();
     }
   }

@@ -184,6 +184,8 @@ llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
   case sort_category::Variable:
     return llvm::PointerType::getUnqual(
         llvm::StructType::getTypeByName(module->getContext(), block_struct));
+  case sort_category::MapIter:
+  case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
   }
 }
