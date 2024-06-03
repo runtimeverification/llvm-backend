@@ -116,6 +116,8 @@ static void fresh_block(struct arena *arena) {
       BLOCK_SIZE - sizeof(memory_block_header));
 }
 
+bool gc_enabled;
+
 static __attribute__((noinline)) void *
 do_alloc_slow(size_t requested, struct arena *arena) {
   MEM_LOG(

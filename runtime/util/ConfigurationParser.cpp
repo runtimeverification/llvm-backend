@@ -98,6 +98,7 @@ struct construction {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 extern "C" void *construct_initial_configuration(kore_pattern const *initial) {
+  gc_enabled = false;
   std::vector<std::variant<kore_pattern const *, construction>> work_list{
       initial};
   std::vector<void *> output;
@@ -156,6 +157,7 @@ extern "C" void *construct_initial_configuration(kore_pattern const *initial) {
     }
   }
 
+  gc_enabled = true;
   return output[0];
 }
 
@@ -163,6 +165,7 @@ extern "C" void *construct_initial_configuration(kore_pattern const *initial) {
 template <typename It>
 static void *
 deserialize_initial_configuration(It ptr, It end, binary_version version) {
+  gc_enabled = false;
   using namespace kllvm::detail;
   auto begin = ptr;
 
@@ -253,6 +256,7 @@ deserialize_initial_configuration(It ptr, It end, binary_version version) {
     }
   }
 
+  gc_enabled = true;
   assert(output.size() == 1 && "Output stack left in invalid state");
   return output.front();
 }
