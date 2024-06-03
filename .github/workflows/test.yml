@@ -60,6 +60,14 @@ jobs:
   build-from-source:
     name: 'Build LLVM backend from source'
     runs-on: [self-hosted, linux, normal]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: jammy
+            llvm: 15
+          - distro: noble
+            llvm: 17
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
@@ -71,12 +79,12 @@ jobs:
         with:
           tag: llvm-backend-ci-${{ github.sha }}
           os: ubuntu
-          distro: jammy
-          llvm: 15
+          distro: ${{ matrix.distro }}
+          llvm: ${{ matrix.llvm }}
 
       - name: 'Run backend tests'
         run: |
-          docker exec -t llvm-backend-ci-${GITHUB_SHA} .github/workflows/ci-tests.sh
+          docker exec -t llvm-backend-ci-${GITHUB_SHA} .github/workflows/ci-tests.sh ${{ matrix.llvm }}
 
       - name: 'Tear down Docker'
         if: always()
@@ -84,23 +92,31 @@ jobs:
           docker stop --time=0 llvm-backend-ci-${GITHUB_SHA}
           docker container rm --force llvm-backend-ci-${GITHUB_SHA} || true
 
-  build-jammy-package:
-    name: 'Build Ubuntu Jammy package'
+  build-ubuntu-package:
+    name: 'Build Ubuntu package'
     runs-on: [self-hosted, linux, normal]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: jammy
+            llvm: 15
+          - distro: noble
+            llvm: 17
 
     steps:
       - uses: actions/checkout@v4
       - name: 'Check out code'
         uses: actions/checkout@v4
         with:
-          path: k-llvm-jammy
+          path: k-llvm-${{ matrix.distro }}
           submodules: recursive
 
       - name: 'Build package in Docker'
         uses: ./.github/actions/test-package
         with:
           os: ubuntu
-          distro: jammy
-          llvm: 15
-          build-package: package/debian/build-package jammy
+          distro: ${{ matrix.distro }}
+          llvm: ${{ matrix.llvm }}
+          build-package: package/debian/build-package ${{ matrix.distro }}
           test-package: package/debian/test-package
