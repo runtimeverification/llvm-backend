@@ -660,13 +660,13 @@ public:
 class llvm_rewrite_trace_iterator {
 private:
   uint32_t version_{};
-  proof_trace_buffer &buffer_;
+  std::unique_ptr<proof_trace_buffer> buffer_;
   llvm_event_type type_ = llvm_event_type::PreTrace;
   proof_trace_parser parser_;
 
 public:
   llvm_rewrite_trace_iterator(
-      proof_trace_buffer &buffer, kore_header const &header);
+      std::unique_ptr<proof_trace_buffer> buffer, kore_header const &header);
   [[nodiscard]] uint32_t get_version() const { return version_; }
   std::optional<annotated_llvm_event> get_next_event();
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U);
