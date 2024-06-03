@@ -268,6 +268,7 @@ std::string kore_symbol::layout_string(kore_definition *definition) const {
     case sort_category::MapIter: result.push_back('c'); break;
     case sort_category::MInt:
       result.append("_" + std::to_string(cat.bits) + "_");
+      break;
     case sort_category::Uncomputed: abort();
     }
   }
