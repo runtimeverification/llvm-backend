@@ -10,7 +10,7 @@ Package: k-llvm-backend
 Architecture: any
 Section: devel
 Priority: optional
-Depends: clang-15 , flex , libboost-dev , libffi-dev , libfmt-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-0-2 , lld-15 , llvm-15 , pkg-config
+Depends: clang-15 , flex , libboost-dev , libffi-dev , libfmt-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libunwind-dev , libyaml-0-2 , lld-15 , llvm-15 , pkg-config
 Description: K Framework LLVM backend
  Fast concrete execution backend for programming language semantics implemented using the K Framework.
 Homepage: https://github.com/runtimeverification/llvm-backend

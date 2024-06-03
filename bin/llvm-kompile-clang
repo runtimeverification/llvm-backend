@@ -243,7 +243,7 @@ elif [ "$main" = "c" ]; then
   flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmcruntime.a" "$end_whole_archive")
   clangpp_args+=("-o" "${output_file}")
 else
-  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc")
+  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc" "-lunwind")
 fi
 
 if $link; then
