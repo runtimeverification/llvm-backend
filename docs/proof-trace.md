@@ -57,13 +57,13 @@ hook              ::= WORD(0xAA) name symbol_name location arg* WORD(0xBB) kore_
 ordinal           ::= uint64
 arity             ::= uint64
 boolean_result    ::= uint8
-variable          ::= name kore_term WORD(0xCC)
+variable          ::= name kore_term
 rule              ::= WORD(0x22) ordinal arity variable*
 
 side_cond_entry   ::= WORD(0xEE) ordinal arity variable*
 side_cond_exit    ::= WORD(0x33) ordinal boolean_result
 
-config            ::= WORD(0xFF) kore_term WORD(0xCC)
+config            ::= WORD(0xFF) kore_term
 
 string            ::= <c-style null terminated string>
 uint64            ::= <64-bit unsigned little endian integer>
