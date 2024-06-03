@@ -8,9 +8,9 @@ flag should have been passed to `kompile` or directly to `llvm-kompile`.
 We currently offer two modes of instrumentation: the default one is enabled with the flag
 `--proof-hint-instrumentation`, while a slower one that generates a longer trace with all
 intermediate configurations is enabled with the flag `--proof-hint-instrumentation-slow`.
-Note that this trace format is in its early stages and will probably change quite a bit as 
+Note that this trace format is in its early stages and will probably change quite a bit as
 development on it continues. Watch for the version of the trace format in the header of
-the trace. 
+the trace.
 
 ## Overview
 
@@ -21,9 +21,9 @@ has been enabled, the trace additionally contains the intermediate configuration
 event, as well as the kore terms that are passed as arguments in function events.
 
 The format of the kore terms themselves are in binary format, and in the proof trace we delimit
-them with 64-bit sentinel values of 0xffffffffffffffff at the beginning and 0xcccccccccccccccc
-at the end. Recent changes to the binary kore format that include the length of the binary term
-have rendered this unnecessary, but the change hasn't been implemented yet.
+them with 64-bit sentinel values of 0xffffffffffffffff at the beginning. Recent changes to the
+binary kore format that include the length of the binary term have rendered this unnecessary,
+but the change hasn't been implemented yet.
 
 ## Grammar
 
@@ -90,7 +90,7 @@ We provide a tool to deserialize the binary trace to a human-readable format. Th
 and it takes two arguments: the path to the binary header and to the binary trace file.
 It can take 3 flags:
  - `--verbose` for verbose output,
- - `--expand-terms` for printing the KORE terms in the trace instead of their sizes and 
+ - `--expand-terms` for printing the KORE terms in the trace instead of their sizes and
  - `--streaming-parser` to use the streaming parser instead of the default one.
 
 The tool will output the trace in a human-readable format to the standard output.
@@ -141,12 +141,12 @@ state(s(s(z())), z())
 
 ```Bash
 kompile add-rewrite.k --llvm-proof-hint-instrumentation
-krun input.add-rewrite --proof-hint > input.add-rewrite.hints
+krun input.add-rewrite --proof-hint --output-file input.add-rewrite.hints
 ```
 
 ### Commands to print the Proof Trace in human-readable format
 
 ```Bash
-kore-rich-header add-rewrite-kompiled/definition.kore > add-rewrite.header
+kore-rich-header add-rewrite-kompiled/definition.kore -o add-rewrite.header
 kore-proof-trace add-rewrite.header input.add-rewrite.hints --expand-terms --verbose
 ```
