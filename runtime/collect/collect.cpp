@@ -360,6 +360,7 @@ void kore_collect(
 
 void free_all_kore_mem() {
   kore_collect(nullptr, 0, nullptr, nullptr);
+  kore_clear();
 }
 
 bool is_collection() {

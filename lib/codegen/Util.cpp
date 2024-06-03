@@ -58,4 +58,13 @@ llvm::Constant *get_offset_of_member(
 #endif
 }
 
+void insert_call_to_clear(llvm::BasicBlock *block) {
+  llvm::Module *module = block->getParent()->getParent();
+  auto kore_clear = get_or_insert_function(
+      module, "kore_clear",
+      llvm::FunctionType::get(
+          llvm::Type::getVoidTy(Module->getContext()), {}, false));
+  llvm::CallInst::Create(kore_clear, {}, "", block);
+}
+
 } // namespace kllvm

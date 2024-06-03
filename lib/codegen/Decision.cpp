@@ -1271,6 +1271,7 @@ void make_step_function(
   llvm::AllocaInst *choice_depth = nullptr;
   llvm::IndirectBrInst *jump = nullptr;
 
+  insert_call_to_clear(block);
   init_choice_buffer(
       dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth, &jump);
 
@@ -1526,6 +1527,7 @@ void make_step_function(
   }
   auto header = step_function_header(
       axiom->get_ordinal(), module, definition, block, stuck, args, types);
+  insert_call_to_clear(header.second);
   i = 0;
   decision codegen(
       definition, header.second, fail, jump, choice_buffer, choice_depth,

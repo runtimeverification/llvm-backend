@@ -38,6 +38,8 @@ llvm::Function *get_or_insert_function(llvm::Module *module, Ts &&...args) {
   return func;
 }
 
+void insert_call_to_clear(llvm::BasicBlock *BB);
+
 } // namespace kllvm
 
 #endif // KLLVM_UTIL_H
