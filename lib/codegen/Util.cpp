@@ -68,4 +68,13 @@ char const *get_collection_alloc_fn(sort_category cat) {
   }
 }
 
+void insert_call_to_clear(llvm::BasicBlock *block) {
+  llvm::Module *module = block->getParent()->getParent();
+  auto kore_clear = get_or_insert_function(
+      module, "kore_clear",
+      llvm::FunctionType::get(
+          llvm::Type::getVoidTy(module->getContext()), {}, false));
+  llvm::CallInst::Create(kore_clear, {}, "", block);
+}
+
 } // namespace kllvm
