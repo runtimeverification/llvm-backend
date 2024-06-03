@@ -4,7 +4,7 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector optimize=-lto
 
 DESTDIR=$(shell pwd)/debian/k-llvm-backend
 PREFIX=/usr
-PYTHON_VERSION=python3.10
+PYTHON_VERSION=python3.12
 PYTHON_DEB_VERSION=python3
 export DESTDIR
 export PREFIX
@@ -18,7 +18,9 @@ override_dh_auto_build:
 		-S . \
 		-B build \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_INSTALL_PREFIX=$(PREFIX)
+		-DCMAKE_INSTALL_PREFIX=$(PREFIX) \
+		-DCMAKE_C_COMPILER=/usr/bin/clang-17 \
+		-DCMAKE_CXX_COMPILER=/usr/bin/clang++-17
 	cmake --build build
 
 override_dh_auto_install:
