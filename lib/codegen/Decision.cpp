@@ -901,7 +901,8 @@ void add_owise(
             ->get_category(d);
   if (is_collection_sort(return_sort)) {
     auto *temp_alloc = allocate_term(
-        retval->getType(), creator.get_current_block(), "kore_alloc_always_gc");
+        retval->getType(), creator.get_current_block(),
+        get_collection_alloc_fn(return_sort.cat));
     new llvm::StoreInst(retval, temp_alloc, creator.get_current_block());
     retval = temp_alloc;
   }

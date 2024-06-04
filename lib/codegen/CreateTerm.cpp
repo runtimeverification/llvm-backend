@@ -754,8 +754,8 @@ llvm::Value *create_term::create_function_call(
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm
     // doesn't handle correctly functions with alloca
-    alloc_sret
-        = allocate_term(return_type, current_block_, "kore_alloc_always_gc");
+    alloc_sret = allocate_term(
+        return_type, current_block_, get_collection_alloc_fn(return_cat.cat));
     sret_type = return_type;
     real_args.insert(real_args.begin(), alloc_sret);
     types.insert(types.begin(), alloc_sret->getType());
@@ -1221,7 +1221,7 @@ std::string make_apply_rule_function(
       if (!arg->getType()->isPointerTy()) {
         auto *ptr = allocate_term(
             arg->getType(), creator.get_current_block(),
-            "kore_alloc_always_gc");
+            get_collection_alloc_fn(cat.cat));
         new llvm::StoreInst(arg, ptr, creator.get_current_block());
         arg = ptr;
       }
