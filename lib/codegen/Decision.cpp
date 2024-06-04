@@ -861,11 +861,12 @@ void abort_when_stuck(
     }
     ptr = new llvm::BitCastInst(block, block_ptr, "", current_block);
   }
+  auto *func = get_or_insert_function(
+      module, "finish_rewriting", llvm::Type::getVoidTy(ctx), block_ptr,
+      llvm::Type::getInt1Ty(ctx));
+  func->setDoesNotReturn();
   llvm::CallInst::Create(
-      get_or_insert_function(
-          module, "finish_rewriting", llvm::Type::getVoidTy(ctx), block_ptr,
-          llvm::Type::getInt1Ty(ctx)),
-      {ptr, llvm::ConstantInt::getTrue(ctx)}, "", current_block);
+      func, {ptr, llvm::ConstantInt::getTrue(ctx)}, "", current_block);
   new llvm::UnreachableInst(ctx, current_block);
 }
 
