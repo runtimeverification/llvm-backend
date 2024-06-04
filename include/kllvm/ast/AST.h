@@ -132,8 +132,10 @@ enum class sort_category {
   Bool,
   Symbol,
   Variable,
-  MInt,
-  RangeMap
+  RangeMap,
+  SetIter,
+  MapIter,
+  MInt
 };
 
 // represents the syntactic category of an LLVM backend term at runtime

@@ -152,6 +152,7 @@ llvm::DIType *get_forward_decl(std::string const &name) {
 }
 
 static std::string map_struct = "map";
+static std::string iter_struct = "iter";
 static std::string rangemap_struct = "rangemap";
 static std::string list_struct = "list";
 static std::string set_struct = "set";
@@ -166,9 +167,11 @@ llvm::DIType *get_debug_type(value_type type, std::string const &type_name) {
   }
   static std::map<std::string, llvm::DIType *> types;
   llvm::DIType *map = nullptr;
+  llvm::DIType *mapiter = nullptr;
   llvm::DIType *rangemap = nullptr;
   llvm::DIType *list = nullptr;
   llvm::DIType *set = nullptr;
+  llvm::DIType *setiter = nullptr;
   llvm::DIType *integer = nullptr;
   llvm::DIType *floating = nullptr;
   llvm::DIType *buffer = nullptr;
@@ -183,6 +186,10 @@ llvm::DIType *get_debug_type(value_type type, std::string const &type_name) {
     map = get_pointer_debug_type(get_forward_decl(map_struct), type_name);
     types[type_name] = map;
     return map;
+  case sort_category::MapIter:
+    mapiter = get_pointer_debug_type(get_forward_decl(iter_struct), type_name);
+    types[type_name] = mapiter;
+    return mapiter;
   case sort_category::RangeMap:
     rangemap
         = get_pointer_debug_type(get_forward_decl(rangemap_struct), type_name);
@@ -196,6 +203,10 @@ llvm::DIType *get_debug_type(value_type type, std::string const &type_name) {
     set = get_pointer_debug_type(get_forward_decl(set_struct), type_name);
     types[type_name] = set;
     return set;
+  case sort_category::SetIter:
+    setiter = get_pointer_debug_type(get_forward_decl(iter_struct), type_name);
+    types[type_name] = setiter;
+    return setiter;
   case sort_category::Int:
     integer = get_pointer_debug_type(get_forward_decl(int_struct), type_name);
     types[type_name] = integer;
