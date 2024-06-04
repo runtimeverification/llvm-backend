@@ -18,6 +18,7 @@ override_dh_auto_build:
 		-S . \
 		-B build \
 		-DCMAKE_BUILD_TYPE=Release \
+		-DK_LLVM_BACKEND_LTO=OFF \
 		-DCMAKE_INSTALL_PREFIX=$(PREFIX) \
 		-DCMAKE_C_COMPILER=/usr/bin/clang-17 \
 		-DCMAKE_CXX_COMPILER=/usr/bin/clang++-17
