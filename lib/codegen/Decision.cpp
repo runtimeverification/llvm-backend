@@ -385,7 +385,7 @@ void make_pattern_node::codegen(decision *d) {
  * the sort that they originated from (int, bool, symbol, ...). In LLVM versions
  * < 16, we could encode this information in the LLVM type safely. However,
  * after the LLVM opaque pointer migration, we can no longer do so (as the
- * legacy types %mpz* and %block* would both be %ptr, for example). We
+ * legacy types %mpz* and %block* would both be ptr, for example). We
  * therefore define a compatibility translation between sort categories and what
  * their corresponding LLVM type _would have been_ before opaque pointers.
  */
@@ -400,9 +400,11 @@ static std::string legacy_value_type_to_string(value_type sort) {
   // Cases below are deliberately not implemented; the return values are
   // placeholders to help with debugging only.
   case sort_category::Map: return "<map>";
+  case sort_category::MapIter: return "<mapiter>";
   case sort_category::RangeMap: return "<rangemap>";
   case sort_category::List: return "<list>";
   case sort_category::Set: return "<set>";
+  case sort_category::SetIter: return "<setiter>";
   case sort_category::StringBuffer: return "<stringbuffer>";
   case sort_category::MInt: return "<mint>";
   case sort_category::Uncomputed: abort();
@@ -1084,6 +1086,8 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       break;
     case sort_category::Bool:
     case sort_category::MInt: break;
+    case sort_category::MapIter:
+    case sort_category::SetIter:
     case sort_category::Uncomputed: abort();
     }
     i++;
@@ -1120,6 +1124,8 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       break;
     case sort_category::Bool:
     case sort_category::MInt: break;
+    case sort_category::MapIter:
+    case sort_category::SetIter:
     case sort_category::Uncomputed: abort();
     }
   }

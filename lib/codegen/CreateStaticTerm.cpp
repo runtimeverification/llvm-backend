@@ -340,6 +340,8 @@ create_static_term::create_token(value_type sort, std::string contents) {
         global, llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
                     module_->getContext(), block_struct)));
   }
+  case sort_category::SetIter:
+  case sort_category::MapIter:
   case sort_category::Uncomputed: abort();
   }
 }
