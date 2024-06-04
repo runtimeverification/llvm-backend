@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
 
   if (use_streaming_parser) {
     std::ifstream file(input_filename, std::ios_base::binary);
-    proof_trace_file_buffer buffer(file);
-    llvm_rewrite_trace_iterator it(buffer, header);
+    llvm_rewrite_trace_iterator it(
+        std::make_unique<proof_trace_file_buffer>(std::move(file)), header);
     if (verbose_output) {
       it.print(std::cout, expand_terms_in_output);
     }

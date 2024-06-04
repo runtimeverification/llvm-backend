@@ -68,6 +68,38 @@ class TestParser(unittest.TestCase):
            # check that the third event is a configuration
            self.assertTrue(trace.trace[2].is_kore_pattern())
 
+        it = kllvm.prooftrace.llvm_rewrite_trace_iterator.from_file(binary_proof_trace, header)
+
+        while True:
+            event0 = it.get_next_event()
+            if event0.type != kllvm.prooftrace.LLVMEventType.PreTrace:
+                break
+
+        self.assertEqual(event0.type, kllvm.prooftrace.LLVMEventType.InitialConfig)
+        self.assertTrue(event0.event.is_kore_pattern())
+
+        event1 = it.get_next_event()
+        self.assertEqual(event1.type, kllvm.prooftrace.LLVMEventType.Trace)
+        self.assertTrue(event1.event.is_step_event())
+        rule_ordinal = event1.event.step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, rule_ordinal)
+        self.assertEqual(axiom, axiom_expected)
+
+        event2 = it.get_next_event()
+        self.assertEqual(event2.type, kllvm.prooftrace.LLVMEventType.Trace)
+        self.assertTrue(event2.event.is_step_event())
+        rule_ordinal = event2.event.step_event.rule_ordinal
+        axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
+        axiom_expected = self.get_pattern_from_ordinal(definition_text, rule_ordinal)
+        self.assertEqual(axiom, axiom_expected)
+
+        event3 = it.get_next_event()
+        self.assertEqual(event3.type, kllvm.prooftrace.LLVMEventType.Trace)
+        self.assertTrue(event3.event.is_kore_pattern())
+
+        self.assertEqual(it.get_next_event(), None)
+
 
 if __name__ == "__main__":
     unittest.main()
