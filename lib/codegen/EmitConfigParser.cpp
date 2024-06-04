@@ -346,6 +346,8 @@ static llvm::Value *get_arg_value(
   case sort_category::Variable:
     arg = new llvm::BitCastInst(arg, getvalue_type(cat, mod), "", case_block);
     break;
+  case sort_category::MapIter:
+  case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
   }
   return arg;
@@ -402,6 +404,8 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> get_eval(
         creator.get_current_block());
     break;
   }
+  case sort_category::MapIter:
+  case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
   }
   inst->insertAfter(&creator.get_current_block()->back());
@@ -628,6 +632,8 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
     }
     case sort_category::Variable:
     case sort_category::Symbol: break;
+    case sort_category::MapIter:
+    case sort_category::SetIter:
     case sort_category::Uncomputed: abort();
     }
     current_block = false_block;
@@ -1171,6 +1177,8 @@ static void get_visitor(
           callbacks.at(2), state_ptr, use_sort_name);
       break;
     }
+    case sort_category::MapIter:
+    case sort_category::SetIter:
     case sort_category::Uncomputed: abort();
     }
     if (i != symbol->get_arguments().size() - 1 && use_sort_name) {
