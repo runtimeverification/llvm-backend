@@ -113,13 +113,19 @@ kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
 }
 
 void *kore_alloc_mp(size_t requested) {
+  bool enabled = gc_enabled;
+  gc_enabled = false;
   auto *new_token = (string *)kore_alloc_token(sizeof(string) + requested);
+  gc_enabled = enabled;
   init_with_len(new_token, requested);
   return new_token->data;
 }
 
 void *kore_realloc_mp(void *ptr, size_t old_size, size_t new_size) {
+  bool enabled = gc_enabled;
+  gc_enabled = false;
   auto *new_token = (string *)kore_alloc_token(sizeof(string) + new_size);
+  gc_enabled = enabled;
   size_t min = old_size > new_size ? new_size : old_size;
   memcpy(new_token->data, ptr, min);
   init_with_len(new_token, new_size);
