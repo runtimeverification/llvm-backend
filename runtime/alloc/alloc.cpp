@@ -155,8 +155,11 @@ __attribute__((always_inline)) void *kore_alloc_floating_old(size_t requested) {
 void *kore_alloc_map(size_t requested) {
   void *mem = kore_alloc(sizeof(blockheader) + sizeof(map) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
-  std::string name = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
-  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  static std::string name
+      = get_raw_symbol_name(kllvm::sort_category::Map) + "{}";
+  static blockheader hdr_val
+      = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  *hdr = hdr_val;
   auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (map *)(hdr + 2);
@@ -166,8 +169,11 @@ void *kore_alloc_map(size_t requested) {
 void *kore_alloc_set(size_t requested) {
   void *mem = kore_alloc(sizeof(blockheader) + sizeof(set) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
-  std::string name = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
-  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  static std::string name
+      = get_raw_symbol_name(kllvm::sort_category::Set) + "{}";
+  static blockheader hdr_val
+      = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  *hdr = hdr_val;
   auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (set *)(hdr + 2);
@@ -177,8 +183,11 @@ void *kore_alloc_set(size_t requested) {
 void *kore_alloc_list(size_t requested) {
   void *mem = kore_alloc(sizeof(blockheader) + sizeof(list) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
-  std::string name = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
-  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  static std::string name
+      = get_raw_symbol_name(kllvm::sort_category::List) + "{}";
+  static blockheader hdr_val
+      = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  *hdr = hdr_val;
   auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (list *)(hdr + 2);
@@ -189,8 +198,11 @@ void *kore_alloc_rangemap(size_t requested) {
   void *mem
       = kore_alloc(sizeof(blockheader) + sizeof(rangemap) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
-  std::string name = get_raw_symbol_name(kllvm::sort_category::RangeMap) + "{}";
-  *hdr = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  static std::string name
+      = get_raw_symbol_name(kllvm::sort_category::RangeMap) + "{}";
+  static blockheader hdr_val
+      = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  *hdr = hdr_val;
   auto *offset = (uint64_t *)(hdr + 1);
   *offset = 16;
   auto *child = (rangemap *)(hdr + 2);
