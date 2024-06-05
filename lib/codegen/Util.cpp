@@ -58,4 +58,14 @@ llvm::Constant *get_offset_of_member(
 #endif
 }
 
+char const *get_collection_alloc_fn(sort_category cat) {
+  switch (cat) {
+  case sort_category::Map: return "kore_alloc_map";
+  case sort_category::Set: return "kore_alloc_set";
+  case sort_category::List: return "kore_alloc_list";
+  case sort_category::RangeMap: return "kore_alloc_rangemap";
+  default: abort();
+  }
+}
+
 } // namespace kllvm
