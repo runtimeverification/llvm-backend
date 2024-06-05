@@ -157,4 +157,37 @@ __attribute__((always_inline)) void *kore_alloc_floating_old(size_t requested) {
   init_with_len(result, sizeof(floating_hdr) - sizeof(blockheader));
   return &result->f;
 }
+
+extern "C++" {
+template <typename collection>
+static inline void *kore_alloc_collection(kllvm::sort_category cat) {
+  void *mem
+      = kore_alloc(sizeof(blockheader) + sizeof(collection) + sizeof(uint64_t));
+  auto *hdr = (blockheader *)mem;
+  static std::string name = get_raw_symbol_name(cat) + "{}";
+  static blockheader hdr_val
+      = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
+  *hdr = hdr_val;
+  auto *offset = (uint64_t *)(hdr + 1);
+  *offset = 16;
+  auto *child = hdr + 2;
+  return child;
+}
+}
+
+void *kore_alloc_map(size_t requested) {
+  return kore_alloc_collection<map>(kllvm::sort_category::Map);
+}
+
+void *kore_alloc_set(size_t requested) {
+  return kore_alloc_collection<set>(kllvm::sort_category::Set);
+}
+
+void *kore_alloc_list(size_t requested) {
+  return kore_alloc_collection<list>(kllvm::sort_category::List);
+}
+
+void *kore_alloc_rangemap(size_t requested) {
+  return kore_alloc_collection<rangemap>(kllvm::sort_category::RangeMap);
+}
 }

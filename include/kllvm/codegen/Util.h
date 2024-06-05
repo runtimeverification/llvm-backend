@@ -1,6 +1,8 @@
 #ifndef KLLVM_UTIL_H
 #define KLLVM_UTIL_H
 
+#include <kllvm/ast/AST.h>
+
 #include <llvm/Config/llvm-config.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -37,6 +39,8 @@ llvm::Function *get_or_insert_function(llvm::Module *module, Ts &&...args) {
 
   return func;
 }
+
+char const *get_collection_alloc_fn(sort_category cat);
 
 } // namespace kllvm
 
