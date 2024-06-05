@@ -111,6 +111,8 @@ size_t hash_k(block *);
 void k_hash(block *, void *);
 bool hash_enter(void);
 void hash_exit(void);
+
+extern bool gc_enabled;
 }
 
 __attribute__((always_inline)) constexpr uint64_t len_hdr(uint64_t hdr) {
@@ -225,7 +227,10 @@ struct kore_alloc_heap {
     if (during_gc()) {
       return ::operator new(size);
     }
+    bool enabled = gc_enabled;
+    gc_enabled = false;
     auto *result = (string *)kore_alloc_token(size + sizeof(blockheader));
+    gc_enabled = enabled;
     init_with_len(result, size);
     return result->data;
   }

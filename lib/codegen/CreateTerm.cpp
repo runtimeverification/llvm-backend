@@ -184,6 +184,8 @@ llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
   case sort_category::Variable:
     return llvm::PointerType::getUnqual(
         llvm::StructType::getTypeByName(module->getContext(), block_struct));
+  case sort_category::MapIter:
+  case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
   }
 }
@@ -673,8 +675,29 @@ llvm::Value *create_term::create_hook(
   }
   std::string hook_name = "hook_" + name.substr(0, name.find('.')) + "_"
                           + name.substr(name.find('.') + 1);
-  return create_function_call(
+  auto *old_val = disable_gc();
+  auto *result = create_function_call(
       hook_name, pattern, true, false, true, location_stack);
+  enable_gc(old_val);
+  return result;
+}
+
+llvm::Value *create_term::disable_gc() {
+  llvm::Constant *global
+      = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  auto *old_val = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(ctx_), global_var, "was_enabled", current_block_);
+  new llvm::StoreInst(
+      llvm::ConstantInt::getFalse(ctx_), global_var, current_block_);
+  return old_val;
+}
+
+void create_term::enable_gc(llvm::Value *was_enabled) {
+  llvm::Constant *global
+      = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  new llvm::StoreInst(was_enabled, global_var, current_block_);
 }
 
 // We use tailcc calling convention for apply_rule_* and eval_* functions to
