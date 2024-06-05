@@ -41,3 +41,10 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Auto-generated header path
 set(KLLVM_AUTOGEN_INCLUDE_DIR ${CMAKE_BINARY_DIR}/include)
 include_directories(${KLLVM_AUTOGEN_INCLUDE_DIR})
+
+option(K_LLVM_STACK_MAPS "Enable stack-map-based GC for the LLVM backend" OFF)
+if (K_LLVM_STACK_MAPS)
+  set(K_LLVM_STACK_MAPS_FLAG "1")
+else()
+  set(K_LLVM_STACK_MAPS_FLAG "0")
+endif()
