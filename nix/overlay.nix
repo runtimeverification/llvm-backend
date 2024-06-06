@@ -12,7 +12,7 @@ let
   clang = llvmPackages.clangNoLibcxx;
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
-    inherit (llvmPackages) llvm libllvm libcxx;
+    inherit (llvmPackages) llvm libllvm libcxx libunwind;
     stdenv = llvmPackages.stdenv;
     cmakeBuildType = prev.llvm-backend-build-type;
     src = prev.llvm-backend-src;

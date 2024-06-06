@@ -27,8 +27,9 @@ RUN     apt-get update                    \
           libfmt-dev                      \
           libgmp-dev                      \
           libmpfr-dev                     \
-          libyaml-dev                     \
           libjemalloc-dev                 \
+          libunwind-dev                   \
+          libyaml-dev                     \
           openjdk-${JDK_VERSION}-jdk      \
           curl                            \
           maven                           \
