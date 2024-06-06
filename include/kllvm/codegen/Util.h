@@ -42,7 +42,7 @@ llvm::Function *get_or_insert_function(llvm::Module *module, Ts &&...args) {
 
 char const *get_collection_alloc_fn(sort_category cat);
 
-void insert_call_to_clear(llvm::BasicBlock *BB);
+void insert_call_to_clear(llvm::BasicBlock *bb);
 
 } // namespace kllvm
 

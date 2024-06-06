@@ -68,9 +68,9 @@ char const *get_collection_alloc_fn(sort_category cat) {
   }
 }
 
-void insert_call_to_clear(llvm::BasicBlock *block) {
+void insert_call_to_clear(llvm::BasicBlock *bb) {
   llvm::Module *module = block->getParent()->getParent();
-  auto kore_clear = get_or_insert_function(
+  auto *kore_clear = get_or_insert_function(
       module, "kore_clear",
       llvm::FunctionType::get(
           llvm::Type::getVoidTy(module->getContext()), {}, false));
