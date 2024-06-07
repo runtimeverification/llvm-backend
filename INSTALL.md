@@ -16,7 +16,6 @@ sudo apt install      \
   libgmp-dev          \
   libjemalloc-dev     \
   libmpfr-dev         \
-  libunwind-dev       \
   libyaml-dev         \
   lld-15              \
   llvm-15-tools       \
@@ -41,7 +40,6 @@ brew install  \
   git         \
   gmp         \
   jemalloc    \
-  libunwind   \
   libyaml     \
   llvm@15     \
   maven       \
