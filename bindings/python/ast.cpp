@@ -460,7 +460,7 @@ void bind_proof_trace(py::module_ &m) {
       proof_trace, "kore_header")
       .def(py::init(&kore_header::create), py::arg("path"));
 
-  py::enum_<llvm_event_type>(proof_trace, "LLVMEventType")
+  py::enum_<llvm_event_type>(proof_trace, "EventType")
       .value("PreTrace", llvm_event_type::PreTrace)
       .value("InitialConfig", llvm_event_type::InitialConfig)
       .value("Trace", llvm_event_type::Trace);
@@ -473,6 +473,7 @@ void bind_proof_trace(py::module_ &m) {
       llvm_rewrite_trace_iterator,
       std::shared_ptr<llvm_rewrite_trace_iterator>>(
       proof_trace, "llvm_rewrite_trace_iterator")
+      .def("__repr__", print_repr_adapter<llvm_rewrite_trace_iterator>(true))
       .def_static(
           "from_file",
           [](std::string const &filename, kore_header const &header) {

@@ -72,14 +72,14 @@ class TestParser(unittest.TestCase):
 
         while True:
             event0 = it.get_next_event()
-            if event0.type != kllvm.prooftrace.LLVMEventType.PreTrace:
+            if event0.type != kllvm.prooftrace.EventType.PreTrace:
                 break
 
-        self.assertEqual(event0.type, kllvm.prooftrace.LLVMEventType.InitialConfig)
+        self.assertEqual(event0.type, kllvm.prooftrace.EventType.InitialConfig)
         self.assertTrue(event0.event.is_kore_pattern())
 
         event1 = it.get_next_event()
-        self.assertEqual(event1.type, kllvm.prooftrace.LLVMEventType.Trace)
+        self.assertEqual(event1.type, kllvm.prooftrace.EventType.Trace)
         self.assertTrue(event1.event.is_step_event())
         rule_ordinal = event1.event.step_event.rule_ordinal
         axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
@@ -87,7 +87,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(axiom, axiom_expected)
 
         event2 = it.get_next_event()
-        self.assertEqual(event2.type, kllvm.prooftrace.LLVMEventType.Trace)
+        self.assertEqual(event2.type, kllvm.prooftrace.EventType.Trace)
         self.assertTrue(event2.event.is_step_event())
         rule_ordinal = event2.event.step_event.rule_ordinal
         axiom = repr(definition.get_axiom_by_ordinal(rule_ordinal))
@@ -95,7 +95,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(axiom, axiom_expected)
 
         event3 = it.get_next_event()
-        self.assertEqual(event3.type, kllvm.prooftrace.LLVMEventType.Trace)
+        self.assertEqual(event3.type, kllvm.prooftrace.EventType.Trace)
         self.assertTrue(event3.event.is_kore_pattern())
 
         self.assertEqual(it.get_next_event(), None)
