@@ -354,6 +354,7 @@ void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
 
 void free_all_kore_mem() {
   kore_collect(nullptr, 0, nullptr);
+  kore_clear();
 }
 
 bool is_collection() {
