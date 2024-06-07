@@ -58,10 +58,13 @@ bool youngspace_almost_full(size_t threshold) {
 
 void kore_alloc_swap(bool swap_old) {
   arena_swap_and_clear(&youngspace);
-  arena_clear(&alwaysgcspace);
   if (swap_old) {
     arena_swap_and_clear(&oldspace);
   }
+}
+
+void kore_clear() {
+  arena_clear(&alwaysgcspace);
 }
 
 void set_kore_memory_functions_for_gmp() {

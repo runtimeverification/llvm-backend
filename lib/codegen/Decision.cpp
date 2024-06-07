@@ -1156,6 +1156,7 @@ void make_step_function(
 
   init_choice_buffer(
       dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth, &jump);
+  insert_call_to_clear(block);
 
   llvm::AllocaInst *has_search_results = nullptr;
   if (search) {
@@ -1387,6 +1388,7 @@ void make_step_function(
   init_choice_buffer(
       res.dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth,
       &jump);
+  insert_call_to_clear(block);
 
   llvm::BranchInst::Create(stuck, pre_stuck);
   std::vector<llvm::PHINode *> phis;
