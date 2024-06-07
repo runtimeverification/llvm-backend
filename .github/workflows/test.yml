@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - runner: [self-hosted, linux, normal]
-            os: ubuntu-20.04
+            os: ubuntu-24.04
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
