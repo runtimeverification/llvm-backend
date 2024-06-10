@@ -29,6 +29,11 @@ find_program(LLDB lldb
   PATHS ${LLVM_TOOLS_BINARY_DIR}
   NO_DEFAULT_PATH)
 
+execute_process(
+  COMMAND "${LLVM_TOOLS_BINARY_DIR}/llvm-config" "--libdir"
+  OUTPUT_VARIABLE LLVM_LIBRARY_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 if(NOT OPT)
   message(FATAL_ERROR "Could not find an opt binary. Is llvm installed on your PATH?")
 endif()
