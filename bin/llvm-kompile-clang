@@ -136,6 +136,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   flags=(
     "-L@BREW_PREFIX@/opt/libffi/lib"
     "-L@BREW_PREFIX@/lib"
+    "-L@LLVM_LIBRARY_DIR@"
     "-Wl,-u,_table_getArgumentSortsForTag"
     "-I" "@BREW_PREFIX@/include"
   )
