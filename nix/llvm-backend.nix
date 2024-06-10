@@ -42,6 +42,7 @@ stdenv.mkDerivation {
       --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
       --replace '"-lunwind"' '"-L${libunwind}/lib" "-lunwind"' \
       --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
+      --replace '"-L@LLVM_LIBRARY_DIR@"' ' ' \
       --replace '-L@BREW_PREFIX@/lib' '-L${libcxx}/lib' \
       --replace '-I "$(dirname "$0")"/../include/kllvm' \
                 '-I "$(dirname "$0")"/../include/kllvm -I ${boost.dev}/include -I ${fmt.dev}/include'
