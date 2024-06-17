@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&ordinal_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  if (source != "") {
+  if (!source.empty()) {
     is_k_line = true;
   }
 
