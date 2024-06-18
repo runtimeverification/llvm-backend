@@ -1,0 +1,5 @@
+#!/bin/bash
+while read -r ordinal time; do
+  loc=$(llvm-kompile-compute-loc "$2" $ordinal)
+  echo "${loc##*/} $time"
+done < "$1"
