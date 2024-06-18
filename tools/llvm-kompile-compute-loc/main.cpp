@@ -49,20 +49,20 @@ get_kore_location(std::string &definition, int const &ordinal) {
 }
 
 std::optional<std::pair<std::string, int64_t>>
-get_k_location(std::string &definition, int const &ordinal) {
+get_k_or_kore_location(std::string &definition, int const &ordinal) {
   // Parse the definition.kore to get the AST.
   kllvm::parser::kore_parser parser(definition);
   auto kore_ast = parser.definition();
   kore_ast->preprocess();
 
   auto axiom = kore_ast->get_axiom_by_ordinal(ordinal);
-  auto result = get_start_line_location(axiom);
-  if (result) {
-    return result;
+  auto k_loc = get_start_line_location(axiom);
+  if (k_loc) {
+    return k_loc;
   }
-  auto result2 = get_kore_location(definition, ordinal);
-  if (result2) {
-    return std::make_pair<std::string, uint64_t>("", *result2);
+  auto kore_loc = get_kore_location(definition, ordinal);
+  if (kore_loc) {
+    return std::make_pair(definition, *kore_loc);
   }
   return std::nullopt;
 }
@@ -78,10 +78,7 @@ int main(int argc, char **argv) {
     auto line = get_kore_location(definition, ordinal);
     location = std::make_pair(definition, *line);
   } else {
-    location = get_k_location(definition, ordinal);
-    if (location->first.empty()) {
-      location->first = definition;
-    }
+    location = get_k_or_kore_location(definition, ordinal);
   }
 
   if (location) {
