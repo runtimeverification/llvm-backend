@@ -21,14 +21,19 @@ cl::opt<std::string> kompiled_dir(
 cl::opt<int> line(
     cl::Positional, cl::desc("<line>"), cl::Required, cl::cat(ordinal_cat));
 
+cl::opt<std::string> source(
+    "source",
+    cl::desc("The file to which the line number refers. Implies --k-line."),
+    cl::cat(ordinal_cat));
+
 cl::opt<bool> is_k_line(
     "k-line",
     cl::desc("The tool will look for the line passed as an argument in the K "
              "definition"),
     cl::init(false), cl::cat(ordinal_cat));
 
-std::optional<int64_t>
-get_k_ordinal(std::string const &definition, int const &line) {
+std::optional<int64_t> get_k_ordinal(
+    std::string const &definition, std::string const &source, int const &line) {
   // Parse the definition.kore to get the AST.
   kllvm::parser::kore_parser parser(definition);
   auto kore_ast = parser.definition();
@@ -37,8 +42,8 @@ get_k_ordinal(std::string const &definition, int const &line) {
   // Iterate through axioms.
   for (auto *axiom : kore_ast->get_axioms()) {
     if (axiom->attributes().contains(attribute_set::key::Location)) {
-      auto start_line = get_start_line_location(*axiom);
-      if (start_line == line) {
+      auto loc = get_start_line_location(*axiom);
+      if (loc->first.ends_with(source) && loc->second == line) {
         return axiom->get_ordinal();
       }
     }
@@ -74,9 +79,13 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&ordinal_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
+  if (!source.empty()) {
+    is_k_line = true;
+  }
+
   auto definition = kompiled_dir + "/definition.kore";
 
-  auto location = is_k_line ? get_k_ordinal(definition, line)
+  auto location = is_k_line ? get_k_ordinal(definition, source, line)
                             : get_kore_ordinal(definition, line);
 
   if (location) {

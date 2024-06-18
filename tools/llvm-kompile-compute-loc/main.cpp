@@ -20,22 +20,10 @@ cl::opt<std::string> kompiled_dir(
 cl::opt<int> ordinal(
     cl::Positional, cl::desc("<ordinal>"), cl::Required, cl::cat(loc_cat));
 
-cl::opt<bool> is_k_line(
-    "k-line",
-    cl::desc("The tool will look for the line passed as an argument in the K "
-             "definition"),
+cl::opt<bool> is_kore_line(
+    "kore-line",
+    cl::desc("The tool will output the line in the KORE definition"),
     cl::init(false), cl::cat(loc_cat));
-
-std::optional<int64_t>
-get_k_location(std::string &definition, int const &ordinal) {
-  // Parse the definition.kore to get the AST.
-  kllvm::parser::kore_parser parser(definition);
-  auto kore_ast = parser.definition();
-  kore_ast->preprocess();
-
-  auto axiom = kore_ast->get_axiom_by_ordinal(ordinal);
-  return get_start_line_location(axiom);
-}
 
 std::optional<int64_t>
 get_kore_location(std::string &definition, int const &ordinal) {
@@ -60,17 +48,41 @@ get_kore_location(std::string &definition, int const &ordinal) {
   return std::nullopt;
 }
 
+std::optional<std::pair<std::string, int64_t>>
+get_k_or_kore_location(std::string &definition, int const &ordinal) {
+  // Parse the definition.kore to get the AST.
+  kllvm::parser::kore_parser parser(definition);
+  auto kore_ast = parser.definition();
+  kore_ast->preprocess();
+
+  auto axiom = kore_ast->get_axiom_by_ordinal(ordinal);
+  auto k_loc = get_start_line_location(axiom);
+  if (k_loc) {
+    return k_loc;
+  }
+  auto kore_loc = get_kore_location(definition, ordinal);
+  if (kore_loc) {
+    return std::make_pair(definition, *kore_loc);
+  }
+  return std::nullopt;
+}
+
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&loc_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
   auto definition = kompiled_dir + "/definition.kore";
 
-  auto location = is_k_line ? get_k_location(definition, ordinal)
-                            : get_kore_location(definition, ordinal);
+  std::optional<std::pair<std::string, uint64_t>> location;
+  if (is_kore_line) {
+    auto line = get_kore_location(definition, ordinal);
+    location = std::make_pair(definition, *line);
+  } else {
+    location = get_k_or_kore_location(definition, ordinal);
+  }
 
   if (location) {
-    std::cout << *location << "\n";
+    std::cout << location->first << ":" << location->second << "\n";
     return 0;
   }
 
