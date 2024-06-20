@@ -1,6 +1,9 @@
 #include "runtime/header.h"
 
 #include <fmt/format.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 extern "C" {
 
@@ -38,5 +41,15 @@ void print_proof_hint_header(FILE *file) {
   uint32_t version = 11;
   fmt::print(file, "HINT");
   fwrite(&version, sizeof(version), 1, file);
+}
+
+FILE *open_fifo(const char *filename) {
+  //if (mkfifo(filename, 0666)) {
+  //  throw std::runtime_error(
+  //      "Failed to make FIFO named " + std::string(filename) + " (" + std::string(strerror(errno)) + ")");
+  //}
+
+  int fd = open(filename, O_WRONLY);
+  return fdopen(fd, "w");
 }
 }

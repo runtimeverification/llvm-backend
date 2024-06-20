@@ -5,6 +5,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare %block* @parse_configuration(i8*)
+declare i8* @open_fifo(i8*)
 declare i64 @atol(i8*)
 declare i8* @fopen(i8*, i8*)
 
@@ -89,14 +90,22 @@ entry:
   %depth = call i64 @atol(i8* %depth_str)
   %output_ptr = getelementptr inbounds i8*, i8** %argv, i64 3
   %output_str = load i8*, i8** %output_ptr
-  %output_file = call i8* @fopen(i8* %output_str, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @a_str, i64 0, i64 0))
-  store i8* %output_file, i8** @output_file
   
   call void @parse_flags(i32 %argc, i8** %argv)
 
   call void @init_static_objects()
 
   %proof_output = load i1, i1* @proof_output
+  br i1 %proof_output, label %if.proof, label %else.proof
+if.proof:
+  %output_fifo = call i8* @open_fifo(i8* %output_str)
+  br label %cont
+else.proof:
+  %output_fs_file = call i8* @fopen(i8* %output_str, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @a_str, i64 0, i64 0))
+  br label %cont
+cont:
+  %output_file = phi i8* [ %output_fifo, %if.proof ], [ %output_fs_file, %else.proof ]
+  store i8* %output_file, i8** @output_file
   br i1 %proof_output, label %if, label %else
 if:
   call void @print_proof_hint_header(i8* %output_file)
