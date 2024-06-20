@@ -40,7 +40,10 @@ Options:
   --mutable-bytes                   Use the faster, unsound (mutable) semantics for objects of sort
                                     Bytes at run time, rather than the slower, sound
                                     (immutable) that are enabled by default.
-  --hidden-visibility               Set the visibility of all global symbols in generated code to "hidden"
+  --hidden-visibility               Set the visibility of all global symbols in generated code to
+                                    "hidden"
+  --profile-matching                Instrument interpeter to emit a profile of time spent in
+                                    top-level rule matching on stderr.
   -O[0123]                          Set the optimization level for code generation.
 
 Any option not listed above will be passed through to clang; use '--' to
@@ -185,6 +188,10 @@ while [[ $# -gt 0 ]]; do
     --hidden-visibility)
       codegen_flags+=("--hidden-visibility")
       kompile_clang_flags+=("--hidden-visibility")
+      shift
+      ;;
+    --profile-matching)
+      codegen_flags+=("--profile-matching")
       shift
       ;;
     -O*)

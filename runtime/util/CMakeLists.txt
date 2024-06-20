@@ -6,6 +6,7 @@ add_library(util STATIC
   match_log.cpp
   search.cpp
   util.cpp
+  clock.cpp
 )
 
 install(

@@ -405,6 +405,7 @@ private:
   value_type cat_;
   llvm::PHINode *fail_subject_, *fail_pattern_, *fail_sort_;
   llvm::AllocaInst *has_search_results_;
+  bool profile_matching_;
 
   std::map<var_type, llvm::AllocaInst *> symbols_{};
 
@@ -422,7 +423,7 @@ public:
       llvm::AllocaInst *choice_buffer, llvm::AllocaInst *choice_depth,
       llvm::Module *module, value_type cat, llvm::PHINode *fail_subject,
       llvm::PHINode *fail_pattern, llvm::PHINode *fail_sort,
-      llvm::AllocaInst *has_search_results)
+      llvm::AllocaInst *has_search_results, bool profile_matching = false)
       : definition_(definition)
       , current_block_(entry_block)
       , failure_block_(failure_block)
@@ -435,7 +436,8 @@ public:
       , fail_subject_(fail_subject)
       , fail_pattern_(fail_pattern)
       , fail_sort_(fail_sort)
-      , has_search_results_(has_search_results) { }
+      , has_search_results_(has_search_results)
+      , profile_matching_(profile_matching) { }
 
   /* adds code to the specified basic block to take a single step based on
      the specified decision tree and return the result of taking that step. */
@@ -464,10 +466,10 @@ void make_anywhere_function(
 
 void make_step_function(
     kore_definition *definition, llvm::Module *module, decision_node *dt,
-    bool search);
+    bool search, bool profile_matching);
 void make_step_function(
     kore_axiom_declaration *axiom, kore_definition *definition,
-    llvm::Module *module, partial_step res);
+    llvm::Module *module, partial_step res, bool profile_matching);
 void make_match_reason_function(
     kore_definition *definition, llvm::Module *module,
     kore_axiom_declaration *axiom, decision_node *dt);

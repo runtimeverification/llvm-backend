@@ -78,6 +78,12 @@ cl::opt<bool> safe_partial(
              "exception."),
     cl::init(false), cl::cat(codegen_tool_cat));
 
+cl::opt<bool> profile_matching(
+    "profile-matching",
+    cl::desc("Instrument k_step functions with code to profile time spent "
+             "matching when applying each rule."),
+    cl::init(false), cl::cat(codegen_tool_cat));
+
 namespace {
 
 fs::path dt_dir() {
@@ -174,7 +180,8 @@ int main(int argc, char **argv) {
             definition->get_hooked_sorts());
         make_apply_rule_function(
             axiom, definition.get(), mod.get(), residuals.residuals);
-        make_step_function(axiom, definition.get(), mod.get(), residuals);
+        make_step_function(
+            axiom, definition.get(), mod.get(), residuals, profile_matching);
       } else {
         make_apply_rule_function(axiom, definition.get(), mod.get(), true);
       }
@@ -195,11 +202,11 @@ int main(int argc, char **argv) {
   auto *dt = parse_yamldecision_tree(
       mod.get(), decision_tree, definition->get_all_symbols(),
       definition->get_hooked_sorts());
-  make_step_function(definition.get(), mod.get(), dt, false);
+  make_step_function(definition.get(), mod.get(), dt, false, profile_matching);
   auto *dt_search = parse_yamldecision_tree(
       mod.get(), dt_dir() / "dt-search.yaml", definition->get_all_symbols(),
       definition->get_hooked_sorts());
-  make_step_function(definition.get(), mod.get(), dt_search, true);
+  make_step_function(definition.get(), mod.get(), dt_search, true, false);
 
   auto index = read_index_file();
   for (auto const &entry : definition->get_symbols()) {
