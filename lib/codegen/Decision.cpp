@@ -612,6 +612,14 @@ void leaf_node::codegen(decision *d) {
       = proof_event(d->definition_, d->module_)
             .rewrite_event_pre(axiom, arity, vars, subst, d->current_block_);
 
+  if (d->profile_matching_) {
+    llvm::CallInst::Create(
+        get_or_insert_function(
+            d->module_, "stop_clock", llvm::Type::getVoidTy(d->ctx_),
+            llvm::Type::getInt64Ty(d->ctx_)),
+        {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->ctx_), ordinal)}, "",
+        d->current_block_);
+  }
   auto *call = llvm::CallInst::Create(apply_rule, args, "", d->current_block_);
   set_debug_loc(call);
   call->setCallingConv(llvm::CallingConv::Tail);
@@ -707,7 +715,7 @@ static void init_choice_buffer(
     decision_node *dt, llvm::Module *module, llvm::BasicBlock *block,
     llvm::BasicBlock *stuck, llvm::BasicBlock *fail,
     llvm::AllocaInst **choice_buffer_out, llvm::AllocaInst **choice_depth_out,
-    llvm::IndirectBrInst **jump_out) {
+    llvm::IndirectBrInst **jump_out, bool profile_matching) {
   std::unordered_set<leaf_node *> leaves;
   dt->preprocess(leaves);
   auto *ty = llvm::ArrayType::get(
@@ -716,6 +724,12 @@ static void init_choice_buffer(
   auto *choice_buffer = new llvm::AllocaInst(ty, 0, "choiceBuffer", block);
   auto *choice_depth = new llvm::AllocaInst(
       llvm::Type::getInt64Ty(module->getContext()), 0, "choiceDepth", block);
+  if (profile_matching) {
+    llvm::CallInst::Create(
+        get_or_insert_function(
+            module, "start_clock", llvm::Type::getVoidTy(module->getContext())),
+        {}, "", block);
+  }
   auto *zero
       = llvm::ConstantInt::get(llvm::Type::getInt64Ty(module->getContext()), 0);
   new llvm::StoreInst(zero, choice_depth, block);
@@ -799,7 +813,8 @@ void make_eval_or_anywhere_function(
   llvm::AllocaInst *choice_depth = nullptr;
   llvm::IndirectBrInst *jump = nullptr;
   init_choice_buffer(
-      dt, module, block, stuck, fail, &choice_buffer, &choice_depth, &jump);
+      dt, module, block, stuck, fail, &choice_buffer, &choice_depth, &jump,
+      false);
 
   int i = 0;
   decision codegen(
@@ -1113,7 +1128,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
 
 void make_step_function(
     kore_definition *definition, llvm::Module *module, decision_node *dt,
-    bool search) {
+    bool search, bool profile_matching) {
   auto *block_type = getvalue_type({sort_category::Symbol, 0}, module);
   auto *debug_type
       = get_debug_type({sort_category::Symbol, 0}, "SortGeneratedTopCell{}");
@@ -1155,7 +1170,8 @@ void make_step_function(
   llvm::IndirectBrInst *jump = nullptr;
 
   init_choice_buffer(
-      dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth, &jump);
+      dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth, &jump,
+      profile_matching);
   insert_call_to_clear(block);
 
   llvm::AllocaInst *has_search_results = nullptr;
@@ -1178,7 +1194,7 @@ void make_step_function(
   decision codegen(
       definition, result.second, fail, jump, choice_buffer, choice_depth,
       module, {sort_category::Symbol, 0}, nullptr, nullptr, nullptr,
-      has_search_results);
+      has_search_results, profile_matching);
   codegen.store(
       std::make_pair(collected_val->getName().str(), collected_val->getType()),
       collected_val);
@@ -1288,7 +1304,8 @@ void make_match_reason_function(
   llvm::AllocaInst *choice_depth = nullptr;
   llvm::IndirectBrInst *jump = nullptr;
   init_choice_buffer(
-      dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth, &jump);
+      dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth, &jump,
+      false);
 
   init_debug_param(
       match_func, 0, "subject", {sort_category::Symbol, 0},
@@ -1340,7 +1357,7 @@ kore_pattern *make_partial_term(
 
 void make_step_function(
     kore_axiom_declaration *axiom, kore_definition *definition,
-    llvm::Module *module, partial_step res) {
+    llvm::Module *module, partial_step res, bool profile_matching) {
   auto *block_type = getvalue_type({sort_category::Symbol, 0}, module);
   std::vector<llvm::Type *> arg_types;
   std::vector<llvm::Metadata *> debug_types;
@@ -1387,7 +1404,7 @@ void make_step_function(
   llvm::IndirectBrInst *jump = nullptr;
   init_choice_buffer(
       res.dt, module, block, pre_stuck, fail, &choice_buffer, &choice_depth,
-      &jump);
+      &jump, profile_matching);
   insert_call_to_clear(block);
 
   llvm::BranchInst::Create(stuck, pre_stuck);
@@ -1414,7 +1431,8 @@ void make_step_function(
   i = 0;
   decision codegen(
       definition, header.second, fail, jump, choice_buffer, choice_depth,
-      module, {sort_category::Symbol, 0}, nullptr, nullptr, nullptr, nullptr);
+      module, {sort_category::Symbol, 0}, nullptr, nullptr, nullptr, nullptr,
+      profile_matching);
   for (auto *val : header.first) {
     val->setName(res.residuals[i].occurrence.substr(0, max_name_length));
     codegen.store(std::make_pair(val->getName().str(), val->getType()), val);
