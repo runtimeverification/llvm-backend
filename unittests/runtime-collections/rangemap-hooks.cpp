@@ -68,7 +68,7 @@ static struct blockheader range_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
     hdr = get_block_header_for_symbol(
-        (uint64_t)get_tag_for_symbol_name("LblRangemap'Coln'Range{}"));
+        (uint64_t)get_tag_for_symbol_name("LblRangeMap'Coln'Range{}"));
   }
   return hdr;
 }
