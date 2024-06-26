@@ -17,3 +17,8 @@ configure_file(
   ${CMAKE_SOURCE_DIR}/config/macros.h
   ${CMAKE_BINARY_DIR}/include/config/macros.h
   @ONLY)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/config/llvm_header.h
+  ${CMAKE_BINARY_DIR}/include/config/llvm_header.h
+  @ONLY)
