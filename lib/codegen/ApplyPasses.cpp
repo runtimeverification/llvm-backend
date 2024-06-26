@@ -65,26 +65,26 @@ void apply_kllvm_opt_passes(llvm::Module &mod, bool hidden_visibility) {
   // Create the analysis managers.
   // These must be declared in this order so that they are destroyed in the
   // correct order due to inter-analysis-manager references.
-  LoopAnalysisManager LAM;
-  FunctionAnalysisManager FAM;
-  CGSCCAnalysisManager CGAM;
-  ModuleAnalysisManager MAM;
+  LoopAnalysisManager lam;
+  FunctionAnalysisManager fam;
+  CGSCCAnalysisManager cgam;
+  ModuleAnalysisManager mam;
 
   // Create the new pass manager builder.
   // Take a look at the PassBuilder constructor parameters for more
   // customization, e.g. specifying a TargetMachine or various debugging
   // options.
-  PassBuilder PB;
+  PassBuilder pb;
 
   // Register all the basic analyses with the managers.
-  PB.registerModuleAnalyses(MAM);
-  PB.registerCGSCCAnalyses(CGAM);
-  PB.registerFunctionAnalyses(FAM);
-  PB.registerLoopAnalyses(LAM);
-  PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
+  pb.registerModuleAnalyses(mam);
+  pb.registerCGSCCAnalyses(cgam);
+  pb.registerFunctionAnalyses(fam);
+  pb.registerLoopAnalyses(lam);
+  pb.crossRegisterProxies(lam, fam, cgam, mam);
 
   // register custom passes
-  PB.registerPipelineStartEPCallback(
+  pb.registerPipelineStartEPCallback(
       [hidden_visibility](
           llvm::ModulePassManager &pm, OptimizationLevel level) {
         if (hidden_visibility) {
@@ -93,11 +93,11 @@ void apply_kllvm_opt_passes(llvm::Module &mod, bool hidden_visibility) {
       });
 
   // Create the pass manager.
-  ModulePassManager MPM
-      = PB.buildPerModuleDefaultPipeline(get_pass_opt_level());
+  ModulePassManager mpm
+      = pb.buildPerModuleDefaultPipeline(get_pass_opt_level());
 
   // Optimize the IR!
-  MPM.run(mod, MAM);
+  mpm.run(mod, mam);
 }
 
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
