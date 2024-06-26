@@ -32,6 +32,7 @@ struct set_visibility_hidden : llvm::PassInfoMixin<set_visibility_hidden> {
     return llvm::PreservedAnalyses::none();
   }
 
+  // NOLINTNEXTLINE(*-identifier-naming)
   static bool isRequired() { return true; }
 };
 
