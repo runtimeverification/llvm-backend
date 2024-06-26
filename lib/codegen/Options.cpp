@@ -24,7 +24,7 @@ cl::opt<char> optimization_level(
     "O",
     cl::desc("Optimization level. [-O0, -O1, -O2, or -O3] "
              "(default = '-O0')"),
-    cl::Prefix, cl::init('0'));
+    cl::Prefix, cl::init('0'), cl::cat(codegen_lib_cat));
 
 cl::opt<bool> debug(
     "debug", cl::desc("Enable debug information"), cl::ZeroOrMore,
