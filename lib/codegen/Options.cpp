@@ -20,14 +20,11 @@ cl::opt<bool> keep_frame_pointer(
     cl::desc("Keep frame pointer in compiled code for debugging purposes"),
     cl::cat(codegen_lib_cat));
 
-cl::opt<opt_level> optimization_level(
-    cl::desc("Choose optimization level"),
-    cl::values(
-        clEnumVal(opt_level::O0, "No optimizations"),
-        clEnumVal(opt_level::O1, "Enable trivial optimizations"),
-        clEnumVal(opt_level::O2, "Enable default optimizations"),
-        clEnumVal(opt_level::O3, "Enable expensive optimizations")),
-    cl::cat(codegen_lib_cat));
+cl::opt<char> optimization_level(
+    "O",
+    cl::desc("Optimization level. [-O0, -O1, -O2, or -O3] "
+             "(default = '-O0')"),
+    cl::Prefix, cl::init('0'));
 
 cl::opt<bool> debug(
     "debug", cl::desc("Enable debug information"), cl::ZeroOrMore,
