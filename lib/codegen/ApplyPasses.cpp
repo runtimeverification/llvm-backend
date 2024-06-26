@@ -19,7 +19,9 @@
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/Scalar/TailRecursionElimination.h>
 #include <llvm/Transforms/Utils.h>
+#include <llvm/Transforms/Utils/Mem2Reg.h>
 
 #include <optional>
 
@@ -37,23 +39,65 @@ namespace kllvm {
 
 auto get_opt_level() {
   switch (optimization_level) {
-  case opt_level::O0: return CODEGEN_OPT_LEVEL::None;
-  case opt_level::O1: return CODEGEN_OPT_LEVEL::Less;
-  case opt_level::O2: return CODEGEN_OPT_LEVEL::Default;
-  case opt_level::O3: return CODEGEN_OPT_LEVEL::Aggressive;
+  case '0': return CODEGEN_OPT_LEVEL::None;
+  case '1': return CODEGEN_OPT_LEVEL::Less;
+  case '2': return CODEGEN_OPT_LEVEL::Default;
+  case '3': return CODEGEN_OPT_LEVEL::Aggressive;
+  default:
+    throw std::runtime_error(
+        fmt::format("Invalid optimization level: {}", optimization_level));
+  }
+}
+
+auto get_pass_opt_level() {
+  switch (optimization_level) {
+  case '0': return OptimizationLevel::O0;
+  case '1': return OptimizationLevel::O1;
+  case '2': return OptimizationLevel::O2;
+  case '3': return OptimizationLevel::O3;
+  default:
+    throw std::runtime_error(
+        fmt::format("Invalid optimization level: {}", optimization_level));
   }
 }
 
 void apply_kllvm_opt_passes(llvm::Module &mod, bool hidden_visibility) {
-  auto pm = legacy::PassManager();
+  // Create the analysis managers.
+  // These must be declared in this order so that they are destroyed in the
+  // correct order due to inter-analysis-manager references.
+  LoopAnalysisManager LAM;
+  FunctionAnalysisManager FAM;
+  CGSCCAnalysisManager CGAM;
+  ModuleAnalysisManager MAM;
 
-  pm.add(createPromoteMemoryToRegisterPass());
-  pm.add(createTailCallEliminationPass());
-  if (hidden_visibility) {
-    pm.add(new legacy_set_visibility_hidden());
-  }
+  // Create the new pass manager builder.
+  // Take a look at the PassBuilder constructor parameters for more
+  // customization, e.g. specifying a TargetMachine or various debugging
+  // options.
+  PassBuilder PB;
 
-  pm.run(mod);
+  // Register all the basic analyses with the managers.
+  PB.registerModuleAnalyses(MAM);
+  PB.registerCGSCCAnalyses(CGAM);
+  PB.registerFunctionAnalyses(FAM);
+  PB.registerLoopAnalyses(LAM);
+  PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
+
+  // register custom passes
+  PB.registerPipelineStartEPCallback(
+      [hidden_visibility](
+          llvm::ModulePassManager &pm, OptimizationLevel level) {
+        if (hidden_visibility) {
+          pm.addPass(set_visibility_hidden());
+        }
+      });
+
+  // Create the pass manager.
+  ModulePassManager MPM
+      = PB.buildPerModuleDefaultPipeline(get_pass_opt_level());
+
+  // Optimize the IR!
+  MPM.run(mod, MAM);
 }
 
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {

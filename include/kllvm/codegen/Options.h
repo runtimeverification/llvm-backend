@@ -3,8 +3,6 @@
 
 #include "llvm/Support/CommandLine.h"
 
-enum class opt_level { O0, O1, O2, O3 };
-
 extern llvm::cl::OptionCategory codegen_lib_cat;
 
 extern llvm::cl::opt<bool> debug;
@@ -15,7 +13,7 @@ extern llvm::cl::opt<bool> force_binary;
 extern llvm::cl::opt<bool> proof_hint_instrumentation;
 extern llvm::cl::opt<bool> proof_hint_instrumentation_slow;
 extern llvm::cl::opt<bool> keep_frame_pointer;
-extern llvm::cl::opt<opt_level> optimization_level;
+extern llvm::cl::opt<char> optimization_level;
 
 namespace kllvm {
 
