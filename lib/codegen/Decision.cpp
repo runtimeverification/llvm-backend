@@ -625,6 +625,7 @@ void leaf_node::codegen(decision *d) {
   call->setCallingConv(llvm::CallingConv::Tail);
 
   if (child_ == nullptr) {
+    call->setTailCallKind(llvm::CallInst::TCK_MustTail);
     llvm::ReturnInst::Create(d->ctx_, call, d->current_block_);
   } else {
     new llvm::StoreInst(

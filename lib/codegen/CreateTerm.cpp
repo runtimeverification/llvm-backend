@@ -795,6 +795,7 @@ llvm::Value *create_term::create_function_call(
   set_debug_loc(call);
   if (tailcc) {
     call->setCallingConv(llvm::CallingConv::Tail);
+    call->setTailCall();
   }
   if (sret) {
     llvm::Attribute sret_attr
@@ -1138,7 +1139,20 @@ bool make_function(
     auto *call = llvm::CallInst::Create(step, {retval}, "", current_block);
     set_debug_loc(call);
     call->setCallingConv(llvm::CallingConv::Tail);
+    call->setTailCallKind(llvm::CallInst::TCK_MustTail);
     retval = call;
+  } else {
+    if (auto call = llvm::dyn_cast<llvm::CallInst>(retval)) {
+      // check that musttail requirements are met:
+      // 1. Call is in tail position (guaranteed)
+      // 2. Return returns return value of call (guaranteed)
+      // 3. Calling convention is tailcc
+      // 4. Function is not sret (here approximated by checking if return type is void)
+      if (call->getCallingConv() == llvm::CallingConv::Tail
+          && call->getType() != llvm::Type::getVoidTy(module->getContext())) {
+        call->setTailCallKind(llvm::CallInst::TCK_MustTail);
+      }
+    }
   }
   auto *ret
       = llvm::ReturnInst::Create(module->getContext(), retval, current_block);
@@ -1262,6 +1276,7 @@ std::string make_apply_rule_function(
       = llvm::CallInst::Create(step, args, "", creator.get_current_block());
   set_debug_loc(retval);
   retval->setCallingConv(llvm::CallingConv::Tail);
+  retval->setTailCallKind(llvm::CallInst::TCK_MustTail);
   llvm::ReturnInst::Create(
       module->getContext(), retval, creator.get_current_block());
   return name;
