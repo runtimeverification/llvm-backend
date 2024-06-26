@@ -40,20 +40,20 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 ; We also define the following LLVM structure types:
 
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
-%stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
-%map = type { { i8 *, i64 } } ; immer::map
-%rangemap = type { { { { { i32 (...)**, i32, i64 }*, { { i32 (...)**, i32, i32 }* } } } } } ; rng_map::RangeMap
-%set = type { { i8 *, i64 } } ; immer::set
-%iter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter / immer::set_iter
-%list = type { { i64, i32, i8 *, i8 * } } ; immer::flex_vector
-%mpz = type { i32, i32, i64 * } ; mpz_t
+%stringbuffer = type { i64, i64, ptr } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
+%map = type { { ptr, i64 } } ; immer::map
+%rangemap = type { { { { ptr, { ptr } } } } } ; rng_map::RangeMap
+%set = type { { ptr, i64 } } ; immer::set
+%iter = type { { ptr, ptr, i32, [14 x ptr] }, { { ptr, i64 } } } ; immer::map_iter / immer::set_iter
+%list = type { { i64, i32, ptr, ptr } } ; immer::flex_vector
+%mpz = type { i32, i32, ptr } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
-%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
+%floating = type { i64, { i64, i32, i64, ptr } } ; exp, mpfr_t
 %floating_hdr = type { %blockheader, %floating } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, floating
 %blockheader = type { i64 }
-%block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
+%block = type { %blockheader, [0 x ptr] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-%layout = type { i8, %layoutitem* } ; number of children, array of children
+%layout = type { i8, ptr } ; number of children, array of children
 %layoutitem = type { i64, i16 } ; offset, category
 
 ; The layout of a block uniquely identifies the categories of its children as
@@ -75,23 +75,23 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 ; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
 
 ; Interface to the configuration parser
-declare %block* @parse_configuration(i8*)
-declare void @print_configuration(i8 *, %block *)
+declare ptr @parse_configuration(ptr)
+declare void @print_configuration(ptr, ptr)
 
 ; get_exit_code
 
-declare i64 @__gmpz_get_ui(%mpz*)
+declare i64 @__gmpz_get_ui(ptr)
 
-@exit_int_0 = global %mpz { i32 0, i32 0, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @exit_int_0_limbs, i32 0, i32 0) }
+@exit_int_0 = global %mpz { i32 0, i32 0, ptr getelementptr inbounds ([0 x i64], ptr @exit_int_0_limbs, i32 0, i32 0) }
 @exit_int_0_limbs = global [0 x i64] zeroinitializer
 
-define tailcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block*) {
-  ret %mpz* @exit_int_0
+define tailcc ptr @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(ptr) {
+  ret ptr @exit_int_0
 }
 
-define i32 @get_exit_code(%block* %subject) {
-  %exit_z = call tailcc %mpz* @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(%block* %subject)
-  %exit_ul = call i64 @__gmpz_get_ui(%mpz* %exit_z)
+define i32 @get_exit_code(ptr %subject) {
+  %exit_z = call tailcc ptr @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(ptr %subject)
+  %exit_ul = call i64 @__gmpz_get_ui(ptr %exit_z)
   %exit_trunc = trunc i64 %exit_ul to i32
   ret i32 %exit_trunc
 }
@@ -100,48 +100,48 @@ define i32 @get_exit_code(%block* %subject) {
 
 declare void @abort() #0
 
-declare i32 @get_tag_for_fresh_sort(i8*)
-declare %mpz* @hook_INT_add(%mpz*, %mpz*)
-declare i8* @evaluate_function_symbol(i32, i8**)
-declare i8* @get_terminated_string(%string*)
+declare i32 @get_tag_for_fresh_sort(ptr)
+declare ptr @hook_INT_add(ptr, ptr)
+declare ptr @evaluate_function_symbol(i32, ptr)
+declare ptr @get_terminated_string(ptr)
 
-@fresh_int_1 = global %mpz { i32 1, i32 1, i64* getelementptr inbounds ([1 x i64], [1 x i64]* @fresh_int_1_limbs, i32 0, i32 0) }
+@fresh_int_1 = global %mpz { i32 1, i32 1, ptr getelementptr inbounds ([1 x i64], ptr @fresh_int_1_limbs, i32 0, i32 0) }
 @fresh_int_1_limbs = global [1 x i64] [i64 1]
 
-define tailcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block*) {
+define tailcc ptr @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(ptr) {
   call void @abort()
   unreachable
 }
 
-define i8* @get_fresh_constant(%string* %sort, %block* %top) {
+define ptr @get_fresh_constant(ptr %sort, ptr %top) {
 entry:
-  %counterCell = call tailcc %block* @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(%block* %top)
-  %counterCellPointer = getelementptr %block, %block* %counterCell, i64 0, i32 1, i64 0
-  %mpzPtrPtr = bitcast i64** %counterCellPointer to %mpz**
-  %currCounter = load %mpz*, %mpz** %mpzPtrPtr
-  %nextCounter = call %mpz* @hook_INT_add(%mpz* %currCounter, %mpz* @fresh_int_1)
-  store %mpz* %nextCounter, %mpz** %mpzPtrPtr
-  %sortData = call i8* @get_terminated_string(%string* %sort)
-  %tag = call i32 @get_tag_for_fresh_sort(i8* %sortData)
-  %args = alloca i8*
-  %voidPtr = bitcast %mpz* %currCounter to i8*
-  store i8* %voidPtr, i8** %args
-  %retval = call i8* @evaluate_function_symbol(i32 %tag, i8** %args)
-  ret i8* %retval
+  %counterCell = call tailcc ptr @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(ptr %top)
+  %counterCellPointer = getelementptr %block, ptr %counterCell, i64 0, i32 1, i64 0
+  %mpzPtrPtr = bitcast ptr %counterCellPointer to ptr
+  %currCounter = load ptr, ptr %mpzPtrPtr
+  %nextCounter = call ptr @hook_INT_add(ptr %currCounter, ptr @fresh_int_1)
+  store ptr %nextCounter, ptr %mpzPtrPtr
+  %sortData = call ptr @get_terminated_string(ptr %sort)
+  %tag = call i32 @get_tag_for_fresh_sort(ptr %sortData)
+  %args = alloca ptr
+  %voidPtr = bitcast ptr %currCounter to ptr
+  store ptr %voidPtr, ptr %args
+  %retval = call ptr @evaluate_function_symbol(i32 %tag, ptr %args)
+  ret ptr %retval
 }
 
 ; get_tag
 
-define i32 @get_tag(%block* %arg) {
-  %intptr = ptrtoint %block* %arg to i64
+define i32 @get_tag(ptr %arg) {
+  %intptr = ptrtoint ptr %arg to i64
   %isConstant = trunc i64 %intptr to i1
   br i1 %isConstant, label %constant, label %block
 constant:
   %taglong = lshr i64 %intptr, 32
   br label %exit
 block:
-  %hdrptr = getelementptr inbounds %block, %block* %arg, i64 0, i32 0, i32 0
-  %hdr = load i64, i64* %hdrptr
+  %hdrptr = getelementptr inbounds %block, ptr %arg, i64 0, i32 0, i32 0
+  %hdr = load i64, ptr %hdrptr
   %layout = lshr i64 %hdr, @LAYOUT_OFFSET@
   %isstring = icmp eq i64 %layout, 0
   %tagorstring = select i1 %isstring, i64 -1, i64 %hdr
@@ -153,37 +153,37 @@ exit:
 }
 
 ; helper function for float hooks
-define %floating* @move_float(%floating* %val) {
-  %loaded = load %floating, %floating* %val
-  %malloccall = tail call i8* @kore_alloc_floating(i64 0)
-  %ptr = bitcast i8* %malloccall to %floating*
-  store %floating %loaded, %floating* %ptr
-  ret %floating* %ptr
+define ptr @move_float(ptr %val) {
+  %loaded = load %floating, ptr %val
+  %malloccall = tail call ptr @kore_alloc_floating(i64 0)
+  %ptr = bitcast ptr %malloccall to ptr
+  store %floating %loaded, ptr %ptr
+  ret ptr %ptr
 
 }
 
-declare noalias i8* @kore_alloc_floating(i64)
+declare noalias ptr @kore_alloc_floating(i64)
 
 ; helper function for int hooks
-define %mpz* @move_int(%mpz* %val) {
-  %loaded = load %mpz, %mpz* %val
-  %malloccall = tail call i8* @kore_alloc_integer(i64 0)
-  %ptr = bitcast i8* %malloccall to %mpz*
-  store %mpz %loaded, %mpz* %ptr
-  ret %mpz* %ptr
+define ptr @move_int(ptr %val) {
+  %loaded = load %mpz, ptr %val
+  %malloccall = tail call ptr @kore_alloc_integer(i64 0)
+  %ptr = bitcast ptr %malloccall to ptr
+  store %mpz %loaded, ptr %ptr
+  ret ptr %ptr
 }
 
-declare noalias i8* @kore_alloc_integer(i64)
+declare noalias ptr @kore_alloc_integer(i64)
 
 ; string equality
 
-declare i32 @memcmp(i8*, i8*, i64);
+declare i32 @memcmp(ptr, ptr, i64);
 
-define i1 @string_equal(i8* %str1, i8* %str2, i64 %len1, i64 %len2) {
+define i1 @string_equal(ptr %str1, ptr %str2, i64 %len1, i64 %len2) {
   %len_eq = icmp eq i64 %len1, %len2
   %len_lt = icmp ult i64 %len1, %len2
   %min_len = select i1 %len_lt, i64 %len1, i64 %len2
-  %result = call i32 @memcmp(i8* %str1, i8* %str2, i64 %min_len)
+  %result = call i32 @memcmp(ptr %str1, ptr %str2, i64 %min_len)
   %prefix_eq = icmp eq i32 %result, 0
   %retval = and i1 %len_eq, %prefix_eq
   ret i1 %retval
@@ -191,70 +191,70 @@ define i1 @string_equal(i8* %str1, i8* %str2, i64 %len1, i64 %len2) {
 
 ; take_steps
 
-declare tailcc %block* @k_step(%block*)
-declare tailcc %block** @step_all(%block*, i64*)
-declare void @serialize_configuration_to_file_v2(i8*, %block*)
-declare void @write_uint64_to_file(i8*, i64)
+declare tailcc ptr @k_step(ptr)
+declare tailcc ptr @step_all(ptr, ptr)
+declare void @serialize_configuration_to_file_v2(ptr, ptr)
+declare void @write_uint64_to_file(ptr, i64)
 
 @proof_output = external global i1
-@output_file = external global i8*
+@output_file = external global ptr
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
 @current_interval = thread_local global i64 0
 @GC_THRESHOLD = thread_local global i64 @GC_THRESHOLD@
 
-@gc_roots = global [256 x i8 *] zeroinitializer
+@gc_roots = global [256 x ptr] zeroinitializer
 
 define void @set_gc_threshold(i64 %threshold) {
-  store i64 %threshold, i64* @GC_THRESHOLD
+  store i64 %threshold, ptr @GC_THRESHOLD
   ret void
 }
 
 define i64 @get_gc_threshold() {
-  %threshold = load i64, i64* @GC_THRESHOLD
+  %threshold = load i64, ptr @GC_THRESHOLD
   ret i64 %threshold
 }
 
 define i1 @finished_rewriting() {
 entry:
-  %depth = load i64, i64* @depth
+  %depth = load i64, ptr @depth
   %hasDepth = icmp sge i64 %depth, 0
-  %steps = load i64, i64* @steps
+  %steps = load i64, ptr @steps
   %stepsPlusOne = add i64 %steps, 1
-  store i64 %stepsPlusOne, i64* @steps
+  store i64 %stepsPlusOne, ptr @steps
   br i1 %hasDepth, label %if, label %else
 if:
   %depthMinusOne = sub i64 %depth, 1
-  store i64 %depthMinusOne, i64* @depth
+  store i64 %depthMinusOne, ptr @depth
   %finished = icmp eq i64 %depth, 0
   ret i1 %finished
 else:
   ret i1 false
 }
 
-define %block* @take_steps(i64 %depth, %block* %subject) {
-  %proof_output = load i1, i1* @proof_output
+define ptr @take_steps(i64 %depth, ptr %subject) {
+  %proof_output = load i1, ptr @proof_output
   br i1 %proof_output, label %if, label %merge
 if:
-  %output_file = load i8*, i8** @output_file
-  call void @write_uint64_to_file(i8* %output_file, i64 18446744073709551615)
-  call void @serialize_configuration_to_file_v2(i8* %output_file, %block* %subject)
+  %output_file = load ptr, ptr @output_file
+  call void @write_uint64_to_file(ptr %output_file, i64 18446744073709551615)
+  call void @serialize_configuration_to_file_v2(ptr %output_file, ptr %subject)
   br label %merge
 merge:
-  store i64 %depth, i64* @depth
-  %result = call tailcc %block* @k_step(%block* %subject)
-  ret %block* %result
+  store i64 %depth, ptr @depth
+  %result = call tailcc ptr @k_step(ptr %subject)
+  ret ptr %result
 }
 
-define %block** @take_search_step(%block* %subject, i64* %count) {
-  store i64 -1, i64* @depth
-  %result = call tailcc %block** @step_all(%block* %subject, i64* %count)
-  ret %block** %result
+define ptr @take_search_step(ptr %subject, ptr %count) {
+  store i64 -1, ptr @depth
+  %result = call tailcc ptr @step_all(ptr %subject, ptr %count)
+  ret ptr %result
 }
 
 define i64 @get_steps() {
 entry:
-  %steps = load i64, i64* @steps
+  %steps = load i64, ptr @steps
   ret i64 %steps
 }
 
