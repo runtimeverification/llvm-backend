@@ -31,6 +31,8 @@ struct set_visibility_hidden : llvm::PassInfoMixin<set_visibility_hidden> {
     }
     return llvm::PreservedAnalyses::none();
   }
+
+  static bool isRequired() { return true; }
 };
 
 } // namespace kllvm
