@@ -791,6 +791,7 @@ void make_eval_or_anywhere_function(
       = llvm::FunctionType::get(return_type, args, false);
   std::string name = fmt::format("eval_{}", ast_to_string(*function, 0, false));
   llvm::Function *match_func = get_or_insert_function(module, name, func_type);
+  match_func->deleteBody();
   [[maybe_unused]] kore_symbol_declaration *symbol_decl
       = definition->get_symbol_declarations().at(function->get_name());
   init_debug_axiom(symbol_decl->attributes());
