@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <sys/types.h>
 
+#include "runtime/alloc.h"
+
 extern "C" {
 
 // An arena can be used to allocate objects that can then be deallocated all at
@@ -51,11 +53,24 @@ char get_arena_collection_semispace_id(const struct arena *);
 // allocated within an arena.
 char get_arena_semispace_id_of_object(void *);
 
+// helper function for `kore_arena_alloc`. Do not call directly.
+void *do_alloc_slow(size_t, struct arena *);
+
 // Allocates the requested number of bytes as a contiguous region and returns a
 // pointer to the first allocated byte.
 // If called with requested size greater than the maximun single allocation
 // size, the space is allocated in a general (not garbage collected pool).
-void *kore_arena_alloc(struct arena *, size_t);
+inline void *kore_arena_alloc(struct arena *arena, size_t requested) {
+  if (arena->block + requested > arena->block_end) {
+    return do_alloc_slow(requested, arena);
+  }
+  void *result = arena->block;
+  arena->block += requested;
+  MEM_LOG(
+      "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
+      requested, Arena->block);
+  return result;
+}
 
 // Resizes the last allocation as long as the resize does not require a new
 // block allocation.
