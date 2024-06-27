@@ -68,7 +68,7 @@ inline void *kore_arena_alloc(struct arena *arena, size_t requested) {
   arena->block += requested;
   MEM_LOG(
       "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, Arena->block);
+      requested, arena->block);
   return result;
 }
 
