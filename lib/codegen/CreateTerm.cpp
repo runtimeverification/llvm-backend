@@ -1142,7 +1142,7 @@ bool make_function(
     call->setTailCallKind(llvm::CallInst::TCK_MustTail);
     retval = call;
   } else {
-    if (auto call = llvm::dyn_cast<llvm::CallInst>(retval)) {
+    if (auto *call = llvm::dyn_cast<llvm::CallInst>(retval)) {
       // check that musttail requirements are met:
       // 1. Call is in tail position (guaranteed)
       // 2. Return returns return value of call (guaranteed)
