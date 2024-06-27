@@ -4,12 +4,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/main)
 configure_file(main/main.ll         ${CMAKE_CURRENT_BINARY_DIR}/main  @ONLY)
 
-file(GLOB LLVMFiles ${CMAKE_CURRENT_BINARY_DIR}/*.ll)
-install(
-  FILES ${LLVMFiles}
-  DESTINATION lib/kllvm/llvm
-)
-
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/main/main.ll main/search.cpp
   DESTINATION lib/kllvm/llvm/main
