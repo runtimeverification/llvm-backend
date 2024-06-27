@@ -198,7 +198,7 @@ void serialize_range_map(
         file, iter->first.start(), "SortKItem{}", false, state);
     serialize_configuration_internal(
         file, iter->first.end(), "SortKItem{}", false, state);
-    emit_symbol(instance, "LblRangemap'Coln'Range{}", 2);
+    emit_symbol(instance, "LblRangeMap'Coln'Range{}", 2);
     serialize_configuration_internal(
         file, iter->second, arg_sorts[1], false, state);
     emit_symbol(instance, element, 2);
@@ -222,7 +222,7 @@ void serialize_range_map_v2(
 
   auto *arg_sorts = get_argument_sorts_for_tag_v2(element);
   const static auto range_tag
-      = get_tag_for_symbol_name("LblRangemap'Coln'Range{}");
+      = get_tag_for_symbol_name("LblRangeMap'Coln'Range{}");
   const static auto *range_sorts = get_argument_sorts_for_tag_v2(range_tag);
 
   for (size_t i = 0; i < size - 1; ++i) {
