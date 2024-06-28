@@ -15,3 +15,7 @@ add_library(Codegen
 target_link_libraries(Codegen
   PUBLIC  AST fmt::fmt-header-only
   PRIVATE base64)
+
+target_include_directories(Codegen
+  PUBLIC ${CMAKE_BINARY_DIR}/runtime/lto
+)

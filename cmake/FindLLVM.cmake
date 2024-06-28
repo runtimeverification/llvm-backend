@@ -29,6 +29,10 @@ find_program(LLDB lldb
   PATHS ${LLVM_TOOLS_BINARY_DIR}
   NO_DEFAULT_PATH)
 
+find_program(LLVM_DIS llvm-dis
+  PATHS ${LLVM_TOOLS_BINARY_DIR}
+  NO_DEFAULT_PATH)
+
 execute_process(
   COMMAND "${LLVM_TOOLS_BINARY_DIR}/llvm-config" "--libdir"
   OUTPUT_VARIABLE LLVM_LIBRARY_DIR
@@ -40,4 +44,8 @@ endif()
 
 if(NOT LLC)
   message(FATAL_ERROR "Could not find an llc binary. Is llvm installed on your PATH?")
+endif()
+
+if(NOT LLVM_DIS)
+  message(FATAL_ERROR "Could not find an llvm-dis binary. Is llvm installed on your PATH?")
 endif()
