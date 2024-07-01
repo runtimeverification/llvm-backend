@@ -29,6 +29,12 @@ llvm::Instruction *create_malloc(
   return llvm::CallInst::Create(malloc_f, {alloc_size}, "", block);
 }
 
+llvm::Instruction *create_malloc(
+    llvm::Instruction *inst, llvm::Value *alloc_size,
+    llvm::Function *malloc_f) {
+  return llvm::CallInst::Create(malloc_f, {alloc_size}, "", inst);
+}
+
 llvm::Constant *get_offset_of_member(
     [[maybe_unused]] llvm::Module *mod, llvm::StructType *struct_ty,
     int nth_member) {

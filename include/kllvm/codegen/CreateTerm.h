@@ -1,12 +1,17 @@
 #ifndef CREATE_TERM_H
 #define CREATE_TERM_H
 
+#include <concepts>
+
 #include "kllvm/ast/AST.h"
 #include "kllvm/codegen/DecisionParser.h"
 
 #include "llvm/ADT/StringMap.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+
+// size up to which calls to the same allocation function will be merged.
+#define MAX_BLOCK_MERGE_SIZE 4096
 
 namespace kllvm {
 
@@ -143,12 +148,15 @@ bool is_injection_symbol(kore_pattern *p, kore_symbol *sym);
 
 void add_abort(llvm::BasicBlock *block, llvm::Module *module);
 
+template <typename T>
+  requires std::same_as<T, llvm::BasicBlock>
+           || std::same_as<T, llvm::Instruction>
+llvm::Value *allocate_term(
+    llvm::Type *alloc_type, llvm::Value *len, T *insert_point,
+    char const *alloc_fn = "kore_alloc");
 llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::BasicBlock *block,
-    char const *alloc_fn = "kore_alloc");
-llvm::Value *allocate_term(
-    llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
-    char const *alloc_fn = "kore_alloc");
+    char const *alloc_fn = "kore_alloc", bool mergeable = false);
 } // namespace kllvm
 
 #endif // CREATE_TERM_H
