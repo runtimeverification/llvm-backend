@@ -2,12 +2,14 @@
 #define AST_DESERIALIZER_H
 
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/ringbuffer.h>
 #include <kllvm/binary/serializer.h>
 #include <kllvm/binary/version.h>
 
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <deque>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -200,6 +202,145 @@ public:
     str.resize(len);
     file_.read(str.data(), len);
     return !file_.fail();
+  }
+};
+
+class proof_trace_ringbuffer : public proof_trace_buffer {
+private:
+  shm_ringbuffer_t *shm_buffer_;
+  std::deque<uint8_t> peek_data_;
+  bool peek_eof_;
+  bool read_eof_;
+
+  bool read(uint8_t *ptr, size_t len = 1) {
+    for (size_t i = 0; i < len; i++) {
+      if (!peek_data_.empty()) {
+        ptr[i] = peek_data_.front();
+        peek_data_.pop_front();
+        continue;
+      }
+
+      if (peek_eof_) {
+        read_eof_ = true;
+        return false;
+      }
+
+      if (read_eof_) {
+        return false;
+      }
+
+      while (int wait_status = sem_trywait(&shm_buffer_->data_avail)) {
+        assert(wait_status == -1 && errno == EAGAIN);
+        if (ringbuffer_eof(*shm_buffer_)) {
+          read_eof_ = true;
+          return false;
+        }
+      }
+      ringbuffer_get(*shm_buffer_, &ptr[i]);
+      sem_post(&shm_buffer_->space_avail);
+    }
+
+    return true;
+  }
+
+  bool peek(uint8_t *ptr, size_t len = 1) {
+    for (size_t i = 0; i < len; i++) {
+      if (i < peek_data_.size()) {
+        ptr[i] = peek_data_[i];
+        continue;
+      }
+
+      if (peek_eof_) {
+        return false;
+      }
+
+      if (read_eof_) {
+        return false;
+      }
+
+      while (int wait_status = sem_trywait(&shm_buffer_->data_avail)) {
+        assert(wait_status == -1 && errno == EAGAIN);
+        if (ringbuffer_eof(*shm_buffer_)) {
+          peek_eof_ = true;
+          return false;
+        }
+      }
+      ringbuffer_get(*shm_buffer_, &ptr[i]);
+      sem_post(&shm_buffer_->space_avail);
+      peek_data_.push_back(ptr[i]);
+    }
+
+    return true;
+  }
+
+public:
+  proof_trace_ringbuffer(shm_ringbuffer_t *buffer)
+      : shm_buffer_(buffer), peek_data_(), peek_eof_(false), read_eof_(false) { }
+
+  bool read(void *ptr, size_t len) override {
+    uint8_t *data = (uint8_t *)ptr;
+    return read(data, len);
+  }
+
+  int read() override {
+    uint8_t c;
+    if (read(&c)) {
+      return c;
+    } else {
+      return -1;
+    }
+  }
+
+  bool has_word() override {
+    uint64_t word;
+    uint8_t *data = (uint8_t *)&word;
+    return peek(data, sizeof(word));
+  }
+
+  bool eof() override { return peek() == -1; }
+
+  int peek() override {
+    uint8_t c;
+    if (peek(&c)) {
+      return c;
+    } else {
+      return -1;
+    }
+  }
+
+  uint64_t peek_word() override {
+    uint64_t word;
+    uint8_t *data = (uint8_t *)&word;
+    assert(peek(data, sizeof(word)));
+    return word;
+  }
+
+  bool read_uint32(uint32_t &i) override {
+    return read(&i, sizeof(i));
+  }
+
+  bool read_uint64(uint64_t &i) override {
+    return read(&i, sizeof(i));
+  }
+
+  bool read_string(std::string &str) override {
+    str.resize(0);
+    while (true) {
+      int c = read();
+      if (c == -1) {
+        return false;
+      }
+      if ((char)c == '\0') {
+        break;
+      }
+      str.push_back((char)c);
+    }
+    return true;
+  }
+
+  bool read_string(std::string &str, size_t len) override {
+    str.resize(len);
+    return read(str.data(), len);
   }
 };
 

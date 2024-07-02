@@ -2,6 +2,7 @@ add_library(BinaryKore
   serializer.cpp
   deserializer.cpp
   ProofTraceParser.cpp
+  ringbuffer.cpp
 )
 
 target_link_libraries(BinaryKore
