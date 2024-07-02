@@ -194,7 +194,7 @@ proof_trace_parser::proof_trace_parser(
     : verbose_(verbose)
     , expand_terms_(expand_terms)
     , header_(header)
-    , kore_definition_(kore_definition) { }
+    , kore_definition_(std::move(kore_definition)) { }
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace(std::string const &data) {

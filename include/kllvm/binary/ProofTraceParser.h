@@ -93,7 +93,8 @@ private:
       : llvm_rewrite_event(rule_ordinal) { }
   llvm_rule_event(
       uint64_t rule_ordinal, std::string label, std::string location)
-      : llvm_rewrite_event(rule_ordinal, label, location) { }
+      : llvm_rewrite_event(
+          rule_ordinal, std::move(label), std::move(location)) { }
 
 public:
   static sptr<llvm_rule_event> create(uint64_t rule_ordinal) {
@@ -102,8 +103,8 @@ public:
 
   static sptr<llvm_rule_event>
   create(uint64_t rule_ordinal, std::string label, std::string location) {
-    return sptr<llvm_rule_event>(
-        new llvm_rule_event(rule_ordinal, label, location));
+    return sptr<llvm_rule_event>(new llvm_rule_event(
+        rule_ordinal, std::move(label), std::move(location)));
   }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
