@@ -2,6 +2,7 @@
 #define PROOF_TRACE_PARSER_H
 
 #include <kllvm/ast/AST.h>
+#include <kllvm/ast/util.h>
 #include <kllvm/binary/deserializer.h>
 
 #include <iostream>
@@ -493,8 +494,28 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_rule_event::create(ordinal);
+    kllvm::sptr<llvm_rule_event> event;
 
+    if (kore_definition_) {
+      auto axiom = kore_definition_->get_axiom_by_ordinal(ordinal);
+      auto axiom_att = axiom.attributes();
+
+      std::string label;
+      if (axiom_att.contains(kllvm::attribute_set::key::Label)) {
+        label = axiom_att.get_string(kllvm::attribute_set::key::Label);
+      }
+
+      std::string location;
+      auto loc = kllvm::get_start_line_location(axiom);
+      if (loc.has_value()) {
+        location = loc.value().first + ":" + std::to_string(loc.value().second);
+      }
+
+      event = llvm_rule_event::create(ordinal, label, location);
+
+    } else {
+      event = llvm_rule_event::create(ordinal);
+    }
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(buffer, event)) {
         return nullptr;
@@ -520,7 +541,27 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_side_condition_event::create(ordinal);
+    kllvm::sptr<llvm_side_condition_event> event;
+
+    if (kore_definition_) {
+      auto axiom = kore_definition_->get_axiom_by_ordinal(ordinal);
+      auto axiom_att = axiom.attributes();
+
+      std::string label;
+      if (axiom_att.contains(kllvm::attribute_set::key::Label)) {
+        label = axiom_att.get_string(kllvm::attribute_set::key::Label);
+      }
+
+      std::string location;
+      auto loc = kllvm::get_start_line_location(axiom);
+      if (loc.has_value()) {
+        location = loc.value().first + ":" + std::to_string(loc.value().second);
+      }
+
+      event = llvm_side_condition_event::create(ordinal, label, location);
+    } else {
+      event = llvm_side_condition_event::create(ordinal);
+    }
 
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(buffer, event)) {
@@ -531,8 +572,8 @@ private:
     return event;
   }
 
-  sptr<llvm_side_condition_end_event> static parse_side_condition_end(
-      proof_trace_buffer &buffer) {
+  sptr<llvm_side_condition_end_event>
+  parse_side_condition_end(proof_trace_buffer &buffer) {
     if (!buffer.check_word(side_condition_end_sentinel)) {
       return nullptr;
     }
@@ -548,8 +589,29 @@ private:
       return nullptr;
     }
 
-    auto event
-        = llvm_side_condition_end_event::create(ordinal, side_condition_result);
+    kllvm::sptr<llvm_side_condition_end_event> event;
+
+    if (kore_definition_) {
+      auto axiom = kore_definition_->get_axiom_by_ordinal(ordinal);
+      auto axiom_att = axiom.attributes();
+
+      std::string label;
+      if (axiom_att.contains(kllvm::attribute_set::key::Label)) {
+        label = axiom_att.get_string(kllvm::attribute_set::key::Label);
+      }
+
+      std::string location;
+      auto loc = kllvm::get_start_line_location(axiom);
+      if (loc.has_value()) {
+        location = loc.value().first + ":" + std::to_string(loc.value().second);
+      }
+
+      event = llvm_side_condition_end_event::create(
+          ordinal, side_condition_result, label, location);
+    } else {
+      event = llvm_side_condition_end_event::create(
+          ordinal, side_condition_result);
+    }
 
     return event;
   }
