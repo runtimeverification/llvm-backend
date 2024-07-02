@@ -50,6 +50,9 @@ public:
 private:
   uint64_t rule_ordinal_;
   substitution_t substitution_{};
+  std::string label_;
+  std::string location_;
+  bool debug_{};
 
 protected:
   void print_substitution(
@@ -58,11 +61,20 @@ protected:
 public:
   llvm_rewrite_event(uint64_t rule_ordinal)
       : rule_ordinal_(rule_ordinal) { }
+  llvm_rewrite_event(
+      uint64_t rule_ordinal, std::string label, std::string location)
+      : rule_ordinal_(rule_ordinal)
+      , label_(std::move(label))
+      , location_(std::move(location))
+      , debug_(true) { }
 
+  [[nodiscard]] std::string const &get_label() const { return label_; }
+  [[nodiscard]] std::string const &get_location() const { return location_; }
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] substitution_t const &get_substitution() const {
     return substitution_;
   }
+  [[nodiscard]] bool print_debug_info() const { return debug_; }
 
   void add_substitution(
       std::string const &name, sptr<kore_pattern> const &term,
@@ -78,10 +90,19 @@ class llvm_rule_event : public llvm_rewrite_event {
 private:
   llvm_rule_event(uint64_t rule_ordinal)
       : llvm_rewrite_event(rule_ordinal) { }
+  llvm_rule_event(
+      uint64_t rule_ordinal, std::string label, std::string location)
+      : llvm_rewrite_event(rule_ordinal, label, location) { }
 
 public:
   static sptr<llvm_rule_event> create(uint64_t rule_ordinal) {
     return sptr<llvm_rule_event>(new llvm_rule_event(rule_ordinal));
+  }
+
+  static sptr<llvm_rule_event>
+  create(uint64_t rule_ordinal, std::string label, std::string location) {
+    return sptr<llvm_rule_event>(
+        new llvm_rule_event(rule_ordinal, label, location));
   }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
@@ -92,11 +113,20 @@ class llvm_side_condition_event : public llvm_rewrite_event {
 private:
   llvm_side_condition_event(uint64_t rule_ordinal)
       : llvm_rewrite_event(rule_ordinal) { }
+  llvm_side_condition_event(
+      uint64_t rule_ordinal, std::string label, std::string location)
+      : llvm_rewrite_event(rule_ordinal, label, location) { }
 
 public:
   static sptr<llvm_side_condition_event> create(uint64_t rule_ordinal) {
     return sptr<llvm_side_condition_event>(
         new llvm_side_condition_event(rule_ordinal));
+  }
+
+  static sptr<llvm_side_condition_event>
+  create(uint64_t rule_ordinal, std::string label, std::string location) {
+    return sptr<llvm_side_condition_event>(
+        new llvm_side_condition_event(rule_ordinal, label, location));
   }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
@@ -107,10 +137,21 @@ class llvm_side_condition_end_event : public llvm_step_event {
 private:
   uint64_t rule_ordinal_;
   bool result_;
+  std::string label_;
+  std::string location_;
+  bool debug_{};
 
   llvm_side_condition_end_event(uint64_t rule_ordinal, bool result)
       : rule_ordinal_(rule_ordinal)
       , result_(result) { }
+  llvm_side_condition_end_event(
+      uint64_t rule_ordinal, bool result, std::string label,
+      std::string location)
+      : rule_ordinal_(rule_ordinal)
+      , result_(result)
+      , label_(std::move(label))
+      , location_(std::move(location))
+      , debug_(true) { }
 
 public:
   static sptr<llvm_side_condition_end_event>
@@ -119,8 +160,19 @@ public:
         new llvm_side_condition_end_event(rule_ordinal, result));
   }
 
+  static sptr<llvm_side_condition_end_event> create(
+      uint64_t rule_ordinal, bool result, std::string label,
+      std::string location) {
+    return sptr<llvm_side_condition_end_event>(
+        new llvm_side_condition_end_event(
+            rule_ordinal, result, label, location));
+  }
+
+  [[nodiscard]] std::string const &get_label() const { return label_; }
+  [[nodiscard]] std::string const &get_location() const { return location_; }
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] bool get_result() const { return result_; }
+  [[nodiscard]] bool print_debug_info() const { return debug_; }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
       const override;
