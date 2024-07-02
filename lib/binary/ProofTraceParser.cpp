@@ -63,31 +63,18 @@ void llvm_rule_event::print(
 void llvm_side_condition_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
-  if (!print_debug_info()) {
-    out << fmt::format(
-        "{}side condition entry: {} {}\n", indent, get_rule_ordinal(),
-        get_substitution().size());
-  } else {
-    out << fmt::format(
-        "{}side condition entry: {} {} [{}] [{}]\n", indent, get_rule_ordinal(),
-        get_substitution().size(), get_label(), get_location());
-  }
+  out << fmt::format(
+      "{}side condition entry: {} {}\n", indent, get_rule_ordinal(),
+      get_substitution().size());
   print_substitution(out, expand_terms, ind + 1U);
 }
 
 void llvm_side_condition_end_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
-  if (!print_debug_info()) {
-    out << fmt::format(
-        "{}side condition exit: {} {}", indent, rule_ordinal_,
-        (result_ ? "true" : "false"));
-  } else {
-    out << fmt::format(
-        "{}side condition exit: {} {} [{}] [{}]", indent, rule_ordinal_,
-        (result_ ? "true" : "false"), label_, location_);
-  }
-  out << fmt::format("\n");
+  out << fmt::format(
+      "{}side condition exit: {} {}\n", indent, rule_ordinal_,
+      (result_ ? "true" : "false"));
 }
 
 void llvm_function_event::print(

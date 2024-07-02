@@ -114,20 +114,11 @@ class llvm_side_condition_event : public llvm_rewrite_event {
 private:
   llvm_side_condition_event(uint64_t rule_ordinal)
       : llvm_rewrite_event(rule_ordinal) { }
-  llvm_side_condition_event(
-      uint64_t rule_ordinal, std::string label, std::string location)
-      : llvm_rewrite_event(rule_ordinal, label, location) { }
 
 public:
   static sptr<llvm_side_condition_event> create(uint64_t rule_ordinal) {
     return sptr<llvm_side_condition_event>(
         new llvm_side_condition_event(rule_ordinal));
-  }
-
-  static sptr<llvm_side_condition_event>
-  create(uint64_t rule_ordinal, std::string label, std::string location) {
-    return sptr<llvm_side_condition_event>(
-        new llvm_side_condition_event(rule_ordinal, label, location));
   }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
@@ -138,21 +129,10 @@ class llvm_side_condition_end_event : public llvm_step_event {
 private:
   uint64_t rule_ordinal_;
   bool result_;
-  std::string label_;
-  std::string location_;
-  bool debug_{};
 
   llvm_side_condition_end_event(uint64_t rule_ordinal, bool result)
       : rule_ordinal_(rule_ordinal)
       , result_(result) { }
-  llvm_side_condition_end_event(
-      uint64_t rule_ordinal, bool result, std::string label,
-      std::string location)
-      : rule_ordinal_(rule_ordinal)
-      , result_(result)
-      , label_(std::move(label))
-      , location_(std::move(location))
-      , debug_(true) { }
 
 public:
   static sptr<llvm_side_condition_end_event>
@@ -161,19 +141,8 @@ public:
         new llvm_side_condition_end_event(rule_ordinal, result));
   }
 
-  static sptr<llvm_side_condition_end_event> create(
-      uint64_t rule_ordinal, bool result, std::string label,
-      std::string location) {
-    return sptr<llvm_side_condition_end_event>(
-        new llvm_side_condition_end_event(
-            rule_ordinal, result, label, location));
-  }
-
-  [[nodiscard]] std::string const &get_label() const { return label_; }
-  [[nodiscard]] std::string const &get_location() const { return location_; }
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] bool get_result() const { return result_; }
-  [[nodiscard]] bool print_debug_info() const { return debug_; }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
       const override;
@@ -541,27 +510,7 @@ private:
       return nullptr;
     }
 
-    kllvm::sptr<llvm_side_condition_event> event;
-
-    if (kore_definition_) {
-      auto axiom = kore_definition_->get_axiom_by_ordinal(ordinal);
-      auto axiom_att = axiom.attributes();
-
-      std::string label;
-      if (axiom_att.contains(kllvm::attribute_set::key::Label)) {
-        label = axiom_att.get_string(kllvm::attribute_set::key::Label);
-      }
-
-      std::string location;
-      auto loc = kllvm::get_start_line_location(axiom);
-      if (loc.has_value()) {
-        location = loc.value().first + ":" + std::to_string(loc.value().second);
-      }
-
-      event = llvm_side_condition_event::create(ordinal, label, location);
-    } else {
-      event = llvm_side_condition_event::create(ordinal);
-    }
+    auto event = llvm_side_condition_event::create(ordinal);
 
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(buffer, event)) {
@@ -589,29 +538,8 @@ private:
       return nullptr;
     }
 
-    kllvm::sptr<llvm_side_condition_end_event> event;
-
-    if (kore_definition_) {
-      auto axiom = kore_definition_->get_axiom_by_ordinal(ordinal);
-      auto axiom_att = axiom.attributes();
-
-      std::string label;
-      if (axiom_att.contains(kllvm::attribute_set::key::Label)) {
-        label = axiom_att.get_string(kllvm::attribute_set::key::Label);
-      }
-
-      std::string location;
-      auto loc = kllvm::get_start_line_location(axiom);
-      if (loc.has_value()) {
-        location = loc.value().first + ":" + std::to_string(loc.value().second);
-      }
-
-      event = llvm_side_condition_end_event::create(
-          ordinal, side_condition_result, label, location);
-    } else {
-      event = llvm_side_condition_end_event::create(
-          ordinal, side_condition_result);
-    }
+    auto event
+        = llvm_side_condition_end_event::create(ordinal, side_condition_result);
 
     return event;
   }
