@@ -182,10 +182,12 @@ void llvm_rewrite_trace::print(
 }
 
 proof_trace_parser::proof_trace_parser(
-    bool verbose, bool expand_terms, kore_header const &header)
+    bool verbose, bool expand_terms, kore_header const &header,
+    std::optional<kore_definition> kore_definition)
     : verbose_(verbose)
     , expand_terms_(expand_terms)
-    , header_(header) { }
+    , header_(header)
+    , kore_definition_(kore_definition) { }
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace(std::string const &data) {

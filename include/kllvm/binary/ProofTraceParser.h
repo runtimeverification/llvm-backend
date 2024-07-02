@@ -279,6 +279,8 @@ private:
   bool verbose_;
   bool expand_terms_;
   [[maybe_unused]] kore_header const &header_;
+  [[maybe_unused]] std::optional<kore_definition> kore_definition_
+      = std::nullopt;
 
   sptr<kore_pattern>
   parse_kore_term(proof_trace_buffer &buffer, uint64_t &pattern_len) {
@@ -648,7 +650,8 @@ private:
 
 public:
   proof_trace_parser(
-      bool verbose, bool expand_terms, kore_header const &header);
+      bool verbose, bool expand_terms, kore_header const &header,
+      std::optional<kore_definition> kore_definition = std::nullopt);
 
   std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);
