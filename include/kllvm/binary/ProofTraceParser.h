@@ -521,8 +521,8 @@ private:
     return event;
   }
 
-  sptr<llvm_side_condition_end_event>
-  parse_side_condition_end(proof_trace_buffer &buffer) {
+  sptr<llvm_side_condition_end_event> static parse_side_condition_end(
+      proof_trace_buffer &buffer) {
     if (!buffer.check_word(side_condition_end_sentinel)) {
       return nullptr;
     }
