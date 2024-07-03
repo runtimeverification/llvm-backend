@@ -19,9 +19,7 @@
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar.h>
-#include <llvm/Transforms/Scalar/TailRecursionElimination.h>
 #include <llvm/Transforms/Utils.h>
-#include <llvm/Transforms/Utils/Mem2Reg.h>
 
 #include <optional>
 
