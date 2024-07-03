@@ -441,7 +441,8 @@ void function_node::codegen(decision *d) {
   create_term creator(
       final_subst, d->definition_, d->current_block_, d->module_, false);
   auto *call = creator.create_function_call(
-      function_, cat_, args, function_.substr(0, 5) == "hook_", false);
+      function_, cat_, args, function_.substr(0, 5) == "hook_",
+      is_side_condition);
   call->setName(name_.substr(0, max_name_length));
   d->store(std::make_pair(name_, type_), call);
 

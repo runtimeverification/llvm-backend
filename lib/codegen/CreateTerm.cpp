@@ -1292,7 +1292,7 @@ std::string make_side_condition_function(
   }
   std::string name = "side_condition_" + std::to_string(axiom->get_ordinal());
   if (make_function(
-          name, pattern, definition, module, false, false, false, axiom,
+          name, pattern, definition, module, true, false, false, axiom,
           ".sc")) {
     return name;
   }
