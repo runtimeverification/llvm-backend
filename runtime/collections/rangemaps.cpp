@@ -17,7 +17,7 @@ static struct blockheader range_header() {
   static struct blockheader hdr = {(uint64_t)-1};
   if (hdr.hdr == -1) {
     hdr = get_block_header_for_symbol(
-        (uint64_t)get_tag_for_symbol_name("LblRangemap'Coln'Range{}"));
+        (uint64_t)get_tag_for_symbol_name("LblRangeMap'Coln'Range{}"));
   }
   return hdr;
 }
@@ -275,7 +275,7 @@ void print_range_map(
 
     sfprintf(file, "%s(", element);
     auto entry = *iter;
-    sfprintf(file, "LblRangemap'Coln'Range{}(");
+    sfprintf(file, "LblRangeMap'Coln'Range{}(");
     print_configuration_internal(
         file, entry.first.start(), "SortKItem{}", false, state);
     sfprintf(file, ",");

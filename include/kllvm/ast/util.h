@@ -11,7 +11,7 @@ namespace kllvm {
  * the AST and other data structures.
 */
 
-[[nodiscard]] std::optional<int64_t>
+[[nodiscard]] std::optional<std::pair<std::string, uint64_t>>
 get_start_line_location(kore_axiom_declaration const &axiom);
 
 [[nodiscard]] std::string trim(std::string s);
