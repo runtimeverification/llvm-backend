@@ -17,7 +17,7 @@ make -j$(nproc) install
 popd
 
 pushd matching
-mvn package
+mvn -B package
 popd
 
 export PATH="$(realpath ./build/install/bin):$(realpath ./build/bin):/usr/lib/llvm-${llvm_version}/bin:$PATH"
