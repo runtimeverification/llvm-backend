@@ -236,7 +236,7 @@ void switch_node::codegen(decision *d) {
       llvm::StructType *block_type = get_block_type(
           d->module_, d->definition_, switch_case.get_constructor());
       auto *cast = new llvm::BitCastInst(
-          val, llvm::PointerType::getUnqual(block_type), "", d->current_block_);
+          val, llvm::PointerType::getUnqual(d->ctx_), "", d->current_block_);
       kore_symbol_declaration *symbol_decl
           = d->definition_->get_symbol_declarations().at(
               switch_case.get_constructor()->get_name());
@@ -268,9 +268,7 @@ void switch_node::codegen(decision *d) {
               binding.first.substr(0, max_name_length), d->current_block_);
           break;
         }
-        auto *block_ptr
-            = llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
-                d->module_->getContext(), block_struct));
+        auto *block_ptr = llvm::PointerType::getUnqual(d->ctx_);
         if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
           if (offset == 0) {
             renamed = llvm::CallInst::Create(
@@ -783,7 +781,7 @@ void make_eval_or_anywhere_function(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      args.push_back(llvm::PointerType::getUnqual(getvalue_type(cat, module)));
+      args.push_back(llvm::PointerType::getUnqual(module->getContext()));
       cats.push_back(cat);
       break;
     default:
@@ -842,8 +840,7 @@ void abort_when_stuck(
   symbol = d->get_all_symbols().at(ast_to_string(*symbol));
   auto *block_type = get_block_type(module, d, symbol);
   llvm::Value *ptr = nullptr;
-  auto *block_ptr = llvm::PointerType::getUnqual(
-      llvm::StructType::getTypeByName(module->getContext(), block_struct));
+  auto *block_ptr = llvm::PointerType::getUnqual(module->getContext());
   if (symbol->get_arguments().empty()) {
     ptr = llvm::ConstantExpr::getIntToPtr(
         llvm::ConstantInt::get(
@@ -954,7 +951,7 @@ static void store_ptrs_for_gc(
                    llvm::Type::getInt64Ty(module->getContext()), i)},
         "", collect);
     auto *casted = new llvm::BitCastInst(
-        ptr, llvm::PointerType::getUnqual(ptr_types[i]), "", collect);
+        ptr, llvm::PointerType::getUnqual(module->getContext()), "", collect);
     new llvm::StoreInst(roots[i], casted, collect);
     root_ptrs.emplace_back(casted, ptr_types[i]);
   }
@@ -1015,8 +1012,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
     case sort_category::List:
     case sort_category::Set:
       nroots++;
-      ptr_types.push_back(
-          llvm::PointerType::getUnqual(getvalue_type(type, module)));
+      ptr_types.push_back(llvm::PointerType::getUnqual(module->getContext()));
       roots.push_back(args[i]);
       break;
     case sort_category::Int:
@@ -1085,9 +1081,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(layout_arr);
   }
-  auto *ptr_ty = llvm::PointerType::getUnqual(llvm::ArrayType::get(
-      llvm::StructType::getTypeByName(module->getContext(), layoutitem_struct),
-      0));
+  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
   auto *kore_collect = get_or_insert_function(
       module, "kore_collect",
       llvm::FunctionType::get(
@@ -1285,11 +1279,9 @@ void make_match_reason_function(
   // In newer versions, the string constants also get type `ptr` and these
   // explicit element types become no-ops that we can remove.
   llvm::PHINode *fail_pattern = llvm::PHINode::Create(
-      llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(module->getContext())),
-      0, "pattern", fail);
+      llvm::PointerType::getUnqual(module->getContext()), 0, "pattern", fail);
   llvm::PHINode *fail_sort = llvm::PHINode::Create(
-      llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(module->getContext())),
-      0, "sort", fail);
+      llvm::PointerType::getUnqual(module->getContext()), 0, "sort", fail);
 
   auto *call = llvm::CallInst::Create(
       get_or_insert_function(
@@ -1373,8 +1365,7 @@ void make_step_function(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      arg_types.push_back(
-          llvm::PointerType::getUnqual(getvalue_type(cat, module)));
+      arg_types.push_back(llvm::PointerType::getUnqual(module->getContext()));
       break;
     default: arg_types.push_back(getvalue_type(cat, module)); break;
     }

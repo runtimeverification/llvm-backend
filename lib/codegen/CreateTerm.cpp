@@ -147,7 +147,9 @@ llvm::Type *get_param_type(value_type sort, llvm::Module *module) {
   case sort_category::Map:
   case sort_category::RangeMap:
   case sort_category::List:
-  case sort_category::Set: type = llvm::PointerType::getUnqual(type); break;
+  case sort_category::Set:
+    type = llvm::PointerType::getUnqual(module->getContext());
+    break;
   default: break;
   }
   return type;
@@ -169,21 +171,17 @@ llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
   case sort_category::Set:
     return llvm::StructType::getTypeByName(module->getContext(), set_struct);
   case sort_category::Int:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), int_struct));
+    return llvm::PointerType::getUnqual(module->getContext());
   case sort_category::Float:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), float_struct));
+    return llvm::PointerType::getUnqual(module->getContext());
   case sort_category::StringBuffer:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), buffer_struct));
+    return llvm::PointerType::getUnqual(module->getContext());
   case sort_category::Bool: return llvm::Type::getInt1Ty(module->getContext());
   case sort_category::MInt:
     return llvm::IntegerType::get(module->getContext(), sort.bits);
   case sort_category::Symbol:
   case sort_category::Variable:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), block_struct));
+    return llvm::PointerType::getUnqual(module->getContext());
   case sort_category::MapIter:
   case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
@@ -784,7 +782,7 @@ llvm::Value *create_term::create_function_call(
     types.insert(types.begin(), alloc_sret->getType());
     return_type = llvm::Type::getVoidTy(ctx_);
   } else if (collection) {
-    return_type = llvm::PointerType::getUnqual(return_type);
+    return_type = llvm::PointerType::getUnqual(ctx_);
   }
 
   llvm::FunctionType *func_type
@@ -868,8 +866,7 @@ llvm::Value *create_term::not_injection_case(
     new llvm::StoreInst(child_value, child_ptr, current_block_);
   }
 
-  auto *block_ptr = llvm::PointerType::getUnqual(
-      llvm::StructType::getTypeByName(module_->getContext(), block_struct));
+  auto *block_ptr = llvm::PointerType::getUnqual(module_->getContext());
   auto *bitcast = new llvm::BitCastInst(block, block_ptr, "", current_block_);
   if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
     auto *call = llvm::CallInst::Create(
@@ -1071,7 +1068,7 @@ bool make_function(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(param_type);
+      param_type = llvm::PointerType::getUnqual(module->getContext());
       break;
     default: break;
     }
@@ -1087,7 +1084,7 @@ bool make_function(
   case sort_category::RangeMap:
   case sort_category::List:
   case sort_category::Set:
-    return_type = llvm::PointerType::getUnqual(return_type);
+    return_type = llvm::PointerType::getUnqual(module->getContext());
     break;
   default: break;
   }
@@ -1203,7 +1200,7 @@ std::string make_apply_rule_function(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(param_type);
+      param_type = llvm::PointerType::getUnqual(module->getContext());
       break;
     default: break;
     }
