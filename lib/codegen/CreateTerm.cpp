@@ -76,20 +76,20 @@ target triple = "{triple}"
 ; We also define the following LLVM structure types:
 
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
-%stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
-%map = type { { i8 *, i64 } } ; immer::map
-%rangemap = type { { { { { i32 (...)**, i32, i64 }*, { { i32 (...)**, i32, i32 }* } } } } } ; rng_map::RangeMap
-%set = type { { i8 *, i64 } } ; immer::set
-%iter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter / immer::set_iter
-%list = type { { i64, i32, i8 *, i8 * } } ; immer::flex_vector
-%mpz = type { i32, i32, i64 * } ; mpz_t
+%stringbuffer = type { i64, i64, ptr } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
+%map = type { { ptr, i64 } } ; immer::map
+%rangemap = type { { { { ptr, { ptr } } } } } ; rng_map::RangeMap
+%set = type { { ptr, i64 } } ; immer::set
+%iter = type { { ptr, ptr, i32, [14 x ptr] }, { { ptr, i64 } } } ; immer::map_iter / immer::set_iter
+%list = type { { i64, i32, ptr, ptr } } ; immer::flex_vector
+%mpz = type { i32, i32, ptr } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
-%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
+%floating = type { i64, { i64, i32, i64, ptr } } ; exp, mpfr_t
 %floating_hdr = type { %blockheader, %floating } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, floating
 %blockheader = type { i64 }
-%block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
+%block = type { %blockheader, [0 x ptr] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-%layout = type { i8, %layoutitem* } ; number of children, array of children
+%layout = type { i8, ptr } ; number of children, array of children
 %layoutitem = type { i64, i16 } ; offset, category
 
 ; The layout of a block uniquely identifies the categories of its children as
@@ -111,8 +111,8 @@ target triple = "{triple}"
 ; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
 
 ; Interface to the configuration parser
-declare %block* @parse_configuration(i8*)
-declare void @print_configuration(i8 *, %block *)
+declare ptr @parse_configuration(ptr)
+declare void @print_configuration(ptr, ptr)
 )LLVM";
   return target_dependent + rest;
 }
