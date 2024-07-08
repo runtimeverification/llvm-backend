@@ -266,8 +266,7 @@ llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
     char const *alloc_fn) {
   auto *malloc = create_malloc(
-      block, llvm::Type::getInt64Ty(block->getContext()), alloc_type, len,
-      nullptr, kore_heap_alloc(alloc_fn, block->getModule()));
+      block, len, kore_heap_alloc(alloc_fn, block->getModule()));
 
   set_debug_loc(malloc);
   return malloc;

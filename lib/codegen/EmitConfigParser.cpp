@@ -392,10 +392,11 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> get_eval(
     break;
   case sort_category::Bool:
   case sort_category::MInt: {
+    auto *ptr = llvm::PointerType::getUnqual(ctx);
     auto *malloc = create_malloc(
-        creator.get_current_block(), llvm::Type::getInt64Ty(ctx),
-        result->getType(), llvm::ConstantExpr::getSizeOf(result->getType()),
-        nullptr, nullptr);
+        creator.get_current_block(),
+        llvm::ConstantExpr::getSizeOf(result->getType()),
+        get_or_insert_function(mod, "malloc", ptr, ptr));
     new llvm::StoreInst(result, malloc, creator.get_current_block());
     retval = new llvm::BitCastInst(
         malloc, llvm::PointerType::getUnqual(ctx), "",
@@ -555,9 +556,10 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
           string_equal,
           {func->arg_begin() + 2, ptr, func->arg_begin() + 1, len}, "",
           case_block);
+      auto *ptr_ty = llvm::PointerType::getUnqual(ctx);
       auto *malloc = create_malloc(
-          case_block, llvm::Type::getInt64Ty(ctx), compare->getType(),
-          llvm::ConstantExpr::getSizeOf(compare->getType()), nullptr, nullptr);
+          case_block, llvm::ConstantExpr::getSizeOf(compare->getType()),
+          get_or_insert_function(module, "malloc", ptr_ty, ptr_ty));
       new llvm::StoreInst(compare, malloc, case_block);
       auto *result = new llvm::BitCastInst(
           malloc, llvm::PointerType::getUnqual(ctx), "", case_block);
