@@ -5,7 +5,7 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 %block = type { %blockheader, [0 x ptr] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
 declare tailcc ptr @k_step(ptr)
-declare tailcc ptr @step_all(ptr, ptr)
+declare tailcc void @step_all(ptr)
 declare void @serialize_configuration_to_file_v2(ptr, ptr)
 declare void @write_uint64_to_file(ptr, i64)
 
@@ -59,10 +59,10 @@ merge:
   ret ptr %result
 }
 
-define ptr @take_search_step(ptr %subject, ptr %count) {
+define void @take_search_step(ptr %subject) {
   store i64 -1, ptr @depth
-  %result = call tailcc ptr @step_all(ptr %subject, ptr %count)
-  ret ptr %result
+  call tailcc void @step_all(ptr %subject)
+  ret void
 }
 
 define i64 @get_steps() {
