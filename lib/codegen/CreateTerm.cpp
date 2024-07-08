@@ -170,15 +170,12 @@ llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
     return llvm::StructType::getTypeByName(module->getContext(), list_struct);
   case sort_category::Set:
     return llvm::StructType::getTypeByName(module->getContext(), set_struct);
-  case sort_category::Int:
-    return llvm::PointerType::getUnqual(module->getContext());
-  case sort_category::Float:
-    return llvm::PointerType::getUnqual(module->getContext());
-  case sort_category::StringBuffer:
-    return llvm::PointerType::getUnqual(module->getContext());
   case sort_category::Bool: return llvm::Type::getInt1Ty(module->getContext());
   case sort_category::MInt:
     return llvm::IntegerType::get(module->getContext(), sort.bits);
+  case sort_category::Int:
+  case sort_category::Float:
+  case sort_category::StringBuffer:
   case sort_category::Symbol:
   case sort_category::Variable:
     return llvm::PointerType::getUnqual(module->getContext());
