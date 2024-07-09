@@ -665,51 +665,20 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
   merge_block->insertInto(func);
 }
 
-static llvm::PointerType *make_writer_type(llvm::LLVMContext &ctx) {
-  return llvm::PointerType::getUnqual(ctx);
-}
-
-static llvm::PointerType *make_visitor_type(
-    llvm::LLVMContext &ctx, llvm::Type *file, llvm::Type *item, int num_strs,
-    int num_bools, bool is_serialize) {
-  return llvm::PointerType::getUnqual(ctx);
-}
-
 static llvm::StructType *make_packed_visitor_structure_type(
     llvm::LLVMContext &ctx, llvm::Module *module, bool is_serialize) {
   std::string const name = is_serialize ? "serialize_visitor" : "visitor";
   static auto types = std::map<llvm::LLVMContext *, llvm::StructType *>{};
 
-  auto *file = make_writer_type(ctx);
   auto *ptr_ty = llvm::PointerType::getUnqual(ctx);
 
   if (types.find(&ctx) == types.end()) {
     auto element_types = std::vector<llvm::Type *>{
-        {make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Symbol, 0}, module), 1, 1,
-             is_serialize),
-         make_visitor_type(ctx, file, ptr_ty, 3, 0, is_serialize),
-         make_visitor_type(ctx, file, ptr_ty, 3, 0, is_serialize),
-         make_visitor_type(ctx, file, ptr_ty, 3, 0, is_serialize),
-         make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Int, 0}, module), 1, 0,
-             is_serialize),
-         make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Float, 0}, module), 1, 0,
-             is_serialize),
-         make_visitor_type(
-             ctx, file, getvalue_type({sort_category::Bool, 0}, module), 1, 0,
-             is_serialize),
-         make_visitor_type(
-             ctx, file, getvalue_type({sort_category::StringBuffer, 0}, module),
-             1, 0, is_serialize),
+        {ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty,
          ptr_ty}};
     if (!is_serialize) {
       element_types.push_back(ptr_ty);
     }
-    element_types.push_back(
-        make_visitor_type(ctx, file, ptr_ty, 3, 0, is_serialize));
-
     auto *struct_ty = llvm::StructType::create(ctx, element_types, name);
     types[&ctx] = struct_ty;
   }
@@ -732,8 +701,7 @@ static void emit_traversal(
 
   if (is_visitor) {
     // cf runtime/util/header.h visitChildren
-    auto *file = make_writer_type(ctx);
-    arg_types.push_back(file);
+    arg_types.push_back(ptr_ty);
     arg_types.push_back(
         make_packed_visitor_structure_type(ctx, module, is_serialize)
             ->getPointerTo());
@@ -897,7 +865,6 @@ static void visit_collection(
       element->get_constructor()->get_name() + "{}");
   auto *element_ptr
       = get_symbol_name_ptr(element_symbol, nullptr, module, use_sort_name);
-  auto *file = make_writer_type(ctx);
   llvm::Type *sort_type = nullptr;
   if (use_sort_name) {
     sort_type = ptr_ty;
@@ -906,7 +873,7 @@ static void visit_collection(
   }
   auto *fn_type = llvm::FunctionType::get(
       llvm::Type::getVoidTy(ctx),
-      {file, child_ptr->getType(), sort_type, sort_type, sort_type, ptr_ty},
+      {ptr_ty, child_ptr->getType(), sort_type, sort_type, sort_type, ptr_ty},
       false);
   llvm::CallInst::Create(
       fn_type, callback,
@@ -929,7 +896,6 @@ static void get_visitor(
   auto *block_type = get_block_type(module, definition, symbol);
   auto *cast = new llvm::BitCastInst(func->arg_begin(), ptr_ty, "", case_block);
   unsigned i = 0;
-  auto *file = make_writer_type(ctx);
 
   auto *state_ptr = func->arg_end() - 1;
 
@@ -971,7 +937,7 @@ static void get_visitor(
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), sort_type, llvm::Type::getInt1Ty(ctx),
+              {ptr_ty, child->getType(), sort_type, llvm::Type::getInt1Ty(ctx),
                ptr_ty},
               false),
           callbacks.at(0),
@@ -985,7 +951,7 @@ static void get_visitor(
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), sort_type, ptr_ty}, false),
+              {ptr_ty, child->getType(), sort_type, ptr_ty}, false),
           callbacks.at(4), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
@@ -993,7 +959,7 @@ static void get_visitor(
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), sort_type, ptr_ty}, false),
+              {ptr_ty, child->getType(), sort_type, ptr_ty}, false),
           callbacks.at(5), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
@@ -1001,7 +967,7 @@ static void get_visitor(
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), sort_type, ptr_ty}, false),
+              {ptr_ty, child->getType(), sort_type, ptr_ty}, false),
           callbacks.at(6), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
@@ -1009,7 +975,7 @@ static void get_visitor(
       llvm::CallInst::Create(
           llvm::FunctionType::get(
               llvm::Type::getVoidTy(ctx),
-              {file, child->getType(), sort_type, ptr_ty}, false),
+              {ptr_ty, child->getType(), sort_type, ptr_ty}, false),
           callbacks.at(7), {func->arg_begin() + 1, child, sort_val, state_ptr},
           "", case_block);
       break;
@@ -1021,7 +987,7 @@ static void get_visitor(
           = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), cat.bits);
       auto *fn_type = llvm::FunctionType::get(
           llvm::Type::getVoidTy(ctx),
-          {file, ptr_ty, llvm::Type::getInt64Ty(ctx), sort_type, ptr_ty},
+          {ptr_ty, ptr_ty, llvm::Type::getInt64Ty(ctx), sort_type, ptr_ty},
           false);
       if (nwords == 0) {
         llvm::CallInst::Create(
@@ -1095,7 +1061,7 @@ static void get_visitor(
     if (i != symbol->get_arguments().size() - 1 && use_sort_name) {
       llvm::CallInst::Create(
           llvm::FunctionType::get(
-              llvm::Type::getVoidTy(ctx), {file, ptr_ty}, false),
+              llvm::Type::getVoidTy(ctx), {ptr_ty, ptr_ty}, false),
           callbacks.at(9), {func->arg_begin() + 1, state_ptr}, "", case_block);
     }
     i++;
