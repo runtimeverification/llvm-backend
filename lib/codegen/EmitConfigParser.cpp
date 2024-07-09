@@ -673,9 +673,7 @@ static llvm::StructType *make_packed_visitor_structure_type(
   auto *ptr_ty = llvm::PointerType::getUnqual(ctx);
 
   if (types.find(&ctx) == types.end()) {
-    auto element_types = std::vector<llvm::Type *>{
-        {ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty, ptr_ty,
-         ptr_ty}};
+    auto element_types = std::vector<llvm::Type *>(10, ptr_ty);
     if (!is_serialize) {
       element_types.push_back(ptr_ty);
     }
