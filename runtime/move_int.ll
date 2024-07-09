@@ -1,16 +1,15 @@
 target datalayout = "@BACKEND_TARGET_DATALAYOUT@"
 target triple = "@BACKEND_TARGET_TRIPLE@"
 
-%mpz = type { i32, i32, i64 * } ; mpz_t
+%mpz = type { i32, i32, ptr } ; mpz_t
 
 ; helper function for int hooks
-define %mpz* @move_int(%mpz* %val) {
-  %loaded = load %mpz, %mpz* %val
-  %malloccall = tail call i8* @kore_alloc_integer(i64 0)
-  %ptr = bitcast i8* %malloccall to %mpz*
-  store %mpz %loaded, %mpz* %ptr
-  ret %mpz* %ptr
+define ptr @move_int(ptr %val) {
+  %loaded = load %mpz, ptr %val
+  %malloccall = tail call ptr @kore_alloc_integer(i64 0)
+  store %mpz %loaded, ptr %malloccall
+  ret ptr %malloccall
 }
 
-declare noalias i8* @kore_alloc_integer(i64)
+declare noalias ptr @kore_alloc_integer(i64)
 

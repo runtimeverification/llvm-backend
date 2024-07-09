@@ -86,8 +86,7 @@ llvm::Constant *create_static_term::not_injection_case(
   return llvm::ConstantExpr::getBitCast(
       llvm::ConstantExpr::getInBoundsGetElementPtr(
           block_type, global_var, idxs),
-      llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
-          module_->getContext(), block_struct)));
+      llvm::PointerType::getUnqual(module_->getContext()));
 }
 
 std::pair<llvm::Constant *, bool>
@@ -106,13 +105,11 @@ create_static_term::operator()(kore_pattern *pattern) {
           false);
     }
     if (symbol->get_arguments().empty()) {
-      llvm::StructType *block_type = llvm::StructType::getTypeByName(
-          module_->getContext(), block_struct);
       llvm::Constant *cast = llvm::ConstantExpr::getIntToPtr(
           llvm::ConstantInt::get(
               llvm::Type::getInt64Ty(ctx_),
               (((uint64_t)symbol->get_tag()) << 32) | 1),
-          llvm::PointerType::getUnqual(block_type));
+          llvm::PointerType::getUnqual(module_->getContext()));
       return std::make_pair(cast, false);
     }
     kore_symbol_declaration *symbol_decl
@@ -144,6 +141,7 @@ create_static_term::operator()(kore_pattern *pattern) {
 // NOLINTBEGIN(*-cognitive-complexity)
 llvm::Constant *
 create_static_term::create_token(value_type sort, std::string contents) {
+  auto *ptr_ty = llvm::PointerType::getUnqual(ctx_);
   switch (sort.cat) {
   case sort_category::Map:
   case sort_category::RangeMap:
@@ -193,8 +191,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
               llvm::StructType::getTypeByName(
                   module_->getContext(), int_struct),
               num_limbs, mp_size,
-              llvm::ConstantExpr::getPointerCast(
-                  limbs_var, llvm::PointerType::getUnqual(ctx_)))));
+              llvm::ConstantExpr::getPointerCast(limbs_var, ptr_ty))));
       mpz_clear(value);
     }
     std::vector<llvm::Constant *> idxs
@@ -289,8 +286,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
               expbits,
               llvm::ConstantStruct::getAnon(
                   {mpfr_prec, mpfr_sign, mpfr_exp,
-                   llvm::ConstantExpr::getPointerCast(
-                       limbs_var, llvm::PointerType::getUnqual(ctx_))}))));
+                   llvm::ConstantExpr::getPointerCast(limbs_var, ptr_ty)}))));
       mpfr_clear(value);
     }
     std::vector<llvm::Constant *> idxs
@@ -336,9 +332,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
           string_type, block_header,
           llvm::ConstantDataArray::getString(ctx_, contents, false)));
     }
-    return llvm::ConstantExpr::getPointerCast(
-        global, llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(
-                    module_->getContext(), block_struct)));
+    return llvm::ConstantExpr::getPointerCast(global, ptr_ty);
   }
   case sort_category::SetIter:
   case sort_category::MapIter:
