@@ -1,4 +1,5 @@
 #include <kllvm/binary/ProofTraceParser.h>
+#include <kllvm/parser/KOREParser.h>
 
 #include <llvm/Support/CommandLine.h>
 
@@ -16,6 +17,10 @@ cl::opt<std::string> header_path(
 
 cl::opt<std::string> input_filename(
     cl::Positional, cl::desc("<input file>"), cl::Required,
+    cl::cat(kore_proof_trace_cat));
+
+cl::opt<std::string> kore_filename(
+    cl::Positional, cl::desc("[kore definition file]"), cl::Optional,
     cl::cat(kore_proof_trace_cat));
 
 cl::opt<bool> verbose_output(
@@ -50,7 +55,18 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  proof_trace_parser parser(verbose_output, expand_terms_in_output, header);
+  std::optional<kore_definition> kore_def;
+
+  if (!kore_filename.empty()) {
+    std::fstream kore_file(kore_filename);
+    kore_def
+        = std::make_optional(*parser::kore_parser(kore_filename).definition());
+    kore_def->preprocess();
+  }
+
+  proof_trace_parser parser(
+      verbose_output, expand_terms_in_output, header, kore_def);
+
   auto trace = parser.parse_proof_trace_from_file(input_filename);
   if (trace.has_value()) {
     return 0;
