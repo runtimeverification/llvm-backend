@@ -85,7 +85,7 @@ declare i64 @__gmpz_get_ui(ptr)
 @exit_int_0 = global %mpz { i32 0, i32 0, ptr getelementptr inbounds ([0 x i64], ptr @exit_int_0_limbs, i32 0, i32 0) }
 @exit_int_0_limbs = global [0 x i64] zeroinitializer
 
-define weak tailcc ptr @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(ptr) {
+define tailcc ptr @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(ptr) {
   ret ptr @exit_int_0
 }
 
@@ -100,7 +100,7 @@ define i32 @get_exit_code(ptr %subject) {
 
 declare void @abort() #0
 
-define weak tailcc ptr @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(ptr) {
+define tailcc ptr @"eval_LblgetGeneratedCounterCell{SortGeneratedTopCell{}}"(ptr) {
   call void @abort()
   unreachable
 }
