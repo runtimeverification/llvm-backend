@@ -2,6 +2,7 @@
 #define PROOF_TRACE_PARSER_H
 
 #include <kllvm/ast/AST.h>
+#include <kllvm/ast/util.h>
 #include <kllvm/binary/deserializer.h>
 
 #include <iostream>
@@ -50,6 +51,9 @@ public:
 private:
   uint64_t rule_ordinal_;
   substitution_t substitution_{};
+  std::string label_;
+  std::string location_;
+  bool debug_{};
 
 protected:
   void print_substitution(
@@ -58,11 +62,20 @@ protected:
 public:
   llvm_rewrite_event(uint64_t rule_ordinal)
       : rule_ordinal_(rule_ordinal) { }
+  llvm_rewrite_event(
+      uint64_t rule_ordinal, std::string label, std::string location)
+      : rule_ordinal_(rule_ordinal)
+      , label_(std::move(label))
+      , location_(std::move(location))
+      , debug_(true) { }
 
+  [[nodiscard]] std::string const &get_label() const { return label_; }
+  [[nodiscard]] std::string const &get_location() const { return location_; }
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] substitution_t const &get_substitution() const {
     return substitution_;
   }
+  [[nodiscard]] bool print_debug_info() const { return debug_; }
 
   void add_substitution(
       std::string const &name, sptr<kore_pattern> const &term,
@@ -78,10 +91,20 @@ class llvm_rule_event : public llvm_rewrite_event {
 private:
   llvm_rule_event(uint64_t rule_ordinal)
       : llvm_rewrite_event(rule_ordinal) { }
+  llvm_rule_event(
+      uint64_t rule_ordinal, std::string label, std::string location)
+      : llvm_rewrite_event(
+          rule_ordinal, std::move(label), std::move(location)) { }
 
 public:
   static sptr<llvm_rule_event> create(uint64_t rule_ordinal) {
     return sptr<llvm_rule_event>(new llvm_rule_event(rule_ordinal));
+  }
+
+  static sptr<llvm_rule_event>
+  create(uint64_t rule_ordinal, std::string label, std::string location) {
+    return sptr<llvm_rule_event>(new llvm_rule_event(
+        rule_ordinal, std::move(label), std::move(location)));
   }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
@@ -279,6 +302,8 @@ private:
   bool verbose_;
   bool expand_terms_;
   [[maybe_unused]] kore_header const &header_;
+  [[maybe_unused]] std::optional<kore_definition> kore_definition_
+      = std::nullopt;
 
   sptr<kore_pattern>
   parse_kore_term(proof_trace_buffer &buffer, uint64_t &pattern_len) {
@@ -439,8 +464,28 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_rule_event::create(ordinal);
+    kllvm::sptr<llvm_rule_event> event;
 
+    if (kore_definition_) {
+      auto axiom = kore_definition_->get_axiom_by_ordinal(ordinal);
+      auto axiom_att = axiom.attributes();
+
+      std::string label;
+      if (axiom_att.contains(kllvm::attribute_set::key::Label)) {
+        label = axiom_att.get_string(kllvm::attribute_set::key::Label);
+      }
+
+      std::string location;
+      auto loc = kllvm::get_start_line_location(axiom);
+      if (loc.has_value()) {
+        location = loc.value().first + ":" + std::to_string(loc.value().second);
+      }
+
+      event = llvm_rule_event::create(ordinal, label, location);
+
+    } else {
+      event = llvm_rule_event::create(ordinal);
+    }
     for (auto i = 0; i < arity; i++) {
       if (!parse_variable(buffer, event)) {
         return nullptr;
@@ -648,7 +693,8 @@ private:
 
 public:
   proof_trace_parser(
-      bool verbose, bool expand_terms, kore_header const &header);
+      bool verbose, bool expand_terms, kore_header const &header,
+      std::optional<kore_definition> kore_definition = std::nullopt);
 
   std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);
