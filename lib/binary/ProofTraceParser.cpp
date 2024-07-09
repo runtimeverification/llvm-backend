@@ -48,8 +48,15 @@ void llvm_rewrite_event::print_substitution(
 void llvm_rule_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
-  out << fmt::format(
-      "{}rule: {} {}\n", indent, get_rule_ordinal(), get_substitution().size());
+  if (!print_debug_info()) {
+    out << fmt::format(
+        "{}rule: {} {}\n", indent, get_rule_ordinal(),
+        get_substitution().size());
+  } else {
+    out << fmt::format(
+        "{}rule: {} {} [{}] [{}]\n", indent, get_rule_ordinal(),
+        get_substitution().size(), get_label(), get_location());
+  }
   print_substitution(out, expand_terms, ind + 1U);
 }
 
@@ -65,9 +72,9 @@ void llvm_side_condition_event::print(
 void llvm_side_condition_end_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
-  out << fmt::format("{}side condition exit: {} ", indent, rule_ordinal_);
-  out << (result_ ? "true" : "false");
-  out << fmt::format("\n");
+  out << fmt::format(
+      "{}side condition exit: {} {}\n", indent, rule_ordinal_,
+      (result_ ? "true" : "false"));
 }
 
 void llvm_function_event::print(
@@ -182,10 +189,12 @@ void llvm_rewrite_trace::print(
 }
 
 proof_trace_parser::proof_trace_parser(
-    bool verbose, bool expand_terms, kore_header const &header)
+    bool verbose, bool expand_terms, kore_header const &header,
+    std::optional<kore_definition> kore_definition)
     : verbose_(verbose)
     , expand_terms_(expand_terms)
-    , header_(header) { }
+    , header_(header)
+    , kore_definition_(std::move(kore_definition)) { }
 
 std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace(std::string const &data) {

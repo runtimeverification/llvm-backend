@@ -168,6 +168,21 @@ config.substitutions.extend([
         fi
     ''')),
 
+    ('%check-proof-debug-out', one_line('''
+        out=%test-dir-out/*.proof.debug.out.diff
+        in=%test-dir-in/`basename $out .proof.debug.out.diff`.in
+        hint=%t.`basename $out .proof.debug.out.diff`.hint
+        rm -f $hint
+        %t.interpreter $in -1 $hint --proof-output
+        %kore-rich-header %s > %t.header.bin
+        %kore-proof-trace --verbose --expand-terms %t.header.bin $hint %s | diff - $out
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
+            exit 1
+        fi
+     ''')),
+
     ('%check-dir-proof-out', one_line('''
         %kore-rich-header %s > %t.header.bin
         for out in %test-dir-out/*.proof.out.diff; do
@@ -207,6 +222,7 @@ config.substitutions.extend([
     ('%test-dir-out', os.path.join('%output-dir', '%test-basename')),
     ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
     ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename.proof.out.diff')),
+    ('%test-proof-debug-diff-out', os.path.join('%output-dir', '%test-basename.proof.debug.out.diff')),
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),
