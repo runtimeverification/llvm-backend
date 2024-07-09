@@ -76,20 +76,20 @@ target triple = "{triple}"
 ; We also define the following LLVM structure types:
 
 %string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
-%stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
-%map = type { { i8 *, i64 } } ; immer::map
-%rangemap = type { { { { { i32 (...)**, i32, i64 }*, { { i32 (...)**, i32, i32 }* } } } } } ; rng_map::RangeMap
-%set = type { { i8 *, i64 } } ; immer::set
-%iter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter / immer::set_iter
-%list = type { { i64, i32, i8 *, i8 * } } ; immer::flex_vector
-%mpz = type { i32, i32, i64 * } ; mpz_t
+%stringbuffer = type { i64, i64, ptr } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
+%map = type { { ptr, i64 } } ; immer::map
+%rangemap = type { { { { ptr, { ptr } } } } } ; rng_map::RangeMap
+%set = type { { ptr, i64 } } ; immer::set
+%iter = type { { ptr, ptr, i32, [14 x ptr] }, { { ptr, i64 } } } ; immer::map_iter / immer::set_iter
+%list = type { { i64, i32, ptr, ptr } } ; immer::flex_vector
+%mpz = type { i32, i32, ptr } ; mpz_t
 %mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
-%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
+%floating = type { i64, { i64, i32, i64, ptr } } ; exp, mpfr_t
 %floating_hdr = type { %blockheader, %floating } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, floating
 %blockheader = type { i64 }
-%block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
+%block = type { %blockheader, [0 x ptr] } ; 16-bit layout, 8-bit length, 32-bit tag, children
 
-%layout = type { i8, %layoutitem* } ; number of children, array of children
+%layout = type { i8, ptr } ; number of children, array of children
 %layoutitem = type { i64, i16 } ; offset, category
 
 ; The layout of a block uniquely identifies the categories of its children as
@@ -111,8 +111,8 @@ target triple = "{triple}"
 ; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
 
 ; Interface to the configuration parser
-declare %block* @parse_configuration(i8*)
-declare void @print_configuration(i8 *, %block *)
+declare ptr @parse_configuration(ptr)
+declare void @print_configuration(ptr, ptr)
 )LLVM";
   return target_dependent + rest;
 }
@@ -147,7 +147,9 @@ llvm::Type *get_param_type(value_type sort, llvm::Module *module) {
   case sort_category::Map:
   case sort_category::RangeMap:
   case sort_category::List:
-  case sort_category::Set: type = llvm::PointerType::getUnqual(type); break;
+  case sort_category::Set:
+    type = llvm::PointerType::getUnqual(module->getContext());
+    break;
   default: break;
   }
   return type;
@@ -168,22 +170,15 @@ llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
     return llvm::StructType::getTypeByName(module->getContext(), list_struct);
   case sort_category::Set:
     return llvm::StructType::getTypeByName(module->getContext(), set_struct);
-  case sort_category::Int:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), int_struct));
-  case sort_category::Float:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), float_struct));
-  case sort_category::StringBuffer:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), buffer_struct));
   case sort_category::Bool: return llvm::Type::getInt1Ty(module->getContext());
   case sort_category::MInt:
     return llvm::IntegerType::get(module->getContext(), sort.bits);
+  case sort_category::Int:
+  case sort_category::Float:
+  case sort_category::StringBuffer:
   case sort_category::Symbol:
   case sort_category::Variable:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), block_struct));
+    return llvm::PointerType::getUnqual(module->getContext());
   case sort_category::MapIter:
   case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
@@ -268,8 +263,7 @@ llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
     char const *alloc_fn) {
   auto *malloc = create_malloc(
-      block, llvm::Type::getInt64Ty(block->getContext()), alloc_type, len,
-      nullptr, kore_heap_alloc(alloc_fn, block->getModule()));
+      block, len, kore_heap_alloc(alloc_fn, block->getModule()));
 
   set_debug_loc(malloc);
   return malloc;
@@ -340,6 +334,7 @@ std::string escape(std::string const &str) {
 llvm::Value *create_term::create_hook(
     kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
     std::string const &location_stack) {
+  auto *ptr_ty = llvm::PointerType::getUnqual(ctx_);
   assert(hook_att->get_arguments().size() == 1);
   auto *str_pattern
       = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
@@ -513,9 +508,8 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         get_or_insert_function(
             module_, "hook_MINT_import",
-            getvalue_type({sort_category::Int, 0}, module_),
-            llvm::PointerType::getUnqual(ctx_), llvm::Type::getInt64Ty(ctx_),
-            llvm::Type::getInt1Ty(ctx_)),
+            getvalue_type({sort_category::Int, 0}, module_), ptr_ty,
+            llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getFalse(ctx_)},
         "hook_MINT_uvalue", current_block_);
@@ -565,9 +559,8 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         get_or_insert_function(
             module_, "hook_MINT_import",
-            getvalue_type({sort_category::Int, 0}, module_),
-            llvm::PointerType::getUnqual(ctx_), llvm::Type::getInt64Ty(ctx_),
-            llvm::Type::getInt1Ty(ctx_)),
+            getvalue_type({sort_category::Int, 0}, module_), ptr_ty,
+            llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getTrue(ctx_)},
         "hook_MINT_svalue", current_block_);
@@ -582,7 +575,7 @@ llvm::Value *create_term::create_hook(
     auto *type = getvalue_type(cat, module_);
     llvm::Instruction *ptr = llvm::CallInst::Create(
         get_or_insert_function(
-            module_, "hook_MINT_export", llvm::PointerType::getUnqual(ctx_),
+            module_, "hook_MINT_export", ptr_ty,
             getvalue_type({sort_category::Int, 0}, module_),
             llvm::Type::getInt64Ty(ctx_)),
         {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits)},
@@ -784,7 +777,7 @@ llvm::Value *create_term::create_function_call(
     types.insert(types.begin(), alloc_sret->getType());
     return_type = llvm::Type::getVoidTy(ctx_);
   } else if (collection) {
-    return_type = llvm::PointerType::getUnqual(return_type);
+    return_type = llvm::PointerType::getUnqual(ctx_);
   }
 
   llvm::FunctionType *func_type
@@ -868,8 +861,7 @@ llvm::Value *create_term::not_injection_case(
     new llvm::StoreInst(child_value, child_ptr, current_block_);
   }
 
-  auto *block_ptr = llvm::PointerType::getUnqual(
-      llvm::StructType::getTypeByName(module_->getContext(), block_struct));
+  auto *block_ptr = llvm::PointerType::getUnqual(module_->getContext());
   auto *bitcast = new llvm::BitCastInst(block, block_ptr, "", current_block_);
   if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
     auto *call = llvm::CallInst::Create(
@@ -1056,6 +1048,7 @@ bool make_function(
   std::vector<llvm::Type *> param_types;
   std::vector<std::string> param_names;
   std::vector<llvm::Metadata *> debug_args;
+  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
   for (auto &entry : vars) {
     auto *sort
         = dynamic_cast<kore_composite_sort *>(entry.second->get_sort().get());
@@ -1070,9 +1063,7 @@ bool make_function(
     case sort_category::Map:
     case sort_category::RangeMap:
     case sort_category::List:
-    case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(param_type);
-      break;
+    case sort_category::Set: param_type = ptr_ty; break;
     default: break;
     }
 
@@ -1086,9 +1077,7 @@ bool make_function(
   case sort_category::Map:
   case sort_category::RangeMap:
   case sort_category::List:
-  case sort_category::Set:
-    return_type = llvm::PointerType::getUnqual(return_type);
-    break;
+  case sort_category::Set: return_type = ptr_ty; break;
   default: break;
   }
   llvm::FunctionType *func_type
@@ -1203,7 +1192,7 @@ std::string make_apply_rule_function(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(param_type);
+      param_type = llvm::PointerType::getUnqual(module->getContext());
       break;
     default: break;
     }

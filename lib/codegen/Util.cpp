@@ -24,24 +24,9 @@ llvm::Function *kore_heap_alloc(std::string const &name, llvm::Module *module) {
 }
 
 llvm::Instruction *create_malloc(
-    llvm::BasicBlock *block, llvm::Type *int_ptr_ty, llvm::Type *alloc_ty,
-    llvm::Value *alloc_size, llvm::Value *array_size, llvm::Function *malloc_f,
-    std::string const &name) {
-#if LLVM_VERSION_MAJOR >= 18
-  auto b = llvm::IRBuilder<>(block);
-  return b.CreateMalloc(
-      int_ptr_ty, alloc_ty, alloc_size, array_size, malloc_f, name);
-#elif LLVM_VERSION_MAJOR >= 16
-  auto *call = llvm::CallInst::CreateMalloc(
-      block, int_ptr_ty, alloc_ty, alloc_size, array_size, malloc_f, name);
-  call->insertInto(block, block->end());
-  return call;
-#else
-  auto *call = llvm::CallInst::CreateMalloc(
-      block, int_ptr_ty, alloc_ty, alloc_size, array_size, malloc_f, name);
-  call->insertAfter(&block->back());
-  return call;
-#endif
+    llvm::BasicBlock *block, llvm::Value *alloc_size,
+    llvm::Function *malloc_f) {
+  return llvm::CallInst::Create(malloc_f, {alloc_size}, "", block);
 }
 
 llvm::Constant *get_offset_of_member(
