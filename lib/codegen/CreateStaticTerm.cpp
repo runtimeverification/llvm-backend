@@ -141,6 +141,7 @@ create_static_term::operator()(kore_pattern *pattern) {
 // NOLINTBEGIN(*-cognitive-complexity)
 llvm::Constant *
 create_static_term::create_token(value_type sort, std::string contents) {
+  auto *ptr_ty = llvm::PointerType::getUnqual(ctx_);
   switch (sort.cat) {
   case sort_category::Map:
   case sort_category::RangeMap:
@@ -190,8 +191,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
               llvm::StructType::getTypeByName(
                   module_->getContext(), int_struct),
               num_limbs, mp_size,
-              llvm::ConstantExpr::getPointerCast(
-                  limbs_var, llvm::PointerType::getUnqual(ctx_)))));
+              llvm::ConstantExpr::getPointerCast(limbs_var, ptr_ty))));
       mpz_clear(value);
     }
     std::vector<llvm::Constant *> idxs
@@ -286,8 +286,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
               expbits,
               llvm::ConstantStruct::getAnon(
                   {mpfr_prec, mpfr_sign, mpfr_exp,
-                   llvm::ConstantExpr::getPointerCast(
-                       limbs_var, llvm::PointerType::getUnqual(ctx_))}))));
+                   llvm::ConstantExpr::getPointerCast(limbs_var, ptr_ty)}))));
       mpfr_clear(value);
     }
     std::vector<llvm::Constant *> idxs
@@ -333,8 +332,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
           string_type, block_header,
           llvm::ConstantDataArray::getString(ctx_, contents, false)));
     }
-    return llvm::ConstantExpr::getPointerCast(
-        global, llvm::PointerType::getUnqual(module_->getContext()));
+    return llvm::ConstantExpr::getPointerCast(global, ptr_ty);
   }
   case sort_category::SetIter:
   case sort_category::MapIter:

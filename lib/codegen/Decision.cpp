@@ -146,6 +146,7 @@ void switch_node::codegen(decision *d) {
   if (begin_node(d, "switch" + name_)) {
     return;
   }
+  auto *ptr_ty = llvm::PointerType::getUnqual(d->ctx_);
   llvm::Value *val = d->load(std::make_pair(name_, type_));
   llvm::Value *ptr_val = nullptr;
   if (d->fail_pattern_) {
@@ -235,8 +236,7 @@ void switch_node::codegen(decision *d) {
       int offset = 0;
       llvm::StructType *block_type = get_block_type(
           d->module_, d->definition_, switch_case.get_constructor());
-      auto *cast = new llvm::BitCastInst(
-          val, llvm::PointerType::getUnqual(d->ctx_), "", d->current_block_);
+      auto *cast = new llvm::BitCastInst(val, ptr_ty, "", d->current_block_);
       kore_symbol_declaration *symbol_decl
           = d->definition_->get_symbol_declarations().at(
               switch_case.get_constructor()->get_name());
@@ -268,7 +268,7 @@ void switch_node::codegen(decision *d) {
               binding.first.substr(0, max_name_length), d->current_block_);
           break;
         }
-        auto *block_ptr = llvm::PointerType::getUnqual(d->ctx_);
+        auto *block_ptr = ptr_ty;
         if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
           if (offset == 0) {
             renamed = llvm::CallInst::Create(
@@ -490,17 +490,14 @@ void function_node::codegen(decision *d) {
       auto str = legacy_value_type_to_string(cat);
       function_args.push_back(d->string_literal(str));
     }
-    function_args.push_back(
-        llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(d->ctx_)));
+    auto *ptr_ty = llvm::PointerType::getUnqual(d->ctx_);
+    function_args.push_back(llvm::ConstantPointerNull::get(ptr_ty));
 
     auto *call = llvm::CallInst::Create(
         get_or_insert_function(
             d->module_, "add_match_function",
             llvm::FunctionType::get(
-                llvm::Type::getVoidTy(d->ctx_),
-                {llvm::PointerType::getUnqual(d->ctx_),
-                 llvm::PointerType::getUnqual(d->ctx_),
-                 llvm::PointerType::getUnqual(d->ctx_)},
+                llvm::Type::getVoidTy(d->ctx_), {ptr_ty, ptr_ty, ptr_ty},
                 true)),
         function_args, "", d->current_block_);
     set_debug_loc(call);
@@ -979,6 +976,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
     unsigned ordinal, llvm::Module *module, kore_definition *definition,
     llvm::BasicBlock *block, llvm::BasicBlock *stuck,
     std::vector<llvm::Value *> args, std::vector<value_type> const &types) {
+  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
   auto *finished = get_or_insert_function(
       module, "finished_rewriting",
       llvm::FunctionType::get(
@@ -1012,7 +1010,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
     case sort_category::List:
     case sort_category::Set:
       nroots++;
-      ptr_types.push_back(llvm::PointerType::getUnqual(module->getContext()));
+      ptr_types.push_back(ptr_ty);
       roots.push_back(args[i]);
       break;
     case sort_category::Int:
@@ -1032,8 +1030,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
     }
     i++;
   }
-  auto *root_ty = llvm::ArrayType::get(
-      llvm::PointerType::getUnqual(module->getContext()), 256);
+  auto *root_ty = llvm::ArrayType::get(ptr_ty, 256);
   auto *arr = module->getOrInsertGlobal("gc_roots", root_ty);
   std::vector<std::pair<llvm::Value *, llvm::Type *>> root_ptrs;
 
@@ -1081,13 +1078,12 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(layout_arr);
   }
-  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
   auto *kore_collect = get_or_insert_function(
       module, "kore_collect",
       llvm::FunctionType::get(
           llvm::Type::getVoidTy(module->getContext()),
           {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptr_ty,
-           llvm::PointerType::getUnqual(module->getContext())},
+           ptr_ty},
           false));
   auto *call = llvm::CallInst::Create(
       kore_collect,
@@ -1268,8 +1264,9 @@ void make_match_reason_function(
       = llvm::BasicBlock::Create(module->getContext(), "pre_stuck", match_func);
   llvm::BasicBlock *fail
       = llvm::BasicBlock::Create(module->getContext(), "fail", match_func);
-  llvm::PHINode *fail_subject = llvm::PHINode::Create(
-      llvm::PointerType::getUnqual(module->getContext()), 0, "subject", fail);
+  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
+  llvm::PHINode *fail_subject
+      = llvm::PHINode::Create(ptr_ty, 0, "subject", fail);
 
   // The pointer types created here for the failure pattern and sort need to be
   // given an explicit element type on LLVM 15 (LLVM_VERSION_MAJOR <= 15). This
@@ -1278,10 +1275,9 @@ void make_match_reason_function(
   //
   // In newer versions, the string constants also get type `ptr` and these
   // explicit element types become no-ops that we can remove.
-  llvm::PHINode *fail_pattern = llvm::PHINode::Create(
-      llvm::PointerType::getUnqual(module->getContext()), 0, "pattern", fail);
-  llvm::PHINode *fail_sort = llvm::PHINode::Create(
-      llvm::PointerType::getUnqual(module->getContext()), 0, "sort", fail);
+  llvm::PHINode *fail_pattern
+      = llvm::PHINode::Create(ptr_ty, 0, "pattern", fail);
+  llvm::PHINode *fail_sort = llvm::PHINode::Create(ptr_ty, 0, "sort", fail);
 
   auto *call = llvm::CallInst::Create(
       get_or_insert_function(

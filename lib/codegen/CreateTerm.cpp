@@ -334,6 +334,7 @@ std::string escape(std::string const &str) {
 llvm::Value *create_term::create_hook(
     kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
     std::string const &location_stack) {
+  auto *ptr_ty = llvm::PointerType::getUnqual(ctx_);
   assert(hook_att->get_arguments().size() == 1);
   auto *str_pattern
       = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
@@ -507,9 +508,8 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         get_or_insert_function(
             module_, "hook_MINT_import",
-            getvalue_type({sort_category::Int, 0}, module_),
-            llvm::PointerType::getUnqual(ctx_), llvm::Type::getInt64Ty(ctx_),
-            llvm::Type::getInt1Ty(ctx_)),
+            getvalue_type({sort_category::Int, 0}, module_), ptr_ty,
+            llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getFalse(ctx_)},
         "hook_MINT_uvalue", current_block_);
@@ -559,9 +559,8 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         get_or_insert_function(
             module_, "hook_MINT_import",
-            getvalue_type({sort_category::Int, 0}, module_),
-            llvm::PointerType::getUnqual(ctx_), llvm::Type::getInt64Ty(ctx_),
-            llvm::Type::getInt1Ty(ctx_)),
+            getvalue_type({sort_category::Int, 0}, module_), ptr_ty,
+            llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getTrue(ctx_)},
         "hook_MINT_svalue", current_block_);
@@ -576,7 +575,7 @@ llvm::Value *create_term::create_hook(
     auto *type = getvalue_type(cat, module_);
     llvm::Instruction *ptr = llvm::CallInst::Create(
         get_or_insert_function(
-            module_, "hook_MINT_export", llvm::PointerType::getUnqual(ctx_),
+            module_, "hook_MINT_export", ptr_ty,
             getvalue_type({sort_category::Int, 0}, module_),
             llvm::Type::getInt64Ty(ctx_)),
         {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits)},
@@ -1049,6 +1048,7 @@ bool make_function(
   std::vector<llvm::Type *> param_types;
   std::vector<std::string> param_names;
   std::vector<llvm::Metadata *> debug_args;
+  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
   for (auto &entry : vars) {
     auto *sort
         = dynamic_cast<kore_composite_sort *>(entry.second->get_sort().get());
@@ -1063,9 +1063,7 @@ bool make_function(
     case sort_category::Map:
     case sort_category::RangeMap:
     case sort_category::List:
-    case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(module->getContext());
-      break;
+    case sort_category::Set: param_type = ptr_ty; break;
     default: break;
     }
 
@@ -1079,9 +1077,7 @@ bool make_function(
   case sort_category::Map:
   case sort_category::RangeMap:
   case sort_category::List:
-  case sort_category::Set:
-    return_type = llvm::PointerType::getUnqual(module->getContext());
-    break;
+  case sort_category::Set: return_type = ptr_ty; break;
   default: break;
   }
   llvm::FunctionType *func_type
