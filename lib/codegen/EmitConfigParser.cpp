@@ -1313,8 +1313,13 @@ static void emit_return_sort_table(kore_definition *def, llvm::Module *mod) {
     auto *char_type = llvm::Type::getInt8Ty(ctx);
     auto *str_type = llvm::ArrayType::get(char_type, sort_str.size() + 1);
 
+    auto *str = llvm::ConstantDataArray::getString(ctx, sort_str, true);
     auto *sort_name
         = module->getOrInsertGlobal("sort_name_" + sort_str, str_type);
+    auto *global_var = llvm::cast<llvm::GlobalVariable>(sort_name);
+    if (!global_var->hasInitializer()) {
+      global_var->setInitializer(str);
+    }
 
     auto *i64_type = llvm::Type::getInt64Ty(ctx);
     auto *zero = llvm::ConstantInt::get(i64_type, 0);
