@@ -2,17 +2,16 @@ target datalayout = "@BACKEND_TARGET_DATALAYOUT@"
 target triple = "@BACKEND_TARGET_TRIPLE@"
 
 %blockheader = type { i64 }
-%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
+%floating = type { i64, { i64, i32, i64, ptr } } ; exp, mpfr_t
 
 ; helper function for float hooks
-define %floating* @move_float(%floating* %val) {
-  %loaded = load %floating, %floating* %val
-  %malloccall = tail call i8* @kore_alloc_floating(i64 0)
-  %ptr = bitcast i8* %malloccall to %floating*
-  store %floating %loaded, %floating* %ptr
-  ret %floating* %ptr
+define ptr @move_float(ptr %val) {
+  %loaded = load %floating, ptr %val
+  %malloccall = tail call ptr @kore_alloc_floating(i64 0)
+  store %floating %loaded, ptr %malloccall
+  ret ptr %malloccall
 
 }
 
-declare noalias i8* @kore_alloc_floating(i64)
+declare noalias ptr @kore_alloc_floating(i64)
 

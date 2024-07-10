@@ -230,9 +230,7 @@ public:
 
     return make_iterator_node::create(
         collection, type, collection + "_iter",
-        llvm::PointerType::getUnqual(
-            llvm::StructType::getTypeByName(mod_->getContext(), "iter")),
-        hook_name, child);
+        llvm::PointerType::getUnqual(mod_->getContext()), hook_name, child);
   }
 
   decision_node *iter_next(yaml_node_t *node) {
@@ -244,10 +242,8 @@ public:
     auto *child = (*this)(get(node, "next"));
 
     return iter_next_node::create(
-        iterator,
-        llvm::PointerType::getUnqual(
-            llvm::StructType::getTypeByName(mod_->getContext(), "iter")),
-        binding, type, function, child);
+        iterator, llvm::PointerType::getUnqual(mod_->getContext()), binding,
+        type, function, child);
   }
 
   decision_node *switch_case(kind kind, yaml_node_t *node) {
