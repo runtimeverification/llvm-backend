@@ -207,6 +207,9 @@ static void emit_data_for_symbol(
     if (is_eval && !is_func) {
       continue;
     }
+    if (is_eval && !symbol->get_sort()->is_concrete()) {
+      continue;
+    }
     auto *case_block
         = llvm::BasicBlock::Create(ctx, "tag" + std::to_string(tag), func);
     auto *branch = llvm::BranchInst::Create(merge_block, case_block);
