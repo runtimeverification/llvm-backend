@@ -16,7 +16,7 @@ void ringbuffer_put_eof(shm_ringbuffer_t &buf) {
   buf.eof = true;
 }
 
-bool ringbuffer_eof(const shm_ringbuffer_t &buf) {
+bool ringbuffer_eof(shm_ringbuffer_t const &buf) {
   // NOTE: for synchronization purposes, it is important that the buf.eof field
   // is checked first. Typically, the reader process will call this, so we want
   // to avoid a race where the writer updates buf.writer_pos after the reader
@@ -28,7 +28,7 @@ bool ringbuffer_eof(const shm_ringbuffer_t &buf) {
   return buf.eof && buf.write_pos == buf.read_pos;
 }
 
-void ringbuffer_put(shm_ringbuffer_t &buf, const uint8_t *data, size_t count) {
+void ringbuffer_put(shm_ringbuffer_t &buf, uint8_t const *data, size_t count) {
   assert(!buf.eof);
   assert(data);
 

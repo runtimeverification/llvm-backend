@@ -275,7 +275,10 @@ private:
 
 public:
   proof_trace_ringbuffer(shm_ringbuffer_t *buffer)
-      : shm_buffer_(buffer), peek_data_(), peek_eof_(false), read_eof_(false) { }
+      : shm_buffer_(buffer)
+      , peek_data_()
+      , peek_eof_(false)
+      , read_eof_(false) { }
 
   bool read(void *ptr, size_t len) override {
     uint8_t *data = (uint8_t *)ptr;
@@ -315,13 +318,9 @@ public:
     return word;
   }
 
-  bool read_uint32(uint32_t &i) override {
-    return read(&i, sizeof(i));
-  }
+  bool read_uint32(uint32_t &i) override { return read(&i, sizeof(i)); }
 
-  bool read_uint64(uint64_t &i) override {
-    return read(&i, sizeof(i));
-  }
+  bool read_uint64(uint64_t &i) override { return read(&i, sizeof(i)); }
 
   bool read_string(std::string &str) override {
     str.resize(0);

@@ -3,9 +3,9 @@
 
 #include <llvm/Support/CommandLine.h>
 
+#include <fcntl.h>
 #include <fstream>
 #include <string>
-#include <fcntl.h>
 #include <sys/mman.h>
 
 using namespace llvm;
@@ -40,12 +40,14 @@ cl::opt<bool> use_streaming_parser(
     llvm::cl::cat(kore_proof_trace_cat));
 
 cl::opt<bool> use_shared_memory(
-    "shared-memory",
-    cl::desc("Use shared memory parser to parse trace"),
+    "shared-memory", cl::desc("Use shared memory parser to parse trace"),
     cl::cat(kore_proof_trace_cat));
 
-#define errExit(msg) \
-  do { perror(msg); exit(EXIT_FAILURE); } while (0)
+#define errExit(msg)                                                           \
+  do {                                                                         \
+    perror(msg);                                                               \
+    exit(EXIT_FAILURE);                                                        \
+  } while (0)
 
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&kore_proof_trace_cat});
@@ -89,8 +91,8 @@ int main(int argc, char **argv) {
     }
 
     // Map the object into the caller's address space
-    shm_ringbuffer_t *shm_buffer =
-      (shm_ringbuffer_t *) mmap(nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    shm_ringbuffer_t *shm_buffer = (shm_ringbuffer_t *)mmap(
+        nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (shm_buffer == MAP_FAILED) {
       errExit("mmap");
     }

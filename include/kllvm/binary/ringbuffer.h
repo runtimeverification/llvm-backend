@@ -40,14 +40,15 @@ void ringbuffer_put_eof(shm_ringbuffer_t &buf);
 // Returns true when the ringbuffer is empty and the EOF has been written, and
 // false otherwise. As commented above, the ringbuffer is empty iff
 // read_pos == write_pos.
-bool ringbuffer_eof(const shm_ringbuffer_t &buf);
+bool ringbuffer_eof(shm_ringbuffer_t const &buf);
 
 // Add data to the ringbuffer. The behavior is undefined if the buffer does not
 // have enough remaining space to fit the data or if EOF has been written to the
 // ringbuffer. The behavior is also undefined if the data pointer passed to this
 // function does not point to a contiguous memory chunk of the corresponding
 // size.
-void ringbuffer_put(shm_ringbuffer_t &buf, const uint8_t *data, size_t count = 1);
+void ringbuffer_put(
+    shm_ringbuffer_t &buf, uint8_t const *data, size_t count = 1);
 
 // Get and remove data from the ringbuffer. The behavior is undefined if more
 // data is requested than it is currently available in the ringbuffer. The
