@@ -43,7 +43,7 @@ cl::opt<bool> use_shared_memory(
     "shared-memory", cl::desc("Use shared memory parser to parse trace"),
     cl::cat(kore_proof_trace_cat));
 
-#define errExit(msg)                                                           \
+#define ERR_EXIT(msg)                                                          \
   do {                                                                         \
     perror(msg);                                                               \
     exit(EXIT_FAILURE);                                                        \
@@ -83,18 +83,18 @@ int main(int argc, char **argv) {
     // Create shared memory object and set its size
     int fd = shm_open(input_filename.c_str(), O_CREAT | O_TRUNC | O_RDWR, 0600);
     if (fd == -1) {
-      errExit("shm_open");
+      ERR_EXIT("shm_open");
     }
     size_t shm_size = sizeof(shm_ringbuffer_t);
     if (ftruncate(fd, shm_size) == -1) {
-      errExit("ftruncate");
+      ERR_EXIT("ftruncate");
     }
 
     // Map the object into the caller's address space
-    shm_ringbuffer_t *shm_buffer = (shm_ringbuffer_t *)mmap(
+    auto *shm_buffer = (shm_ringbuffer_t *)mmap(
         nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (shm_buffer == MAP_FAILED) {
-      errExit("mmap");
+      ERR_EXIT("mmap");
     }
 
     // Initialize ringbuffer
@@ -102,10 +102,10 @@ int main(int argc, char **argv) {
 
     // Initialize semaphores
     if (sem_init(&shm_buffer->data_avail, 1, 0) == -1) {
-      errExit("sem_init-data_avail");
+      ERR_EXIT("sem_init-data_avail");
     }
-    if (sem_init(&shm_buffer->space_avail, 1, RINGBUFFER_CAPACITY) == -1) {
-      errExit("sem_init-space_avail");
+    if (sem_init(&shm_buffer->space_avail, 1, ringbuffer_capacity) == -1) {
+      ERR_EXIT("sem_init-space_avail");
     }
 
     // Do parsing

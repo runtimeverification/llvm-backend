@@ -33,21 +33,21 @@ void ringbuffer_put(shm_ringbuffer_t &buf, uint8_t const *data, size_t count) {
   assert(data);
 
   // check if we need to wrap to the start of the ringbuffer
-  size_t no_wrap_size = RINGBUFFER_SIZE - buf.write_pos;
+  size_t no_wrap_size = ringbuffer_size - buf.write_pos;
   size_t rest_count = count;
   if (count > no_wrap_size) {
     // if yes, do a first copy to reach the end of the ringbuffer and wrap to
     // start
-    memcpy(buf.buffer + buf.write_pos, data, no_wrap_size);
+    memcpy(buf.buffer.data() + buf.write_pos, data, no_wrap_size);
     buf.write_pos = 0;
     data += no_wrap_size;
     rest_count = count - no_wrap_size;
   }
 
   // copy the (rest of the) data
-  memcpy(buf.buffer + buf.write_pos, data, rest_count);
+  memcpy(buf.buffer.data() + buf.write_pos, data, rest_count);
   buf.write_pos += rest_count;
-  if (buf.write_pos == RINGBUFFER_SIZE) {
+  if (buf.write_pos == ringbuffer_size) {
     buf.write_pos = 0;
   }
 }
@@ -56,21 +56,21 @@ void ringbuffer_get(shm_ringbuffer_t &buf, uint8_t *data, size_t count) {
   assert(data);
 
   // check if we need to wrap to the start of the ringbuffer
-  size_t no_wrap_size = RINGBUFFER_SIZE - buf.read_pos;
+  size_t no_wrap_size = ringbuffer_size - buf.read_pos;
   size_t rest_count = count;
   if (count > no_wrap_size) {
     // if yes, do a first copy to reach the end of the ringbuffer and wrap to
     // start
-    memcpy(data, buf.buffer + buf.read_pos, no_wrap_size);
+    memcpy(data, buf.buffer.data() + buf.read_pos, no_wrap_size);
     buf.read_pos = 0;
     data += no_wrap_size;
     rest_count = count - no_wrap_size;
   }
 
   // copy the (rest of the) data
-  memcpy(data, buf.buffer + buf.read_pos, rest_count);
+  memcpy(data, buf.buffer.data() + buf.read_pos, rest_count);
   buf.read_pos += rest_count;
-  if (buf.read_pos == RINGBUFFER_SIZE) {
+  if (buf.read_pos == ringbuffer_size) {
     buf.read_pos = 0;
   }
 }

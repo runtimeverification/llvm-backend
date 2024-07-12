@@ -209,8 +209,8 @@ class proof_trace_ringbuffer : public proof_trace_buffer {
 private:
   shm_ringbuffer_t *shm_buffer_;
   std::deque<uint8_t> peek_data_;
-  bool peek_eof_;
-  bool read_eof_;
+  bool peek_eof_{false};
+  bool read_eof_{false};
 
   bool read(uint8_t *ptr, size_t len = 1) {
     for (size_t i = 0; i < len; i++) {
@@ -275,45 +275,40 @@ private:
 
 public:
   proof_trace_ringbuffer(shm_ringbuffer_t *buffer)
-      : shm_buffer_(buffer)
-      , peek_data_()
-      , peek_eof_(false)
-      , read_eof_(false) { }
+      : shm_buffer_(buffer) { }
 
   bool read(void *ptr, size_t len) override {
-    uint8_t *data = (uint8_t *)ptr;
+    auto *data = (uint8_t *)ptr;
     return read(data, len);
   }
 
   int read() override {
-    uint8_t c;
+    uint8_t c = 0;
     if (read(&c)) {
       return c;
-    } else {
-      return -1;
     }
+    return -1;
   }
 
   bool has_word() override {
-    uint64_t word;
-    uint8_t *data = (uint8_t *)&word;
+    uint64_t word = 0;
+    auto *data = (uint8_t *)&word;
     return peek(data, sizeof(word));
   }
 
   bool eof() override { return peek() == -1; }
 
   int peek() override {
-    uint8_t c;
+    uint8_t c = 0;
     if (peek(&c)) {
       return c;
-    } else {
-      return -1;
     }
+    return -1;
   }
 
   uint64_t peek_word() override {
-    uint64_t word;
-    uint8_t *data = (uint8_t *)&word;
+    uint64_t word = 0;
+    auto *data = (uint8_t *)&word;
     if (!peek(data, sizeof(word))) {
       assert(false);
     }

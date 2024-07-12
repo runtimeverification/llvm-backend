@@ -1,6 +1,7 @@
 #ifndef RINGBUFFER_H
 #define RINGBUFFER_H
 
+#include <array>
 #include <cstdint>
 #include <cstdlib>
 #include <semaphore.h>
@@ -15,11 +16,11 @@ namespace kllvm {
 // empty, we maintain the invariant that the capacity of the buffer is one byte
 // less than its size. This way, the buffer is empty iff read_pos == write_pos,
 // and it is full iff read_pos == (write_pos+1)%RINGBUFFER_SIZE.
-constexpr size_t RINGBUFFER_SIZE = 1024;
+constexpr size_t ringbuffer_size = 1024;
 
 // Ringbuffer capacity in bytes.
 // As commented above, the capacity is always equal to RINGBUFFER_SIZE-1.
-constexpr size_t RINGBUFFER_CAPACITY = RINGBUFFER_SIZE - 1;
+constexpr size_t ringbuffer_capacity = ringbuffer_size - 1;
 
 struct shm_ringbuffer_t {
   sem_t data_avail;
@@ -27,7 +28,7 @@ struct shm_ringbuffer_t {
   bool eof;
   size_t read_pos;
   size_t write_pos;
-  uint8_t buffer[RINGBUFFER_SIZE];
+  std::array<uint8_t, ringbuffer_size> buffer;
 };
 
 // Initialize the ringbuffer.
