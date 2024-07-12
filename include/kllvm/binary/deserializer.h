@@ -314,7 +314,9 @@ public:
   uint64_t peek_word() override {
     uint64_t word;
     uint8_t *data = (uint8_t *)&word;
-    assert(peek(data, sizeof(word)));
+    if (!peek(data, sizeof(word))) {
+      assert(false);
+    }
     return word;
   }
 
