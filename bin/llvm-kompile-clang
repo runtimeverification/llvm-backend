@@ -207,7 +207,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   start_whole_archive="-force_load"
   end_whole_archive=""
 
-  flags+=("-Wl,-flat_namespace" "-Wl,-undefined" "-Wl,dynamic_lookup")
+  flags+=("-Wl,-undefined" "-Wl,dynamic_lookup")
 else
   start_whole_archive="-Wl,--whole-archive"
   end_whole_archive="-Wl,--no-whole-archive"
