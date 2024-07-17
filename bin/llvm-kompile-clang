@@ -136,7 +136,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   flags=(
     "-L@BREW_PREFIX@/opt/libffi/lib"
     "-L@BREW_PREFIX@/lib"
-    "-L@LLVM_LIBRARY_DIR@"
     "-Wl,-u,_table_getArgumentSortsForTag"
     "-I" "@BREW_PREFIX@/include"
   )
@@ -156,6 +155,19 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   set_visibility_hidden="$LIBDIR/libSetVisibilityHidden.dylib"
 else
   set_visibility_hidden="$LIBDIR/libSetVisibilityHidden.so"
+fi
+
+# On macOS, we get libunwind supplied as part of the developer tools in the OS,
+# and so don't need to link it directly. If we instead try to explictly link
+# against the libunwind that's part of Homebrew-supplied LLVM, it's easy to end
+# up in a situation where exceptions thrown in a shared library are not
+# compatible with the unwinding machinery in the main application binary. This
+# then manifests as BAD_ACCESS errors (or similar) when an exception is thrown,
+# _even if the exception should in principle be caught_.
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  libunwind=""
+else
+  libunwind="-lunwind"
 fi
 
 # When building the Python AST module, there's no runtime and no main file, so
@@ -218,7 +230,7 @@ if [ "$main" = "static" ]; then
 elif [[ "$main" =~ "python" ]]; then
   # Don't link jemalloc when building a python library; it clashes with the
   # pymalloc implementation that Python expects you to use.
-  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-lunwind")
+  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "$libunwind")
   flags+=("-fPIC" "-shared" "-I${INCDIR}" "-fvisibility=hidden")
 
   read -r -a python_include_flags <<< "$("${python_cmd}" -m pybind11 --includes)"
@@ -240,11 +252,11 @@ elif [ "$main" = "c" ]; then
 
   # Avoid jemalloc for similar reasons as Python; we don't know who is loading
   # this library so don't want to impose it.
-  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-lunwind")
+  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "$libunwind")
   flags+=("-fPIC" "-shared" "$start_whole_archive" "$LIBDIR/libkllvmcruntime.a" "$end_whole_archive")
   clangpp_args+=("-o" "${output_file}")
 else
-  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc" "-lunwind")
+  all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "-ljemalloc" "$libunwind")
 fi
 
 if $link; then
