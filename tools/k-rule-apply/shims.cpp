@@ -1,27 +1,13 @@
+#include "shims.h"
+
 #include <kllvm/ast/AST.h>
-#include <kllvm/parser/KOREParser.h>
 
-#include <llvm/Support/CommandLine.h>
-
-#include <cstdlib>
 #include <dlfcn.h>
-#include <fstream>
 #include <iostream>
-#include <optional>
 
 #include "runtime/header.h"
 
-using namespace kllvm;
-
-extern "C" {
-void *construct_initial_configuration(kore_pattern const *);
-void reset_match_reason();
-match_log *getmatch_log();
-size_t getmatch_log_size();
-void print_match_result(
-    std::ostream &, match_log *, size_t, std::string const &);
-void init_static_objects();
-}
+namespace kllvm {
 
 void *
 construct_initial_configuration(kore_pattern const *pattern, void *handle) {
@@ -67,9 +53,8 @@ void *print_match_result(
   if (funcPtr == NULL) {
     return NULL;
   }
-  auto f = reinterpret_cast<
-      void *(*)(std::ostream &, match_log *, size_t, std::string const &)>(
-      funcPtr);
+  auto f = reinterpret_cast<void *(*)(std::ostream &, match_log *, size_t,
+                                      std::string const &)>(funcPtr);
   return f(os, log, logSize, dir);
 }
 
@@ -81,3 +66,5 @@ void *init_static_objects(void *handle) {
   auto f = reinterpret_cast<void *(*)()>(funcPtr);
   return f();
 }
+
+} // namespace kllvm

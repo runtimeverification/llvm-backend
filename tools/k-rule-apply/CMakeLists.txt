@@ -1,5 +1,6 @@
 kllvm_add_tool(k-rule-apply
   main.cpp
+  shims.cpp
 )
 
 target_link_libraries(k-rule-apply 

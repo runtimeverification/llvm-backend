@@ -1,4 +1,16 @@
-#include "auxiliar.h"
+#include "shims.h"
+
+#include <kllvm/parser/KOREParser.h>
+
+#include <llvm/Support/CommandLine.h>
+
+#include <cstdlib>
+#include <dlfcn.h>
+#include <fstream>
+#include <iostream>
+#include <optional>
+
+#include "runtime/header.h"
 
 using namespace llvm;
 using namespace kllvm;
