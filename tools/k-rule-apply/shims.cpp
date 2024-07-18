@@ -35,50 +35,51 @@ char *get_match_function_name(
 }
 
 void *reset_match_reason(void *handle) {
-  void *funcPtr = dlsym(handle, "reset_match_reason");
-  if (funcPtr == NULL) {
-    return NULL;
+  void *func_ptr = dlsym(handle, "reset_match_reason");
+  if (func_ptr == nullptr) {
+    return nullptr;
   }
-  auto f = reinterpret_cast<void *(*)()>(funcPtr);
+  auto f = reinterpret_cast<void *(*)()>(func_ptr);
   return f();
 }
 
 match_log *getmatch_log(void *handle) {
-  void *funcPtr = dlsym(handle, "getmatch_log");
-  if (funcPtr == NULL) {
-    return NULL;
+  void *func_ptr = dlsym(handle, "getmatch_log");
+  if (func_ptr == nullptr) {
+    return nullptr;
   }
-  auto f = reinterpret_cast<match_log *(*)()>(funcPtr);
+  auto f = reinterpret_cast<match_log *(*)()>(func_ptr);
   return f();
 }
 
 size_t getmatch_log_size(void *handle) {
-  void *funcPtr = dlsym(handle, "getmatch_log_size");
-  if (funcPtr == NULL) {
+  void *func_ptr = dlsym(handle, "getmatch_log_size");
+  if (func_ptr == nullptr) {
     return -1;
   }
-  auto f = reinterpret_cast<size_t (*)()>(funcPtr);
+  auto f = reinterpret_cast<size_t (*)()>(func_ptr);
   return f();
 }
 
 void *print_match_result(
-    std::ostream &os, match_log *log, size_t logSize, std::string const &dir,
+    std::ostream &os, match_log *log, size_t log_size, std::string const &dir,
     void *handle) {
-  void *funcPtr = dlsym(handle, "print_match_result");
-  if (funcPtr == NULL) {
-    return NULL;
+  void *func_ptr = dlsym(handle, "print_match_result");
+  if (func_ptr == nullptr) {
+    return nullptr;
   }
-  auto f = reinterpret_cast<void *(*)(std::ostream &, match_log *, size_t,
-                                      std::string const &)>(funcPtr);
-  return f(os, log, logSize, dir);
+  auto f = reinterpret_cast<
+      void *(*)(std::ostream &, match_log *, size_t, std::string const &)>(
+      func_ptr);
+  return f(os, log, log_size, dir);
 }
 
 void *init_static_objects(void *handle) {
-  void *funcPtr = dlsym(handle, "init_static_objects");
-  if (funcPtr == NULL) {
-    return NULL;
+  void *func_ptr = dlsym(handle, "init_static_objects");
+  if (func_ptr == nullptr) {
+    return nullptr;
   }
-  auto f = reinterpret_cast<void *(*)()>(funcPtr);
+  auto f = reinterpret_cast<void *(*)()>(func_ptr);
   return f();
 }
 

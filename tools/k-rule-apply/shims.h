@@ -23,7 +23,7 @@ match_log *getmatch_log(void *handle);
 size_t getmatch_log_size(void *handle);
 
 void *print_match_result(
-    std::ostream &os, match_log *log, size_t logSize, std::string const &dir,
+    std::ostream &os, match_log *log, size_t log_size, std::string const &dir,
     void *handle);
 
 void *init_static_objects(void *handle);

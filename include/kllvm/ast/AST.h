@@ -1034,7 +1034,8 @@ public:
   }
   kore_symbol *get_inj_symbol() { return inj_symbol_; }
 
-  std::vector<kore_composite_sort *> const &get_all_sorts() const {
+  [[nodiscard]] std::vector<kore_composite_sort *> const &
+  get_all_sorts() const {
     return all_sorts_;
   }
 };

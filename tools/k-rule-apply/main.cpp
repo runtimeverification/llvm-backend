@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  auto match_function_name = get_match_function_name(
+  auto *match_function_name = get_match_function_name(
       kompiled_dir + "/definition.kore", rule_label, handle);
   if (!match_function_name) {
     std::cerr << "Rule with label " << rule_label << " does not exist.\n";
