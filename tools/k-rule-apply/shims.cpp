@@ -25,6 +25,17 @@ block *parse_initial_configuration(std::string const &filename, void *handle) {
   return construct(parse_file(filename.c_str()));
 }
 
+char *get_match_function_name(
+    std::string const &definition, std::string const &label, void *handle) {
+  auto *get_name = reinterpret_cast<char *(*)(char const *, char const *)>(
+      dlsym(handle, "kore_match_function_name"));
+  if (!get_name) {
+    return nullptr;
+  }
+
+  return get_name(definition.c_str(), label.c_str());
+}
+
 void *reset_match_reason(void *handle) {
   void *funcPtr = dlsym(handle, "reset_match_reason");
   if (funcPtr == NULL) {

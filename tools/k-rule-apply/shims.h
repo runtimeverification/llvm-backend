@@ -13,6 +13,9 @@ class kore_pattern;
 
 block *parse_initial_configuration(std::string const &filename, void *handle);
 
+char *get_match_function_name(
+    std::string const &definition, std::string const &label, void *handle);
+
 void *reset_match_reason(void *handle);
 
 match_log *getmatch_log(void *handle);

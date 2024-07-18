@@ -32,37 +32,9 @@ cl::opt<std::string> kore_pattern_filename(
 cl::opt<std::string> shared_lib_path(
     cl::Positional, cl::desc("<path_to_shared_lib>"), cl::cat(k_rule_cat));
 
-std::optional<std::string> get_match_function_name(
-    std::string const &definition_path, std::string const &label) {
-  // Parse the definition.kore to get the AST.
-  parser::kore_parser parser(definition_path);
-  auto kore_ast = parser.definition();
-  kore_ast->preprocess();
-
-  // Iterate through axioms and return the one with the give rulen label if exits.
-  for (auto *axiom : kore_ast.get()->get_axioms()) {
-    // Check if the current axiom has the attribute label.
-    if (axiom->attributes().contains(attribute_set::key::Label)) {
-      // Compare the axiom's label with the given rule label.
-      if (label == axiom->attributes().get_string(attribute_set::key::Label)) {
-        return "intern_match_" + std::to_string(axiom->get_ordinal());
-      }
-    }
-  }
-
-  return std::nullopt;
-}
-
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&k_rule_cat});
   cl::ParseCommandLineOptions(argc, argv);
-
-  auto match_function_name
-      = get_match_function_name(kompiled_dir + "/definition.kore", rule_label);
-  if (!match_function_name) {
-    std::cerr << "Rule with label " << rule_label << " does not exist.\n";
-    return EXIT_FAILURE;
-  }
 
   // Open the shared library that contains the llvm match functions.
   auto *handle = dlopen(shared_lib_path.c_str(), RTLD_LAZY);
@@ -73,9 +45,16 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
+  auto match_function_name = get_match_function_name(
+      kompiled_dir + "/definition.kore", rule_label, handle);
+  if (!match_function_name) {
+    std::cerr << "Rule with label " << rule_label << " does not exist.\n";
+    return EXIT_FAILURE;
+  }
+
   // Get util function from the shared lib, cast it to its right type, and call
   // with its appropriate argument if any.
-  void *match_function_ptr = dlsym(handle, match_function_name->c_str());
+  void *match_function_ptr = dlsym(handle, match_function_name);
   if (match_function_ptr == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
