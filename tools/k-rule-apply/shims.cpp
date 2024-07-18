@@ -10,13 +10,13 @@
 namespace kllvm {
 
 block *parse_initial_configuration(std::string const &filename, void *handle) {
-  auto *parse_file = reinterpret_cast<void *(*)(char const *)>(
+  auto *parse_file = reinterpret_cast<kore_pattern *(*)(char const *)>(
       dlsym(handle, "kore_pattern_parse_file"));
   if (!parse_file) {
     return nullptr;
   }
 
-  auto *construct = reinterpret_cast<block *(*)(void *)>(
+  auto *construct = reinterpret_cast<block *(*)(kore_pattern *)>(
       dlsym(handle, "kore_pattern_construct"));
   if (!construct) {
     return nullptr;
