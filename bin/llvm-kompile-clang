@@ -233,6 +233,10 @@ elif [[ "$main" =~ "python" ]]; then
   all_libraries=("${libraries[@]}" "-lgmp" "-lgmpxx" "-lmpfr" "-lpthread" "-ldl" "-lffi" "$libunwind")
   flags+=("-fPIC" "-shared" "-I${INCDIR}" "-fvisibility=hidden")
 
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    flags+=("-Wl,-flat_namespace")
+  fi
+
   read -r -a python_include_flags <<< "$("${python_cmd}" -m pybind11 --includes)"
   flags+=("${python_include_flags[@]}")
 
