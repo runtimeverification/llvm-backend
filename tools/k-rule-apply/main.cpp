@@ -58,11 +58,6 @@ int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&k_rule_cat});
   cl::ParseCommandLineOptions(argc, argv);
 
-  // Parse the given KORE Pattern and get the block* to use as input for the
-  // match function.
-  parser::kore_parser parser(kore_pattern_filename.getValue());
-  auto initial_configuration = parser.pattern();
-
   auto match_function_name = get_match_function_name();
   if (!match_function_name.has_value()) {
     std::cerr << "Rule with label " << rule_label << " does not exist.\n";
@@ -92,8 +87,7 @@ int main(int argc, char **argv) {
 
   reset_match_reason(handle);
   init_static_objects(handle);
-  auto *b
-      = construct_initial_configuration(initial_configuration.get(), handle);
+  auto *b = parse_initial_configuration(kore_pattern_filename, handle);
   if (b == nullptr) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;

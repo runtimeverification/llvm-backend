@@ -9,14 +9,20 @@
 
 namespace kllvm {
 
-void *
-construct_initial_configuration(kore_pattern const *pattern, void *handle) {
-  void *funcPtr = dlsym(handle, "construct_initial_configuration");
-  if (funcPtr == NULL) {
-    return NULL;
+block *parse_initial_configuration(std::string const &filename, void *handle) {
+  auto *parse_file = reinterpret_cast<void *(*)(char const *)>(
+      dlsym(handle, "kore_pattern_parse_file"));
+  if (!parse_file) {
+    return nullptr;
   }
-  auto f = reinterpret_cast<void *(*)(kore_pattern const *)>(funcPtr);
-  return f(pattern);
+
+  auto *construct = reinterpret_cast<block *(*)(void *)>(
+      dlsym(handle, "kore_pattern_construct"));
+  if (!construct) {
+    return nullptr;
+  }
+
+  return construct(parse_file(filename.c_str()));
 }
 
 void *reset_match_reason(void *handle) {
