@@ -1,7 +1,5 @@
 #include "shims.h"
 
-#include <kllvm/ast/AST.h>
-
 #include <dlfcn.h>
 #include <iostream>
 

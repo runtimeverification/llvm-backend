@@ -1,7 +1,5 @@
 #include "shims.h"
 
-#include <kllvm/parser/KOREParser.h>
-
 #include <llvm/Support/CommandLine.h>
 
 #include <cstdlib>
