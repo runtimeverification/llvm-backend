@@ -54,27 +54,27 @@ int main(int argc, char **argv) {
 
   // Get util function from the shared lib, cast it to its right type, and call
   // with its appropriate argument if any.
-  void *match_function_ptr = dlsym(handle, match_function_name);
-  if (match_function_ptr == nullptr) {
+  auto *match_function
+      = reinterpret_cast<void (*)(block *)>(dlsym(handle, match_function_name));
+  if (!match_function) {
     std::cerr << "Error: " << dlerror() << "\n";
     dlclose(handle);
     return EXIT_FAILURE;
   }
 
-  // NOLINTNEXTLINE(*-reinterpret-cast)
-  auto match_function = reinterpret_cast<void (*)(block *)>(match_function_ptr);
-
-  reset_match_reason(handle);
   init_static_objects(handle);
+  reset_match_reason(handle);
+
   auto *b = parse_initial_configuration(kore_pattern_filename, handle);
-  if (b == nullptr) {
+  if (!b) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
 
-  match_function((block *)b);
+  match_function(b);
+
   auto *log = getmatch_log(handle);
-  if (log == nullptr) {
+  if (!log) {
     std::cerr << "Error: " << dlerror() << "\n";
     return EXIT_FAILURE;
   }
@@ -86,7 +86,8 @@ int main(int argc, char **argv) {
   }
 
   print_match_result(
-      std::cout, (match_log *)log, log_size, kompiled_dir, handle);
+      std::cout, reinterpret_cast<match_log *>(log), log_size, kompiled_dir,
+      handle);
 
   dlclose(handle);
   return 0;
