@@ -123,6 +123,7 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
 
   auto features_string = features.getString();
   auto options = TargetOptions{};
+  options.GuaranteedTailCallOpt = true;
 
 #if LLVM_VERSION_MAJOR >= 16
   std::optional<CodeModel::Model> model = std::nullopt;
