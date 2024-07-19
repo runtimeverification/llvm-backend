@@ -434,6 +434,17 @@ void kllvm_free_all_memory(void) {
 bool kllvm_mutable_bytes_enabled(void) {
   return hook_BYTES_mutableBytesEnabled();
 }
+
+/* Definitions */
+
+char *kore_match_function_name(char const *defn_path, char const *label) {
+  auto result = kllvm::bindings::get_match_function_name(defn_path, label);
+  if (!result) {
+    return nullptr;
+  }
+
+  return get_c_string(*result);
+}
 }
 
 namespace {

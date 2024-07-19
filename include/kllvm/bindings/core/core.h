@@ -4,6 +4,7 @@
 #include <kllvm/ast/AST.h>
 
 #include <memory>
+#include <optional>
 
 // These headers need to be included last because they pollute a number of macro
 // definitions into the global namespace.
@@ -40,6 +41,13 @@ bool is_sort_k(std::shared_ptr<kllvm::kore_sort> const &sort);
 
 std::shared_ptr<kore_pattern>
 evaluate_function(std::shared_ptr<kore_composite_pattern> const &term);
+
+/**
+ * Get the name of the LLVM function that attempts matching on the rule with
+ * this label by parsing a KORE definition and examining its axioms.
+ */
+std::optional<std::string> get_match_function_name(
+    std::string const &definition_path, std::string const &label);
 
 } // namespace kllvm::bindings
 

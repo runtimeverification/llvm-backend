@@ -1,4 +1,5 @@
 #include <kllvm/bindings/core/core.h>
+#include <kllvm/parser/KOREParser.h>
 
 using namespace kllvm;
 
@@ -114,6 +115,27 @@ bool is_sort_k(std::shared_ptr<kore_sort> const &sort) {
   }
 
   return false;
+}
+
+std::optional<std::string> get_match_function_name(
+    std::string const &definition_path, std::string const &label) {
+  // Parse the definition.kore to get the AST.
+  parser::kore_parser parser(definition_path);
+  auto kore_ast = parser.definition();
+  kore_ast->preprocess();
+
+  // Iterate through axioms and return the one with the give rulen label if exits.
+  for (auto *axiom : kore_ast.get()->get_axioms()) {
+    // Check if the current axiom has the attribute label.
+    if (axiom->attributes().contains(attribute_set::key::Label)) {
+      // Compare the axiom's label with the given rule label.
+      if (label == axiom->attributes().get_string(attribute_set::key::Label)) {
+        return "intern_match_" + std::to_string(axiom->get_ordinal());
+      }
+    }
+  }
+
+  return std::nullopt;
 }
 
 } // namespace kllvm::bindings
