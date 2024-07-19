@@ -40,7 +40,7 @@ stdenv.mkDerivation {
       --replace '"-liconv"' '"-L${libiconv}/lib" "-liconv"' \
       --replace '"-lncurses"' '"-L${ncurses}/lib" "-lncurses"' \
       --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
-      --replace '"-lunwind"' '"-L${libunwind}/lib" "-lunwind"' \
+      --replace '"$libunwind"' '"-L${libunwind}/lib" "-lunwind"' \
       --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
       --replace '"-L@LLVM_LIBRARY_DIR@"' ' ' \
       --replace '-L@BREW_PREFIX@/lib' '-L${libcxx}/lib' \
