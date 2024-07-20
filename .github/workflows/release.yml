@@ -78,12 +78,48 @@ jobs:
             --yes                                   \
             --cleanup-tag
             
+  cachix:
+    name: 'Publish to Cachix'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: [self-hosted, linux, normal]
+            os: ubuntu-24.04
+          - runner: MacM1
+            os: self-macos-12
+
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v4
+
+      - name: 'Install Nix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: cachix/install-nix-action@v22
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Install Cachix'
+        uses: cachix/cachix-action@v12
+        with:
+          name: k-framework
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          skipPush: true
+
+      - name: 'Push Flake to Cachix'
+        run: |
+          GC_DONT_GC=1 nix build --print-build-logs . --json \
+            | jq -r '.[].outputs | to_entries[].value' \
+            | cachix push k-framework
 
   release:
     name: 'Publish Release'
     runs-on: ubuntu-latest
     environment: production
-    needs: build-ubuntu-package
+    needs: [build-ubuntu-package, cachix]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v4
