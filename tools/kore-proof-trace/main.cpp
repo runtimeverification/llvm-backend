@@ -50,6 +50,7 @@ cl::opt<bool> use_shared_memory(
     exit(1);                                                                   \
   } while (0)
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&kore_proof_trace_cat});
   cl::ParseCommandLineOptions(argc, argv);
@@ -116,11 +117,13 @@ int main(int argc, char **argv) {
     sem_unlink(space_avail_sem_name.c_str());
 
     // Initialize semaphores
+    // NOLINTNEXTLINE(*-pro-type-vararg)
     sem_t *data_avail = sem_open(
         data_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0);
     if (data_avail == SEM_FAILED) {
       ERR_EXIT("sem_init data_avail reader");
     }
+    // NOLINTNEXTLINE(*-pro-type-vararg)
     sem_t *space_avail = sem_open(
         space_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR,
         ringbuffer_capacity);

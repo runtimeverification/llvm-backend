@@ -51,10 +51,12 @@ int main(int argc, char **argv) {
   std::string space_avail_sem_name = shm_filename + ".s";
 
   // Open existing semaphores
+  // NOLINTNEXTLINE(*-pro-type-vararg)
   sem_t *data_avail = sem_open(data_avail_sem_name.c_str(), 0);
   if (data_avail == SEM_FAILED) {
     ERR_EXIT("sem_init data_avail writer");
   }
+  // NOLINTNEXTLINE(*-pro-type-vararg)
   sem_t *space_avail = sem_open(space_avail_sem_name.c_str(), 0);
   if (space_avail == SEM_FAILED) {
     ERR_EXIT("sem_init space_avail writer");
