@@ -3,7 +3,7 @@ add_library(BindingsCore
 )
 
 target_link_libraries(BindingsCore
-  PUBLIC AST fmt::fmt-header-only
+  PUBLIC AST Parser fmt::fmt-header-only
 )
 
 install(
