@@ -25,7 +25,7 @@ cl::opt<std::string> shm_filename(
 #define ERR_EXIT(msg)                                                          \
   do {                                                                         \
     perror(msg);                                                               \
-    exit(EXIT_FAILURE);                                                        \
+    exit(1);                                                                   \
   } while (0)
 
 int main(int argc, char **argv) {
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   // Open existing shared memory object
   int fd = shm_open(shm_filename.c_str(), O_RDWR, 0);
   if (fd == -1) {
-    ERR_EXIT("shm_open");
+    ERR_EXIT("shm_open writer");
   }
 
   // Map the object into the caller's address space
@@ -43,7 +43,21 @@ int main(int argc, char **argv) {
   auto *shm_buffer = (shm_ringbuffer_t *)mmap(
       nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   if (shm_buffer == MAP_FAILED) {
-    ERR_EXIT("mmap");
+    ERR_EXIT("mmap writer");
+  }
+
+  // MacOS has deprecated unnamed semaphores, so we need to use named ones
+  std::string data_avail_sem_name = shm_filename + ".d";
+  std::string space_avail_sem_name = shm_filename + ".s";
+
+  // Open existing semaphores
+  sem_t *data_avail = sem_open(data_avail_sem_name.c_str(), 0);
+  if (data_avail == SEM_FAILED) {
+    ERR_EXIT("sem_init data_avail writer");
+  }
+  sem_t *space_avail = sem_open(space_avail_sem_name.c_str(), 0);
+  if (space_avail == SEM_FAILED) {
+    ERR_EXIT("sem_init space_avail writer");
   }
 
   // Copy the trace file into the shared memory object
@@ -54,11 +68,19 @@ int main(int argc, char **argv) {
     if (file.eof()) {
       break;
     }
-    sem_wait(&shm_buffer->space_avail);
+    sem_wait(space_avail);
     ringbuffer_put(*shm_buffer, (uint8_t *)&c);
-    sem_post(&shm_buffer->data_avail);
+    sem_post(data_avail);
   }
   ringbuffer_put_eof(*shm_buffer);
+
+  // Close semaphores
+  if (sem_close(data_avail) == -1) {
+    ERR_EXIT("sem_close data reader");
+  }
+  if (sem_close(space_avail) == -1) {
+    ERR_EXIT("sem_close space reader");
+  }
 
   // Exit
   return 0;

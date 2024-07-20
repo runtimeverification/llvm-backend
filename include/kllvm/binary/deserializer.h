@@ -208,6 +208,8 @@ public:
 class proof_trace_ringbuffer : public proof_trace_buffer {
 private:
   shm_ringbuffer_t *shm_buffer_;
+  sem_t *data_avail_;
+  sem_t *space_avail_;
   std::deque<uint8_t> peek_data_;
   bool peek_eof_{false};
   bool read_eof_{false};
@@ -229,7 +231,7 @@ private:
         return false;
       }
 
-      while (int wait_status = sem_trywait(&shm_buffer_->data_avail)) {
+      while (int wait_status = sem_trywait(data_avail_)) {
         assert(wait_status == -1 && errno == EAGAIN);
         if (ringbuffer_eof(*shm_buffer_)) {
           read_eof_ = true;
@@ -237,7 +239,7 @@ private:
         }
       }
       ringbuffer_get(*shm_buffer_, &ptr[i]);
-      sem_post(&shm_buffer_->space_avail);
+      sem_post(space_avail_);
     }
 
     return true;
@@ -258,7 +260,7 @@ private:
         return false;
       }
 
-      while (int wait_status = sem_trywait(&shm_buffer_->data_avail)) {
+      while (int wait_status = sem_trywait(data_avail_)) {
         assert(wait_status == -1 && errno == EAGAIN);
         if (ringbuffer_eof(*shm_buffer_)) {
           peek_eof_ = true;
@@ -266,7 +268,7 @@ private:
         }
       }
       ringbuffer_get(*shm_buffer_, &ptr[i]);
-      sem_post(&shm_buffer_->space_avail);
+      sem_post(space_avail_);
       peek_data_.push_back(ptr[i]);
     }
 
@@ -274,8 +276,11 @@ private:
   }
 
 public:
-  proof_trace_ringbuffer(shm_ringbuffer_t *buffer)
-      : shm_buffer_(buffer) { }
+  proof_trace_ringbuffer(
+      shm_ringbuffer_t *buffer, sem_t *data_avail, sem_t *space_avail)
+      : shm_buffer_(buffer)
+      , data_avail_(data_avail)
+      , space_avail_(space_avail) { }
 
   bool read(void *ptr, size_t len) override {
     auto *data = (uint8_t *)ptr;

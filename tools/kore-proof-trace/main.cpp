@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 using namespace llvm;
 using namespace kllvm;
@@ -46,7 +47,7 @@ cl::opt<bool> use_shared_memory(
 #define ERR_EXIT(msg)                                                          \
   do {                                                                         \
     perror(msg);                                                               \
-    exit(EXIT_FAILURE);                                                        \
+    exit(1);                                                                   \
   } while (0)
 
 int main(int argc, char **argv) {
@@ -80,39 +81,75 @@ int main(int argc, char **argv) {
       verbose_output, expand_terms_in_output, header, kore_def);
 
   if (use_shared_memory) {
-    // Create shared memory object and set its size
-    int fd = shm_open(input_filename.c_str(), O_CREAT | O_TRUNC | O_RDWR, 0600);
+    // Unlink any existing shared memory object with the same name
+    shm_unlink(input_filename.c_str());
+
+    // Open shared memory object
+    int fd = shm_open(
+        input_filename.c_str(), O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd == -1) {
-      ERR_EXIT("shm_open");
+      ERR_EXIT("shm_open reader");
     }
+
+    // Set the size of the shared memory object
     size_t shm_size = sizeof(shm_ringbuffer_t);
     if (ftruncate(fd, shm_size) == -1) {
-      ERR_EXIT("ftruncate");
+      ERR_EXIT("ftruncate reader");
     }
 
     // Map the object into the caller's address space
     auto *shm_buffer = (shm_ringbuffer_t *)mmap(
         nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (shm_buffer == MAP_FAILED) {
-      ERR_EXIT("mmap");
+      ERR_EXIT("mmap reader");
     }
 
     // Initialize ringbuffer
     ringbuffer_init(*shm_buffer);
 
+    // MacOS has deprecated unnamed semaphores, so we need to use named ones
+    std::string data_avail_sem_name = input_filename + ".d";
+    std::string space_avail_sem_name = input_filename + ".s";
+
+    // Unlink any existing semaphores with the same names
+    sem_unlink(data_avail_sem_name.c_str());
+    sem_unlink(space_avail_sem_name.c_str());
+
     // Initialize semaphores
-    if (sem_init(&shm_buffer->data_avail, 1, 0) == -1) {
-      ERR_EXIT("sem_init-data_avail");
+    sem_t *data_avail = sem_open(
+        data_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0);
+    if (data_avail == SEM_FAILED) {
+      ERR_EXIT("sem_init data_avail reader");
     }
-    if (sem_init(&shm_buffer->space_avail, 1, ringbuffer_capacity) == -1) {
-      ERR_EXIT("sem_init-space_avail");
+    sem_t *space_avail = sem_open(
+        space_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR,
+        ringbuffer_capacity);
+    if (space_avail == SEM_FAILED) {
+      ERR_EXIT("sem_init space_avail reader");
     }
 
     // Do parsing
-    auto trace = parser.parse_proof_trace_from_shmem(shm_buffer);
+    auto trace = parser.parse_proof_trace_from_shmem(
+        shm_buffer, data_avail, space_avail);
 
-    // Unlink the shared memory object
-    shm_unlink(input_filename.c_str());
+    // Close semaphores
+    if (sem_close(data_avail) == -1) {
+      ERR_EXIT("sem_close data reader");
+    }
+    if (sem_close(space_avail) == -1) {
+      ERR_EXIT("sem_close space reader");
+    }
+
+    // Unlink the shared memory object and semaphores
+    if (sem_unlink(data_avail_sem_name.c_str()) == -1) {
+      ERR_EXIT("sem_unlink data reader");
+    }
+    if (sem_unlink(space_avail_sem_name.c_str()) == -1) {
+      ERR_EXIT("sem_unlink space reader");
+    }
+    if (shm_unlink(input_filename.c_str()) == -1) {
+      ERR_EXIT("shm_unlink reader");
+    }
 
     // Exit
     if (trace.has_value()) {

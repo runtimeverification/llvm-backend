@@ -196,10 +196,11 @@ config.substitutions.extend([
 
     ('%check-dir-proof-out', one_line('''
         %kore-rich-header %s > %t.header.bin
+        count=0
         for out in %test-dir-out/*.proof.out.diff; do
             in=%test-dir-in/`basename $out .proof.out.diff`.in
             hint=%t.`basename $out .proof.out.diff`.hint
-            shmbuf=%test-shm-buffer.`basename $out .proof.out.diff`
+            shmbuf=%test-shm-buffer.$count
             rm -f $hint
             %t.interpreter $in -1 $hint --proof-output
             %kore-proof-trace --verbose --expand-terms %t.header.bin $hint | diff - $out
@@ -224,6 +225,7 @@ config.substitutions.extend([
                 echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
                 exit 1
             fi
+            count=$(expr $count + 1)
         done
     ''')),
 
@@ -245,7 +247,7 @@ config.substitutions.extend([
     ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
     ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename.proof.out.diff')),
     ('%test-proof-debug-diff-out', os.path.join('%output-dir', '%test-basename.proof.debug.out.diff')),
-    ('%test-shm-buffer', os.path.join('/', '%test-basename.shm.buffer')),
+    ('%test-shm-buffer', os.path.join('/', '%test-basename.b')),
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),

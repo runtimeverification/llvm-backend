@@ -23,8 +23,6 @@ constexpr size_t ringbuffer_size = 1024;
 constexpr size_t ringbuffer_capacity = ringbuffer_size - 1;
 
 struct shm_ringbuffer_t {
-  sem_t data_avail;
-  sem_t space_avail;
   bool eof;
   size_t read_pos;
   size_t write_pos;

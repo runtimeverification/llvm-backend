@@ -233,8 +233,9 @@ proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
 }
 
 std::optional<llvm_rewrite_trace>
-proof_trace_parser::parse_proof_trace_from_shmem(shm_ringbuffer_t *shm_buffer) {
-  proof_trace_ringbuffer buffer(shm_buffer);
+proof_trace_parser::parse_proof_trace_from_shmem(
+    shm_ringbuffer_t *shm_buffer, sem_t *data_avail, sem_t *space_avail) {
+  proof_trace_ringbuffer buffer(shm_buffer, data_avail, space_avail);
   llvm_rewrite_trace trace;
   bool result = parse_trace(buffer, trace);
 
