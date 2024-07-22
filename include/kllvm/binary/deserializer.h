@@ -207,7 +207,7 @@ public:
 
 class proof_trace_ringbuffer : public proof_trace_buffer {
 private:
-  shm_ringbuffer_t *shm_buffer_;
+  shm_ringbuffer *shm_buffer_;
   sem_t *data_avail_;
   sem_t *space_avail_;
   std::deque<uint8_t> peek_data_;
@@ -233,12 +233,12 @@ private:
 
       while (int wait_status = sem_trywait(data_avail_)) {
         assert(wait_status == -1 && errno == EAGAIN);
-        if (ringbuffer_eof(*shm_buffer_)) {
+        if (shm_buffer_->eof()) {
           read_eof_ = true;
           return false;
         }
       }
-      ringbuffer_get(*shm_buffer_, &ptr[i]);
+      shm_buffer_->get(&ptr[i]);
       sem_post(space_avail_);
     }
 
@@ -262,12 +262,12 @@ private:
 
       while (int wait_status = sem_trywait(data_avail_)) {
         assert(wait_status == -1 && errno == EAGAIN);
-        if (ringbuffer_eof(*shm_buffer_)) {
+        if (shm_buffer_->eof()) {
           peek_eof_ = true;
           return false;
         }
       }
-      ringbuffer_get(*shm_buffer_, &ptr[i]);
+      shm_buffer_->get(&ptr[i]);
       sem_post(space_avail_);
       peek_data_.push_back(ptr[i]);
     }
@@ -277,7 +277,7 @@ private:
 
 public:
   proof_trace_ringbuffer(
-      shm_ringbuffer_t *buffer, sem_t *data_avail, sem_t *space_avail)
+      shm_ringbuffer *buffer, sem_t *data_avail, sem_t *space_avail)
       : shm_buffer_(buffer)
       , data_avail_(data_avail)
       , space_avail_(space_avail) { }

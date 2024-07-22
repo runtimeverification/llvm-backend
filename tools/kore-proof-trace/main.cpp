@@ -93,20 +93,20 @@ int main(int argc, char **argv) {
     }
 
     // Set the size of the shared memory object
-    size_t shm_size = sizeof(shm_ringbuffer_t);
+    size_t shm_size = sizeof(shm_ringbuffer);
     if (ftruncate(fd, shm_size) == -1) {
       ERR_EXIT("ftruncate reader");
     }
 
     // Map the object into the caller's address space
-    auto *shm_buffer = (shm_ringbuffer_t *)mmap(
-        nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (shm_buffer == MAP_FAILED) {
+    void *shm_object
+        = mmap(nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (shm_object == MAP_FAILED) {
       ERR_EXIT("mmap reader");
     }
 
     // Initialize ringbuffer
-    ringbuffer_init(*shm_buffer);
+    auto *shm_buffer = new (shm_object) shm_ringbuffer;
 
     // MacOS has deprecated unnamed semaphores, so we need to use named ones
     std::string data_avail_sem_name = input_filename + ".d";
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     // NOLINTNEXTLINE(*-pro-type-vararg)
     sem_t *space_avail = sem_open(
         space_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR,
-        ringbuffer_capacity);
+        shm_ringbuffer::capacity);
     if (space_avail == SEM_FAILED) {
       ERR_EXIT("sem_init space_avail reader");
     }

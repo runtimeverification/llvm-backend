@@ -39,12 +39,15 @@ int main(int argc, char **argv) {
   }
 
   // Map the object into the caller's address space
-  size_t shm_size = sizeof(shm_ringbuffer_t);
-  auto *shm_buffer = (shm_ringbuffer_t *)mmap(
-      nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  if (shm_buffer == MAP_FAILED) {
+  size_t shm_size = sizeof(shm_ringbuffer);
+  void *shm_object
+      = mmap(nullptr, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  if (shm_object == MAP_FAILED) {
     ERR_EXIT("mmap writer");
   }
+
+  // Cast shared memory object to a shm_ringbuffer.
+  auto *shm_buffer = reinterpret_cast<shm_ringbuffer *>(shm_object);
 
   // MacOS has deprecated unnamed semaphores, so we need to use named ones
   std::string data_avail_sem_name = shm_filename + ".d";
@@ -71,10 +74,10 @@ int main(int argc, char **argv) {
       break;
     }
     sem_wait(space_avail);
-    ringbuffer_put(*shm_buffer, (uint8_t *)&c);
+    shm_buffer->put((uint8_t *)&c);
     sem_post(data_avail);
   }
-  ringbuffer_put_eof(*shm_buffer);
+  shm_buffer->put_eof();
 
   // Close semaphores
   if (sem_close(data_avail) == -1) {
