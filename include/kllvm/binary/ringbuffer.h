@@ -9,7 +9,7 @@
 namespace kllvm {
 
 // Simple ringbuffer struct, intended to live in shared memory and operated by a
-// reader and a writer prpocess.
+// reader and a writer process.
 
 // Ringbuffer size in bytes.
 // NOTE: In order to easily distinguish between when the buffer is full versus
