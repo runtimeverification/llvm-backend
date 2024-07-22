@@ -6,9 +6,15 @@
 namespace kllvm {
 
 shm_ringbuffer::shm_ringbuffer()
-    : eof_(false)
-    , read_pos_(0)
-    , write_pos_(0) { }
+    : buffer_() { }
+
+size_t shm_ringbuffer::data_size() const {
+  if (write_pos_ < read_pos_) {
+    return size - (read_pos_ - write_pos_);
+  }
+
+  return write_pos_ - read_pos_;
+}
 
 void shm_ringbuffer::put_eof() {
   assert(!eof_);

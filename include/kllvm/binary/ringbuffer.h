@@ -17,21 +17,24 @@ public:
   // NOTE: In order to easily distinguish between when the buffer is full versus
   // empty, we maintain the invariant that the capacity of the buffer is one byte
   // less than its size. This way, the buffer is empty iff read_pos == write_pos,
-  // and it is full iff read_pos == (write_pos+1)%RINGBUFFER_SIZE.
+  // and it is full iff read_pos == (write_pos+1)%size.
   static constexpr size_t size = 1024;
 
   // Ringbuffer capacity in bytes.
-  // As commented above, the capacity is always equal to RINGBUFFER_SIZE-1.
+  // As commented above, the capacity is always equal to size-1.
   static constexpr size_t capacity = size - 1;
 
 private:
-  bool eof_;
-  size_t read_pos_;
-  size_t write_pos_;
+  bool eof_{false};
+  size_t read_pos_{0};
+  size_t write_pos_{0};
   std::array<uint8_t, size> buffer_;
 
 public:
   shm_ringbuffer();
+
+  // Returns the current size of the data contained in the ringbuffer.
+  [[nodiscard]] size_t data_size() const;
 
   // Write EOF to the ring buffer. Further writes after this is called are
   // undefined behavior.
@@ -40,7 +43,7 @@ public:
   // Returns true when the ringbuffer is empty and the EOF has been written, and
   // false otherwise. As commented above, the ringbuffer is empty iff
   // read_pos == write_pos.
-  bool eof() const;
+  [[nodiscard]] bool eof() const;
 
   // Add data to the ringbuffer. The behavior is undefined if the buffer does not
   // have enough remaining space to fit the data or if EOF has been written to the
