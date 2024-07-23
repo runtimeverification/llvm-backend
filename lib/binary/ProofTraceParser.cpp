@@ -1,4 +1,5 @@
 #include <kllvm/binary/ProofTraceParser.h>
+#include <kllvm/binary/ringbuffer.h>
 
 #include <fmt/format.h>
 #include <fstream>
@@ -217,6 +218,24 @@ std::optional<llvm_rewrite_trace>
 proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
   std::ifstream file(filename, std::ios_base::binary);
   proof_trace_file_buffer buffer(std::move(file));
+  llvm_rewrite_trace trace;
+  bool result = parse_trace(buffer, trace);
+
+  if (!result || !buffer.eof()) {
+    return std::nullopt;
+  }
+
+  if (verbose_) {
+    trace.print(std::cout, expand_terms_);
+  }
+
+  return trace;
+}
+
+std::optional<llvm_rewrite_trace>
+proof_trace_parser::parse_proof_trace_from_shmem(
+    void *shm_object, sem_t *data_avail, sem_t *space_avail) {
+  proof_trace_ringbuffer buffer(shm_object, data_avail, space_avail);
   llvm_rewrite_trace trace;
   bool result = parse_trace(buffer, trace);
 
