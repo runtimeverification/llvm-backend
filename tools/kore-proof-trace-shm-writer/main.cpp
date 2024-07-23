@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
       break;
     }
     sem_wait(space_avail);
-    shm_buffer->put((uint8_t *)&c);
+    shm_buffer->put(reinterpret_cast<uint8_t *>(&c));
     sem_post(data_avail);
   }
   shm_buffer->put_eof();

@@ -283,7 +283,7 @@ public:
       , space_avail_(space_avail) { }
 
   bool read(void *ptr, size_t len) override {
-    auto *data = (uint8_t *)ptr;
+    auto *data = static_cast<uint8_t *>(ptr);
     return read(data, len);
   }
 
@@ -297,7 +297,7 @@ public:
 
   bool has_word() override {
     uint64_t word = 0;
-    auto *data = (uint8_t *)&word;
+    auto *data = reinterpret_cast<uint8_t *>(&word);
     return peek(data, sizeof(word));
   }
 
@@ -313,7 +313,7 @@ public:
 
   uint64_t peek_word() override {
     uint64_t word = 0;
-    auto *data = (uint8_t *)&word;
+    auto *data = reinterpret_cast<uint8_t *>(&word);
     if (!peek(data, sizeof(word))) {
       assert(false);
     }
