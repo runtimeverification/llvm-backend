@@ -284,7 +284,12 @@ public:
     new (shm_buffer_) shm_ringbuffer;
   }
 
-  ~proof_trace_ringbuffer() { shm_buffer_->~shm_ringbuffer(); }
+  ~proof_trace_ringbuffer() override { shm_buffer_->~shm_ringbuffer(); }
+
+  proof_trace_ringbuffer(proof_trace_ringbuffer const &) = delete;
+  proof_trace_ringbuffer(proof_trace_ringbuffer &&) = delete;
+  proof_trace_ringbuffer &operator=(proof_trace_ringbuffer const &) = delete;
+  proof_trace_ringbuffer &operator=(proof_trace_ringbuffer &&) = delete;
 
   bool read(void *ptr, size_t len) override {
     auto *data = static_cast<uint8_t *>(ptr);
