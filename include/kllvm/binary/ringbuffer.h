@@ -33,6 +33,8 @@ private:
 public:
   shm_ringbuffer();
 
+  ~shm_ringbuffer() = default;
+
   // Returns the current size of the data contained in the ringbuffer.
   [[nodiscard]] size_t data_size() const;
 

@@ -277,10 +277,14 @@ private:
 
 public:
   proof_trace_ringbuffer(
-      shm_ringbuffer *buffer, sem_t *data_avail, sem_t *space_avail)
-      : shm_buffer_(buffer)
+      void *shm_object, sem_t *data_avail, sem_t *space_avail)
+      : shm_buffer_(static_cast<shm_ringbuffer *>(shm_object))
       , data_avail_(data_avail)
-      , space_avail_(space_avail) { }
+      , space_avail_(space_avail) {
+    new (shm_buffer_) shm_ringbuffer;
+  }
+
+  ~proof_trace_ringbuffer() { shm_buffer_->~shm_ringbuffer(); }
 
   bool read(void *ptr, size_t len) override {
     auto *data = static_cast<uint8_t *>(ptr);

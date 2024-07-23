@@ -105,9 +105,6 @@ int main(int argc, char **argv) {
       ERR_EXIT("mmap reader");
     }
 
-    // Initialize ringbuffer
-    auto *shm_buffer = new (shm_object) shm_ringbuffer;
-
     // MacOS has deprecated unnamed semaphores, so we need to use named ones
     std::string data_avail_sem_name = input_filename + ".d";
     std::string space_avail_sem_name = input_filename + ".s";
@@ -133,7 +130,7 @@ int main(int argc, char **argv) {
 
     // Do parsing
     auto trace = parser.parse_proof_trace_from_shmem(
-        shm_buffer, data_avail, space_avail);
+        shm_object, data_avail, space_avail);
 
     // Close semaphores
     if (sem_close(data_avail) == -1) {
