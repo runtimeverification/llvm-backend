@@ -41,7 +41,6 @@ brew install  \
   git         \
   gmp         \
   jemalloc    \
-  libunwind   \
   libyaml     \
   llvm@15     \
   maven       \
