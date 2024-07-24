@@ -79,7 +79,7 @@ llvm::CallInst *proof_event::emit_write_uint64(
       func, {output_file, i64_value}, "", insert_at_end);
 }
 
-llvm::CallInst *proof_event::emit_bool_term(
+llvm::CallInst *proof_event::emit_write_bool(
     llvm::Value *output_file, llvm::Value *term,
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
@@ -372,7 +372,7 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
 
   emit_write_uint64(output_file, detail::word(0x33), true_block);
   emit_write_uint64(output_file, ordinal, true_block);
-  emit_bool_term(output_file, check_result, true_block);
+  emit_write_bool(output_file, check_result, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 
