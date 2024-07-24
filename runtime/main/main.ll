@@ -6,12 +6,13 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 declare ptr @parse_configuration(ptr)
 declare i64 @atol(ptr)
-declare ptr @fopen(ptr, ptr)
 
 declare ptr @take_steps(i64, ptr)
 declare void @finish_rewriting(ptr, i1) #0
 
 declare void @init_static_objects()
+
+declare void @init_outputs(ptr)
 
 declare void @print_proof_hint_header(ptr)
 
@@ -19,8 +20,7 @@ declare void @print_proof_hint_header(ptr)
 @binary_out.flag = private constant [16 x i8] c"--binary-output\00"
 @proof_out.flag = private constant [15 x i8] c"--proof-output\00"
 
-@output_file = external global ptr
-@a_str = private constant [2 x i8] c"a\00"
+@proof_writer = external global ptr
 @statistics = external global i1
 @binary_output = external global i1
 @proof_output = external global i1
@@ -89,17 +89,18 @@ entry:
   %depth = call i64 @atol(ptr %depth_str)
   %output_ptr = getelementptr inbounds ptr, ptr %argv, i64 3
   %output_str = load ptr, ptr %output_ptr
-  %output_file = call ptr @fopen(ptr %output_str, ptr getelementptr inbounds ([2 x i8], ptr @a_str, i64 0, i64 0))
-  store ptr %output_file, ptr @output_file
   
   call void @parse_flags(i32 %argc, ptr %argv)
 
   call void @init_static_objects()
 
+  call void @init_outputs(ptr %output_str)
+
   %proof_output = load i1, ptr @proof_output
   br i1 %proof_output, label %if, label %else
 if:
-  call void @print_proof_hint_header(ptr %output_file)
+  %proof_writer = load ptr, ptr @proof_writer
+  call void @print_proof_hint_header(ptr %proof_writer)
   br label %else
 else:
   %ret = call ptr @parse_configuration(ptr %filename)

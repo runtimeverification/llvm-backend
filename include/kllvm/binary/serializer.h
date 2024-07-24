@@ -141,6 +141,14 @@ void serializer::emit(T val) {
 
 void emit_kore_rich_header(std::ostream &os, kore_definition *definition);
 
+class proof_trace_writer {
+public:
+  FILE *file_;
+
+  proof_trace_writer(FILE *file)
+      : file_(file) { }
+};
+
 } // namespace kllvm
 
 #endif

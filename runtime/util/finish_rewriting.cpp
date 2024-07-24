@@ -7,6 +7,7 @@
 extern "C" {
 
 FILE *output_file = nullptr;
+kllvm::proof_trace_writer *proof_writer = nullptr;
 bool statistics = false;
 bool binary_output = false;
 bool proof_output = false;
@@ -17,6 +18,13 @@ extern bool proof_hint_instrumentation_slow;
 
 int32_t get_exit_code(block *);
 
+void init_outputs(char const *output_filename) {
+  output_file = fopen(output_filename, "a");
+  if (proof_output) {
+    proof_writer = new kllvm::proof_trace_writer(output_file);
+  }
+}
+
 [[noreturn]] void finish_rewriting(block *subject, bool error) {
   // This function is responsible for closing output_file when rewriting
   // finishes; because it can exit in a few different ways (exceptions,
@@ -24,6 +32,10 @@ int32_t get_exit_code(block *);
   // for us.
   [[maybe_unused]] auto closer
       = std::unique_ptr<FILE, decltype(&fclose)>(output_file, fclose);
+
+  // Similar for deletinging the proof_output_buffer data structure
+  [[maybe_unused]] auto deleter
+      = std::unique_ptr<kllvm::proof_trace_writer>(proof_writer);
 
   if (error && safe_partial) {
     throw std::runtime_error(
@@ -46,8 +58,8 @@ int32_t get_exit_code(block *);
       print_configuration(output_file, subject);
     }
   } else if (!error && !proof_hint_instrumentation_slow) {
-    write_uint64_to_file(output_file, 0xFFFFFFFFFFFFFFFF);
-    serialize_configuration_to_file_v2(output_file, subject);
+    write_uint64_to_proof_trace(proof_writer, 0xFFFFFFFFFFFFFFFF);
+    serialize_configuration_to_proof_writer(proof_writer, subject);
   }
 
   auto exit_code = error ? 113 : get_exit_code(subject);

@@ -22,6 +22,7 @@
 #include <immer/map.hpp>
 #include <immer/set.hpp>
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/serializer.h>
 #include <runtime/collections/rangemap.h>
 #include <unordered_set>
 
@@ -336,19 +337,27 @@ void serialize_configurations(
 void serialize_configuration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern);
-void serialize_configuration_v2(FILE *file, block *subject, uint32_t sort);
 void serialize_configuration_to_file(
     FILE *file, block *subject, bool emit_size, bool use_intern);
-void serialize_configuration_to_file_v2(FILE *file, block *subject);
-void write_uint64_to_file(FILE *file, uint64_t i);
-void write_bool_to_file(FILE *file, bool b);
-void write_string_to_file(FILE *file, char const *str);
 void serialize_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern,
     bool k_item_inj = false);
-void serialize_term_to_file_v2(FILE *file, void *subject, uint64_t, bool);
 void serialize_raw_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern);
+
+// The following functions are called by the generated code and runtime code to
+// ouput the proof trace data.
+void serialize_configuration_to_proof_trace(
+    kllvm::proof_trace_writer *proof_writer, block *subject, uint32_t sort);
+void serialize_configuration_to_proof_writer(
+    kllvm::proof_trace_writer *proof_writer, block *subject);
+void write_uint64_to_proof_trace(
+    kllvm::proof_trace_writer *proof_writer, uint64_t i);
+void write_bool_to_proof_trace(kllvm::proof_trace_writer *proof_writer, bool b);
+void write_string_to_proof_trace(
+    kllvm::proof_trace_writer *proof_writer, char const *str);
+void serialize_term_to_proof_trace(
+    kllvm::proof_trace_writer *proof_writer, void *subject, uint64_t, bool);
 
 // The following functions have to be generated at kompile time
 // and linked with the interpreter.
@@ -368,7 +377,8 @@ bool hook_STRING_eq(SortString, SortString);
 char const *get_symbol_name_for_tag(uint32_t tag);
 char const *get_return_sort_for_tag(uint32_t tag);
 char const **get_argument_sorts_for_tag(uint32_t tag);
-uint32_t *get_argument_sorts_for_tag_v2(uint32_t tag);
+uint32_t *
+get_argument_sorts_for_tag_with_proof_trace_serialization(uint32_t tag);
 char const *top_sort(void);
 
 bool symbol_is_instantiation(uint32_t tag);
@@ -391,17 +401,22 @@ using visitor = struct {
       writer *, rangemap *, char const *, char const *, char const *, void *);
 };
 
-using serialize_visitor = struct {
-  void (*visit_config)(FILE *, block *, uint32_t, bool);
-  void (*visit_map)(FILE *, map *, uint32_t, uint32_t, uint32_t);
-  void (*visit_list)(FILE *, list *, uint32_t, uint32_t, uint32_t);
-  void (*visit_set)(FILE *, set *, uint32_t, uint32_t, uint32_t);
-  void (*visit_int)(FILE *, mpz_t, uint32_t);
-  void (*visit_float)(FILE *, floating *, uint32_t);
-  void (*visit_bool)(FILE *, bool, uint32_t);
-  void (*visit_string_buffer)(FILE *, stringbuffer *, uint32_t);
-  void (*visit_m_int)(FILE *, size_t *, size_t, uint32_t);
-  void (*visit_range_map)(FILE *, rangemap *, uint32_t, uint32_t, uint32_t);
+using serialize_to_proof_trace_visitor = struct {
+  void (*visit_config)(kllvm::proof_trace_writer *, block *, uint32_t, bool);
+  void (*visit_map)(
+      kllvm::proof_trace_writer *, map *, uint32_t, uint32_t, uint32_t);
+  void (*visit_list)(
+      kllvm::proof_trace_writer *, list *, uint32_t, uint32_t, uint32_t);
+  void (*visit_set)(
+      kllvm::proof_trace_writer *, set *, uint32_t, uint32_t, uint32_t);
+  void (*visit_int)(kllvm::proof_trace_writer *, mpz_t, uint32_t);
+  void (*visit_float)(kllvm::proof_trace_writer *, floating *, uint32_t);
+  void (*visit_bool)(kllvm::proof_trace_writer *, bool, uint32_t);
+  void (*visit_string_buffer)(
+      kllvm::proof_trace_writer *, stringbuffer *, uint32_t);
+  void (*visit_m_int)(kllvm::proof_trace_writer *, size_t *, size_t, uint32_t);
+  void (*visit_range_map)(
+      kllvm::proof_trace_writer *, rangemap *, uint32_t, uint32_t, uint32_t);
 };
 
 void print_map(
@@ -414,8 +429,9 @@ void print_list(
     writer *, list *, char const *, char const *, char const *, void *);
 void visit_children(
     block *subject, writer *file, visitor *printer, void *state);
-void visit_children_for_serialize(
-    block *subject, FILE *file, serialize_visitor *printer);
+void visit_children_for_serialize_to_proof_trace(
+    block *subject, kllvm::proof_trace_writer *proof_writer,
+    serialize_to_proof_trace_visitor *printer);
 
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
