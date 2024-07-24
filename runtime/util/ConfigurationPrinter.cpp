@@ -321,9 +321,3 @@ void print_value_of_type(
     os << "Error: " << type << " not implemented!";
   }
 }
-
-void print_variable_to_file(FILE *file, char const *varname) {
-  fmt::print(file, "{}", varname);
-  char n = 0;
-  fwrite(&n, 1, 1, file);
-}

@@ -110,7 +110,7 @@ llvm::CallInst *proof_event::emit_write_string(
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
 
   auto *print
-      = get_or_insert_function(module_, "print_variable_to_file", func_ty);
+      = get_or_insert_function(module_, "write_string_to_file", func_ty);
 
   auto *varname = b.CreateGlobalStringPtr(str, "", 0, module_);
   return b.CreateCall(print, {output_file, varname});

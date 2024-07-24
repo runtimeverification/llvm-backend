@@ -641,6 +641,12 @@ void write_bool_to_file(FILE *file, bool b) {
   fwrite(&b, 1, 1, file);
 }
 
+void write_string_to_file(FILE *file, char const *str) {
+  fmt::print(file, "{}", str);
+  char n = 0;
+  fwrite(&n, 1, 1, file);
+}
+
 void serialize_term_to_file(
     FILE *file, void *subject, char const *sort, bool use_intern,
     bool k_item_inj) {
