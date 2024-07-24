@@ -75,15 +75,15 @@ bool hook_BYTES_mutableBytesEnabled();
 extern "C" {
 
 /*
- * These symbols may not have been compiled into the library (if
- * `--embed-kprint` was not passed), and so we need to give them a weak default
+ * These symbols may not have been compiled into the library (if `--embed FILE`
+ * was not passed appropriately), and so we need to give them a weak default
  * definition. If the embed flag was passed, the value of these symbols will be
  * given by the embedded data.
  */
 int kore_definition_syntax_len __attribute__((weak)) = -1;
-char kore_definition_syntax __attribute__((weak)) = -1;
+char kore_definition_syntax __attribute__((weak)) = 0;
 int kore_definition_macros_len __attribute__((weak)) = -1;
-char kore_definition_macros __attribute__((weak)) = -1;
+char kore_definition_macros __attribute__((weak)) = 0;
 
 /* Completed types */
 
@@ -475,8 +475,8 @@ kore_pattern *kore_pattern_new_token_internal(
 }
 
 std::optional<pretty_print_definition> get_print_data() {
-  if (kore_definition_macros_len == -1 || kore_definition_macros == -1
-      || kore_definition_syntax_len == -1 || kore_definition_syntax == -1) {
+  if (kore_definition_macros_len == -1 || kore_definition_macros == 0
+      || kore_definition_syntax_len == -1 || kore_definition_syntax == 0) {
     return std::nullopt;
   }
 
