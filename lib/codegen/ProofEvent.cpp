@@ -172,14 +172,14 @@ llvm::BasicBlock *proof_event::hook_event_pre(
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("hookpre", current_block);
 
-  emit_write_uint64(outputFile, detail::word(0xAA), true_block);
-  emit_write_string(outputFile, name, true_block);
+  emit_write_uint64(output_file, detail::word(0xAA), true_block);
+  emit_write_string(output_file, name, true_block);
   emit_write_string(
-      outputFile, ast_to_string(*pattern->get_constructor()), true_block);
-  emit_write_string(outputFile, location_stack, true_block);
+      output_file, ast_to_string(*pattern->get_constructor()), true_block);
+  emit_write_string(output_file, location_stack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -192,12 +192,12 @@ llvm::BasicBlock *proof_event::hook_event_post(
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("hookpost", current_block);
 
-  emit_write_uint64(outputFile, detail::word(0xBB), true_block);
+  emit_write_uint64(output_file, detail::word(0xBB), true_block);
 
-  emit_serialize_term(*sort, outputFile, val, true_block);
+  emit_serialize_term(*sort, output_file, val, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -218,10 +218,10 @@ llvm::BasicBlock *proof_event::argument(
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("eventarg", current_block);
 
-  emit_serialize_term(*sort, outputFile, val, true_block);
+  emit_serialize_term(*sort, output_file, val, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -240,12 +240,12 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("rewrite_pre", current_block);
 
-  emit_write_uint64(outputFile, detail::word(0x22), true_block);
-  emit_write_uint64(outputFile, axiom.get_ordinal(), true_block);
-  emit_write_uint64(outputFile, arity, true_block);
+  emit_write_uint64(output_file, detail::word(0x22), true_block);
+  emit_write_uint64(output_file, axiom.get_ordinal(), true_block);
+  emit_write_uint64(output_file, arity, true_block);
   for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
     auto key = entry->getKey();
     auto *val = entry->getValue();
@@ -253,8 +253,8 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
 
     auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->get_sort());
 
-    emit_write_string(outputFile, key.str(), true_block);
-    emit_serialize_term(*sort, outputFile, val, true_block);
+    emit_write_string(output_file, key.str(), true_block);
+    emit_serialize_term(*sort, output_file, val, true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -292,13 +292,13 @@ llvm::BasicBlock *proof_event::function_event_pre(
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("function_pre", current_block);
 
-  emit_write_uint64(outputFile, detail::word(0xDD), true_block);
+  emit_write_uint64(output_file, detail::word(0xDD), true_block);
   emit_write_string(
-      outputFile, ast_to_string(*pattern->get_constructor()), true_block);
-  emit_write_string(outputFile, location_stack, true_block);
+      output_file, ast_to_string(*pattern->get_constructor()), true_block);
+  emit_write_string(output_file, location_stack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -310,10 +310,10 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("function_post", current_block);
 
-  emit_write_uint64(outputFile, detail::word(0x11), true_block);
+  emit_write_uint64(output_file, detail::word(0x11), true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 
@@ -327,15 +327,15 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("side_condition_pre", current_block);
 
   size_t ordinal = axiom.get_ordinal();
   size_t arity = args.size();
 
-  emit_write_uint64(outputFile, detail::word(0xEE), true_block);
-  emit_write_uint64(outputFile, ordinal, true_block);
-  emit_write_uint64(outputFile, arity, true_block);
+  emit_write_uint64(output_file, detail::word(0xEE), true_block);
+  emit_write_uint64(output_file, ordinal, true_block);
+  emit_write_uint64(output_file, arity, true_block);
 
   kore_pattern *pattern = axiom.get_requires();
   std::map<std::string, kore_variable_pattern *> vars;
@@ -349,8 +349,8 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 
     auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->get_sort());
 
-    emit_write_string(outputFile, var_name, true_block);
-    emit_serialize_term(*sort, outputFile, val, true_block);
+    emit_write_string(output_file, var_name, true_block);
+    emit_serialize_term(*sort, output_file, val, true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -365,14 +365,14 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
     return current_block;
   }
 
-  auto [true_block, merge_block, outputFile]
+  auto [true_block, merge_block, output_file]
       = event_prelude("side_condition_post", current_block);
 
   size_t ordinal = axiom.get_ordinal();
 
-  emit_write_uint64(outputFile, detail::word(0x33), true_block);
-  emit_write_uint64(outputFile, ordinal, true_block);
-  emit_bool_term(outputFile, check_result, true_block);
+  emit_write_uint64(output_file, detail::word(0x33), true_block);
+  emit_write_uint64(output_file, ordinal, true_block);
+  emit_bool_term(output_file, check_result, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 

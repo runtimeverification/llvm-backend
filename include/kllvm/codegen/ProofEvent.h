@@ -44,7 +44,7 @@ private:
   event_prelude(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `term` to the specified `outputFile` as
+   * Emit a call that will serialize `term` to the specified `output_file` as
    * binary KORE. This function can be called on any term, but the sort of that
    * term must be known.
    */
@@ -53,7 +53,7 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `value` to the specified `outputFile`.
+   * Emit a call that will serialize `value` to the specified `output_file`.
    */
   llvm::CallInst *emit_write_uint64(
       llvm::Value *output_file, uint64_t value,
@@ -67,7 +67,7 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `str` to the specified `outputFile`.
+   * Emit a call that will serialize `str` to the specified `output_file`.
    */
   llvm::CallInst *emit_write_string(
       llvm::Value *output_file, std::string const &str,
