@@ -57,7 +57,7 @@ static std::string drop_back(std::string const &s, int n) {
 void serialize_configuration_internal(
     writer *file, block *subject, char const *sort, bool is_var, void *state);
 void serialize_configuration_v2_internal(
-    writer *file, block *subject, uint32_t sort, bool is_var);
+    FILE *file, block *subject, uint32_t sort, bool is_var);
 
 /**
  * Emit a symbol of the form ctor{...}(...); this should be preceded by the
@@ -78,9 +78,9 @@ const uint8_t COMPOSITE = 0x01;
 const uint8_t STRING = 0x00;
 const uint8_t NULL_BYTE = 0x00;
 
-static void emit_symbol_v2(writer *file, int32_t tag) {
-  sfwrite(&COMPOSITE, sizeof(COMPOSITE), 1, file);
-  sfwrite(&tag, sizeof(tag), 1, file);
+static void emit_symbol_v2(FILE *file, int32_t tag) {
+  fwrite(&COMPOSITE, sizeof(COMPOSITE), 1, file);
+  fwrite(&tag, sizeof(tag), 1, file);
 }
 
 /**
@@ -120,12 +120,12 @@ static void emit_token(
 }
 
 static void
-emit_token_v2(writer *file, uint32_t sort, char const *str, size_t len) {
+emit_token_v2(FILE *file, uint32_t sort, char const *str, size_t len) {
   emit_symbol_v2(file, sort);
-  sfwrite(&STRING, sizeof(STRING), 1, file);
-  sfwrite(&len, sizeof(len), 1, file);
-  sfwrite(str, 1, len, file);
-  sfwrite(&NULL_BYTE, sizeof(NULL_BYTE), 1, file);
+  fwrite(&STRING, sizeof(STRING), 1, file);
+  fwrite(&len, sizeof(len), 1, file);
+  fwrite(str, 1, len, file);
+  fwrite(&NULL_BYTE, sizeof(NULL_BYTE), 1, file);
 }
 
 void serialize_map(
@@ -156,7 +156,7 @@ void serialize_map(
 }
 
 void serialize_map_v2(
-    writer *file, map *map, uint32_t unit, uint32_t element, uint32_t concat) {
+    FILE *file, map *map, uint32_t unit, uint32_t element, uint32_t concat) {
   size_t size = map->size();
   if (size == 0) {
     emit_symbol_v2(file, unit);
@@ -212,7 +212,7 @@ void serialize_range_map(
 }
 
 void serialize_range_map_v2(
-    writer *file, rangemap *map, uint32_t unit, uint32_t element,
+    FILE *file, rangemap *map, uint32_t unit, uint32_t element,
     uint32_t concat) {
   size_t size = map->size();
   if (size == 0) {
@@ -267,7 +267,7 @@ void serialize_list(
 }
 
 void serialize_list_v2(
-    writer *file, list *list, uint32_t unit, uint32_t element,
+    FILE *file, list *list, uint32_t unit, uint32_t element,
     uint32_t concat) {
   size_t size = list->size();
   if (size == 0) {
@@ -312,7 +312,7 @@ void serialize_set(
 }
 
 void serialize_set_v2(
-    writer *file, set *set, uint32_t unit, uint32_t element, uint32_t concat) {
+    FILE *file, set *set, uint32_t unit, uint32_t element, uint32_t concat) {
   size_t size = set->size();
   if (size == 0) {
     emit_symbol_v2(file, unit);
@@ -338,7 +338,7 @@ void serialize_int(writer *file, mpz_t i, char const *sort, void *state) {
   emit_token(instance, sort, str.c_str());
 }
 
-void serialize_int_v2(writer *file, mpz_t i, uint32_t sort) {
+void serialize_int_v2(FILE *file, mpz_t i, uint32_t sort) {
   auto str = int_to_string(i);
   emit_token_v2(file, sort, str.data(), str.length());
 }
@@ -350,7 +350,7 @@ void serialize_float(writer *file, floating *f, char const *sort, void *state) {
   emit_token(instance, sort, str.c_str());
 }
 
-void serialize_float_v2(writer *file, floating *f, uint32_t sort) {
+void serialize_float_v2(FILE *file, floating *f, uint32_t sort) {
   auto str = float_to_string(f);
   emit_token_v2(file, sort, str.data(), str.length());
 }
@@ -362,7 +362,7 @@ void serialize_bool(writer *file, bool b, char const *sort, void *state) {
   emit_token(instance, sort, str);
 }
 
-void serialize_bool_v2(writer *file, bool b, uint32_t sort) {
+void serialize_bool_v2(FILE *file, bool b, uint32_t sort) {
   std::string str = b ? "true" : "false";
   emit_token_v2(file, sort, str.data(), str.length());
 }
@@ -374,7 +374,7 @@ void serialize_string_buffer(
   emit_token(instance, sort, b->contents->data, b->strlen);
 }
 
-void serialize_string_buffer_v2(writer *file, stringbuffer *b, uint32_t sort) {
+void serialize_string_buffer_v2(FILE *file, stringbuffer *b, uint32_t sort) {
   emit_token_v2(file, sort, b->contents->data, b->strlen);
 }
 
@@ -389,7 +389,7 @@ void serialize_m_int(
   emit_token(instance, sort, buffer.c_str());
 }
 
-void serialize_m_int_v2(writer *file, size_t *i, size_t bits, uint32_t sort) {
+void serialize_m_int_v2(FILE *file, size_t *i, size_t bits, uint32_t sort) {
   auto str = (i == nullptr) ? std::string("0")
                             : int_to_string(hook_MINT_import(i, bits, false));
 
@@ -520,7 +520,7 @@ void serialize_configuration_internal(
 }
 
 void serialize_configuration_v2_internal(
-    writer *file, block *subject, uint32_t sort, bool is_var) {
+    FILE *file, block *subject, uint32_t sort, bool is_var) {
   if (is_var) {
     throw std::invalid_argument("does not support bound variables yet");
   }
@@ -608,8 +608,7 @@ void serialize_configuration_to_file_v2(FILE *file, block *subject) {
 
 void serialize_configuration_v2(FILE *file, block *subject, uint32_t sort) {
   fputs("\x7FKR2", file);
-  writer w = {file, nullptr};
-  serialize_configuration_v2_internal(&w, subject, sort, false);
+  serialize_configuration_v2_internal(file, subject, sort, false);
 }
 
 void serialize_configuration(
@@ -673,7 +672,6 @@ void serialize_term_to_file_v2(
   term->h = header_val;
   store_symbol_children(term, &arg);
   fputs("\x7FKR2", file);
-  writer w = {file, nullptr};
 
   serialize_visitor callbacks
       = {serialize_configuration_v2_internal,
@@ -687,7 +685,7 @@ void serialize_term_to_file_v2(
          serialize_m_int_v2,
          serialize_range_map_v2};
 
-  visit_children_for_serialize(term, &w, &callbacks);
+  visit_children_for_serialize(term, file, &callbacks);
 }
 
 void serialize_raw_term_to_file(
