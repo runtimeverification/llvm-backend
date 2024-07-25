@@ -81,8 +81,8 @@ const uint8_t NULL_BYTE = 0x00;
 
 static void
 emit_symbol_to_proof_trace(proof_trace_writer *proof_writer, int32_t tag) {
-  fwrite(&COMPOSITE, sizeof(COMPOSITE), 1, proof_writer->file_);
-  fwrite(&tag, sizeof(tag), 1, proof_writer->file_);
+  proof_writer->write(&COMPOSITE, sizeof(COMPOSITE));
+  proof_writer->write(&tag, sizeof(tag));
 }
 
 /**
@@ -125,10 +125,10 @@ static void emit_token_to_proof_trace(
     proof_trace_writer *proof_writer, uint32_t sort, char const *str,
     size_t len) {
   emit_symbol_to_proof_trace(proof_writer, sort);
-  fwrite(&STRING, sizeof(STRING), 1, proof_writer->file_);
-  fwrite(&len, sizeof(len), 1, proof_writer->file_);
-  fwrite(str, 1, len, proof_writer->file_);
-  fwrite(&NULL_BYTE, sizeof(NULL_BYTE), 1, proof_writer->file_);
+  proof_writer->write(&STRING, sizeof(STRING));
+  proof_writer->write(&len, sizeof(len));
+  proof_writer->write_string(str, len);
+  proof_writer->write(&NULL_BYTE, sizeof(NULL_BYTE));
 }
 
 void serialize_map(
@@ -629,7 +629,7 @@ void serialize_configuration_to_proof_writer(
 
 void serialize_configuration_to_proof_trace(
     proof_trace_writer *proof_writer, block *subject, uint32_t sort) {
-  fputs("\x7FKR2", proof_writer->file_);
+  proof_writer->write_string("\x7FKR2");
   serialize_configuration_to_proof_trace_internal(
       proof_writer, subject, sort, false);
 }
@@ -656,18 +656,16 @@ void serialize_configuration(
 }
 
 void write_uint64_to_proof_trace(proof_trace_writer *proof_writer, uint64_t i) {
-  fwrite(&i, 8, 1, proof_writer->file_);
+  proof_writer->write_uint64(i);
 }
 
 void write_bool_to_proof_trace(proof_trace_writer *proof_writer, bool b) {
-  fwrite(&b, 1, 1, proof_writer->file_);
+  proof_writer->write_bool(b);
 }
 
 void write_string_to_proof_trace(
     proof_trace_writer *proof_writer, char const *str) {
-  fmt::print(proof_writer->file_, "{}", str);
-  char n = 0;
-  fwrite(&n, 1, 1, proof_writer->file_);
+  proof_writer->write_c_string(str);
 }
 
 void serialize_term_to_file(
@@ -696,7 +694,7 @@ void serialize_term_to_proof_trace(
   auto *term = (block *)kore_alloc(size_hdr(block_header));
   term->h = header_val;
   store_symbol_children(term, &arg);
-  fputs("\x7FKR2", proof_writer->file_);
+  proof_writer->write_string("\x7FKR2");
 
   serialize_to_proof_trace_visitor callbacks
       = {serialize_configuration_to_proof_trace_internal,

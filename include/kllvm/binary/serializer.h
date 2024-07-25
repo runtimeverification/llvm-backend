@@ -143,10 +143,30 @@ void emit_kore_rich_header(std::ostream &os, kore_definition *definition);
 
 class proof_trace_writer {
 public:
+  virtual ~proof_trace_writer() = default;
+  virtual void write(void const *ptr, size_t len) = 0;
+  virtual void write_string(char const *str, size_t len) = 0;
+  virtual void write_string(char const *str) = 0;
+  void write_bool(bool b) { write(&b, sizeof(bool)); }
+  void write_uint32(uint32_t i) { write(&i, sizeof(uint32_t)); }
+  void write_uint64(uint64_t i) { write(&i, sizeof(uint64_t)); }
+  void write_c_string(char const *str) {
+    write_string(str);
+    char n = 0;
+    write(&n, 1);
+  }
+};
+
+class proof_trace_file_writer : public proof_trace_writer {
+private:
   FILE *file_;
 
-  proof_trace_writer(FILE *file)
+public:
+  proof_trace_file_writer(FILE *file)
       : file_(file) { }
+  void write(void const *ptr, size_t len) override;
+  void write_string(char const *str, size_t len) override;
+  void write_string(char const *str) override;
 };
 
 } // namespace kllvm

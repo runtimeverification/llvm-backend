@@ -21,7 +21,7 @@ int32_t get_exit_code(block *);
 void init_outputs(char const *output_filename) {
   output_file = fopen(output_filename, "a");
   if (proof_output) {
-    proof_writer = new kllvm::proof_trace_writer(output_file);
+    proof_writer = new kllvm::proof_trace_file_writer(output_file);
   }
 }
 

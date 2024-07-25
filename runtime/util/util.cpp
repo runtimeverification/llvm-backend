@@ -36,7 +36,7 @@ block *construct_raw_term(void *subject, char const *sort, bool raw_value) {
 
 void print_proof_hint_header(kllvm::proof_trace_writer *writer) {
   uint32_t version = 11;
-  fmt::print(writer->file_, "HINT");
-  fwrite(&version, sizeof(version), 1, writer->file_);
+  writer->write_string("HINT");
+  writer->write_uint32(version);
 }
 }
