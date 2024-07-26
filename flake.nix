@@ -111,7 +111,7 @@
             {
               name = "llvm-backend-${toString args.llvm-version}-${args.build-type}";
               value = {
-                inherit (pkgs) llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests;
+                inherit (pkgs) llvm-backend llvm-backend-matching llvm-kompile-testing integration-tests integration-test-shell;
               };
             }
         ));
@@ -120,6 +120,11 @@
           inherit (llvm-backend-18-FastBuild) llvm-backend llvm-backend-matching llvm-kompile-testing;
           default = llvm-backend-18-FastBuild.llvm-backend;
           llvm-backend-release = llvm-backend-18-Release.llvm-backend;
+
+          integration-test-shell-15 = llvm-backend-15-Debug.integration-test-shell;
+          integration-test-shell-16 = llvm-backend-16-Debug.integration-test-shell;
+          integration-test-shell-17 = llvm-backend-17-Debug.integration-test-shell;
+          integration-test-shell-18 = llvm-backend-18-Debug.integration-test-shell;
         };
 
         checks = listToChecks [
