@@ -2,4 +2,4 @@ k-llvm-backend (0.1.64) unstable; urgency=medium
 
   * Initial release
 
- -- Bruce Collie <bruce.collie@runtimeverification.com>  Fri, 26 Apr 2024 15:43:00 +0100
+ -- Guy Repta <guy.repta@runtimeverification.com>  Fri, 26 Apr 2024 15:43:00 +0100
