@@ -54,6 +54,13 @@ let
     patchShebangs "$out/bin/llvm-kompile-testing"
   '';
 
+  integration-test-env = ''
+    export PYTHON_INTERPRETER=${llvm-backend.python-interpreter}
+    export BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python
+    export INCLUDE_INSTALL_PATH=${llvm-backend}/include
+    export LIT_USE_NIX=1
+  '';
+
   integration-tests = prev.stdenv.mkDerivation {
     name = "llvm-backend-integration-tests";
     src = llvm-backend.src;
@@ -66,16 +73,16 @@ let
       llvm-backend # the system under test
     ];
     configurePhase = "true";
+
     buildPhase = ''
       runHook preBuild
 
-      PYTHON_INTERPRETER=${llvm-backend.python-interpreter} \
-      BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python \
-      INCLUDE_INSTALL_PATH=${llvm-backend}/include \
-        LIT_USE_NIX=1 lit -v test
+      ${integration-test-env}
+      lit -v test
 
       runHook postBuild
     '';
+
     installPhase = ''
       runHook preInstall
 
@@ -85,8 +92,13 @@ let
       runHook postInstall
     '';
   };
+
+  integration-test-shell = prev.mkShell {
+    inputsFrom = [ integration-tests ];
+    shellHook = integration-test-env;
+  };
 in {
   inherit kllvm llvm-backend llvm-backend-matching llvm-kompile-testing
-    integration-tests;
+    integration-tests integration-test-shell;
   inherit (prev) clang; # for compatibility
 }

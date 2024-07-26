@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: k-llvm-backend
-Upstream-Contact: Bruce Collie <bruce.collie@runtimeverification.com>
+Upstream-Contact: Guy Repta <guy.repta@runtimeverification.com>
 Source: https://github.com/runtimeverification/llvm-backend
 
 Files: *
