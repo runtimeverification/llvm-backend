@@ -77,7 +77,7 @@ let
     buildPhase = ''
       runHook preBuild
 
-      ${integration-test-env};
+      ${integration-test-env}
       lit -v test
 
       runHook postBuild
