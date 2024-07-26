@@ -661,7 +661,8 @@ void write_bool_to_proof_trace(void *proof_writer, bool b) {
 }
 
 void write_string_to_proof_trace(void *proof_writer, char const *str) {
-  static_cast<proof_trace_writer *>(proof_writer)->write_c_string(str);
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->write_null_terminated_string(str);
 }
 
 void serialize_term_to_file(

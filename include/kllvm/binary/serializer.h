@@ -145,16 +145,24 @@ class proof_trace_writer {
 public:
   virtual ~proof_trace_writer() = default;
   virtual void write(void const *ptr, size_t len) = 0;
+
   virtual void write_string(char const *str, size_t len) = 0;
+
+  // Note: This method will not write a 0 at the end of string.
+  // The passed string should be 0 terminated.
   virtual void write_string(char const *str) = 0;
-  void write_bool(bool b) { write(&b, sizeof(bool)); }
-  void write_uint32(uint32_t i) { write(&i, sizeof(uint32_t)); }
-  void write_uint64(uint64_t i) { write(&i, sizeof(uint64_t)); }
-  void write_c_string(char const *str) {
+
+  // Note: this method will write a 0 at the end of the string.
+  // The passed string should be 0 terminated.
+  void write_null_terminated_string(char const *str) {
     write_string(str);
     char n = 0;
     write(&n, 1);
   }
+
+  void write_bool(bool b) { write(&b, sizeof(bool)); }
+  void write_uint32(uint32_t i) { write(&i, sizeof(uint32_t)); }
+  void write_uint64(uint64_t i) { write(&i, sizeof(uint64_t)); }
 };
 
 class proof_trace_file_writer : public proof_trace_writer {
