@@ -2,6 +2,7 @@
 #define AST_SERIALIZER_H
 
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/ringbuffer.h>
 #include <kllvm/binary/version.h>
 
 #include <array>
@@ -160,6 +161,8 @@ public:
     write(&n, 1);
   }
 
+  virtual void write_eof() = 0;
+
   void write_bool(bool b) { write(&b, sizeof(bool)); }
   void write_uint32(uint32_t i) { write(&i, sizeof(uint32_t)); }
   void write_uint64(uint64_t i) { write(&i, sizeof(uint64_t)); }
@@ -172,9 +175,34 @@ private:
 public:
   proof_trace_file_writer(FILE *file)
       : file_(file) { }
+
   void write(void const *ptr, size_t len) override;
   void write_string(char const *str, size_t len) override;
   void write_string(char const *str) override;
+  void write_eof() override { }
+};
+
+class proof_trace_ringbuffer_writer : public proof_trace_writer {
+private:
+  shm_ringbuffer *shm_buffer_;
+  sem_t *data_avail_;
+  sem_t *space_avail_;
+
+  void write(uint8_t const *ptr, size_t len = 1);
+
+public:
+  proof_trace_ringbuffer_writer(
+      void *shm_object, sem_t *data_avail, sem_t *space_avail)
+      : shm_buffer_(reinterpret_cast<shm_ringbuffer *>(shm_object))
+      , data_avail_(data_avail)
+      , space_avail_(space_avail) { }
+
+  ~proof_trace_ringbuffer_writer() override { shm_buffer_->~shm_ringbuffer(); }
+
+  void write(void const *ptr, size_t len) override;
+  void write_string(char const *str, size_t len) override;
+  void write_string(char const *str) override;
+  void write_eof() override;
 };
 
 } // namespace kllvm
