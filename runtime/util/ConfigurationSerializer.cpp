@@ -57,8 +57,7 @@ static std::string drop_back(std::string const &s, int n) {
 void serialize_configuration_internal(
     writer *file, block *subject, char const *sort, bool is_var, void *state);
 void serialize_configuration_to_proof_trace_internal(
-    proof_trace_writer *proof_writer, block *subject, uint32_t sort,
-    bool is_var);
+    void *proof_writer, block *subject, uint32_t sort, bool is_var);
 
 /**
  * Emit a symbol of the form ctor{...}(...); this should be preceded by the
@@ -79,10 +78,10 @@ const uint8_t COMPOSITE = 0x01;
 const uint8_t STRING = 0x00;
 const uint8_t NULL_BYTE = 0x00;
 
-static void
-emit_symbol_to_proof_trace(proof_trace_writer *proof_writer, int32_t tag) {
-  proof_writer->write(&COMPOSITE, sizeof(COMPOSITE));
-  proof_writer->write(&tag, sizeof(tag));
+static void emit_symbol_to_proof_trace(void *proof_writer, int32_t tag) {
+  auto *w = static_cast<proof_trace_writer *>(proof_writer);
+  w->write(&COMPOSITE, sizeof(COMPOSITE));
+  w->write(&tag, sizeof(tag));
 }
 
 /**
@@ -122,13 +121,14 @@ static void emit_token(
 }
 
 static void emit_token_to_proof_trace(
-    proof_trace_writer *proof_writer, uint32_t sort, char const *str,
-    size_t len) {
+    void *proof_writer, uint32_t sort, char const *str, size_t len) {
   emit_symbol_to_proof_trace(proof_writer, sort);
-  proof_writer->write(&STRING, sizeof(STRING));
-  proof_writer->write(&len, sizeof(len));
-  proof_writer->write_string(str, len);
-  proof_writer->write(&NULL_BYTE, sizeof(NULL_BYTE));
+
+  auto *w = static_cast<proof_trace_writer *>(proof_writer);
+  w->write(&STRING, sizeof(STRING));
+  w->write(&len, sizeof(len));
+  w->write_string(str, len);
+  w->write(&NULL_BYTE, sizeof(NULL_BYTE));
 }
 
 void serialize_map(
@@ -159,7 +159,7 @@ void serialize_map(
 }
 
 void serialize_map_to_proof_trace(
-    proof_trace_writer *proof_writer, map *map, uint32_t unit, uint32_t element,
+    void *proof_writer, map *map, uint32_t unit, uint32_t element,
     uint32_t concat) {
   size_t size = map->size();
   if (size == 0) {
@@ -218,8 +218,8 @@ void serialize_range_map(
 }
 
 void serialize_range_map_to_proof_trace(
-    proof_trace_writer *proof_writer, rangemap *map, uint32_t unit,
-    uint32_t element, uint32_t concat) {
+    void *proof_writer, rangemap *map, uint32_t unit, uint32_t element,
+    uint32_t concat) {
   size_t size = map->size();
   if (size == 0) {
     emit_symbol_to_proof_trace(proof_writer, unit);
@@ -275,8 +275,8 @@ void serialize_list(
 }
 
 void serialize_list_to_proof_trace(
-    proof_trace_writer *proof_writer, list *list, uint32_t unit,
-    uint32_t element, uint32_t concat) {
+    void *proof_writer, list *list, uint32_t unit, uint32_t element,
+    uint32_t concat) {
   size_t size = list->size();
   if (size == 0) {
     emit_symbol_to_proof_trace(proof_writer, unit);
@@ -322,7 +322,7 @@ void serialize_set(
 }
 
 void serialize_set_to_proof_trace(
-    proof_trace_writer *proof_writer, set *set, uint32_t unit, uint32_t element,
+    void *proof_writer, set *set, uint32_t unit, uint32_t element,
     uint32_t concat) {
   size_t size = set->size();
   if (size == 0) {
@@ -351,8 +351,7 @@ void serialize_int(writer *file, mpz_t i, char const *sort, void *state) {
   emit_token(instance, sort, str.c_str());
 }
 
-void serialize_int_to_proof_trace(
-    proof_trace_writer *proof_writer, mpz_t i, uint32_t sort) {
+void serialize_int_to_proof_trace(void *proof_writer, mpz_t i, uint32_t sort) {
   auto str = int_to_string(i);
   emit_token_to_proof_trace(proof_writer, sort, str.data(), str.length());
 }
@@ -365,7 +364,7 @@ void serialize_float(writer *file, floating *f, char const *sort, void *state) {
 }
 
 void serialize_float_to_proof_trace(
-    proof_trace_writer *proof_writer, floating *f, uint32_t sort) {
+    void *proof_writer, floating *f, uint32_t sort) {
   auto str = float_to_string(f);
   emit_token_to_proof_trace(proof_writer, sort, str.data(), str.length());
 }
@@ -377,8 +376,7 @@ void serialize_bool(writer *file, bool b, char const *sort, void *state) {
   emit_token(instance, sort, str);
 }
 
-void serialize_bool_to_proof_trace(
-    proof_trace_writer *proof_writer, bool b, uint32_t sort) {
+void serialize_bool_to_proof_trace(void *proof_writer, bool b, uint32_t sort) {
   std::string str = b ? "true" : "false";
   emit_token_to_proof_trace(proof_writer, sort, str.data(), str.length());
 }
@@ -391,7 +389,7 @@ void serialize_string_buffer(
 }
 
 void serialize_string_buffer_to_proof_trace(
-    proof_trace_writer *proof_writer, stringbuffer *b, uint32_t sort) {
+    void *proof_writer, stringbuffer *b, uint32_t sort) {
   emit_token_to_proof_trace(proof_writer, sort, b->contents->data, b->strlen);
 }
 
@@ -407,7 +405,7 @@ void serialize_m_int(
 }
 
 void serialize_m_int_to_proof_trace(
-    proof_trace_writer *proof_writer, size_t *i, size_t bits, uint32_t sort) {
+    void *proof_writer, size_t *i, size_t bits, uint32_t sort) {
   auto str = (i == nullptr) ? std::string("0")
                             : int_to_string(hook_MINT_import(i, bits, false));
 
@@ -538,8 +536,7 @@ void serialize_configuration_internal(
 }
 
 void serialize_configuration_to_proof_trace_internal(
-    proof_trace_writer *proof_writer, block *subject, uint32_t sort,
-    bool is_var) {
+    void *proof_writer, block *subject, uint32_t sort, bool is_var) {
   if (is_var) {
     throw std::invalid_argument("does not support bound variables yet");
   }
@@ -623,13 +620,13 @@ void serialize_configuration_to_file(
 }
 
 void serialize_configuration_to_proof_writer(
-    proof_trace_writer *proof_writer, block *subject) {
+    void *proof_writer, block *subject) {
   serialize_configuration_to_proof_trace(proof_writer, subject, 0);
 }
 
 void serialize_configuration_to_proof_trace(
-    proof_trace_writer *proof_writer, block *subject, uint32_t sort) {
-  proof_writer->write_string("\x7FKR2");
+    void *proof_writer, block *subject, uint32_t sort) {
+  static_cast<proof_trace_writer *>(proof_writer)->write_string("\x7FKR2");
   serialize_configuration_to_proof_trace_internal(
       proof_writer, subject, sort, false);
 }
@@ -655,17 +652,16 @@ void serialize_configuration(
   *size_out = size;
 }
 
-void write_uint64_to_proof_trace(proof_trace_writer *proof_writer, uint64_t i) {
-  proof_writer->write_uint64(i);
+void write_uint64_to_proof_trace(void *proof_writer, uint64_t i) {
+  static_cast<proof_trace_writer *>(proof_writer)->write_uint64(i);
 }
 
-void write_bool_to_proof_trace(proof_trace_writer *proof_writer, bool b) {
-  proof_writer->write_bool(b);
+void write_bool_to_proof_trace(void *proof_writer, bool b) {
+  static_cast<proof_trace_writer *>(proof_writer)->write_bool(b);
 }
 
-void write_string_to_proof_trace(
-    proof_trace_writer *proof_writer, char const *str) {
-  proof_writer->write_c_string(str);
+void write_string_to_proof_trace(void *proof_writer, char const *str) {
+  static_cast<proof_trace_writer *>(proof_writer)->write_c_string(str);
 }
 
 void serialize_term_to_file(
@@ -685,8 +681,7 @@ void serialize_term_to_file(
 }
 
 void serialize_term_to_proof_trace(
-    proof_trace_writer *proof_writer, void *subject, uint64_t block_header,
-    bool indirect) {
+    void *proof_writer, void *subject, uint64_t block_header, bool indirect) {
   void *arg = indirect ? (void *)&subject : subject;
   struct blockheader header_val {
     block_header
@@ -694,7 +689,7 @@ void serialize_term_to_proof_trace(
   auto *term = (block *)kore_alloc(size_hdr(block_header));
   term->h = header_val;
   store_symbol_children(term, &arg);
-  proof_writer->write_string("\x7FKR2");
+  static_cast<proof_trace_writer *>(proof_writer)->write_string("\x7FKR2");
 
   serialize_to_proof_trace_visitor callbacks
       = {serialize_configuration_to_proof_trace_internal,
