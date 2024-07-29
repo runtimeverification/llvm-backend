@@ -1,8 +1,11 @@
 add_library(lto STATIC
   alloc.cpp
 )
+add_library(lto-static STATIC
+  alloc.cpp
+)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+target_compile_options(lto PRIVATE "-flto")
 
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/runtime/lto/alloc.cpp.o
 	COMMAND ${CMAKE_C_COMPILER_AR} x ${CMAKE_BINARY_DIR}/runtime/lto/liblto.a alloc.cpp.o
