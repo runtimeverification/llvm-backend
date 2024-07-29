@@ -791,6 +791,19 @@ void make_eval_or_anywhere_function(
       = llvm::FunctionType::get(return_type, args, false);
   std::string name = fmt::format("eval_{}", ast_to_string(*function, 0, false));
   llvm::Function *match_func = get_or_insert_function(module, name, func_type);
+  // there are a few functions that are given default implementations in
+  // llvm_header.inc. Previously these were implemented as weak function
+  // definitions, but now they live in the same translation unit, so resolving
+  // them via the linker is not possible. The purpose of these weak function
+  // definitions was to provide an implementation of some required
+  // functionality in the event that the K definition we are compiling does
+  // not provide the functionality itself. As such, in the case where we
+  // are actually generating the real body of the function, a previous, dummy
+  // body might already exist. We simply delete the body of the function here
+  // and start from scratch every time, in order to ensure that we always
+  // have one correct version of the function body after code generation
+  // finishes.
+  match_func->deleteBody();
   [[maybe_unused]] kore_symbol_declaration *symbol_decl
       = definition->get_symbol_declarations().at(function->get_name());
   init_debug_axiom(symbol_decl->attributes());
