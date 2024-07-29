@@ -194,20 +194,6 @@ if [ "$main" != "python_ast" ]; then
         -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$modasm"
       modopt="$modasm"
     fi
-    if $link; then
-      for file in "$LIBDIR"/llvm/*.ll; do
-        tmp="$tmpdir/$(basename "$file").o"
-        if $visibility_hidden; then
-          tmphidden="$tmpdir/$(basename "$file").hidden.bc"
-	  run @OPT@ "$file" -load-pass-plugin "$set_visibility_hidden" -set-visibility-hidden -o "$tmphidden"
-	  file="$tmphidden"
-        fi
-        run @LLC@ \
-          "$file" -mtriple=@BACKEND_TARGET_TRIPLE@ \
-          -filetype=obj "$llc_opt_flags" "${llc_flags[@]}" -o "$tmp"
-        files+=("$tmp")
-      done
-    fi
   fi
 
   if ! $link; then
