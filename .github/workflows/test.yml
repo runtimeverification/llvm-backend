@@ -32,14 +32,11 @@ jobs:
         uses: cachix/install-nix-action@v22
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v12
         with:
           name: k-framework
-          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
 
       - name: 'Build LLVM backend'
@@ -48,14 +45,11 @@ jobs:
       - name: 'Build pattern matching compiler'
         run: GC_DONT_GC=1 nix build --print-build-logs .#llvm-backend-matching
 
+      - name: 'Smoke test integration test shell'
+        run: GC_DONT_GC=1 nix develop --print-build-logs .#integration-test-shell-18 --command lit -v test/defn/imp.kore
+
       - name: 'Test LLVM backend'
         run: GC_DONT_GC=1 nix flake check --print-build-logs
-
-      - name: 'Push Flake to Cachix'
-        run: |
-          GC_DONT_GC=1 nix build --print-build-logs . --json \
-            | jq -r '.[].outputs | to_entries[].value' \
-            | cachix push k-framework
 
   build-from-source:
     name: 'Build LLVM backend from source'

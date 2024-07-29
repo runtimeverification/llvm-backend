@@ -69,6 +69,7 @@ if os.getenv('LIT_USE_NIX'):
 # use them cross-platform while retaining nice source code.
 def one_line(s):
     return 'set -e; ' + s.strip() \
+        .replace('&\n', '& ') \
         .replace('\n', ' ; ') \
         .replace('do ;', 'do') \
         .replace('then ;', 'then') \
@@ -166,6 +167,16 @@ config.substitutions.extend([
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
             exit 1
         fi
+        %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin %test-shm-buffer | diff - %test-proof-diff-out &
+        reader_pid="$!"
+        sleep 1
+        %kore-proof-trace-shm-writer %t.out.bin %test-shm-buffer
+        wait $reader_pid
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
+            exit 1
+        fi
     ''')),
 
     ('%check-proof-debug-out', one_line('''
@@ -185,9 +196,11 @@ config.substitutions.extend([
 
     ('%check-dir-proof-out', one_line('''
         %kore-rich-header %s > %t.header.bin
+        count=0
         for out in %test-dir-out/*.proof.out.diff; do
             in=%test-dir-in/`basename $out .proof.out.diff`.in
             hint=%t.`basename $out .proof.out.diff`.hint
+            shmbuf=%test-shm-buffer.$count
             rm -f $hint
             %t.interpreter $in -1 $hint --proof-output
             %kore-proof-trace --verbose --expand-terms %t.header.bin $hint | diff - $out
@@ -202,6 +215,17 @@ config.substitutions.extend([
                 echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
                 exit 1
             fi
+            %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin $shmbuf | diff - $out &
+            reader_pid="$!"
+            sleep 1
+            %kore-proof-trace-shm-writer $hint $shmbuf
+            wait $reader_pid
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
+                exit 1
+            fi
+            count=$(expr $count + 1)
         done
     ''')),
 
@@ -223,6 +247,7 @@ config.substitutions.extend([
     ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
     ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename.proof.out.diff')),
     ('%test-proof-debug-diff-out', os.path.join('%output-dir', '%test-basename.proof.debug.out.diff')),
+    ('%test-shm-buffer', os.path.join('/', '%test-basename.b')),
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),
@@ -230,6 +255,7 @@ config.substitutions.extend([
     ('%kore-convert', 'kore-convert'),
 
     ('%kore-proof-trace', 'kore-proof-trace'),
+    ('%kore-proof-trace-shm-writer', 'kore-proof-trace-shm-writer'),
     ('%kore-rich-header', 'kore-rich-header'),
 ])
 
