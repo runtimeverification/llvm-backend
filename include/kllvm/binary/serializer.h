@@ -199,6 +199,14 @@ public:
 
   ~proof_trace_ringbuffer_writer() override { shm_buffer_->~shm_ringbuffer(); }
 
+  proof_trace_ringbuffer_writer(proof_trace_ringbuffer_writer const &) = delete;
+  proof_trace_ringbuffer_writer(proof_trace_ringbuffer_writer &&) = delete;
+  proof_trace_ringbuffer_writer &
+  operator=(proof_trace_ringbuffer_writer const &)
+      = delete;
+  proof_trace_ringbuffer_writer &operator=(proof_trace_ringbuffer_writer &&)
+      = delete;
+
   void write(void const *ptr, size_t len) override;
   void write_string(char const *str, size_t len) override;
   void write_string(char const *str) override;

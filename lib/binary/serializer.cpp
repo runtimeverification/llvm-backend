@@ -231,17 +231,17 @@ void proof_trace_ringbuffer_writer::write(uint8_t const *ptr, size_t len) {
 }
 
 void proof_trace_ringbuffer_writer::write(void const *ptr, size_t len) {
-  auto *data = reinterpret_cast<uint8_t const *>(ptr);
+  auto const *data = reinterpret_cast<uint8_t const *>(ptr);
   write(data, len);
 }
 
 void proof_trace_ringbuffer_writer::write_string(char const *str, size_t len) {
-  auto *data = reinterpret_cast<uint8_t const *>(str);
+  auto const *data = reinterpret_cast<uint8_t const *>(str);
   write(data, len);
 }
 
 void proof_trace_ringbuffer_writer::write_string(char const *str) {
-  auto *data = reinterpret_cast<uint8_t const *>(str);
+  auto const *data = reinterpret_cast<uint8_t const *>(str);
   write(data, strlen(str));
 }
 
