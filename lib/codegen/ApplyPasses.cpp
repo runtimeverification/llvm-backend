@@ -2,7 +2,7 @@
 #include <kllvm/codegen/Options.h>
 #include <kllvm/codegen/SetVisibilityHidden.h>
 
-#include "alloc_cpp.h"
+#include "runtime/alloc_cpp.h"
 #include "runtime/header.h"
 
 #if LLVM_VERSION_MAJOR >= 17

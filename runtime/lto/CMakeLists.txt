@@ -17,11 +17,12 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/runtime/lto/alloc.cpp.o.ll
 	DEPENDS ${CMAKE_BINARY_DIR}/runtime/lto/alloc.cpp.o
 )
 
-add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/runtime/lto/alloc_cpp.h
-	COMMAND xxd -i alloc.cpp.o.ll alloc_cpp.h
+add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/runtime/lto/alloc_cpp.cpp
+	COMMAND xxd -i alloc.cpp.o.ll alloc_cpp.cpp
 	DEPENDS ${CMAKE_BINARY_DIR}/runtime/lto/alloc.cpp.o.ll
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/runtime/lto
 )
 
-add_custom_target(skeleton ALL
-	DEPENDS "${CMAKE_BINARY_DIR}/runtime/lto/alloc_cpp.h")
+add_library(alloc-cpp STATIC
+  ${CMAKE_BINARY_DIR}/runtime/lto/alloc_cpp.cpp
+)
