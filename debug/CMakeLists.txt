@@ -19,6 +19,6 @@ configure_file(
   @ONLY)
 
 configure_file(
-  ${CMAKE_SOURCE_DIR}/config/llvm_header.h
-  ${CMAKE_BINARY_DIR}/include/config/llvm_header.h
+  ${CMAKE_SOURCE_DIR}/config/llvm_header.inc
+  ${CMAKE_BINARY_DIR}/include/config/llvm_header.inc
   @ONLY)

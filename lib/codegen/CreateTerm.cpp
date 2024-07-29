@@ -28,7 +28,7 @@ using namespace fmt::literals;
 namespace {
 std::string llvm_header() {
   return
-#include "config/llvm_header.h"
+#include "config/llvm_header.inc"
       ;
 }
 } // namespace
