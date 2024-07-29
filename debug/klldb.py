@@ -141,7 +141,7 @@ class LogEntry:
         return self.exe_ctx.target.EvaluateExpression(ptr_exp)
 
     def get_match_function_args(self):
-        return target_call(self.exe_ctx, 'getMatchFnArgs', 'void **',
+        return target_call(self.exe_ctx, 'get_match_fn_args', 'void **',
                            ['MatchLog *'], [self.root])
 
     @property
@@ -190,7 +190,7 @@ class RuleMatcher:
         self.exe_ctx = exe_ctx
 
     def _reset_match_reason(self):
-        target_call(self.exe_ctx, 'resetMatchReason', 'void')
+        target_call(self.exe_ctx, 'reset_match_reason', 'void')
 
     def _try_match(self, rule_name, subject):
         expr = self.exe_ctx.target.EvaluateExpression(subject)
@@ -198,10 +198,10 @@ class RuleMatcher:
                     'void', ['block *'], [expr])
 
     def _get_match_log_size(self):
-        return target_call(self.exe_ctx, 'getMatchLogSize', 'size_t').data.uint64[0]
+        return target_call(self.exe_ctx, 'getmatch_log_size', 'size_t').data.uint64[0]
 
     def _get_match_log(self):
-        return target_call(self.exe_ctx, 'getMatchLog', 'MatchLog *')
+        return target_call(self.exe_ctx, 'getmatch_log', 'MatchLog *')
 
     def _type_to_sort(self, ty):
         return {
