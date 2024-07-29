@@ -26,3 +26,5 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/runtime/lto/alloc_cpp.cpp
 add_library(alloc-cpp STATIC
   ${CMAKE_BINARY_DIR}/runtime/lto/alloc_cpp.cpp
 )
+
+set_target_properties(alloc-cpp PROPERTIES EXPORT_COMPILE_COMMANDS Off)
