@@ -670,7 +670,8 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
 
 static llvm::StructType *make_packed_visitor_structure_type(
     llvm::LLVMContext &ctx, llvm::Module *module, bool is_serialize) {
-  std::string const name = is_serialize ? "serialize_visitor" : "visitor";
+  std::string const name
+      = is_serialize ? "serialize_to_proof_trace_visitor" : "visitor";
   static auto types = std::map<llvm::LLVMContext *, llvm::StructType *>{};
 
   auto *ptr_ty = llvm::PointerType::getUnqual(ctx);
@@ -1077,7 +1078,7 @@ static void get_visitor(
 }
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-static void get_serialize_visitor(
+static void get_serialize_to_proof_trace_visitor(
     kore_definition *definition, llvm::Module *module, kore_symbol *symbol,
     llvm::BasicBlock *case_block, std::vector<llvm::Value *> const &callbacks) {
   get_visitor(definition, module, symbol, case_block, callbacks, false);
@@ -1179,11 +1180,11 @@ static void emit_visit_children(kore_definition *def, llvm::Module *mod) {
   emit_traversal("visit_children", def, mod, true, false, get_visitor);
 }
 
-static void
-emit_visit_children_for_serialize(kore_definition *def, llvm::Module *mod) {
+static void emit_visit_children_for_serialize_to_proof_trace(
+    kore_definition *def, llvm::Module *mod) {
   emit_traversal(
-      "visit_children_for_serialize", def, mod, true, true,
-      get_serialize_visitor);
+      "visit_children_for_serialize_to_proof_trace", def, mod, true, true,
+      get_serialize_to_proof_trace_visitor);
 }
 
 static void emit_inj_tags(kore_definition *def, llvm::Module *mod) {
@@ -1205,7 +1206,8 @@ static void emit_inj_tags(kore_definition *def, llvm::Module *mod) {
   }
 }
 
-static void emit_sort_table_v2(kore_definition *def, llvm::Module *mod) {
+static void emit_sort_table_for_proof_trace_serialization(
+    kore_definition *def, llvm::Module *mod) {
   auto getter = [](kore_definition *definition, llvm::Module *module,
                    kore_symbol *symbol) -> llvm::Constant * {
     auto &ctx = module->getContext();
@@ -1245,7 +1247,8 @@ static void emit_sort_table_v2(kore_definition *def, llvm::Module *mod) {
   auto *debug_ty = get_pointer_debug_type(get_int_debug_type(), "int *");
 
   emit_data_table_for_symbol(
-      "get_argument_sorts_for_tag_v2", entry_ty, debug_ty, def, mod, getter);
+      "get_argument_sorts_for_tag_with_proof_trace_serialization", entry_ty,
+      debug_ty, def, mod, getter);
 }
 
 static void emit_sort_table(kore_definition *def, llvm::Module *mod) {
@@ -1373,14 +1376,14 @@ void emit_config_parser_functions(
 
   emit_get_symbol_name_for_tag(definition, module);
   emit_visit_children(definition, module);
-  emit_visit_children_for_serialize(definition, module);
+  emit_visit_children_for_serialize_to_proof_trace(definition, module);
 
   emit_layouts(definition, module);
 
   emit_inj_tags(definition, module);
 
   emit_sort_table(definition, module);
-  emit_sort_table_v2(definition, module);
+  emit_sort_table_for_proof_trace_serialization(definition, module);
   emit_return_sort_table(definition, module);
   emit_symbol_is_instantiation(definition, module);
 }
