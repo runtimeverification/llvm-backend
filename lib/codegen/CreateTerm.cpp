@@ -608,6 +608,20 @@ llvm::Value *create_term::create_hook(
   if (name == "MINT.not") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", current_block_);
+#define MINT_MINMAX(hookname, inst)                                            \
+  }                                                                            \
+  if (name == "MINT." #hookname) {                                             \
+    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
+    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
+    auto *cmp = new llvm::ICmpInst(                                            \
+        *current_block_, llvm::CmpInst::inst, first, second,                   \
+        "cmp_" #hookname);                                                     \
+  return llvm::SelectInst::Create(                                             \
+      cmp, first, second, "hook_MINT_" #hookname, current_block_)
+    MINT_MINMAX(umin, ICMP_ULE);
+    MINT_MINMAX(umax, ICMP_UGE);
+    MINT_MINMAX(smin, ICMP_SLE);
+    MINT_MINMAX(smax, ICMP_SGE);
 #define MINT_CMP(hookname, inst)                                               \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
