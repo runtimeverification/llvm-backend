@@ -167,10 +167,14 @@ config.substitutions.extend([
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
             exit 1
         fi
+    ''')),
+
+    ('%check-proof-shm-out', one_line('''
+        %kore-rich-header %s > %t.header.bin
         %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin %test-shm-buffer | diff - %test-proof-diff-out &
         reader_pid="$!"
         sleep 1
-        %kore-proof-trace-shm-writer %t.out.bin %test-shm-buffer
+        %run-proof-shm-out
         wait $reader_pid
         result="$?"
         if [ "$result" -ne 0 ]; then
@@ -196,11 +200,9 @@ config.substitutions.extend([
 
     ('%check-dir-proof-out', one_line('''
         %kore-rich-header %s > %t.header.bin
-        count=0
         for out in %test-dir-out/*.proof.out.diff; do
             in=%test-dir-in/`basename $out .proof.out.diff`.in
             hint=%t.`basename $out .proof.out.diff`.hint
-            shmbuf=%test-shm-buffer.$count
             rm -f $hint
             %t.interpreter $in -1 $hint --proof-output
             %kore-proof-trace --verbose --expand-terms %t.header.bin $hint | diff - $out
@@ -215,10 +217,19 @@ config.substitutions.extend([
                 echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
                 exit 1
             fi
+        done
+    ''')),
+
+    ('%check-dir-proof-shm-out', one_line('''
+        %kore-rich-header %s > %t.header.bin
+        count=0
+        for out in %test-dir-out/*.proof.out.diff; do
+            in=%test-dir-in/`basename $out .proof.out.diff`.in
+            shmbuf=%test-shm-buffer.$count
             %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin $shmbuf | diff - $out &
             reader_pid="$!"
             sleep 1
-            %kore-proof-trace-shm-writer $hint $shmbuf
+            %t.interpreter $in -1 $shmbuf --proof-output --use-shared-memory
             wait $reader_pid
             result="$?"
             if [ "$result" -ne 0 ]; then
@@ -232,6 +243,7 @@ config.substitutions.extend([
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
+    ('%run-proof-shm-out', '%t.interpreter %test-input -1 %test-shm-buffer --proof-output --use-shared-memory'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
