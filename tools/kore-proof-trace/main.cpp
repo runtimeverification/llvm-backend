@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
     // NOLINTNEXTLINE(*-pro-type-vararg)
     sem_t *space_avail = sem_open(
         space_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR,
-        shm_ringbuffer::capacity);
+        shm_ringbuffer::capacity / shm_ringbuffer::buffered_access_sz);
     if (space_avail == SEM_FAILED) {
       ERR_EXIT("sem_init space_avail reader");
     }

@@ -210,68 +210,172 @@ private:
   shm_ringbuffer *shm_buffer_;
   sem_t *data_avail_;
   sem_t *space_avail_;
+
   std::deque<uint8_t> peek_data_;
+  std::array<uint8_t, shm_ringbuffer::buffered_access_sz> buffer_;
+  size_t buffer_data_size_{0};
+  size_t buffer_data_start_{0};
+
   bool peek_eof_{false};
+  bool buffered_eof_{false};
   bool read_eof_{false};
 
+  // Helper function that reads from the shared memory ringbuffer into the
+  // buffer_. It tries to read shm_ringbuffer::buffered_access_sz bytes of data.
+  // It assumes that buffer_ is empty.
+  void read_from_shared_memory() {
+    assert(buffer_data_size_ == 0);
+    assert(buffer_data_start_ == 0);
+
+    if (buffered_eof_) {
+      return;
+    }
+
+    sem_wait(data_avail_);
+
+    if (shm_buffer_->eof()) {
+      // EOF has been written to the ringbuffer. Check if this is the last chunk
+      // of data to be read.
+      size_t remaining_data_sz = shm_buffer_->data_size();
+      if (remaining_data_sz < shm_ringbuffer::buffered_access_sz) {
+        // This is the last chunk of data to be read from the ringbuffer.
+        shm_buffer_->get(buffer_.data(), remaining_data_sz);
+        sem_post(space_avail_);
+
+        buffer_data_size_ = remaining_data_sz;
+        buffered_eof_ = true;
+
+        return;
+      }
+    }
+
+    // Else, either EOF has not been written or EOF has been written but there
+    // are remaining full chunks to be read. In any case, we can read a full
+    // chunk.
+    shm_buffer_->get(buffer_.data());
+    sem_post(space_avail_);
+
+    buffer_data_size_ = shm_ringbuffer::buffered_access_sz;
+  }
+
   bool read(uint8_t *ptr, size_t len = 1) {
-    for (size_t i = 0; i < len; i++) {
-      if (!peek_data_.empty()) {
-        ptr[i] = peek_data_.front();
-        peek_data_.pop_front();
-        continue;
-      }
+    // Check if we have read EOF already.
+    if (read_eof_) {
+      return false;
+    }
 
-      if (peek_eof_) {
-        read_eof_ = true;
-        return false;
-      }
+    // Consume peeked data.
+    while (len > 0 && !peek_data_.empty()) {
+      *ptr = peek_data_.front();
+      peek_data_.pop_front();
+      ptr++;
+      len--;
+    }
 
-      if (read_eof_) {
-        return false;
-      }
+    // Consume peeked EOF.
+    if (len > 0 && peek_eof_) {
+      read_eof_ = true;
+      return false;
+    }
 
-      while (int wait_status = sem_trywait(data_avail_)) {
-        assert(wait_status == -1 && errno == EAGAIN);
-        if (shm_buffer_->eof()) {
+    // Peeked data has been fully consumed. If more data is requested, we need
+    // to read from buffer_ and/or shared memory.
+    while (len > 0) {
+      // If buffer_ is empty, try to fetch more data from the shared memory
+      // ringbuffer.
+      if (buffer_data_size_ == 0) {
+        // Check for and conusme buffered EOF.
+        if (buffered_eof_) {
           read_eof_ = true;
           return false;
         }
+
+        assert(buffer_data_start_ == 0);
+        read_from_shared_memory();
       }
-      shm_buffer_->get(&ptr[i]);
-      sem_post(space_avail_);
+
+      // Read available data from the buffer_.
+      assert(buffer_data_start_ < shm_ringbuffer::buffered_access_sz);
+      assert(
+          buffer_data_start_ + buffer_data_size_
+          <= shm_ringbuffer::buffered_access_sz);
+      size_t size_to_read_from_buffer = std::min(len, buffer_data_size_);
+      memcpy(
+          ptr, buffer_.data() + buffer_data_start_, size_to_read_from_buffer);
+      ptr += size_to_read_from_buffer;
+      len -= size_to_read_from_buffer;
+
+      buffer_data_start_ += size_to_read_from_buffer;
+      buffer_data_size_ -= size_to_read_from_buffer;
+      if (buffer_data_start_ == shm_ringbuffer::buffered_access_sz) {
+        assert(buffer_data_size_ == 0);
+        buffer_data_start_ = 0;
+      }
     }
 
+    assert(len == 0);
     return true;
   }
 
   bool peek(uint8_t *ptr, size_t len = 1) {
-    for (size_t i = 0; i < len; i++) {
-      if (i < peek_data_.size()) {
-        ptr[i] = peek_data_[i];
-        continue;
-      }
+    // Check if we have read EOF already.
+    if (read_eof_) {
+      return false;
+    }
 
-      if (peek_eof_) {
-        return false;
-      }
+    // Copy already peeked data.
+    size_t i = 0;
+    while (len > 0 && i < peek_data_.size()) {
+      *ptr = peek_data_[i];
+      ptr++;
+      i++;
+      len--;
+    }
 
-      if (read_eof_) {
-        return false;
-      }
+    // Check for already peeked EOF.
+    if (len > 0 && peek_eof_) {
+      return false;
+    }
 
-      while (int wait_status = sem_trywait(data_avail_)) {
-        assert(wait_status == -1 && errno == EAGAIN);
-        if (shm_buffer_->eof()) {
+    // Already peeked data has been fully copied. If more data is requested, we
+    // need to peek from buffer_ and/or shared memory.
+    while (len > 0) {
+      // If buffer_ is empty, try to fetch more data from the shared memory
+      // ringbuffer.
+      if (buffer_data_size_ == 0) {
+        // Check for buffered EOF.
+        if (buffered_eof_) {
           peek_eof_ = true;
           return false;
         }
+
+        assert(buffer_data_start_ == 0);
+        read_from_shared_memory();
       }
-      shm_buffer_->get(&ptr[i]);
-      sem_post(space_avail_);
-      peek_data_.push_back(ptr[i]);
+
+      // Peek available data from the buffer_.
+      assert(buffer_data_start_ < shm_ringbuffer::buffered_access_sz);
+      assert(
+          buffer_data_start_ + buffer_data_size_
+          <= shm_ringbuffer::buffered_access_sz);
+      size_t size_to_peek_from_buffer = std::min(len, buffer_data_size_);
+      memcpy(
+          ptr, buffer_.data() + buffer_data_start_, size_to_peek_from_buffer);
+      peek_data_.insert(
+          peek_data_.end(), buffer_.begin() + buffer_data_start_,
+          buffer_.begin() + buffer_data_start_ + size_to_peek_from_buffer);
+      ptr += size_to_peek_from_buffer;
+      len -= size_to_peek_from_buffer;
+
+      buffer_data_start_ += size_to_peek_from_buffer;
+      buffer_data_size_ -= size_to_peek_from_buffer;
+      if (buffer_data_start_ == shm_ringbuffer::buffered_access_sz) {
+        assert(buffer_data_size_ == 0);
+        buffer_data_start_ = 0;
+      }
     }
 
+    assert(len == 0);
     return true;
   }
 

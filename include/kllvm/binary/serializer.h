@@ -188,6 +188,9 @@ private:
   sem_t *data_avail_;
   sem_t *space_avail_;
 
+  std::array<uint8_t, shm_ringbuffer::buffered_access_sz> buffer_;
+  size_t buffer_data_size_{0};
+
   void write(uint8_t const *ptr, size_t len = 1);
 
 public:
