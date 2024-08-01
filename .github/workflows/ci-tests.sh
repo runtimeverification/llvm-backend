@@ -15,6 +15,7 @@ cmake ..                                                  \
   -DBUILD_TESTS=On                                        \
   -DCMAKE_INSTALL_PREFIX=install
 make -j$(nproc) install
+make test
 popd
 
 pushd matching
