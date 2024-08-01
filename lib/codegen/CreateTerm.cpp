@@ -196,17 +196,16 @@ llvm::Value *allocate_term(
     if (auto *first = block->getFirstNonPHI()) {
       if (auto *call = llvm::dyn_cast<llvm::CallInst>(first)) {
         if (auto *func = call->getCalledFunction()) {
-          if (func->getName() == alloc_fn && is_basic_alloc(alloc_fn)) {
-            if (auto *size
-                = llvm::dyn_cast<llvm::ConstantInt>(call->getOperand(0))) {
-              if (size->getLimitedValue() + type_size < MAX_BLOCK_MERGE_SIZE) {
-                call->setOperand(
-                    0, llvm::ConstantExpr::getAdd(
-                           size, llvm::ConstantInt::get(ty, type_size)));
-                return llvm::GetElementPtrInst::Create(
-                    llvm::Type::getInt8Ty(block->getContext()), call, {size},
-                    "alloc_chunk", block);
-              }
+          if (auto *size
+              = llvm::dyn_cast<llvm::ConstantInt>(call->getOperand(0))) {
+            if (func->getName() == alloc_fn && is_basic_alloc(alloc_fn)
+                && size->getLimitedValue() + type_size < MAX_BLOCK_MERGE_SIZE) {
+              call->setOperand(
+                  0, llvm::ConstantExpr::getAdd(
+                         size, llvm::ConstantInt::get(ty, type_size)));
+              return llvm::GetElementPtrInst::Create(
+                  llvm::Type::getInt8Ty(block->getContext()), call, {size},
+                  "alloc_chunk", block);
             }
           }
         }
@@ -214,10 +213,9 @@ llvm::Value *allocate_term(
     }
     return allocate_term(
         alloc_type, llvm::ConstantInt::get(ty, type_size), block, alloc_fn);
-  } else {
-    return allocate_term(
-        alloc_type, llvm::ConstantInt::get(ty, type_size), block, alloc_fn);
   }
+  return allocate_term(
+      alloc_type, llvm::ConstantInt::get(ty, type_size), block, alloc_fn);
 }
 
 value_type term_type(
