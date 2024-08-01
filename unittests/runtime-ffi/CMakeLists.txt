@@ -18,6 +18,7 @@ target_link_libraries(runtime-ffi-tests
   strings
   arithmetic
   alloc
+  lto-static
   gmp
   mpfr
   dl

@@ -236,6 +236,8 @@ int main(int argc, char **argv) {
     finalize_debug_info();
   }
 
+  do_bitcode_linking(*mod);
+
   if (!no_optimize) {
     apply_kllvm_opt_passes(*mod, hidden_visibility);
   }
