@@ -199,7 +199,7 @@ llvm::Value *allocate_term(
           if (auto *size
               = llvm::dyn_cast<llvm::ConstantInt>(call->getOperand(0))) {
             if (func->getName() == alloc_fn && is_basic_alloc(alloc_fn)
-                && size->getLimitedValue() + type_size < MAX_BLOCK_MERGE_SIZE) {
+                && size->getLimitedValue() + type_size < MaxBlockMergeSize) {
               call->setOperand(
                   0, llvm::ConstantExpr::getAdd(
                          size, llvm::ConstantInt::get(ty, type_size)));

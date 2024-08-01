@@ -11,7 +11,7 @@
 #include "llvm/IR/Value.h"
 
 // size up to which calls to the same allocation function will be merged.
-enum { MAX_BLOCK_MERGE_SIZE = 4096 };
+enum { MaxBlockMergeSize = 4096 };
 
 namespace kllvm {
 
