@@ -193,11 +193,11 @@ define i1 @string_equal(ptr %str1, ptr %str2, i64 %len1, i64 %len2) {
 
 declare tailcc ptr @k_step(ptr)
 declare tailcc void @step_all(ptr)
-declare void @serialize_configuration_to_file_v2(ptr, ptr)
-declare void @write_uint64_to_file(ptr, i64)
+declare void @serialize_configuration_to_proof_writer(ptr, ptr)
+declare void @write_uint64_to_proof_trace(ptr, i64)
 
 @proof_output = external global i1
-@output_file = external global ptr
+@proof_writer = external global ptr
 @depth = thread_local global i64 zeroinitializer
 @steps = thread_local global i64 zeroinitializer
 @current_interval = thread_local global i64 0
@@ -236,9 +236,9 @@ define ptr @take_steps(i64 %depth, ptr %subject) {
   %proof_output = load i1, ptr @proof_output
   br i1 %proof_output, label %if, label %merge
 if:
-  %output_file = load ptr, ptr @output_file
-  call void @write_uint64_to_file(ptr %output_file, i64 18446744073709551615)
-  call void @serialize_configuration_to_file_v2(ptr %output_file, ptr %subject)
+  %proof_writer = load ptr, ptr @proof_writer
+  call void @write_uint64_to_proof_trace(ptr %proof_writer, i64 18446744073709551615)
+  call void @serialize_configuration_to_proof_writer(ptr %proof_writer, ptr %subject)
   br label %merge
 merge:
   store i64 %depth, ptr @depth

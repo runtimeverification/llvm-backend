@@ -6,24 +6,26 @@ target triple = "@BACKEND_TARGET_TRIPLE@"
 
 declare ptr @parse_configuration(ptr)
 declare i64 @atol(ptr)
-declare ptr @fopen(ptr, ptr)
 
 declare ptr @take_steps(i64, ptr)
 declare void @finish_rewriting(ptr, i1) #0
 
 declare void @init_static_objects()
 
+declare void @init_outputs(ptr)
+
 declare void @print_proof_hint_header(ptr)
 
 @statistics.flag = private constant [13 x i8] c"--statistics\00"
 @binary_out.flag = private constant [16 x i8] c"--binary-output\00"
 @proof_out.flag = private constant [15 x i8] c"--proof-output\00"
+@use_shm.flag = private constant [20 x i8] c"--use-shared-memory\00"
 
-@output_file = external global ptr
-@a_str = private constant [2 x i8] c"a\00"
+@proof_writer = external global ptr
 @statistics = external global i1
 @binary_output = external global i1
 @proof_output = external global i1
+@use_shm = external global i1
 
 declare i32 @strcmp(ptr %a, ptr %b)
 
@@ -63,10 +65,19 @@ binary.set:
 proof.body:
   %proof.cmp = call i32 @strcmp(ptr %arg, ptr getelementptr inbounds ([15 x i8], ptr @proof_out.flag, i64 0, i64 0))
   %proof.eq = icmp eq i32 %proof.cmp, 0
-  br i1 %proof.eq, label %proof.set, label %body.tail
+  br i1 %proof.eq, label %proof.set, label %shm.body
 
 proof.set:
   store i1 1, ptr @proof_output
+  br label %shm.body
+
+shm.body:
+  %shm.cmp = call i32 @strcmp(ptr %arg, ptr getelementptr inbounds ([20 x i8], ptr @use_shm.flag, i64 0, i64 0))
+  %shm.eq = icmp eq i32 %shm.cmp, 0
+  br i1 %shm.eq, label %shm.set, label %body.tail
+
+shm.set:
+  store i1 1, ptr @use_shm
   br label %body.tail
 
 body.tail:
@@ -89,17 +100,18 @@ entry:
   %depth = call i64 @atol(ptr %depth_str)
   %output_ptr = getelementptr inbounds ptr, ptr %argv, i64 3
   %output_str = load ptr, ptr %output_ptr
-  %output_file = call ptr @fopen(ptr %output_str, ptr getelementptr inbounds ([2 x i8], ptr @a_str, i64 0, i64 0))
-  store ptr %output_file, ptr @output_file
   
   call void @parse_flags(i32 %argc, ptr %argv)
 
   call void @init_static_objects()
 
+  call void @init_outputs(ptr %output_str)
+
   %proof_output = load i1, ptr @proof_output
   br i1 %proof_output, label %if, label %else
 if:
-  call void @print_proof_hint_header(ptr %output_file)
+  %proof_writer = load ptr, ptr @proof_writer
+  call void @print_proof_hint_header(ptr %proof_writer)
   br label %else
 else:
   %ret = call ptr @parse_configuration(ptr %filename)

@@ -2,6 +2,7 @@
 #define AST_SERIALIZER_H
 
 #include <kllvm/ast/AST.h>
+#include <kllvm/binary/ringbuffer.h>
 #include <kllvm/binary/version.h>
 
 #include <array>
@@ -140,6 +141,77 @@ void serializer::emit(T val) {
 }
 
 void emit_kore_rich_header(std::ostream &os, kore_definition *definition);
+
+class proof_trace_writer {
+public:
+  virtual ~proof_trace_writer() = default;
+  virtual void write(void const *ptr, size_t len) = 0;
+
+  virtual void write_string(char const *str, size_t len) = 0;
+
+  // Note: This method will not write a 0 at the end of string.
+  // The passed string should be 0 terminated.
+  virtual void write_string(char const *str) = 0;
+
+  // Note: this method will write a 0 at the end of the string.
+  // The passed string should be 0 terminated.
+  void write_null_terminated_string(char const *str) {
+    write_string(str);
+    char n = 0;
+    write(&n, 1);
+  }
+
+  virtual void write_eof() = 0;
+
+  void write_bool(bool b) { write(&b, sizeof(bool)); }
+  void write_uint32(uint32_t i) { write(&i, sizeof(uint32_t)); }
+  void write_uint64(uint64_t i) { write(&i, sizeof(uint64_t)); }
+};
+
+class proof_trace_file_writer : public proof_trace_writer {
+private:
+  FILE *file_;
+
+public:
+  proof_trace_file_writer(FILE *file)
+      : file_(file) { }
+
+  void write(void const *ptr, size_t len) override;
+  void write_string(char const *str, size_t len) override;
+  void write_string(char const *str) override;
+  void write_eof() override { }
+};
+
+class proof_trace_ringbuffer_writer : public proof_trace_writer {
+private:
+  shm_ringbuffer *shm_buffer_;
+  sem_t *data_avail_;
+  sem_t *space_avail_;
+
+  void write(uint8_t const *ptr, size_t len = 1);
+
+public:
+  proof_trace_ringbuffer_writer(
+      void *shm_object, sem_t *data_avail, sem_t *space_avail)
+      : shm_buffer_(reinterpret_cast<shm_ringbuffer *>(shm_object))
+      , data_avail_(data_avail)
+      , space_avail_(space_avail) { }
+
+  ~proof_trace_ringbuffer_writer() override { shm_buffer_->~shm_ringbuffer(); }
+
+  proof_trace_ringbuffer_writer(proof_trace_ringbuffer_writer const &) = delete;
+  proof_trace_ringbuffer_writer(proof_trace_ringbuffer_writer &&) = delete;
+  proof_trace_ringbuffer_writer &
+  operator=(proof_trace_ringbuffer_writer const &)
+      = delete;
+  proof_trace_ringbuffer_writer &operator=(proof_trace_ringbuffer_writer &&)
+      = delete;
+
+  void write(void const *ptr, size_t len) override;
+  void write_string(char const *str, size_t len) override;
+  void write_string(char const *str) override;
+  void write_eof() override;
+};
 
 } // namespace kllvm
 

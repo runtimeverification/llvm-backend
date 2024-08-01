@@ -210,4 +210,43 @@ void emit_kore_rich_header(std::ostream &os, kore_definition *definition) {
   }
 }
 
+void proof_trace_file_writer::write(void const *ptr, size_t len) {
+  fwrite(ptr, len, 1, file_);
+}
+
+void proof_trace_file_writer::write_string(char const *str, size_t len) {
+  fwrite(str, 1, len, file_);
+}
+
+void proof_trace_file_writer::write_string(char const *str) {
+  fputs(str, file_);
+}
+
+void proof_trace_ringbuffer_writer::write(uint8_t const *ptr, size_t len) {
+  for (size_t i = 0; i < len; i++) {
+    sem_wait(space_avail_);
+    shm_buffer_->put(&ptr[i]);
+    sem_post(data_avail_);
+  }
+}
+
+void proof_trace_ringbuffer_writer::write(void const *ptr, size_t len) {
+  auto const *data = reinterpret_cast<uint8_t const *>(ptr);
+  write(data, len);
+}
+
+void proof_trace_ringbuffer_writer::write_string(char const *str, size_t len) {
+  auto const *data = reinterpret_cast<uint8_t const *>(str);
+  write(data, len);
+}
+
+void proof_trace_ringbuffer_writer::write_string(char const *str) {
+  auto const *data = reinterpret_cast<uint8_t const *>(str);
+  write(data, strlen(str));
+}
+
+void proof_trace_ringbuffer_writer::write_eof() {
+  shm_buffer_->put_eof();
+}
+
 } // namespace kllvm
