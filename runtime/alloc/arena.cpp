@@ -99,7 +99,7 @@ static void fresh_block(struct arena *arena) {
     if (!next_block) {
       MEM_LOG(
           "Allocating new block for the first time in arena %d\n",
-          Arena->allocation_semispace_id);
+          arena->allocation_semispace_id);
       next_block = (char *)megabyte_malloc();
       *(char **)arena->block_start = next_block;
       auto *next_header = (memory_block_header *)next_block;
@@ -112,17 +112,17 @@ static void fresh_block(struct arena *arena) {
   arena->block_start = next_block;
   arena->block_end = next_block + BLOCK_SIZE;
   MEM_LOG(
-      "New block at %p (remaining %zd)\n", Arena->block,
+      "New block at %p (remaining %zd)\n", arena->block,
       BLOCK_SIZE - sizeof(memory_block_header));
 }
 
 bool gc_enabled;
 
-static __attribute__((noinline)) void *
+__attribute__((noinline)) void *
 do_alloc_slow(size_t requested, struct arena *arena) {
   MEM_LOG(
-      "Block at %p too small, %zd remaining but %zd needed\n", Arena->block,
-      Arena->block_end - Arena->block, requested);
+      "Block at %p too small, %zd remaining but %zd needed\n", arena->block,
+      arena->block_end - arena->block, requested);
   if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
     return malloc(requested);
   }
@@ -131,20 +131,7 @@ do_alloc_slow(size_t requested, struct arena *arena) {
   arena->block += requested;
   MEM_LOG(
       "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, Arena->block);
-  return result;
-}
-
-__attribute__((always_inline)) void *
-kore_arena_alloc(struct arena *arena, size_t requested) {
-  if (arena->block + requested > arena->block_end) {
-    return do_alloc_slow(requested, arena);
-  }
-  void *result = arena->block;
-  arena->block += requested;
-  MEM_LOG(
-      "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, Arena->block);
+      requested, arena->block);
   return result;
 }
 

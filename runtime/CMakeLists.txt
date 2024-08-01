@@ -9,12 +9,13 @@ install(
   DESTINATION lib/kllvm/llvm/main
 )
 
-add_subdirectory(arithmetic)
-add_subdirectory(util)
-add_subdirectory(strings)
-add_subdirectory(meta)
 add_subdirectory(alloc)
+add_subdirectory(arithmetic)
 add_subdirectory(collect)
-add_subdirectory(io)
 add_subdirectory(collections)
+add_subdirectory(io)
 add_subdirectory(json)
+add_subdirectory(lto)
+add_subdirectory(meta)
+add_subdirectory(strings)
+add_subdirectory(util)
