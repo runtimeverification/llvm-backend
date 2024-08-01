@@ -125,7 +125,7 @@ class StepCommand:
 
 
 class LogEntry:
-    typename = 'MatchLog'
+    typename = 'match_log'
 
     def __init__(self, exe_ctx, root, idx):
         self.exe_ctx = exe_ctx
@@ -142,7 +142,7 @@ class LogEntry:
 
     def get_match_function_args(self):
         return target_call(self.exe_ctx, 'get_match_fn_args', 'void **',
-                           ['MatchLog *'], [self.root])
+                           ['match_log *'], [self.root])
 
     @property
     def kind(self):
@@ -170,7 +170,7 @@ class LogEntry:
     def debug_name(self):
         err = lldb.SBError()
         return self.exe_ctx.process.ReadCStringFromMemory(
-            to_address(self._field_expr('debugName')), 65536, err)
+            to_address(self._field_expr('debug_name')), 65536, err)
 
     @property
     def function(self):
@@ -201,7 +201,7 @@ class RuleMatcher:
         return target_call(self.exe_ctx, 'getmatch_log_size', 'size_t').data.uint64[0]
 
     def _get_match_log(self):
-        return target_call(self.exe_ctx, 'getmatch_log', 'MatchLog *')
+        return target_call(self.exe_ctx, 'getmatch_log', 'match_log *')
 
     def _type_to_sort(self, ty):
         return {
