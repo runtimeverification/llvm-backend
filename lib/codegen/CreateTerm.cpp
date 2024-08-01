@@ -181,6 +181,11 @@ llvm::Value *allocate_term(
   return malloc;
 }
 
+static bool is_basic_alloc(std::string alloc_fn) {
+  return alloc_fn == "kore_alloc" || alloc_fn == "kore_alloc_old"
+         || alloc_fn == "kore_alloc_always_gc";
+}
+
 llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::BasicBlock *block, char const *alloc_fn,
     bool mergeable) {
@@ -191,7 +196,7 @@ llvm::Value *allocate_term(
     if (auto *first = block->getFirstNonPHI()) {
       if (auto *call = llvm::dyn_cast<llvm::CallInst>(first)) {
         if (auto *func = call->getCalledFunction()) {
-          if (func->getName() == alloc_fn) {
+          if (func->getName() == alloc_fn && is_basic_alloc(alloc_fn)) {
             if (auto *size
                 = llvm::dyn_cast<llvm::ConstantInt>(call->getOperand(0))) {
               if (size->getLimitedValue() + type_size < MAX_BLOCK_MERGE_SIZE) {
