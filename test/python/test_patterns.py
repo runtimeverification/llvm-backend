@@ -36,7 +36,19 @@ class TestPatterns(unittest.TestCase):
     def test_string(self):
         pat = kllvm.ast.StringPattern("abc")
         self.assertEqual(str(pat), '"abc"')
-        self.assertEqual(pat.contents, "abc")
+        self.assertEqual(pat.contents.decode('raw_unicode_escape'), "abc")
+        
+    def test_string_escape(self):
+        value_encoded = r'\t\n\r\f\\\"'.encode('raw_unicode_escape')
+        pat = kllvm.ast.StringPattern(value_encoded)
+        self.assertEqual(pat.contents, value_encoded)
+        self.assertEqual(value_encoded.decode('raw_unicode_escape'), r'\t\n\r\f\\\"')
+        
+    def test_string_unicode(self):
+        value_encoded = r'\u03b1'.encode('raw_unicode_escape')
+        pat = kllvm.ast.StringPattern(value_encoded)
+        self.assertEqual(pat.contents, value_encoded)
+        self.assertEqual(value_encoded.decode('raw_unicode_escape'), r'α')
 
     def test_variable(self):
         pat = kllvm.ast.VariablePattern("A", kllvm.ast.CompositeSort("S"))
