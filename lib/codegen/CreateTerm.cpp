@@ -181,7 +181,7 @@ llvm::Value *allocate_term(
   return malloc;
 }
 
-static bool is_basic_alloc(std::string alloc_fn) {
+static bool is_basic_alloc(std::string const &alloc_fn) {
   return alloc_fn == "kore_alloc" || alloc_fn == "kore_alloc_old"
          || alloc_fn == "kore_alloc_always_gc";
 }
