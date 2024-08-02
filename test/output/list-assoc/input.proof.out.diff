@@ -1,0 +1,50 @@
+version: 11
+function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes{} ()
+rule: 102 1
+  VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))]
+function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+rule: 104 3
+  VarOP = kore[Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
+  VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())]
+  VarOPS'Apos' = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
+function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+rule: 104 3
+  VarOP = kore[Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
+  VarOPS = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
+  VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())]
+function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+rule: 103 3
+  Var'Unds'Gen0 = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
+  VarOP = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
+  VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))]
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
+function: LblinitGeneratedTopCell{} ()
+rule: 108 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
+function: LblinitKCell{} (0)
+rule: 109 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())))]
+rule: 150 1
+  VarK = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())))]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 107 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

@@ -1,0 +1,50 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}())]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 251 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}())]
+function: LblinitKCell{} (0)
+rule: 253 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}()]
+rule: 335 1
+  VarK = kore[Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}()]
+function: LblinitPersonCell{} (1)
+rule: 257 0
+function: LblinitNameCell{} (0)
+rule: 254 0
+function: LblinitIdCell{} (1)
+rule: 252 0
+function: LblinitP1Cell{} (0)
+rule: 255 0
+function: LblinitP2Cell{} (1)
+rule: 256 0
+function: LblinitAgeCell{} (2)
+rule: 249 0
+function: LblinitGeneratedCounterCell{} (2)
+rule: 250 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'exec'Unds'NESTED-CELLS-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'person'-GT-'{}(Lbl'-LT-'name'-GT-'{}(\dv{SortString{}}("")),Lbl'-LT-'id'-GT-'{}(Lbl'-LT-'p1'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'p2'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'age'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 203 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen0 = kore[\dv{SortString{}}("")]
+  Var'Unds'Gen1 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen2 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen3 = kore[\dv{SortInt{}}("0")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'person'-GT-'{}(Lbl'-LT-'name'-GT-'{}(\dv{SortString{}}("Foo Bar")),Lbl'-LT-'id'-GT-'{}(Lbl'-LT-'p1'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'p2'-GT-'{}(\dv{SortInt{}}("2"))),Lbl'-LT-'age'-GT-'{}(\dv{SortInt{}}("10"))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

@@ -1,0 +1,56 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 278 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+function: LblinitKCell{} (0)
+rule: 279 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
+rule: 378 1
+  VarK = kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
+function: LblinitFooCell{} (1)
+rule: 273 0
+function: LblinitFooP1Cell{} (0)
+rule: 274 0
+function: LblinitFooP2Cell{} (1)
+rule: 275 0
+function: LblinitFooP3Cell{} (2)
+rule: 276 0
+function: LblinitBarCell{} (2)
+rule: 269 0
+function: LblinitBarP1Cell{} (0)
+rule: 270 0
+function: LblinitBarP2Cell{} (1)
+rule: 271 0
+function: LblinitBarP3Cell{} (2)
+rule: 272 0
+function: LblinitGeneratedCounterCell{} (3)
+rule: 277 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'foo'-GT-'{}(Lbl'-LT-'foo-p1'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'foo-p2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'foo-p3'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'bar'-GT-'{}(Lbl'-LT-'bar-p1'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'bar-p2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'bar-p3'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 223 7
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen1 = kore[\dv{SortInt{}}("0")]
+  Var'Unds'Gen2 = kore[Lbl'-LT-'bar-p2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'bar-p3'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen4 = kore[Lbl'-LT-'foo-p2'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen5 = kore[Lbl'-LT-'foo-p3'-GT-'{}(\dv{SortInt{}}("0"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'foo'-GT-'{}(Lbl'-LT-'foo-p1'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'foo-p2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'foo-p3'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'bar'-GT-'{}(Lbl'-LT-'bar-p1'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'bar-p2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'bar-p3'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

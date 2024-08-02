@@ -178,6 +178,8 @@ void bind_ast(py::module_ &m) {
           py::init(&kore_axiom_declaration::create),
           py::arg("is_claim") = false)
       .def_property_readonly("is_claim", &kore_axiom_declaration::is_claim)
+      .def_property_readonly(
+          "is_required", &kore_axiom_declaration::is_required)
       .def("add_pattern", &kore_axiom_declaration::add_pattern)
       .def_property_readonly("pattern", &kore_axiom_declaration::get_pattern)
       .def_property_readonly("requires", &kore_axiom_declaration::get_requires);
@@ -218,6 +220,8 @@ void bind_ast(py::module_ &m) {
              std::shared_ptr<kore_composite_pattern> const &arg) {
             decl.attributes().add(arg);
           })
+      .def("preprocess", &kore_definition::preprocess)
+      .def("get_axiom_by_ordinal", &kore_definition::get_axiom_by_ordinal)
       .def_property_readonly("attributes", [](kore_definition &decl) {
         return decl.attributes().underlying();
       });
@@ -227,9 +231,11 @@ void bind_ast(py::module_ &m) {
   py::enum_<sort_category>(ast, "SortCategory")
       .value("Uncomputed", sort_category::Uncomputed)
       .value("Map", sort_category::Map)
+      .value("MapIter", sort_category::MapIter)
       .value("RangeMap", sort_category::RangeMap)
       .value("List", sort_category::List)
       .value("Set", sort_category::Set)
+      .value("SetIter", sort_category::SetIter)
       .value("Int", sort_category::Int)
       .value("Float", sort_category::Float)
       .value("StringBuffer", sort_category::StringBuffer)
@@ -369,9 +375,12 @@ void bind_parser(py::module_ &mod) {
           "pattern",
           [](kore_parser &parser) { return std::shared_ptr(parser.pattern()); })
       .def("sort", [](kore_parser &parser) { return parser.sort(); })
-      .def("definition", [](kore_parser &parser) {
-        return std::shared_ptr(parser.definition());
-      });
+      .def(
+          "definition",
+          [](kore_parser &parser) {
+            return std::shared_ptr(parser.definition());
+          })
+      .def("symbol", &kore_parser::symbol);
 }
 
 void bind_proof_trace(py::module_ &m) {
@@ -417,6 +426,7 @@ void bind_proof_trace(py::module_ &m) {
   py::class_<llvm_hook_event, std::shared_ptr<llvm_hook_event>>(
       proof_trace, "llvm_hook_event", step_event)
       .def_property_readonly("name", &llvm_hook_event::get_name)
+      .def_property_readonly("symbol_name", &llvm_hook_event::get_symbol_name)
       .def_property_readonly(
           "relative_position", &llvm_hook_event::get_relative_position)
       .def_property_readonly("args", &llvm_hook_event::get_arguments)
@@ -439,12 +449,43 @@ void bind_proof_trace(py::module_ &m) {
       .def_property_readonly("trace", &llvm_rewrite_trace::get_trace)
       .def_static(
           "parse",
-          [](py::bytes const &bytes) {
-            proof_trace_parser parser(false, false);
+          [](py::bytes const &bytes, kore_header const &header) {
+            proof_trace_parser parser(false, false, header);
             auto str = std::string(bytes);
             return parser.parse_proof_trace(str);
           },
-          py::arg("bytes"));
+          py::arg("bytes"), py::arg("header"));
+
+  py::class_<kore_header, std::shared_ptr<kore_header>>(
+      proof_trace, "kore_header")
+      .def(py::init(&kore_header::create), py::arg("path"));
+
+  py::enum_<llvm_event_type>(proof_trace, "EventType")
+      .value("PreTrace", llvm_event_type::PreTrace)
+      .value("InitialConfig", llvm_event_type::InitialConfig)
+      .value("Trace", llvm_event_type::Trace);
+
+  py::class_<annotated_llvm_event>(proof_trace, "annotated_llvm_event")
+      .def_readonly("type", &annotated_llvm_event::type)
+      .def_readonly("event", &annotated_llvm_event::event);
+
+  py::class_<
+      llvm_rewrite_trace_iterator,
+      std::shared_ptr<llvm_rewrite_trace_iterator>>(
+      proof_trace, "llvm_rewrite_trace_iterator")
+      .def("__repr__", print_repr_adapter<llvm_rewrite_trace_iterator>(true))
+      .def_static(
+          "from_file",
+          [](std::string const &filename, kore_header const &header) {
+            std::ifstream file(filename, std::ios_base::binary);
+            return llvm_rewrite_trace_iterator(
+                std::make_unique<proof_trace_file_buffer>(std::move(file)),
+                header);
+          },
+          py::arg("filename"), py::arg("header"))
+      .def_property_readonly(
+          "version", &llvm_rewrite_trace_iterator::get_version)
+      .def("get_next_event", &llvm_rewrite_trace_iterator::get_next_event);
 }
 
 PYBIND11_MODULE(_kllvm, m) {

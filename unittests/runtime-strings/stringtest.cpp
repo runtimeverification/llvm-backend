@@ -67,6 +67,10 @@ floating *move_float(floating *i) {
 }
 
 void add_hash64(void *, uint64_t) { }
+
+struct blockheader get_block_header_for_symbol(uint32_t tag) {
+  return blockheader{tag};
+}
 }
 
 BOOST_AUTO_TEST_SUITE(StringTest)

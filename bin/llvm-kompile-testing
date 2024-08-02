@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <definition.kore> [main|library|search|static|python|pythonast|c] <clang flags>"
+  echo "Usage: $0 <definition.kore> [main|library|search|static|python|pythonast|c] <llvm-kompile flags> [--] <clang flags>"
   echo "See llvm-kompile -h for help"
   exit 1
 fi
@@ -11,5 +11,34 @@ trap 'rm -rf "$dt_dir"' INT TERM EXIT
 definition=$(realpath "$1")
 mode="$2"
 shift; shift
-( cd "@PROJECT_SOURCE_DIR@"/matching && mvn exec:java -Dexec.args="$definition qbaL $dt_dir 1" -q )
-llvm-kompile "$definition" "$dt_dir" "$mode" "$@" -g
+
+matching_dir="@PROJECT_SOURCE_DIR@/matching"
+installed_jar="$matching_dir/target/llvm-backend-matching-1.0-SNAPSHOT-jar-with-dependencies.jar"
+
+if [ ! -f "$installed_jar" ]; then
+  echo "Pattern matching compiler isn't installed!"
+  echo "  looking for a jar file at $installed_jar"
+  exit 1
+fi
+
+java -jar "$installed_jar" "$definition" qbaL "$dt_dir" 1
+
+llvm_kompile_flags=()
+clang_flags=()
+
+while [ $# -gt 0 ]; do
+  if [ "$1" = "--" ]; then
+    clang_flags+=("--")
+    shift
+    break
+  fi
+  llvm_kompile_flags+=("$1")
+  shift
+done
+
+while [ $# -gt 0 ]; do
+  clang_flags+=("$1")
+  shift
+done
+
+llvm-kompile "$definition" "$dt_dir" "$mode" "${llvm_kompile_flags[@]}" "${clang_flags[@]}" -g

@@ -27,94 +27,9 @@ using namespace fmt::literals;
 
 namespace {
 std::string llvm_header() {
-  auto target_dependent = fmt::format(
-      R"LLVM(
-; Target determined during CMake build
-target datalayout = "{datalayout}"
-target triple = "{triple}"
-  )LLVM",
-      "datalayout"_a = BACKEND_TARGET_DATALAYOUT,
-      "triple"_a = BACKEND_TARGET_TRIPLE);
-
-  auto const *rest =
-      R"LLVM(
-; K types in LLVM
-
-; A K value in the LLVM backend can be one of the following values:
-
-; an uninterpreted domain value: \dv{Id}("foo")
-; a symbol with 0 or more arguments: foo{}()
-; a map: dotMap{}()
-; an associative list: dotList{}()
-; a set: dotSet{}()
-; an array: dotArray{}()
-; an arbitrary precision integer: \dv{Int}("0")
-; an arbitrary precision float: \dv{Float}("0.0")
-; a domain string: \dv{String}("\"\"")
-; a byte array: \dv{Bytes}("b\"\"")
-; a string buffer: \dv{StringBuffer}("")
-; a domain boolean: \dv{Bool}("false")
-; a machine integer: \dv{MInt}("0p8")
-
-; For each type, a value of that type has the following llvm type:
-
-; token: %string *
-; symbol with 0 arguments: i32
-; symbol with 1 or more arguments: %block *
-; map: %map
-; list: %list
-; set: %set
-; array: %list
-; integer: %mpz *
-; float: %floating *
-; string: %string *
-; bytes: %string *
-; string buffer: %stringbuffer *
-; boolean: i1
-; machine integer of N bits: iN
-
-; We also define the following LLVM structure types:
-
-%string = type { %blockheader, [0 x i8] } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length (or buffer capacity for string pointed by stringbuffers), bytes
-%stringbuffer = type { i64, i64, %string* } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, string length, current contents
-%map = type { { i8 *, i64 } } ; immer::map
-%rangemap = type { { { { { i32 (...)**, i32, i64 }*, { { i32 (...)**, i32, i32 }* } } } } } ; rng_map::RangeMap
-%set = type { { i8 *, i64 } } ; immer::set
-%iter = type { { i8 *, i8 *, i32, [14 x i8**] }, { { i8 *, i64 } } } ; immer::map_iter / immer::set_iter
-%list = type { { i64, i32, i8 *, i8 * } } ; immer::flex_vector
-%mpz = type { i32, i32, i64 * } ; mpz_t
-%mpz_hdr = type { %blockheader, %mpz } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, mpz_t
-%floating = type { i64, { i64, i32, i64, i64 * } } ; exp, mpfr_t
-%floating_hdr = type { %blockheader, %floating } ; 10-bit layout, 4-bit gc flags, 10 unused bits, 40-bit length, floating
-%blockheader = type { i64 }
-%block = type { %blockheader, [0 x i64 *] } ; 16-bit layout, 8-bit length, 32-bit tag, children
-
-%layout = type { i8, %layoutitem* } ; number of children, array of children
-%layoutitem = type { i64, i16 } ; offset, category
-
-; The layout of a block uniquely identifies the categories of its children as
-; well as how to allocate/deallocate them and whether to follow their pointers
-; during gc. Roughly speaking, the following rules apply:
-
-; %string *: malloc/free, do not follow
-; iN: noop, do not follow
-; %map, %set, %list: noop/drop_in_place, follow
-; %block *: managed heap, follow
-; %mpz *: malloc/mpz_clear->free, do not follow
-; %floating *: malloc/mpfr_clear->free, do not follow
-; %stringbuffer *: malloc->malloc/free->free, do not follow
-
-; We also automatically generate for each unique layout id a struct type
-; corresponding to the actual layout of that block. For example, if we have
-; the symbol symbol foo{Map{}, Int{}, Exp{}} : Exp{}, we would generate the type:
-
-; %layoutN = type { %blockheader, [0 x i64 *], %map, %mpz *, %block * }
-
-; Interface to the configuration parser
-declare %block* @parse_configuration(i8*)
-declare void @print_configuration(i8 *, %block *)
-)LLVM";
-  return target_dependent + rest;
+  return
+#include "config/llvm_header.inc"
+      ;
 }
 } // namespace
 
@@ -147,7 +62,9 @@ llvm::Type *get_param_type(value_type sort, llvm::Module *module) {
   case sort_category::Map:
   case sort_category::RangeMap:
   case sort_category::List:
-  case sort_category::Set: type = llvm::PointerType::getUnqual(type); break;
+  case sort_category::Set:
+    type = llvm::PointerType::getUnqual(module->getContext());
+    break;
   default: break;
   }
   return type;
@@ -168,22 +85,17 @@ llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
     return llvm::StructType::getTypeByName(module->getContext(), list_struct);
   case sort_category::Set:
     return llvm::StructType::getTypeByName(module->getContext(), set_struct);
-  case sort_category::Int:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), int_struct));
-  case sort_category::Float:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), float_struct));
-  case sort_category::StringBuffer:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), buffer_struct));
   case sort_category::Bool: return llvm::Type::getInt1Ty(module->getContext());
   case sort_category::MInt:
     return llvm::IntegerType::get(module->getContext(), sort.bits);
+  case sort_category::Int:
+  case sort_category::Float:
+  case sort_category::StringBuffer:
   case sort_category::Symbol:
   case sort_category::Variable:
-    return llvm::PointerType::getUnqual(
-        llvm::StructType::getTypeByName(module->getContext(), block_struct));
+    return llvm::PointerType::getUnqual(module->getContext());
+  case sort_category::MapIter:
+  case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
   }
 }
@@ -265,20 +177,10 @@ llvm::Value *allocate_term(
 llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
     char const *alloc_fn) {
-  llvm::Instruction *malloc = llvm::CallInst::CreateMalloc(
-      block, llvm::Type::getInt64Ty(block->getContext()), alloc_type, len,
-      nullptr, kore_heap_alloc(alloc_fn, block->getModule()));
+  auto *malloc = create_malloc(
+      block, len, kore_heap_alloc(alloc_fn, block->getModule()));
 
-  if (!block->empty()) {
-    set_debug_loc(&block->back());
-  }
-
-#if LLVM_VERSION_MAJOR < 16
-  malloc->insertAfter(&block->back());
-#else
-  malloc->insertInto(block, block->end());
-#endif
-
+  set_debug_loc(malloc);
   return malloc;
 }
 
@@ -347,6 +249,7 @@ std::string escape(std::string const &str) {
 llvm::Value *create_term::create_hook(
     kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
     std::string const &location_stack) {
+  auto *ptr_ty = llvm::PointerType::getUnqual(ctx_);
   assert(hook_att->get_arguments().size() == 1);
   auto *str_pattern
       = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
@@ -520,9 +423,8 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         get_or_insert_function(
             module_, "hook_MINT_import",
-            getvalue_type({sort_category::Int, 0}, module_),
-            llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
-            llvm::Type::getInt1Ty(ctx_)),
+            getvalue_type({sort_category::Int, 0}, module_), ptr_ty,
+            llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getFalse(ctx_)},
         "hook_MINT_uvalue", current_block_);
@@ -572,9 +474,8 @@ llvm::Value *create_term::create_hook(
     auto *result = llvm::CallInst::Create(
         get_or_insert_function(
             module_, "hook_MINT_import",
-            getvalue_type({sort_category::Int, 0}, module_),
-            llvm::Type::getInt64PtrTy(ctx_), llvm::Type::getInt64Ty(ctx_),
-            llvm::Type::getInt1Ty(ctx_)),
+            getvalue_type({sort_category::Int, 0}, module_), ptr_ty,
+            llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt1Ty(ctx_)),
         {ptr, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits),
          llvm::ConstantInt::getTrue(ctx_)},
         "hook_MINT_svalue", current_block_);
@@ -589,7 +490,7 @@ llvm::Value *create_term::create_hook(
     auto *type = getvalue_type(cat, module_);
     llvm::Instruction *ptr = llvm::CallInst::Create(
         get_or_insert_function(
-            module_, "hook_MINT_export", llvm::Type::getInt64PtrTy(ctx_),
+            module_, "hook_MINT_export", ptr_ty,
             getvalue_type({sort_category::Int, 0}, module_),
             llvm::Type::getInt64Ty(ctx_)),
         {mpz, llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), cat.bits)},
@@ -682,8 +583,29 @@ llvm::Value *create_term::create_hook(
   }
   std::string hook_name = "hook_" + name.substr(0, name.find('.')) + "_"
                           + name.substr(name.find('.') + 1);
-  return create_function_call(
+  auto *old_val = disable_gc();
+  auto *result = create_function_call(
       hook_name, pattern, true, false, true, location_stack);
+  enable_gc(old_val);
+  return result;
+}
+
+llvm::Value *create_term::disable_gc() {
+  llvm::Constant *global
+      = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  auto *old_val = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(ctx_), global_var, "was_enabled", current_block_);
+  new llvm::StoreInst(
+      llvm::ConstantInt::getFalse(ctx_), global_var, current_block_);
+  return old_val;
+}
+
+void create_term::enable_gc(llvm::Value *was_enabled) {
+  llvm::Constant *global
+      = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
+  auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  new llvm::StoreInst(was_enabled, global_var, current_block_);
 }
 
 // We use tailcc calling convention for apply_rule_* and eval_* functions to
@@ -763,14 +685,14 @@ llvm::Value *create_term::create_function_call(
   if (sret) {
     // we don't use alloca here because the tail call optimization pass for llvm
     // doesn't handle correctly functions with alloca
-    alloc_sret
-        = allocate_term(return_type, current_block_, "kore_alloc_always_gc");
+    alloc_sret = allocate_term(
+        return_type, current_block_, get_collection_alloc_fn(return_cat.cat));
     sret_type = return_type;
     real_args.insert(real_args.begin(), alloc_sret);
     types.insert(types.begin(), alloc_sret->getType());
     return_type = llvm::Type::getVoidTy(ctx_);
   } else if (collection) {
-    return_type = llvm::PointerType::getUnqual(return_type);
+    return_type = llvm::PointerType::getUnqual(ctx_);
   }
 
   llvm::FunctionType *func_type
@@ -781,6 +703,7 @@ llvm::Value *create_term::create_function_call(
   set_debug_loc(call);
   if (tailcc) {
     call->setCallingConv(llvm::CallingConv::Tail);
+    call->setTailCall();
   }
   if (sret) {
     llvm::Attribute sret_attr
@@ -853,8 +776,7 @@ llvm::Value *create_term::not_injection_case(
     new llvm::StoreInst(child_value, child_ptr, current_block_);
   }
 
-  auto *block_ptr = llvm::PointerType::getUnqual(
-      llvm::StructType::getTypeByName(module_->getContext(), block_struct));
+  auto *block_ptr = llvm::PointerType::getUnqual(module_->getContext());
   auto *bitcast = new llvm::BitCastInst(block, block_ptr, "", current_block_);
   if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
     auto *call = llvm::CallInst::Create(
@@ -938,7 +860,8 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
         std::string name = str_pattern->get_contents();
 
         proof_event p(definition_, module_);
-        current_block_ = p.hook_event_pre(name, current_block_, location_stack);
+        current_block_ = p.hook_event_pre(
+            name, constructor, current_block_, location_stack);
         llvm::Value *val = create_hook(
             symbol_decl->attributes().get(attribute_set::key::Hook).get(),
             constructor, location_stack);
@@ -952,15 +875,13 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
               fn_name, constructor, false, true, false, location_stack),
           true);
     }
-    if (auto cat
-        = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get())
-              ->get_category(definition_)
-              .cat;
+    if (auto *sort
+        = dynamic_cast<kore_composite_sort *>(symbol->get_arguments()[0].get());
         symbol_decl->attributes().contains(attribute_set::key::SortInjection)
-        && (cat == sort_category::Symbol)) {
+        && (sort->get_category(definition_).cat == sort_category::Symbol)) {
       std::pair<llvm::Value *, bool> val = create_allocation(
           constructor->get_arguments()[0].get(), location_stack);
-      if (val.second) {
+      if (val.second && !definition_->get_supersorts()[sort].empty()) {
         llvm::Instruction *tag = llvm::CallInst::Create(
             get_or_insert_function(
                 module_, "get_tag", llvm::Type::getInt32Ty(ctx_),
@@ -1042,6 +963,7 @@ bool make_function(
   std::vector<llvm::Type *> param_types;
   std::vector<std::string> param_names;
   std::vector<llvm::Metadata *> debug_args;
+  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
   for (auto &entry : vars) {
     auto *sort
         = dynamic_cast<kore_composite_sort *>(entry.second->get_sort().get());
@@ -1056,9 +978,7 @@ bool make_function(
     case sort_category::Map:
     case sort_category::RangeMap:
     case sort_category::List:
-    case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(param_type);
-      break;
+    case sort_category::Set: param_type = ptr_ty; break;
     default: break;
     }
 
@@ -1072,9 +992,7 @@ bool make_function(
   case sort_category::Map:
   case sort_category::RangeMap:
   case sort_category::List:
-  case sort_category::Set:
-    return_type = llvm::PointerType::getUnqual(return_type);
-    break;
+  case sort_category::Set: return_type = ptr_ty; break;
   default: break;
   }
   llvm::FunctionType *func_type
@@ -1125,7 +1043,20 @@ bool make_function(
     auto *call = llvm::CallInst::Create(step, {retval}, "", current_block);
     set_debug_loc(call);
     call->setCallingConv(llvm::CallingConv::Tail);
+    call->setTailCallKind(llvm::CallInst::TCK_MustTail);
     retval = call;
+  } else {
+    if (auto *call = llvm::dyn_cast<llvm::CallInst>(retval)) {
+      // check that musttail requirements are met:
+      // 1. Call is in tail position (guaranteed)
+      // 2. Return returns return value of call (guaranteed)
+      // 3. Calling convention is tailcc
+      // 4. Function is not sret (here approximated by checking if return type is void)
+      if (call->getCallingConv() == llvm::CallingConv::Tail
+          && call->getType() != llvm::Type::getVoidTy(module->getContext())) {
+        call->setTailCallKind(llvm::CallInst::TCK_MustTail);
+      }
+    }
   }
   auto *ret
       = llvm::ReturnInst::Create(module->getContext(), retval, current_block);
@@ -1176,7 +1107,7 @@ std::string make_apply_rule_function(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(param_type);
+      param_type = llvm::PointerType::getUnqual(module->getContext());
       break;
     default: break;
     }
@@ -1231,7 +1162,7 @@ std::string make_apply_rule_function(
       if (!arg->getType()->isPointerTy()) {
         auto *ptr = allocate_term(
             arg->getType(), creator.get_current_block(),
-            "kore_alloc_always_gc");
+            get_collection_alloc_fn(cat.cat));
         new llvm::StoreInst(arg, ptr, creator.get_current_block());
         arg = ptr;
       }
@@ -1249,6 +1180,7 @@ std::string make_apply_rule_function(
       = llvm::CallInst::Create(step, args, "", creator.get_current_block());
   set_debug_loc(retval);
   retval->setCallingConv(llvm::CallingConv::Tail);
+  retval->setTailCallKind(llvm::CallInst::TCK_MustTail);
   llvm::ReturnInst::Create(
       module->getContext(), retval, creator.get_current_block());
   return name;
@@ -1264,7 +1196,7 @@ std::string make_side_condition_function(
   }
   std::string name = "side_condition_" + std::to_string(axiom->get_ordinal());
   if (make_function(
-          name, pattern, definition, module, false, false, false, axiom,
+          name, pattern, definition, module, true, false, false, axiom,
           ".sc")) {
     return name;
   }

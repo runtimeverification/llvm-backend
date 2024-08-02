@@ -1,0 +1,118 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}())]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 196 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}())]
+function: LblinitKCell{} (0)
+rule: 197 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}()]
+rule: 248 1
+  VarK = kore[Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}()]
+function: LblinitGCell{} (1)
+rule: 194 0
+hook: LIST.unit Lbl'Stop'List{} (0)
+  function: Lbl'Stop'List{} (0)
+hook result: kore[Lbl'Stop'List{}()]
+function: LblinitGeneratedCounterCell{} (2)
+rule: 195 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'g'-GT-'{}(Lbl'Stop'List{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 148 2
+  Var'Unds'Gen0 = kore[Lbl'-LT-'g'-GT-'{}(Lbl'Stop'List{}())]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+rule: 147 3
+  Var'Hash'Fresh = kore[\dv{SortInt{}}("0")]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'fresh'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}(),kseq{}(Lbl'Hash'fresh'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}(),dotk{}()))]
+  Var'Unds'Gen0 = kore[Lbl'Stop'List{}()]
+hook: LIST.concat Lbl'Unds'List'Unds'{} (1:0)
+  function: Lbl'Unds'List'Unds'{} (1:0)
+    hook: LIST.element LblListItem{} (1:0:1)
+      function: LblListItem{} (1:0:1)
+        function: LblfreshInt'LParUndsRParUnds'INT'Unds'Int'Unds'Int{} (1:0:1:0)
+          hook: INT.add Lbl'UndsPlus'Int'Unds'{} (1:0:1:0:0)
+            function: Lbl'UndsPlus'Int'Unds'{} (1:0:1:0:0)
+            arg: kore[\dv{SortInt{}}("0")]
+            arg: kore[\dv{SortInt{}}("0")]
+          hook result: kore[\dv{SortInt{}}("0")]
+        rule: 192 1
+          VarI = kore[\dv{SortInt{}}("0")]
+      arg: kore[\dv{SortInt{}}("0")]
+    hook result: kore[LblListItem{}(\dv{SortInt{}}("0"))]
+  arg: kore[Lbl'Stop'List{}()]
+  arg: kore[LblListItem{}(\dv{SortInt{}}("0"))]
+hook result: kore[LblListItem{}(\dv{SortInt{}}("0"))]
+hook: INT.add Lbl'UndsPlus'Int'Unds'{} (2:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (2:0)
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("1")]
+rule: 147 3
+  Var'Hash'Fresh = kore[\dv{SortInt{}}("1")]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'fresh'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}(),dotk{}())]
+  Var'Unds'Gen0 = kore[LblListItem{}(\dv{SortInt{}}("0"))]
+hook: LIST.concat Lbl'Unds'List'Unds'{} (1:0)
+  function: Lbl'Unds'List'Unds'{} (1:0)
+    hook: LIST.element LblListItem{} (1:0:1)
+      function: LblListItem{} (1:0:1)
+        function: LblfreshInt'LParUndsRParUnds'INT'Unds'Int'Unds'Int{} (1:0:1:0)
+          hook: INT.add Lbl'UndsPlus'Int'Unds'{} (1:0:1:0:0)
+            function: Lbl'UndsPlus'Int'Unds'{} (1:0:1:0:0)
+            arg: kore[\dv{SortInt{}}("1")]
+            arg: kore[\dv{SortInt{}}("0")]
+          hook result: kore[\dv{SortInt{}}("1")]
+        rule: 192 1
+          VarI = kore[\dv{SortInt{}}("1")]
+      arg: kore[\dv{SortInt{}}("1")]
+    hook result: kore[LblListItem{}(\dv{SortInt{}}("1"))]
+  arg: kore[LblListItem{}(\dv{SortInt{}}("0"))]
+  arg: kore[LblListItem{}(\dv{SortInt{}}("1"))]
+hook result: kore[Lbl'Unds'List'Unds'{}(LblListItem{}(\dv{SortInt{}}("0")),LblListItem{}(\dv{SortInt{}}("1")))]
+hook: INT.add Lbl'UndsPlus'Int'Unds'{} (2:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (2:0)
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("2")]
+rule: 147 3
+  Var'Hash'Fresh = kore[\dv{SortInt{}}("2")]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[Lbl'Unds'List'Unds'{}(LblListItem{}(\dv{SortInt{}}("0")),LblListItem{}(\dv{SortInt{}}("1")))]
+hook: LIST.concat Lbl'Unds'List'Unds'{} (1:0)
+  function: Lbl'Unds'List'Unds'{} (1:0)
+    hook: LIST.element LblListItem{} (1:0:1)
+      function: LblListItem{} (1:0:1)
+        function: LblfreshInt'LParUndsRParUnds'INT'Unds'Int'Unds'Int{} (1:0:1:0)
+          hook: INT.add Lbl'UndsPlus'Int'Unds'{} (1:0:1:0:0)
+            function: Lbl'UndsPlus'Int'Unds'{} (1:0:1:0:0)
+            arg: kore[\dv{SortInt{}}("2")]
+            arg: kore[\dv{SortInt{}}("0")]
+          hook result: kore[\dv{SortInt{}}("2")]
+        rule: 192 1
+          VarI = kore[\dv{SortInt{}}("2")]
+      arg: kore[\dv{SortInt{}}("2")]
+    hook result: kore[LblListItem{}(\dv{SortInt{}}("2"))]
+  arg: kore[Lbl'Unds'List'Unds'{}(LblListItem{}(\dv{SortInt{}}("0")),LblListItem{}(\dv{SortInt{}}("1")))]
+  arg: kore[LblListItem{}(\dv{SortInt{}}("2"))]
+hook result: kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(\dv{SortInt{}}("0")),LblListItem{}(\dv{SortInt{}}("1"))),LblListItem{}(\dv{SortInt{}}("2")))]
+hook: INT.add Lbl'UndsPlus'Int'Unds'{} (2:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (2:0)
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("3")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'g'-GT-'{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(\dv{SortInt{}}("0")),LblListItem{}(\dv{SortInt{}}("1"))),LblListItem{}(\dv{SortInt{}}("2")))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("3")))]

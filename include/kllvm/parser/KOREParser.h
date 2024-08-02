@@ -23,6 +23,7 @@ public:
   ptr<kore_definition> definition();
   sptr<kore_pattern> pattern();
   sptr<kore_sort> sort();
+  ptr<kore_symbol> symbol();
   std::vector<ptr<kore_declaration>> declarations();
 
   std::pair<std::string, std::vector<sptr<kore_sort>>> symbol_sort_list();

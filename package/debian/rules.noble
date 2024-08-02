@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector optimize=-lto
+
+DESTDIR=$(shell pwd)/debian/k-llvm-backend
+PREFIX=/usr
+PYTHON_VERSION=python3.12
+PYTHON_DEB_VERSION=python3
+export DESTDIR
+export PREFIX
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	mkdir build
+	cmake  \
+		-S . \
+		-B build \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DK_LLVM_BACKEND_LTO=OFF \
+		-DCMAKE_INSTALL_PREFIX=$(PREFIX) \
+		-DCMAKE_C_COMPILER=/usr/bin/clang-17 \
+		-DCMAKE_CXX_COMPILER=/usr/bin/clang++-17
+	cmake --build build
+
+override_dh_auto_install:
+	cmake --install build
+
+override_dh_strip:
+	dh_strip -Xliballoc.a -Xlibarithmetic.a -XlibAST.a -Xlibutil.a -XlibParser.a -Xlibcollect.a -Xlibcollections.a -Xlibjson.a -Xlibstrings.a -Xlibmeta.a -Xlibio.a

@@ -1,0 +1,47 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[\dv{SortInt{}}("42")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+function: LblinitGeneratedTopCell{} ()
+rule: 168 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+function: LblinitKCell{} (0)
+rule: 169 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+function: Lblproject'Coln'Exp{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("42"))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[\dv{SortInt{}}("42")]
+rule: 213 1
+  VarK = kore[\dv{SortInt{}}("42")]
+function: LblinitSumCell{} (1)
+rule: 170 0
+function: LblinitGeneratedCounterCell{} (2)
+rule: 167 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("42"),dotk{}())),Lbl'-LT-'sum'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 133 4
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'Gen1 = kore[kseq{}(\dv{SortInt{}}("42"),dotk{}())]
+  VarPgm = kore[\dv{SortInt{}}("42")]
+  VarSUM = kore[\dv{SortInt{}}("0")]
+hook: INT.add Lbl'UndsPlus'Int'Unds'{} (1:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (1:0)
+    function: Lblproject'Coln'Int{} (1:0:1)
+    rule: 218 1
+      VarK = kore[\dv{SortInt{}}("42")]
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("42")]
+hook result: kore[\dv{SortInt{}}("42")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'sum'-GT-'{}(\dv{SortInt{}}("42")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

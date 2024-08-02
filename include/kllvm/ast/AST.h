@@ -132,8 +132,10 @@ enum class sort_category {
   Bool,
   Symbol,
   Variable,
-  MInt,
-  RangeMap
+  RangeMap,
+  SetIter,
+  MapIter,
+  MInt
 };
 
 // represents the syntactic category of an LLVM backend term at runtime
@@ -922,6 +924,9 @@ private:
 
   kore_symbol *inj_symbol_{};
 
+  std::optional<SubsortMap> subsorts_;
+  std::optional<SubsortMap> supersorts_;
+
   /*
    * Insert symbols into this definition that have knowable labels, but cannot
    * be directly referenced in user code:
@@ -1020,16 +1025,17 @@ public:
   [[nodiscard]] std::list<kore_axiom_declaration *> const &get_axioms() const {
     return axioms_;
   }
-  [[nodiscard]] kore_axiom_declaration *
+  [[nodiscard]] kore_axiom_declaration const &
   get_axiom_by_ordinal(size_t ordinal) const {
-    return ordinals_.at(ordinal);
+    return *ordinals_.at(ordinal);
   }
   [[nodiscard]] kore_symbolStringMapType const &get_fresh_functions() const {
     return fresh_functions_;
   }
   kore_symbol *get_inj_symbol() { return inj_symbol_; }
 
-  std::vector<kore_composite_sort *> const &get_all_sorts() const {
+  [[nodiscard]] std::vector<kore_composite_sort *> const &
+  get_all_sorts() const {
     return all_sorts_;
   }
 };

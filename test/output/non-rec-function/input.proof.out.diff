@@ -1,0 +1,42 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
+function: LblinitGeneratedTopCell{} ()
+rule: 104 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
+function: LblinitKCell{} (0)
+rule: 105 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()))]
+rule: 145 1
+  VarK = kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()))]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 103 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 99 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  VarX = kore[Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()]
+function: Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} (0:0:0)
+  function: Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} (0:0:0:0)
+  rule: 102 1
+    VarX = kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())]
+rule: 102 1
+  VarX = kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

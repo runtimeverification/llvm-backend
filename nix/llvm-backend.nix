@@ -1,5 +1,5 @@
-{ lib, src, cmake, flex, fmt, pkg-config, llvm, libllvm, libcxxabi, stdenv, boost, gmp
-, jemalloc, libffi, libiconv, libyaml, mpfr, ncurses, python310, unixtools,
+{ lib, src, cmake, flex, fmt, pkg-config, llvm, libllvm, libcxx, stdenv, boost, gmp
+, jemalloc, libffi, libiconv, libunwind, libyaml, mpfr, ncurses, python310, unixtools,
 # Runtime dependencies:
 host,
 # Options:
@@ -15,7 +15,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ cmake flex llvm pkg-config ];
   buildInputs = [ libyaml ];
   propagatedBuildInputs = [
-    boost fmt gmp jemalloc libffi mpfr ncurses python-env unixtools.xxd
+    boost fmt gmp libunwind jemalloc libffi mpfr ncurses python-env unixtools.xxd
   ] ++ lib.optional stdenv.isDarwin libiconv;
 
   dontStrip = true;
@@ -40,8 +40,10 @@ stdenv.mkDerivation {
       --replace '"-liconv"' '"-L${libiconv}/lib" "-liconv"' \
       --replace '"-lncurses"' '"-L${ncurses}/lib" "-lncurses"' \
       --replace '"-ltinfo"' '"-L${ncurses}/lib" "-ltinfo"' \
+      --replace '"$libunwind"' '"-L${libunwind}/lib" "-lunwind"' \
       --replace '"-L@BREW_PREFIX@/opt/libffi/lib"' ' ' \
-      --replace '-L@BREW_PREFIX@/lib' '-L${libcxxabi}/lib' \
+      --replace '"-L@LLVM_LIBRARY_DIR@"' ' ' \
+      --replace '-L@BREW_PREFIX@/lib' '-L${libcxx}/lib' \
       --replace '-I "$(dirname "$0")"/../include/kllvm' \
                 '-I "$(dirname "$0")"/../include/kllvm -I ${boost.dev}/include -I ${fmt.dev}/include'
   '';

@@ -37,49 +37,41 @@ private:
    * proof output and continuation, then loading the output filename from its
    * global.
    *
-   * Returns a triple [proof enabled, merge, output_file]; see `proofBranch` and
-   * `emitGetOutputFileName`.
+   * Returns a triple [proof enabled, merge, proof_writer]; see `proofBranch`
+   * and `emitGetOutputFileName`.
    */
   std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
   event_prelude(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `term` to the specified `outputFile` as
+   * Emit a call that will serialize `term` to the specified `proof_writer` as
    * binary KORE. This function can be called on any term, but the sort of that
    * term must be known.
    */
   llvm::CallInst *emit_serialize_term(
-      kore_composite_sort &sort, llvm::Value *output_file, llvm::Value *term,
+      kore_composite_sort &sort, llvm::Value *proof_writer, llvm::Value *term,
       llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `config` to the specified `outputFile` as
-   * binary KORE. This function does not require a sort, but the configuration
-   * passed must be a top-level configuration.
-   */
-  llvm::CallInst *emit_serialize_configuration(
-      llvm::Value *output_file, llvm::Value *config,
-      llvm::BasicBlock *insert_at_end);
-
-  /*
-   * Emit a call that will serialize `value` to the specified `outputFile`.
+   * Emit a call that will serialize `value` to the specified `proof_writer`.
    */
   llvm::CallInst *emit_write_uint64(
-      llvm::Value *output_file, uint64_t value,
+      llvm::Value *proof_writer, uint64_t value,
       llvm::BasicBlock *insert_at_end);
 
   /*
-  * Emit a call that will serialize a boolean value to the specified `output_file`.
+  * Emit a call that will serialize a boolean value to the specified
+  * `proof_writer`.
   */
-  llvm::CallInst *emit_bool_term(
-      llvm::Value *output_file, llvm::Value *term,
+  llvm::CallInst *emit_write_bool(
+      llvm::Value *proof_writer, llvm::Value *term,
       llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `str` to the specified `outputFile`.
+   * Emit a call that will serialize `str` to the specified `proof_writer`.
    */
   llvm::CallInst *emit_write_string(
-      llvm::Value *output_file, std::string const &str,
+      llvm::Value *proof_writer, std::string const &str,
       llvm::BasicBlock *insert_at_end);
 
   /*
@@ -94,15 +86,15 @@ private:
   llvm::BinaryOperator *emit_no_op(llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit instructions to load the path of the interpreter's current output
-   * file; used here for binary proof trace data.
+   * Emit instructions to get a pointer to the interpreter's proof_trace_writer;
+   * the data structure that outputs proof trace data.
    */
-  llvm::LoadInst *emit_get_output_file_name(llvm::BasicBlock *insert_at_end);
+  llvm::LoadInst *emit_get_proof_trace_writer(llvm::BasicBlock *insert_at_end);
 
 public:
   [[nodiscard]] llvm::BasicBlock *hook_event_pre(
-      std::string const &name, llvm::BasicBlock *current_block,
-      std::string const &location_stack);
+      std::string const &name, kore_composite_pattern *pattern,
+      llvm::BasicBlock *current_block, std::string const &location_stack);
 
   [[nodiscard]] llvm::BasicBlock *hook_event_post(
       llvm::Value *val, kore_composite_sort *sort,
@@ -113,7 +105,7 @@ public:
       llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *rewrite_event_pre(
-      kore_axiom_declaration *axiom, uint64_t arity,
+      kore_axiom_declaration const &axiom, uint64_t arity,
       std::map<std::string, kore_variable_pattern *> vars,
       llvm::StringMap<llvm::Value *> const &subst,
       llvm::BasicBlock *current_block);
@@ -130,11 +122,11 @@ public:
   function_event_post(llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_pre(
-      kore_axiom_declaration *axiom, std::vector<llvm::Value *> const &args,
-      llvm::BasicBlock *current_block);
+      kore_axiom_declaration const &axiom,
+      std::vector<llvm::Value *> const &args, llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *side_condition_event_post(
-      kore_axiom_declaration *axiom, llvm::Value *check_result,
+      kore_axiom_declaration const &axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
   proof_event(kore_definition *definition, llvm::Module *module)

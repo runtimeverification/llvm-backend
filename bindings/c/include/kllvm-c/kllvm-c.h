@@ -162,6 +162,18 @@ void kllvm_free_all_memory(void);
 
 bool kllvm_mutable_bytes_enabled(void);
 
+/* Definitions */
+
+/**
+ * Parse the given KORE definition, then if any of its axioms have a `label`
+ * attribute that matches the supplied label, return the name of the function
+ * symbol that attempts matching a pattern against that axiom (and will
+ * therefore populate the backend's global matching log).
+ *
+ * If no such axiom exists, return `nullptr`.
+ */
+char *kore_match_function_name(char const *defn_path, char const *label);
+
 #ifdef __cplusplus
 }
 #endif

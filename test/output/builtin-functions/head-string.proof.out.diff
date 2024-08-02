@@ -1,0 +1,41 @@
+version: 11
+function: Lblhead'LParUndsRParUnds'BUILTIN-FUNCTIONS-SYNTAX'Unds'String'Unds'String{} ()
+rule: 220 1
+  VarS = kore[\dv{SortString{}}("string")]
+hook: STRING.substr LblsubstrString'LParUndsCommUndsCommUndsRParUnds'STRING-COMMON'Unds'String'Unds'String'Unds'Int'Unds'Int{} ()
+  function: LblsubstrString'LParUndsCommUndsCommUndsRParUnds'STRING-COMMON'Unds'String'Unds'String'Unds'Int'Unds'Int{} ()
+  arg: kore[\dv{SortString{}}("string")]
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortString{}}("s")]
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[\dv{SortString{}}("s")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("s"))]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("s"))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("s"))]
+function: LblinitGeneratedTopCell{} ()
+rule: 222 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("s"))]
+function: LblinitKCell{} (0)
+rule: 223 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("s"))]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("s"))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[\dv{SortString{}}("s")]
+rule: 280 1
+  VarK = kore[\dv{SortString{}}("s")]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 221 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortString{}}("s"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortString{}}("s"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

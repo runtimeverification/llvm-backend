@@ -1,0 +1,41 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5")))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
+function: LblinitGeneratedTopCell{} ()
+rule: 2735 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
+function: LblinitKCell{} (0)
+rule: 2736 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5")))]
+rule: 2807 1
+  VarK = kore[Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5")))]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 2734 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblsucc'LParUndsRParUnds'DV'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 2687 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  VarX = kore[\dv{SortInt{}}("5")]
+hook: INT.add Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
+  function: Lbl'UndsPlus'Int'Unds'{} (0:0:0:0)
+  arg: kore[\dv{SortInt{}}("5")]
+  arg: kore[\dv{SortInt{}}("1")]
+hook result: kore[\dv{SortInt{}}("6")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfoo'LParUndsRParUnds'DV'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("6")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

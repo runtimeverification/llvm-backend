@@ -12,7 +12,7 @@ let
   clang = llvmPackages.clangNoLibcxx;
 
   llvm-backend = prev.callPackage ./llvm-backend.nix {
-    inherit (llvmPackages) llvm libllvm libcxxabi;
+    inherit (llvmPackages) llvm libllvm libcxx libunwind;
     stdenv = llvmPackages.stdenv;
     cmakeBuildType = prev.llvm-backend-build-type;
     src = prev.llvm-backend-src;
@@ -45,11 +45,20 @@ let
     mkdir -p "$out/bin"
     cp ${llvm-backend.src}/bin/llvm-kompile-testing "$out/bin"
     sed -i "$out/bin/llvm-kompile-testing" \
-        -e '/@PROJECT_SOURCE_DIR@/ c ${java} -jar ${jar} $definition qbaL $dt_dir 1'
+        -e 's!installed_jar=.*!installed_jar="${jar}"!g'
     substituteInPlace $out/bin/llvm-kompile-testing \
-      --replace 'llvm-kompile' '${llvm-backend}/bin/llvm-kompile'
+      --replace 'llvm-kompile' '${llvm-backend}/bin/llvm-kompile' \
+      --replace 'java -jar "$installed_jar" "$definition" qbaL "$dt_dir" 1' \
+                '${java} -jar "$installed_jar" "$definition" qbaL "$dt_dir" 1'
     chmod +x "$out/bin/llvm-kompile-testing"
     patchShebangs "$out/bin/llvm-kompile-testing"
+  '';
+
+  integration-test-env = ''
+    export PYTHON_INTERPRETER=${llvm-backend.python-interpreter}
+    export BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python
+    export INCLUDE_INSTALL_PATH=${llvm-backend}/include
+    export LIT_USE_NIX=1
   '';
 
   integration-tests = prev.stdenv.mkDerivation {
@@ -64,16 +73,16 @@ let
       llvm-backend # the system under test
     ];
     configurePhase = "true";
+
     buildPhase = ''
       runHook preBuild
 
-      PYTHON_INTERPRETER=${llvm-backend.python-interpreter} \
-      BINDINGS_INSTALL_PATH=${llvm-backend}/lib/kllvm/python \
-      INCLUDE_INSTALL_PATH=${llvm-backend}/include \
-        LIT_USE_NIX=1 lit -v test
+      ${integration-test-env}
+      lit -v test
 
       runHook postBuild
     '';
+
     installPhase = ''
       runHook preInstall
 
@@ -83,8 +92,13 @@ let
       runHook postInstall
     '';
   };
+
+  integration-test-shell = prev.mkShell {
+    inputsFrom = [ integration-tests ];
+    shellHook = integration-test-env;
+  };
 in {
   inherit kllvm llvm-backend llvm-backend-matching llvm-kompile-testing
-    integration-tests;
+    integration-tests integration-test-shell;
   inherit (prev) clang; # for compatibility
 }

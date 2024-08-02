@@ -35,6 +35,8 @@ private:
   bool populate_static_set(kore_pattern *pattern);
   std::pair<llvm::Value *, bool> create_allocation(
       kore_pattern *pattern, std::string const &location_stack = "");
+  llvm::Value *disable_gc();
+  void enable_gc(llvm::Value *was_enabled);
 
 public:
   create_term(

@@ -1,0 +1,35 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}())]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 97 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}())]
+function: LblinitKCell{} (0)
+rule: 98 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}()]
+rule: 138 1
+  VarK = kore[LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}()]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 96 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(LblFooA'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 93 2
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(LblFooB'LParRParUnds'SINGLE-REWRITE-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

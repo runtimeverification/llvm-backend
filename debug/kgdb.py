@@ -375,10 +375,10 @@ class termPrinter:
         self.kompiled_dir = getKompiledDir()
 
     def getSymbolNameForTag(self, tag):
-        return gdb.lookup_global_symbol("table_getSymbolNameForTag").value()[tag]
+        return gdb.lookup_global_symbol("table_get_symbol_name_for_tag").value()[tag]
 
     def isSymbolABinder(self, tag):
-        return gdb.lookup_global_symbol("table_isSymbolABinder").value()[tag]
+        return gdb.lookup_global_symbol("table_is_symbol_a_binder").value()[tag]
 
     def getLayoutData(self, layout):
         return gdb.lookup_global_symbol("layout_" + str(layout)).value()
@@ -610,7 +610,7 @@ class termPrinter:
             argData = layoutData['args'] + i
             arg = subject.cast(self.long_int) + int(argData.dereference()['offset'])
             cat = argData.dereference()['cat']
-            sort = gdb.lookup_global_symbol("table_getArgumentSortsForTag").value()[tag][i].string("iso-8859-1")
+            sort = gdb.lookup_global_symbol("table_get_argument_sorts_for_tag").value()[tag][i].string("iso-8859-1")
             if cat == @MAP_LAYOUT@:
                 self.appendMap(arg.cast(self.map_ptr), sort)
             elif cat == @RANGEMAP_LAYOUT@:
@@ -748,7 +748,7 @@ Does not actually take a step if matching succeeds.
             argv = gdb.string_to_argv(arg)
             if gdb.selected_inferior().pid == 0:
                 raise gdb.GdbError("You can't do that without a process to debug.")
-            gdb.lookup_global_symbol("resetMatchReason").value()()
+            gdb.lookup_global_symbol("reset_match_reason").value()()
             if (len(argv) != 2):
                 raise gdb.GdbError("k match takes two arguments.")
             fun = gdb.lookup_global_symbol(argv[0] + '.match')
@@ -759,19 +759,19 @@ Does not actually take a step if matching succeeds.
             except gdb.error as err:
                 raise gdb.GdbError(*err.args)
             fun.value()(subject)
-            entries = gdb.lookup_global_symbol("getMatchLog").value()()
-            size = int(gdb.lookup_global_symbol("getMatchLogSize").value()())
+            entries = gdb.lookup_global_symbol("getmatch_log").value()()
+            size = int(gdb.lookup_global_symbol("getmatch_log_size").value()())
             for i in range(size):
                 entry = entries[i]
                 if entry['kind'] == self.SUCCESS:
                     print('Match succeeds')
                 elif entry['kind'] == self.FUNCTION:
-                    debugFunctionName = entry['debugName'].string("iso-8859-1")
+                    debugFunctionName = entry['debug_name'].string("iso-8859-1")
                     functionName = entry['function'].string("iso-8859-1")
                     print(debugFunctionName + '(', end='')
                     name = functionName if functionName[:5] == 'hook_' else debugFunctionName
                     function = gdb.lookup_global_symbol(name).value().type
-                    front = gdb.lookup_global_symbol("getMatchFnArgs").value()(entry.address)
+                    front = gdb.lookup_global_symbol("get_match_fn_args").value()(entry.address)
                     conn = ""
                     for i in range(len(function.fields())):
                         arg = front[i]

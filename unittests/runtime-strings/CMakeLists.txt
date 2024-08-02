@@ -9,6 +9,7 @@ target_link_libraries(runtime-strings-tests
   strings
   arithmetic
   alloc
+  lto-static
   gmp
   mpfr
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}

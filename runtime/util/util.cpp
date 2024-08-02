@@ -34,9 +34,9 @@ block *construct_raw_term(void *subject, char const *sort, bool raw_value) {
   return static_cast<block *>(construct_composite_pattern(tag, args));
 }
 
-void print_proof_hint_header(FILE *file) {
-  uint32_t version = 9;
-  fmt::print(file, "HINT");
-  fwrite(&version, sizeof(version), 1, file);
+void print_proof_hint_header(kllvm::proof_trace_writer *writer) {
+  uint32_t version = 11;
+  writer->write_string("HINT");
+  writer->write_uint32(version);
 }
 }

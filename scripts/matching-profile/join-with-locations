@@ -1,0 +1,6 @@
+#!/bin/bash
+# Converts a table of ordinals and seconds to a table of source/location and seconds. Strips directory from file paths.
+while read -r ordinal time; do
+  loc=$(llvm-kompile-compute-loc "$2" $ordinal)
+  echo "${loc##*/} $time"
+done < "$1"

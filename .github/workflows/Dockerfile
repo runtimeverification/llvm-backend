@@ -27,14 +27,17 @@ RUN     apt-get update                    \
           libfmt-dev                      \
           libgmp-dev                      \
           libmpfr-dev                     \
-          libyaml-dev                     \
           libjemalloc-dev                 \
+          libunwind-dev                   \
+          libyaml-dev                     \
           openjdk-${JDK_VERSION}-jdk      \
           curl                            \
           maven                           \
           pkg-config                      \
+          pipx                            \
           python3                         \
-          python3-pip                     \
+          python3-dev                     \
+          python3-pybind11                \
           xxd
 
 RUN locale-gen en_US.UTF-8
@@ -51,8 +54,7 @@ RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP 
 
 USER $USER:$GROUP
 
-RUN    pip3 install --user --upgrade pip  \
-    && ~/.local/bin/pip3 install --user lit pybind11
+RUN pipx install lit
 
 ADD matching/pom.xml /home/user/.tmp-maven/
 RUN    cd /home/user/.tmp-maven \

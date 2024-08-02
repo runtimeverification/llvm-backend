@@ -1,0 +1,140 @@
+version: 11
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}()]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
+function: LblinitGeneratedTopCell{} ()
+rule: 2812 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
+function: LblinitKCell{} (0)
+rule: 2813 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}())]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}()]
+rule: 2907 1
+  VarK = kore[Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}()]
+function: LblinitMessagesCell{} (1)
+rule: 2815 0
+hook: MAP.unit Lbl'Stop'MessageCellMap{} (0)
+  function: Lbl'Stop'MessageCellMap{} (0)
+hook result: kore[Lbl'Stop'MessageCellMap{}()]
+function: LblinitGeneratedCounterCell{} (2)
+rule: 2811 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'init'Unds'CELL-VALUE-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'messages'-GT-'{}(Lbl'Stop'MessageCellMap{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 2759 3
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'messages'-GT-'{}(Lbl'Stop'MessageCellMap{}())]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+rule: 2760 6
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'newMsg'LParUndsCommUndsCommUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int'Unds'Int'Unds'String{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("50"),\dv{SortString{}}("barAccount")),kseq{}(Lbl'Hash'newMsg'LParUndsCommUndsCommUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int'Unds'Int'Unds'String{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("200"),\dv{SortString{}}("oofAccount")),kseq{}(Lbl'Hash'delMsg'LParUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("1")),kseq{}(Lbl'Hash'inMessages'LParUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("1")),dotk{}()))))]
+  Var'Unds'DotVar2 = kore[Lbl'Stop'MessageCellMap{}()]
+  VarID = kore[\dv{SortInt{}}("0")]
+  VarREC = kore[\dv{SortString{}}("fooAccount")]
+  VarVAL = kore[\dv{SortInt{}}("100")]
+hook: MAP.concat Lbl'Unds'MessageCellMap'Unds'{} (1:0)
+  function: Lbl'Unds'MessageCellMap'Unds'{} (1:0)
+    hook: MAP.element LblMessageCellMapItem{} (1:0:0)
+      function: LblMessageCellMapItem{} (1:0:0)
+      arg: kore[Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0"))]
+      arg: kore[Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))]
+    hook result: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))))]
+  arg: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))))]
+  arg: kore[Lbl'Stop'MessageCellMap{}()]
+hook result: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))))]
+rule: 2760 6
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'newMsg'LParUndsCommUndsCommUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int'Unds'Int'Unds'String{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("200"),\dv{SortString{}}("oofAccount")),kseq{}(Lbl'Hash'delMsg'LParUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("1")),kseq{}(Lbl'Hash'inMessages'LParUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("1")),dotk{}())))]
+  Var'Unds'DotVar2 = kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))))]
+  VarID = kore[\dv{SortInt{}}("1")]
+  VarREC = kore[\dv{SortString{}}("barAccount")]
+  VarVAL = kore[\dv{SortInt{}}("50")]
+hook: MAP.concat Lbl'Unds'MessageCellMap'Unds'{} (1:0)
+  function: Lbl'Unds'MessageCellMap'Unds'{} (1:0)
+    hook: MAP.element LblMessageCellMapItem{} (1:0:0)
+      function: LblMessageCellMapItem{} (1:0:0)
+      arg: kore[Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1"))]
+      arg: kore[Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount")))]
+    hook result: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount"))))]
+  arg: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount"))))]
+  arg: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))))]
+hook result: kore[Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))]
+rule: 2760 6
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'delMsg'LParUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("1")),kseq{}(Lbl'Hash'inMessages'LParUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("1")),dotk{}()))]
+  Var'Unds'DotVar2 = kore[Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))]
+  VarID = kore[\dv{SortInt{}}("2")]
+  VarREC = kore[\dv{SortString{}}("oofAccount")]
+  VarVAL = kore[\dv{SortInt{}}("200")]
+hook: MAP.concat Lbl'Unds'MessageCellMap'Unds'{} (1:0)
+  function: Lbl'Unds'MessageCellMap'Unds'{} (1:0)
+    hook: MAP.element LblMessageCellMapItem{} (1:0:0)
+      function: LblMessageCellMapItem{} (1:0:0)
+      arg: kore[Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2"))]
+      arg: kore[Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))]
+    hook result: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount"))))]
+  arg: kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount"))))]
+  arg: kore[Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))]
+hook result: kore[Lbl'Unds'MessageCellMap'Unds'{}(Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount"))))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))]
+rule: 2757 6
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'inMessages'LParUndsRParUnds'CELL-VALUE-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("1")),dotk{}())]
+  Var'Unds'DotVar2 = kore[Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))]
+  Var'Unds'Gen0 = kore[Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("50"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("barAccount"))]
+  VarID = kore[\dv{SortInt{}}("1")]
+rule: 2758 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen3 = kore[Lbl'-LT-'messages'-GT-'{}(Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))))))]
+  VarID = kore[\dv{SortInt{}}("1")]
+  VarMSGS = kore[Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))]
+function: LblfindMsg'LParUndsCommUndsRParUnds'CELL-VALUE'Unds'Bool'Unds'Int'Unds'MessagesCell{} (0:0:0)
+side condition entry: 2805 2
+  VarID = kore[\dv{SortInt{}}("1")]
+  VarID'Apos' = kore[\dv{SortInt{}}("2")]
+hook: INT.ne Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
+  function: Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("2")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 2805 true
+rule: 2805 5
+  Var'Unds'Gen0 = kore[Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount"))]
+  VarID = kore[\dv{SortInt{}}("1")]
+  VarID'Apos' = kore[\dv{SortInt{}}("2")]
+  VarMSGS = kore[LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))))]
+function: LblfindMsg'LParUndsCommUndsRParUnds'CELL-VALUE'Unds'Bool'Unds'Int'Unds'MessagesCell{} ()
+side condition entry: 2805 2
+  VarID = kore[\dv{SortInt{}}("1")]
+  VarID'Apos' = kore[\dv{SortInt{}}("0")]
+hook: INT.ne Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
+  function: Lbl'UndsEqlsSlshEqls'Int'Unds'{} ()
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("0")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 2805 true
+rule: 2805 5
+  Var'Unds'Gen0 = kore[Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100"))]
+  Var'Unds'Gen1 = kore[Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount"))]
+  VarID = kore[\dv{SortInt{}}("1")]
+  VarID'Apos' = kore[\dv{SortInt{}}("0")]
+  VarMSGS = kore[Lbl'Stop'MessageCellMap{}()]
+function: LblfindMsg'LParUndsCommUndsRParUnds'CELL-VALUE'Unds'Bool'Unds'Int'Unds'MessagesCell{} ()
+rule: 2807 1
+  Var'Unds'ID = kore[\dv{SortInt{}}("1")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortBool{}}("false"),dotk{}())),Lbl'-LT-'messages'-GT-'{}(Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

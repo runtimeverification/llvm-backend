@@ -1,0 +1,49 @@
+version: 11
+function: Lblabs'LParUndsRParUnds'BUILTIN-FUNCTIONS-SYNTAX'Unds'Int'Unds'Int{} ()
+rule: 210 1
+  VarI = kore[\dv{SortInt{}}("-5")]
+hook: KEQUAL.ite Lblite{SortInt{}} ()
+  hook: INT.lt Lbl'Unds-LT-'Int'Unds'{} (0)
+    function: Lbl'Unds-LT-'Int'Unds'{} (0)
+    arg: kore[\dv{SortInt{}}("-5")]
+    arg: kore[\dv{SortInt{}}("0")]
+  hook result: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+  hook: INT.sub Lbl'Unds'-Int'Unds'{} (1)
+    function: Lbl'Unds'-Int'Unds'{} (1)
+    arg: kore[\dv{SortInt{}}("0")]
+    arg: kore[\dv{SortInt{}}("-5")]
+  hook result: kore[\dv{SortInt{}}("5")]
+  arg: kore[\dv{SortInt{}}("5")]
+hook result: kore[\dv{SortInt{}}("5")]
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[\dv{SortInt{}}("5")]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
+hook: MAP.unit Lbl'Stop'Map{} ()
+  function: Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  function: Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
+function: LblinitGeneratedTopCell{} ()
+rule: 222 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
+function: LblinitKCell{} (0)
+rule: 223 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
+function: Lblproject'Coln'KItem{} (0:0)
+  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+    function: LblMap'Coln'lookup{} (0:0:0:0)
+    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
+    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  hook result: kore[\dv{SortInt{}}("5")]
+rule: 280 1
+  VarK = kore[\dv{SortInt{}}("5")]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 221 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("5"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("5"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

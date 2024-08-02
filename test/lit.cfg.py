@@ -69,6 +69,7 @@ if os.getenv('LIT_USE_NIX'):
 # use them cross-platform while retaining nice source code.
 def one_line(s):
     return 'set -e; ' + s.strip() \
+        .replace('&\n', '& ') \
         .replace('\n', ' ; ') \
         .replace('do ;', 'do') \
         .replace('then ;', 'then') \
@@ -104,6 +105,8 @@ config.substitutions.extend([
     ('%arity', 'kore-arity'),
     ('%apply-rule', 'k-rule-apply'),
     ('%find-rule', 'k-rule-find'),
+    ('%compute-loc', 'llvm-kompile-compute-loc %S'),
+    ('%compute-ordinal', 'llvm-kompile-compute-ordinal %S'),
 
     ('%kllvm-clang', 'clang -I %include-path -I Inputs Inputs/api.c'),
 
@@ -151,17 +154,96 @@ config.substitutions.extend([
 
     ('%check-proof-out', one_line('''
         %run-proof-out
-        %kore-proof-trace --verbose --expand-terms %t.out.bin | diff - %test-proof-diff-out
+        %kore-rich-header %s > %t.header.bin
+        %kore-proof-trace --verbose --expand-terms %t.header.bin %t.out.bin | diff - %test-proof-diff-out
         result="$?"
         if [ "$result" -ne 0 ]; then
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
             exit 1
         fi
+        %kore-proof-trace --streaming-parser --verbose --expand-terms %t.header.bin %t.out.bin | diff - %test-proof-diff-out -q
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
+            exit 1
+        fi
+    ''')),
+
+    ('%check-proof-shm-out', one_line('''
+        %kore-rich-header %s > %t.header.bin
+        %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin %test-shm-buffer | diff - %test-proof-diff-out &
+        reader_pid="$!"
+        sleep 1
+        %run-proof-shm-out
+        wait $reader_pid
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
+            exit 1
+        fi
+    ''')),
+
+    ('%check-proof-debug-out', one_line('''
+        out=%test-dir-out/*.proof.debug.out.diff
+        in=%test-dir-in/`basename $out .proof.debug.out.diff`.in
+        hint=%t.`basename $out .proof.debug.out.diff`.hint
+        rm -f $hint
+        %t.interpreter $in -1 $hint --proof-output
+        %kore-rich-header %s > %t.header.bin
+        %kore-proof-trace --verbose --expand-terms %t.header.bin $hint %s | diff - $out
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
+            exit 1
+        fi
+     ''')),
+
+    ('%check-dir-proof-out', one_line('''
+        %kore-rich-header %s > %t.header.bin
+        for out in %test-dir-out/*.proof.out.diff; do
+            in=%test-dir-in/`basename $out .proof.out.diff`.in
+            hint=%t.`basename $out .proof.out.diff`.hint
+            rm -f $hint
+            %t.interpreter $in -1 $hint --proof-output
+            %kore-proof-trace --verbose --expand-terms %t.header.bin $hint | diff - $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
+                exit 1
+            fi
+            %kore-proof-trace --streaming-parser --verbose --expand-terms %t.header.bin $hint | diff - $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
+                exit 1
+            fi
+        done
+    ''')),
+
+    ('%check-dir-proof-shm-out', one_line('''
+        %kore-rich-header %s > %t.header.bin
+        count=0
+        for out in %test-dir-out/*.proof.out.diff; do
+            in=%test-dir-in/`basename $out .proof.out.diff`.in
+            shmbuf=%test-shm-buffer.$count
+            %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin $shmbuf | diff - $out &
+            reader_pid="$!"
+            sleep 1
+            %t.interpreter $in -1 $shmbuf --proof-output --use-shared-memory
+            wait $reader_pid
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
+                exit 1
+            fi
+            count=$(expr $count + 1)
+        done
     ''')),
 
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
+    ('%run-proof-shm-out', '%t.interpreter %test-input -1 %test-shm-buffer --proof-output --use-shared-memory'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
@@ -176,6 +258,8 @@ config.substitutions.extend([
     ('%test-dir-out', os.path.join('%output-dir', '%test-basename')),
     ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
     ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename.proof.out.diff')),
+    ('%test-proof-debug-diff-out', os.path.join('%output-dir', '%test-basename.proof.debug.out.diff')),
+    ('%test-shm-buffer', os.path.join('/', '%test-basename.b')),
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),
@@ -183,6 +267,8 @@ config.substitutions.extend([
     ('%kore-convert', 'kore-convert'),
 
     ('%kore-proof-trace', 'kore-proof-trace'),
+    ('%kore-proof-trace-shm-writer', 'kore-proof-trace-shm-writer'),
+    ('%kore-rich-header', 'kore-rich-header'),
 ])
 
 config.recursiveExpansionLimit = 10
