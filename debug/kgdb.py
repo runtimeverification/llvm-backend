@@ -766,7 +766,7 @@ Does not actually take a step if matching succeeds.
                 if entry['kind'] == self.SUCCESS:
                     print('Match succeeds')
                 elif entry['kind'] == self.FUNCTION:
-                    debugFunctionName = entry['debugName'].string("iso-8859-1")
+                    debugFunctionName = entry['debug_name'].string("iso-8859-1")
                     functionName = entry['function'].string("iso-8859-1")
                     print(debugFunctionName + '(', end='')
                     name = functionName if functionName[:5] == 'hook_' else debugFunctionName
