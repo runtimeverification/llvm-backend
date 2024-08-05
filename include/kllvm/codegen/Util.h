@@ -23,6 +23,8 @@ llvm::Function *kore_heap_alloc(std::string const &name, llvm::Module *module);
 
 llvm::Instruction *create_malloc(
     llvm::BasicBlock *block, llvm::Value *alloc_size, llvm::Function *malloc_f);
+llvm::Instruction *create_malloc(
+    llvm::Instruction *inst, llvm::Value *alloc_size, llvm::Function *malloc_f);
 
 // getOrInsertFunction on module, aborting on failure
 template <class... Ts>
