@@ -568,6 +568,7 @@ llvm::Value *create_term::create_hook(
   if (name == "MINT.round") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    assert(type_in);
     unsigned bits_in = type_in->getBitWidth();
     value_type cat_out = dynamic_cast<kore_composite_sort *>(
                              pattern->get_constructor()->get_sort().get())
@@ -577,15 +578,16 @@ llvm::Value *create_term::create_hook(
     if (bits_in == bits_out) {
       // no-op
       return in;
-    } else if (bits_in < bits_out) {
-      return new llvm::ZExtInst(in, type_out, "zext", current_block_);
-    } else {
-      return new llvm::TruncInst(in, type_out, "trunc", current_block_);
     }
+    if (bits_in < bits_out) {
+      return new llvm::ZExtInst(in, type_out, "zext", current_block_);
+    }
+    return new llvm::TruncInst(in, type_out, "trunc", current_block_);
   }
   if (name == "MINT.sext") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    assert(type_in);
     unsigned bits_in = type_in->getBitWidth();
     value_type cat_out = dynamic_cast<kore_composite_sort *>(
                              pattern->get_constructor()->get_sort().get())
@@ -595,11 +597,11 @@ llvm::Value *create_term::create_hook(
     if (bits_in == bits_out) {
       // no-op
       return in;
-    } else if (bits_in < bits_out) {
-      return new llvm::SExtInst(in, type_out, "sext", current_block_);
-    } else {
-      return new llvm::TruncInst(in, type_out, "trunc", current_block_);
     }
+    if (bits_in < bits_out) {
+      return new llvm::SExtInst(in, type_out, "sext", current_block_);
+    }
+    return new llvm::TruncInst(in, type_out, "trunc", current_block_);
   }
   if (name == "MINT.neg") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
