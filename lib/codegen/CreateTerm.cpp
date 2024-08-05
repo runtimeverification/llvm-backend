@@ -203,9 +203,11 @@ llvm::Value *allocate_term(
               call->setOperand(
                   0, llvm::ConstantExpr::getAdd(
                          size, llvm::ConstantInt::get(ty, type_size)));
-              return llvm::GetElementPtrInst::Create(
+              auto *ret = llvm::GetElementPtrInst::Create(
                   llvm::Type::getInt8Ty(block->getContext()), call, {size},
                   "alloc_chunk", block);
+              set_debug_loc(ret);
+              return ret;
             }
           }
         }
