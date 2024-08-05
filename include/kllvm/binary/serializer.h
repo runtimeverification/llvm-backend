@@ -198,7 +198,8 @@ public:
       void *shm_object, sem_t *data_avail, sem_t *space_avail)
       : shm_buffer_(reinterpret_cast<shm_ringbuffer *>(shm_object))
       , data_avail_(data_avail)
-      , space_avail_(space_avail) { }
+      , space_avail_(space_avail)
+      , buffer_() { }
 
   ~proof_trace_ringbuffer_writer() override { shm_buffer_->~shm_ringbuffer(); }
 
