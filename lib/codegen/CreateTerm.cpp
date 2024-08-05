@@ -168,20 +168,56 @@ llvm::Value *get_block_header(
           llvm::Type::getInt64Ty(module->getContext()), header_val));
 }
 
+template <typename T>
+  requires std::same_as<T, llvm::BasicBlock>
+           || std::same_as<T, llvm::Instruction>
 llvm::Value *allocate_term(
-    llvm::Type *alloc_type, llvm::BasicBlock *block, char const *alloc_fn) {
-  return allocate_term(
-      alloc_type, llvm::ConstantExpr::getSizeOf(alloc_type), block, alloc_fn);
-}
-
-llvm::Value *allocate_term(
-    llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
+    llvm::Type *alloc_type, llvm::Value *len, T *insert_point,
     char const *alloc_fn) {
   auto *malloc = create_malloc(
-      block, len, kore_heap_alloc(alloc_fn, block->getModule()));
+      insert_point, len, kore_heap_alloc(alloc_fn, insert_point->getModule()));
 
   set_debug_loc(malloc);
   return malloc;
+}
+
+static bool is_basic_alloc(std::string const &alloc_fn) {
+  return alloc_fn == "kore_alloc" || alloc_fn == "kore_alloc_old"
+         || alloc_fn == "kore_alloc_always_gc";
+}
+
+llvm::Value *allocate_term(
+    llvm::Type *alloc_type, llvm::BasicBlock *block, char const *alloc_fn,
+    bool mergeable) {
+  llvm::DataLayout layout(block->getModule());
+  auto type_size = layout.getTypeAllocSize(alloc_type).getFixedValue();
+  auto *ty = llvm::Type::getInt64Ty(block->getContext());
+  if (mergeable) {
+    if (auto *first = block->getFirstNonPHI()) {
+      if (auto *call = llvm::dyn_cast<llvm::CallInst>(first)) {
+        if (auto *func = call->getCalledFunction()) {
+          if (auto *size
+              = llvm::dyn_cast<llvm::ConstantInt>(call->getOperand(0))) {
+            if (func->getName() == alloc_fn && is_basic_alloc(alloc_fn)
+                && size->getLimitedValue() + type_size < max_block_merge_size) {
+              call->setOperand(
+                  0, llvm::ConstantExpr::getAdd(
+                         size, llvm::ConstantInt::get(ty, type_size)));
+              auto *ret = llvm::GetElementPtrInst::Create(
+                  llvm::Type::getInt8Ty(block->getContext()), call, {size},
+                  "alloc_chunk", block);
+              set_debug_loc(ret);
+              return ret;
+            }
+          }
+        }
+      }
+    }
+    return allocate_term(
+        alloc_type, llvm::ConstantInt::get(ty, type_size), block, alloc_fn);
+  }
+  return allocate_term(
+      alloc_type, llvm::ConstantInt::get(ty, type_size), block, alloc_fn);
 }
 
 value_type term_type(
@@ -686,7 +722,8 @@ llvm::Value *create_term::create_function_call(
     // we don't use alloca here because the tail call optimization pass for llvm
     // doesn't handle correctly functions with alloca
     alloc_sret = allocate_term(
-        return_type, current_block_, get_collection_alloc_fn(return_cat.cat));
+        return_type, current_block_, get_collection_alloc_fn(return_cat.cat),
+        true);
     sret_type = return_type;
     real_args.insert(real_args.begin(), alloc_sret);
     types.insert(types.begin(), alloc_sret->getType());
@@ -759,7 +796,8 @@ llvm::Value *create_term::not_injection_case(
     children.push_back(child_value);
     idx++;
   }
-  llvm::Value *block = allocate_term(block_type, current_block_);
+  llvm::Value *block
+      = allocate_term(block_type, current_block_, "kore_alloc", true);
   llvm::Value *block_header_ptr = llvm::GetElementPtrInst::CreateInBounds(
       block_type, block,
       {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0),
@@ -1162,7 +1200,7 @@ std::string make_apply_rule_function(
       if (!arg->getType()->isPointerTy()) {
         auto *ptr = allocate_term(
             arg->getType(), creator.get_current_block(),
-            get_collection_alloc_fn(cat.cat));
+            get_collection_alloc_fn(cat.cat), true);
         new llvm::StoreInst(arg, ptr, creator.get_current_block());
         arg = ptr;
       }
