@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(smoke) {
   BOOST_CHECK(!buffer.eof());
 
   buffer.put_eof();
-  BOOST_CHECK(!buffer.eof());
+  BOOST_CHECK(buffer.eof());
 
   std::string read_data;
   read_data.resize(message.size());
@@ -58,9 +58,9 @@ BOOST_AUTO_TEST_CASE(write_read_loop) {
   }
 
   buffer.put_eof();
-  BOOST_CHECK(!buffer.eof());
+  BOOST_CHECK(buffer.eof());
 
-  while (!buffer.eof()) {
+  while (buffer.data_size()) {
     if (read_offs + read_chunk_size <= message.size()) {
       BOOST_CHECK(read_chunk_size <= buffer.data_size());
       buffer.get((uint8_t *)read_data.data() + read_offs, read_chunk_size);
