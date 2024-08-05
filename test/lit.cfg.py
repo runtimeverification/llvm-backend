@@ -85,6 +85,13 @@ config.substitutions.extend([
             exit 1
         fi
     ''')),
+    ('%debug-interpreter', one_line('''
+        output=$(%kompile %s main -g -o %t.interpreter.debug -- -g 2>&1)
+        if [[ -n "$output" ]]; then
+            echo "llvm-kompile error or warning: $output"
+            exit 1
+        fi
+    ''')),
     ('%proof-interpreter', one_line('''
         output=$(%kompile %s main --proof-hint-instrumentation -o %t.interpreter 2>&1)
         if [[ -n "$output" ]]; then
@@ -151,6 +158,14 @@ config.substitutions.extend([
             fi
         done
     ''')),
+    ('%check-dir-diff', one_line('''
+        out=%test-dir-out/*.debugger.out.diff
+        in=%test-dir-in/`basename $out .debugger.out.diff`.in
+        gdb_commands=%`basename $out .debugger.out.diff`.gdb
+        
+        gdb --batch -x $gdb_commands %t.interpreter $in -1 /dev/stdout | diff - $out
+    ''')),
+    
 
     ('%check-proof-out', one_line('''
         %run-proof-out

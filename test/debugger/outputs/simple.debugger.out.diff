@@ -1,0 +1,17 @@
+Temporary breakpoint 1 at 0x6f0e0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, 0x00005555555c30e0 in main ()
+0x00005555555b55a0 in k_step (subject=<optimized out>) at /home/robertorosmaninho/rv/llvm-backend/test/debugger/k-files/simple.k:4
+4	  rule I => I +Int 1
+
+Temporary breakpoint -9, 0x00005555555b55a0 in k_step (subject=<optimized out>) at /home/robertorosmaninho/rv/llvm-backend/test/debugger/k-files/simple.k:4
+4	  rule I => I +Int 1
+
+Temporary breakpoint -10, 0x00005555555b55a0 in k_step (subject=<optimized out>) at /home/robertorosmaninho/rv/llvm-backend/test/debugger/k-files/simple.k:4
+4	  rule I => I +Int 1
+[Inferior 1 (process 265761) exited normally]
+
+
+The K framework enables Semantics-based program execution, like executing Solidity code using the formal semantics of Solidity or even EVM. Thus, it's correct by construction and offers the highest level of correctness. In this talk, we'll disprove the myth and show that semantics-based program execution is also efficient and capable of easily generating proof hints from concrete execution to empower Proof of Proof (PoP) for universal formal and mathematical verification.
