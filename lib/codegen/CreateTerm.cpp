@@ -565,6 +565,44 @@ llvm::Value *create_term::create_hook(
     }
     return result;
   }
+  if (name == "MINT.round") {
+    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    assert(type_in);
+    unsigned bits_in = type_in->getBitWidth();
+    value_type cat_out = dynamic_cast<kore_composite_sort *>(
+                             pattern->get_constructor()->get_sort().get())
+                             ->get_category(definition_);
+    unsigned bits_out = cat_out.bits;
+    auto *type_out = llvm::IntegerType::get(ctx_, bits_out);
+    if (bits_in == bits_out) {
+      // no-op
+      return in;
+    }
+    if (bits_in < bits_out) {
+      return new llvm::ZExtInst(in, type_out, "zext", current_block_);
+    }
+    return new llvm::TruncInst(in, type_out, "trunc", current_block_);
+  }
+  if (name == "MINT.sext") {
+    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    assert(type_in);
+    unsigned bits_in = type_in->getBitWidth();
+    value_type cat_out = dynamic_cast<kore_composite_sort *>(
+                             pattern->get_constructor()->get_sort().get())
+                             ->get_category(definition_);
+    unsigned bits_out = cat_out.bits;
+    auto *type_out = llvm::IntegerType::get(ctx_, bits_out);
+    if (bits_in == bits_out) {
+      // no-op
+      return in;
+    }
+    if (bits_in < bits_out) {
+      return new llvm::SExtInst(in, type_out, "sext", current_block_);
+    }
+    return new llvm::TruncInst(in, type_out, "trunc", current_block_);
+  }
   if (name == "MINT.neg") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", current_block_);
@@ -572,6 +610,20 @@ llvm::Value *create_term::create_hook(
   if (name == "MINT.not") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", current_block_);
+#define MINT_MINMAX(hookname, inst)                                            \
+  }                                                                            \
+  if (name == "MINT." #hookname) {                                             \
+    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
+    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
+    auto *cmp = new llvm::ICmpInst(                                            \
+        *current_block_, llvm::CmpInst::inst, first, second,                   \
+        "cmp_" #hookname);                                                     \
+  return llvm::SelectInst::Create(                                             \
+      cmp, first, second, "hook_MINT_" #hookname, current_block_)
+    MINT_MINMAX(umin, ICMP_ULE);
+    MINT_MINMAX(umax, ICMP_UGE);
+    MINT_MINMAX(smin, ICMP_SLE);
+    MINT_MINMAX(smax, ICMP_SGE);
 #define MINT_CMP(hookname, inst)                                               \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \

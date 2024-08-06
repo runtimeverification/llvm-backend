@@ -125,6 +125,25 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
           }
           break;
         }
+        case MINT_LAYOUT + 32: {
+          auto *child1ptr = (int32_t *)(child1intptr);
+          auto *child2ptr = (int32_t *)(child2intptr);
+          bool cmp = *child1ptr == *child2ptr;
+          if (!cmp) {
+            return false;
+          }
+          break;
+        }
+        case MINT_LAYOUT + 64: {
+          auto *child1ptr = (int64_t *)(child1intptr);
+          auto *child2ptr = (int64_t *)(child2intptr);
+          bool cmp = *child1ptr == *child2ptr;
+          if (!cmp) {
+            return false;
+          }
+          break;
+        }
+
         default: abort();
         }
       }
