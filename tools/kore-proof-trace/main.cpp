@@ -50,6 +50,9 @@ cl::opt<bool> use_shared_memory(
     exit(1);                                                                   \
   } while (0)
 
+static constexpr mode_t perms
+    = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
 // NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
   cl::HideUnrelatedOptions({&kore_proof_trace_cat});
@@ -86,8 +89,7 @@ int main(int argc, char **argv) {
     shm_unlink(input_filename.c_str());
 
     // Open shared memory object
-    int fd = shm_open(
-        input_filename.c_str(), O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
+    int fd = shm_open(input_filename.c_str(), O_CREAT | O_EXCL | O_RDWR, perms);
     if (fd == -1) {
       ERR_EXIT("shm_open reader");
     }
@@ -114,16 +116,16 @@ int main(int argc, char **argv) {
     sem_unlink(space_avail_sem_name.c_str());
 
     // Initialize semaphores
-    // NOLINTNEXTLINE(*-pro-type-vararg)
-    sem_t *data_avail = sem_open(
-        data_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0);
+    sem_t *data_avail
+        // NOLINTNEXTLINE(*-pro-type-vararg)
+        = sem_open(data_avail_sem_name.c_str(), O_CREAT | O_EXCL, perms, 0);
     if (data_avail == SEM_FAILED) {
       ERR_EXIT("sem_init data_avail reader");
     }
     // NOLINTNEXTLINE(*-pro-type-vararg)
     sem_t *space_avail = sem_open(
-        space_avail_sem_name.c_str(), O_CREAT | O_EXCL, S_IRUSR | S_IWUSR,
-        shm_ringbuffer::capacity);
+        space_avail_sem_name.c_str(), O_CREAT | O_EXCL, perms,
+        shm_ringbuffer::capacity / shm_ringbuffer::buffered_access_sz);
     if (space_avail == SEM_FAILED) {
       ERR_EXIT("sem_init space_avail reader");
     }
@@ -132,7 +134,10 @@ int main(int argc, char **argv) {
     auto trace = parser.parse_proof_trace_from_shmem(
         shm_object, data_avail, space_avail);
 
-    // Close semaphores
+    // Close the shared memory object and semaphores
+    if (close(fd) == -1) {
+      ERR_EXIT("close shm object reader");
+    }
     if (sem_close(data_avail) == -1) {
       ERR_EXIT("sem_close data reader");
     }

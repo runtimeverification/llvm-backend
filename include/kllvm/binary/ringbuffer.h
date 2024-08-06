@@ -18,11 +18,15 @@ public:
   // empty, we maintain the invariant that the capacity of the buffer is one byte
   // less than its size. This way, the buffer is empty iff read_pos == write_pos,
   // and it is full iff read_pos == (write_pos+1)%size.
-  static constexpr size_t size = 1024;
+  static constexpr size_t size = 4096;
 
   // Ringbuffer capacity in bytes.
   // As commented above, the capacity is always equal to size-1.
   static constexpr size_t capacity = size - 1;
+
+  // The default size in bytes for put and get operations.
+  static constexpr size_t buffered_access_sz = 64;
+  static_assert(buffered_access_sz <= capacity);
 
 private:
   bool eof_{false};
@@ -42,9 +46,8 @@ public:
   // undefined behavior.
   void put_eof();
 
-  // Returns true when the ringbuffer is empty and the EOF has been written, and
-  // false otherwise. As commented above, the ringbuffer is empty iff
-  // read_pos == write_pos.
+  // Returns true when eof has been written in the ringbuffer. At that point,
+  // the ringbuffer may still contain data, but no further writes can happen.
   [[nodiscard]] bool eof() const;
 
   // Add data to the ringbuffer. The behavior is undefined if the buffer does not
@@ -52,13 +55,13 @@ public:
   // ringbuffer. The behavior is also undefined if the data pointer passed to this
   // function does not point to a contiguous memory chunk of the corresponding
   // size.
-  void put(uint8_t const *data, size_t count = 1);
+  void put(uint8_t const *data, size_t count = buffered_access_sz);
 
   // Get and remove data from the ringbuffer. The behavior is undefined if more
   // data is requested than it is currently available in the ringbuffer. The
   // behavior is also undefined if the data pointer passed to this function does
   // not point to a contiguous memory chunk of the corresponding size.
-  void get(uint8_t *data, size_t count = 1);
+  void get(uint8_t *data, size_t count = buffered_access_sz);
 };
 
 } // namespace kllvm
