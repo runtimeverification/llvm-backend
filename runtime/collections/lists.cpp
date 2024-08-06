@@ -113,6 +113,15 @@ list hook_LIST_make(SortInt len, SortKItem value) {
   return {length, value};
 }
 
+list hook_LIST_update_long(SortList list, size_t idx, SortKItem value) {
+  if (idx >= list->size()) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Index out of range for update: index={}, size={}", idx, list->size());
+  }
+
+  return list->set(idx, value);
+}
+
 list hook_LIST_update(SortList list, SortInt index, SortKItem value) {
   if (!mpz_fits_ulong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -120,12 +129,7 @@ list hook_LIST_update(SortList list, SortInt index, SortKItem value) {
   }
 
   size_t idx = mpz_get_ui(index);
-  if (idx >= list->size()) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Index out of range for update: index={}, size={}", idx, list->size());
-  }
-
-  return list->set(idx, value);
+  return hook_LIST_update_long(list, idx, value);
 }
 
 list hook_LIST_updateAll(SortList l1, SortInt index, SortList l2) {
