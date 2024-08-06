@@ -168,20 +168,56 @@ llvm::Value *get_block_header(
           llvm::Type::getInt64Ty(module->getContext()), header_val));
 }
 
+template <typename T>
+  requires std::same_as<T, llvm::BasicBlock>
+           || std::same_as<T, llvm::Instruction>
 llvm::Value *allocate_term(
-    llvm::Type *alloc_type, llvm::BasicBlock *block, char const *alloc_fn) {
-  return allocate_term(
-      alloc_type, llvm::ConstantExpr::getSizeOf(alloc_type), block, alloc_fn);
-}
-
-llvm::Value *allocate_term(
-    llvm::Type *alloc_type, llvm::Value *len, llvm::BasicBlock *block,
+    llvm::Type *alloc_type, llvm::Value *len, T *insert_point,
     char const *alloc_fn) {
   auto *malloc = create_malloc(
-      block, len, kore_heap_alloc(alloc_fn, block->getModule()));
+      insert_point, len, kore_heap_alloc(alloc_fn, insert_point->getModule()));
 
   set_debug_loc(malloc);
   return malloc;
+}
+
+static bool is_basic_alloc(std::string const &alloc_fn) {
+  return alloc_fn == "kore_alloc" || alloc_fn == "kore_alloc_old"
+         || alloc_fn == "kore_alloc_always_gc";
+}
+
+llvm::Value *allocate_term(
+    llvm::Type *alloc_type, llvm::BasicBlock *block, char const *alloc_fn,
+    bool mergeable) {
+  llvm::DataLayout layout(block->getModule());
+  auto type_size = layout.getTypeAllocSize(alloc_type).getFixedValue();
+  auto *ty = llvm::Type::getInt64Ty(block->getContext());
+  if (mergeable) {
+    if (auto *first = block->getFirstNonPHI()) {
+      if (auto *call = llvm::dyn_cast<llvm::CallInst>(first)) {
+        if (auto *func = call->getCalledFunction()) {
+          if (auto *size
+              = llvm::dyn_cast<llvm::ConstantInt>(call->getOperand(0))) {
+            if (func->getName() == alloc_fn && is_basic_alloc(alloc_fn)
+                && size->getLimitedValue() + type_size < max_block_merge_size) {
+              call->setOperand(
+                  0, llvm::ConstantExpr::getAdd(
+                         size, llvm::ConstantInt::get(ty, type_size)));
+              auto *ret = llvm::GetElementPtrInst::Create(
+                  llvm::Type::getInt8Ty(block->getContext()), call, {size},
+                  "alloc_chunk", block);
+              set_debug_loc(ret);
+              return ret;
+            }
+          }
+        }
+      }
+    }
+    return allocate_term(
+        alloc_type, llvm::ConstantInt::get(ty, type_size), block, alloc_fn);
+  }
+  return allocate_term(
+      alloc_type, llvm::ConstantInt::get(ty, type_size), block, alloc_fn);
 }
 
 value_type term_type(
@@ -529,6 +565,44 @@ llvm::Value *create_term::create_hook(
     }
     return result;
   }
+  if (name == "MINT.round") {
+    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    assert(type_in);
+    unsigned bits_in = type_in->getBitWidth();
+    value_type cat_out = dynamic_cast<kore_composite_sort *>(
+                             pattern->get_constructor()->get_sort().get())
+                             ->get_category(definition_);
+    unsigned bits_out = cat_out.bits;
+    auto *type_out = llvm::IntegerType::get(ctx_, bits_out);
+    if (bits_in == bits_out) {
+      // no-op
+      return in;
+    }
+    if (bits_in < bits_out) {
+      return new llvm::ZExtInst(in, type_out, "zext", current_block_);
+    }
+    return new llvm::TruncInst(in, type_out, "trunc", current_block_);
+  }
+  if (name == "MINT.sext") {
+    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    assert(type_in);
+    unsigned bits_in = type_in->getBitWidth();
+    value_type cat_out = dynamic_cast<kore_composite_sort *>(
+                             pattern->get_constructor()->get_sort().get())
+                             ->get_category(definition_);
+    unsigned bits_out = cat_out.bits;
+    auto *type_out = llvm::IntegerType::get(ctx_, bits_out);
+    if (bits_in == bits_out) {
+      // no-op
+      return in;
+    }
+    if (bits_in < bits_out) {
+      return new llvm::SExtInst(in, type_out, "sext", current_block_);
+    }
+    return new llvm::TruncInst(in, type_out, "trunc", current_block_);
+  }
   if (name == "MINT.neg") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", current_block_);
@@ -536,6 +610,20 @@ llvm::Value *create_term::create_hook(
   if (name == "MINT.not") {
     llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
     return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", current_block_);
+#define MINT_MINMAX(hookname, inst)                                            \
+  }                                                                            \
+  if (name == "MINT." #hookname) {                                             \
+    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
+    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
+    auto *cmp = new llvm::ICmpInst(                                            \
+        *current_block_, llvm::CmpInst::inst, first, second,                   \
+        "cmp_" #hookname);                                                     \
+  return llvm::SelectInst::Create(                                             \
+      cmp, first, second, "hook_MINT_" #hookname, current_block_)
+    MINT_MINMAX(umin, ICMP_ULE);
+    MINT_MINMAX(umax, ICMP_UGE);
+    MINT_MINMAX(smin, ICMP_SLE);
+    MINT_MINMAX(smax, ICMP_SGE);
 #define MINT_CMP(hookname, inst)                                               \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
@@ -686,7 +774,8 @@ llvm::Value *create_term::create_function_call(
     // we don't use alloca here because the tail call optimization pass for llvm
     // doesn't handle correctly functions with alloca
     alloc_sret = allocate_term(
-        return_type, current_block_, get_collection_alloc_fn(return_cat.cat));
+        return_type, current_block_, get_collection_alloc_fn(return_cat.cat),
+        true);
     sret_type = return_type;
     real_args.insert(real_args.begin(), alloc_sret);
     types.insert(types.begin(), alloc_sret->getType());
@@ -759,7 +848,8 @@ llvm::Value *create_term::not_injection_case(
     children.push_back(child_value);
     idx++;
   }
-  llvm::Value *block = allocate_term(block_type, current_block_);
+  llvm::Value *block
+      = allocate_term(block_type, current_block_, "kore_alloc", true);
   llvm::Value *block_header_ptr = llvm::GetElementPtrInst::CreateInBounds(
       block_type, block,
       {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0),
@@ -1162,7 +1252,7 @@ std::string make_apply_rule_function(
       if (!arg->getType()->isPointerTy()) {
         auto *ptr = allocate_term(
             arg->getType(), creator.get_current_block(),
-            get_collection_alloc_fn(cat.cat));
+            get_collection_alloc_fn(cat.cat), true);
         new llvm::StoreInst(arg, ptr, creator.get_current_block());
         arg = ptr;
       }

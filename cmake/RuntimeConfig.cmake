@@ -37,6 +37,7 @@ set(VARIABLE_LAYOUT     9)
 set(RANGEMAP_LAYOUT    10)
 set(SETITER_LAYOUT     11)
 set(MAPITER_LAYOUT     12)
+set(MINT_LAYOUT        13)
 
 get_filename_component(INSTALL_DIR_ABS_PATH "${CMAKE_INSTALL_PREFIX}"
                        REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
