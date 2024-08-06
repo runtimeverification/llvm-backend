@@ -22,14 +22,7 @@ void shm_ringbuffer::put_eof() {
 }
 
 bool shm_ringbuffer::eof() const {
-  // NOTE: for synchronization purposes, it is important that the eof_ field is
-  // checked first. Typically, the reader process will call this, so we want to
-  // avoid a race where the writer updates buf.writer_pos after the reader has
-  // accessed it but before the reader has fully evaluated the condition. If
-  // eof_ is checked first, and due to short-circuiting, we know that if eof_ is
-  // true, the writer will not do any further updates to the write_pos_ field,
-  // and if eof_ is false, the reader will not access write_pos_ at all.
-  return eof_ && write_pos_ == read_pos_;
+  return eof_;
 }
 
 void shm_ringbuffer::put(uint8_t const *data, size_t count) {

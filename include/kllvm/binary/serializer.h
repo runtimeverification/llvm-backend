@@ -188,6 +188,9 @@ private:
   sem_t *data_avail_;
   sem_t *space_avail_;
 
+  std::array<uint8_t, shm_ringbuffer::buffered_access_sz> buffer_;
+  size_t buffer_data_size_{0};
+
   void write(uint8_t const *ptr, size_t len = 1);
 
 public:
@@ -195,7 +198,8 @@ public:
       void *shm_object, sem_t *data_avail, sem_t *space_avail)
       : shm_buffer_(reinterpret_cast<shm_ringbuffer *>(shm_object))
       , data_avail_(data_avail)
-      , space_avail_(space_avail) { }
+      , space_avail_(space_avail)
+      , buffer_() { }
 
   ~proof_trace_ringbuffer_writer() override { shm_buffer_->~shm_ringbuffer(); }
 

@@ -223,10 +223,26 @@ void proof_trace_file_writer::write_string(char const *str) {
 }
 
 void proof_trace_ringbuffer_writer::write(uint8_t const *ptr, size_t len) {
-  for (size_t i = 0; i < len; i++) {
-    sem_wait(space_avail_);
-    shm_buffer_->put(&ptr[i]);
-    sem_post(data_avail_);
+  while (len > 0) {
+    // Write to the buffer.
+    assert(buffer_data_size_ < shm_ringbuffer::buffered_access_sz);
+    size_t size_to_write_to_buffer
+        = std::min(len, shm_ringbuffer::buffered_access_sz - buffer_data_size_);
+    memcpy(buffer_.data() + buffer_data_size_, ptr, size_to_write_to_buffer);
+
+    ptr += size_to_write_to_buffer;
+    buffer_data_size_ += size_to_write_to_buffer;
+    len -= size_to_write_to_buffer;
+
+    // If the buffer is full, write its data to the shared memory ringbuffer and
+    // empty it.
+    if (buffer_data_size_ == shm_ringbuffer::buffered_access_sz) {
+      sem_wait(space_avail_);
+      shm_buffer_->put(buffer_.data());
+      sem_post(data_avail_);
+
+      buffer_data_size_ = 0;
+    }
   }
 }
 
@@ -246,7 +262,13 @@ void proof_trace_ringbuffer_writer::write_string(char const *str) {
 }
 
 void proof_trace_ringbuffer_writer::write_eof() {
+  sem_wait(space_avail_);
+  // Write any remaining buffer contents to the ringbuffer before writing EOF.
+  shm_buffer_->put(buffer_.data(), buffer_data_size_);
   shm_buffer_->put_eof();
+  sem_post(data_avail_);
+
+  buffer_data_size_ = 0;
 }
 
 } // namespace kllvm
