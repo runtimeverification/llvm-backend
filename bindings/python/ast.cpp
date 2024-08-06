@@ -362,7 +362,9 @@ void bind_ast(py::module_ &m) {
   py::class_<kore_string_pattern, std::shared_ptr<kore_string_pattern>>(
       ast, "StringPattern", pattern_base)
       .def(py::init(&kore_string_pattern::create))
-      .def_property_readonly("contents", &kore_string_pattern::get_contents);
+      .def_property_readonly("contents", [](kore_string_pattern &pattern) {
+        return py::bytes(pattern.get_contents());
+      });
 }
 
 void bind_parser(py::module_ &mod) {
