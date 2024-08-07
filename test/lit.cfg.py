@@ -77,8 +77,8 @@ def one_line(s):
         .replace("' ; '", r"'\\n'") \
 
 # We want to be able to disable some checks on macOS, this function allows us to
-# that by checking the OS and replacing the input with just `exit 0` in case of
-# macOS
+# do that by checking the OS and replacing the input with just `exit 0` in case
+# of macOS.
 def exclude_macos(s):
   return 'exit 0' if platform.system() == 'Darwin' else s
 
