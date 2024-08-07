@@ -1,5 +1,6 @@
 import glob
 import os
+import platform
 import subprocess
 
 from lit import formats
@@ -74,6 +75,12 @@ def one_line(s):
         .replace('do ;', 'do') \
         .replace('then ;', 'then') \
         .replace("' ; '", r"'\\n'") \
+
+# We want to be able to disable some checks on macOS, this function allows us to
+# that by checking the OS and replacing the input with just `exit 0` in case of
+# macOS
+def exclude_macos(s):
+  return 'exit 0' if platform.system() == 'Darwin' else s
 
 
 config.substitutions.extend([
@@ -169,7 +176,7 @@ config.substitutions.extend([
         fi
     ''')),
 
-    ('%check-proof-shm-out', one_line('''
+    ('%check-proof-shm-out', exclude_macos(one_line('''
         %kore-rich-header %s > %t.header.bin
         %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin %test-shm-buffer | diff - %test-proof-diff-out &
         reader_pid="$!"
@@ -181,7 +188,7 @@ config.substitutions.extend([
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
             exit 1
         fi
-    ''')),
+    '''))),
 
     ('%check-proof-debug-out', one_line('''
         out=%test-dir-out/*.proof.debug.out.diff
@@ -220,7 +227,7 @@ config.substitutions.extend([
         done
     ''')),
 
-    ('%check-dir-proof-shm-out', one_line('''
+    ('%check-dir-proof-shm-out', exclude_macos(one_line('''
         %kore-rich-header %s > %t.header.bin
         count=0
         for out in %test-dir-out/*.proof.out.diff; do
@@ -238,7 +245,7 @@ config.substitutions.extend([
             fi
             count=$(expr $count + 1)
         done
-    ''')),
+    '''))),
 
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
