@@ -302,12 +302,12 @@ class ChampIter:
 
 class MapIter(ChampIter):
     def __init__(self, val):
-        self.T_ptr = gdb.lookup_type("std::pair<KElem, KElem>").pointer()
+        self.T_ptr = gdb.lookup_type("std::pair<k_elem, k_elem>").pointer()
         ChampIter.__init__(self, val)
 
 class SetIter(ChampIter):
     def __init__(self, val):
-        self.T_ptr = gdb.lookup_type("KElem").pointer()
+        self.T_ptr = gdb.lookup_type("k_elem").pointer()
         ChampIter.__init__(self, val)
 
 
