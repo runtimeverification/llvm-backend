@@ -1,7 +1,7 @@
+#include <fstream>
+
 #include "runtime/header.h"
 #include "runtime/timer.h"
-
-#include <fstream>
 
 REGISTER_TIMER(hook, nanoseconds);
 
@@ -22,5 +22,4 @@ block *hook_TIMER_timerStop(void) {
 
   return dot_k();
 }
-
 }
