@@ -176,20 +176,6 @@ config.substitutions.extend([
         fi
     ''')),
 
-    ('%check-proof-shm-out', exclude_macos(one_line('''
-        %kore-rich-header %s > %t.header.bin
-        %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin %test-shm-buffer | diff - %test-proof-diff-out &
-        reader_pid="$!"
-        sleep 1
-        %run-proof-shm-out
-        wait $reader_pid
-        result="$?"
-        if [ "$result" -ne 0 ]; then
-            echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
-            exit 1
-        fi
-    '''))),
-
     ('%check-proof-debug-out', one_line('''
         out=%test-dir-out/*.proof.debug.out.diff
         in=%test-dir-in/`basename $out .proof.debug.out.diff`.in
@@ -227,30 +213,9 @@ config.substitutions.extend([
         done
     ''')),
 
-    ('%check-dir-proof-shm-out', exclude_macos(one_line('''
-        %kore-rich-header %s > %t.header.bin
-        count=0
-        for out in %test-dir-out/*.proof.out.diff; do
-            in=%test-dir-in/`basename $out .proof.out.diff`.in
-            shmbuf=%test-shm-buffer.$count
-            %kore-proof-trace --shared-memory --verbose --expand-terms %t.header.bin $shmbuf | diff - $out &
-            reader_pid="$!"
-            sleep 1
-            %t.interpreter $in -1 $shmbuf --proof-output --use-shared-memory
-            wait $reader_pid
-            result="$?"
-            if [ "$result" -ne 0 ]; then
-                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and shmem parser"
-                exit 1
-            fi
-            count=$(expr $count + 1)
-        done
-    '''))),
-
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
-    ('%run-proof-shm-out', '%t.interpreter %test-input -1 %test-shm-buffer --proof-output --use-shared-memory'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
@@ -266,7 +231,6 @@ config.substitutions.extend([
     ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
     ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename.proof.out.diff')),
     ('%test-proof-debug-diff-out', os.path.join('%output-dir', '%test-basename.proof.debug.out.diff')),
-    ('%test-shm-buffer', os.path.join('/', '%test-basename.b')),
     ('%test-basename', '`basename %s .kore`'),
 
     ('%allow-pipefail', 'set +o pipefail'),
@@ -274,7 +238,6 @@ config.substitutions.extend([
     ('%kore-convert', 'kore-convert'),
 
     ('%kore-proof-trace', 'kore-proof-trace'),
-    ('%kore-proof-trace-shm-writer', 'kore-proof-trace-shm-writer'),
     ('%kore-rich-header', 'kore-rich-header'),
 ])
 

@@ -2,7 +2,6 @@
 // RUN: %check-diff
 // RUN: %proof-interpreter
 // RUN: %check-proof-out
-// RUN: %check-proof-shm-out
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/kframework-5.0.0/k-distribution/pl-tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.md)")]
 
 module BASIC-K

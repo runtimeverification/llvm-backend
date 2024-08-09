@@ -1,6 +1,5 @@
 // RUN: %proof-interpreter
 // RUN: %check-dir-proof-out
-// RUN: %check-dir-proof-shm-out
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/proof-checker/generation/k-benchmarks/tree-reverse/tree-reverse.k)")]
 
 module BASIC-K

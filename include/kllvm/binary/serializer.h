@@ -2,7 +2,6 @@
 #define AST_SERIALIZER_H
 
 #include <kllvm/ast/AST.h>
-#include <kllvm/binary/ringbuffer.h>
 #include <kllvm/binary/version.h>
 
 #include <array>
@@ -180,41 +179,6 @@ public:
   void write_string(char const *str, size_t len) override;
   void write_string(char const *str) override;
   void write_eof() override { }
-};
-
-class proof_trace_ringbuffer_writer : public proof_trace_writer {
-private:
-  shm_ringbuffer *shm_buffer_;
-  sem_t *data_avail_;
-  sem_t *space_avail_;
-
-  std::array<uint8_t, shm_ringbuffer::buffered_access_sz> buffer_;
-  size_t buffer_data_size_{0};
-
-  void write(uint8_t const *ptr, size_t len = 1);
-
-public:
-  proof_trace_ringbuffer_writer(
-      void *shm_object, sem_t *data_avail, sem_t *space_avail)
-      : shm_buffer_(reinterpret_cast<shm_ringbuffer *>(shm_object))
-      , data_avail_(data_avail)
-      , space_avail_(space_avail)
-      , buffer_() { }
-
-  ~proof_trace_ringbuffer_writer() override { shm_buffer_->~shm_ringbuffer(); }
-
-  proof_trace_ringbuffer_writer(proof_trace_ringbuffer_writer const &) = delete;
-  proof_trace_ringbuffer_writer(proof_trace_ringbuffer_writer &&) = delete;
-  proof_trace_ringbuffer_writer &
-  operator=(proof_trace_ringbuffer_writer const &)
-      = delete;
-  proof_trace_ringbuffer_writer &operator=(proof_trace_ringbuffer_writer &&)
-      = delete;
-
-  void write(void const *ptr, size_t len) override;
-  void write_string(char const *str, size_t len) override;
-  void write_string(char const *str) override;
-  void write_eof() override;
 };
 
 } // namespace kllvm
