@@ -263,6 +263,7 @@ if $link; then
     "$LIBDIR"/libcollect.a
     "$LIBDIR"/libmeta.a
     "$LIBDIR"/libjson.a
+    "$LIBDIR"/libtimer.a
   )
 
   components=(
