@@ -698,8 +698,6 @@ public:
 
   std::optional<llvm_rewrite_trace>
   parse_proof_trace_from_file(std::string const &filename);
-  std::optional<llvm_rewrite_trace> parse_proof_trace_from_shmem(
-      void *shm_object, sem_t *data_avail, sem_t *space_avail);
   std::optional<llvm_rewrite_trace> parse_proof_trace(std::string const &data);
 
   friend class llvm_rewrite_trace_iterator;
