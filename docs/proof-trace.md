@@ -49,6 +49,9 @@ name              ::= string
 location          ::= string
 function          ::= WORD(0xDD) name location arg* WORD(0x11) // the arg list is ommited in normal mode
 
+function_name     ::= string
+pattern_matching_failure ::= WORD(0x44) function_name
+
 symbol_name       ::= string
 hook              ::= WORD(0xAA) name symbol_name location arg* WORD(0xBB) kore_term
 
