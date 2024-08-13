@@ -362,6 +362,7 @@ rule: 148 5
   VarM = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -420,6 +421,7 @@ rule: 148 5
   VarM = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -478,6 +480,7 @@ rule: 148 5
   VarM = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -536,6 +539,7 @@ rule: 148 5
   VarM = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -594,6 +598,7 @@ rule: 148 5
   VarM = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
   VarN = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}(),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -861,6 +866,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -919,6 +925,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -977,6 +984,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -1035,6 +1043,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -1093,6 +1102,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
   VarN = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}(),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -1373,6 +1383,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -1431,6 +1442,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -1489,6 +1501,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -1547,6 +1560,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
   VarN = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -1605,6 +1619,7 @@ rule: 148 5
   VarM = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
   VarN = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
+pattern matching failure: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{}
 side condition entry: 153 1
   VarHOLE = kore[Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}(),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
