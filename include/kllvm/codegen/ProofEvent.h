@@ -129,6 +129,9 @@ public:
       kore_axiom_declaration const &axiom, llvm::Value *check_result,
       llvm::BasicBlock *current_block);
 
+  [[nodiscard]] llvm::BasicBlock *pattern_matching_failure(
+      kore_composite_pattern const &pattern, llvm::BasicBlock *current_block);
+
   proof_event(kore_definition *definition, llvm::Module *module)
       : definition_(definition)
       , module_(module)
