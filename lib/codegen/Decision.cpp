@@ -920,6 +920,8 @@ void add_owise(
     auto var = kore_variable_pattern::create(name, symbol->get_arguments()[i]);
     pat->add_argument(std::move(var));
   }
+  proof_event p(d, module);
+  stuck = p.pattern_matching_failure(*pat, stuck);
   create_term creator = create_term(final_subst, d, stuck, module, true);
   llvm::Value *retval = creator(pat.get()).first;
 
