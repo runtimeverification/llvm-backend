@@ -4,6 +4,7 @@
 #include <kllvm/parser/KOREParser.h>
 
 #include "runtime/header.h"
+#include "runtime/proof_trace_writer.h"
 
 #include <fmt/printf.h>
 
@@ -624,13 +625,6 @@ void serialize_configuration_to_proof_writer(
   serialize_configuration_to_proof_trace(proof_writer, subject, 0);
 }
 
-void serialize_configuration_to_proof_trace(
-    void *proof_writer, block *subject, uint32_t sort) {
-  static_cast<proof_trace_writer *>(proof_writer)->write_string("\x7FKR2");
-  serialize_configuration_to_proof_trace_internal(
-      proof_writer, subject, sort, false);
-}
-
 void serialize_configuration(
     block *subject, char const *sort, char **data_out, size_t *size_out,
     bool emit_size, bool use_intern) {
@@ -663,6 +657,77 @@ void write_bool_to_proof_trace(void *proof_writer, bool b) {
 void write_string_to_proof_trace(void *proof_writer, char const *str) {
   static_cast<proof_trace_writer *>(proof_writer)
       ->write_null_terminated_string(str);
+}
+
+void serialize_configuration_to_proof_trace(
+    FILE *file, block *subject, uint32_t sort) {
+  fputs("\x7FKR2", file);
+  serialize_configuration_to_proof_trace_internal(file, subject, sort, false);
+}
+
+void write_hook_event_pre_to_proof_trace(
+    void *proof_writer, char const *name, char const *pattern,
+    char const *location_stack) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->hook_event_pre(name, pattern, location_stack);
+}
+
+void write_hook_event_post_to_proof_trace(
+    void *proof_writer, void *hook_result, uint64_t block_header,
+    bool indirect) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->hook_event_post(hook_result, block_header, indirect);
+}
+
+void write_argument_to_proof_trace(
+    void *proof_writer, void *arg, uint64_t block_header, bool indirect) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->argument(arg, block_header, indirect);
+}
+
+void write_rewrite_event_pre_to_proof_trace(
+    void *proof_writer, uint64_t ordinal, uint64_t arity) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->rewrite_event_pre(ordinal, arity);
+}
+
+void write_variable_to_proof_trace(
+    void *proof_writer, char const *name, void *var, uint64_t block_header,
+    bool indirect) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->variable(name, var, block_header, indirect);
+}
+
+void write_rewrite_event_post_to_proof_trace(
+    void *proof_writer, void *config, uint64_t block_header, bool indirect) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->rewrite_event_post(config, block_header, indirect);
+}
+
+void write_function_event_pre_to_proof_trace(
+    void *proof_writer, char const *name, char const *location_stack) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->function_event_pre(name, location_stack);
+}
+
+void write_function_event_post_to_proof_trace(void *proof_writer) {
+  static_cast<proof_trace_writer *>(proof_writer)->function_event_post();
+}
+
+void write_side_condition_event_pre_to_proof_trace(
+    void *proof_writer, uint64_t ordinal, uint64_t arity) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->side_condition_event_pre(ordinal, arity);
+}
+
+void write_side_condition_event_post_to_proof_trace(
+    void *proof_writer, uint64_t ordinal, bool side_cond_result) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->side_condition_event_post(ordinal, side_cond_result);
+}
+
+void write_configuration_to_proof_trace(void *proof_writer, block *config) {
+  static_cast<proof_trace_writer *>(proof_writer)->configuration(config);
 }
 
 void serialize_term_to_file(

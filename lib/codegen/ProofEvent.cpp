@@ -24,16 +24,13 @@ llvm::Constant *create_global_sort_string_ptr(
       ast_to_string(sort), fmt::format("{}_str", sort.get_name()), 0, mod);
 }
 
+bool get_indirect(std::string const &sort_name) {
+  return sort_name == "SortBool{}" || sort_name.substr(0, 9) == "SortMInt{";
+}
+
 } // namespace
 
-llvm::CallInst *proof_event::emit_serialize_term(
-    kore_composite_sort &sort, llvm::Value *proof_writer, llvm::Value *term,
-    llvm::BasicBlock *insert_at_end) {
-  auto b = llvm::IRBuilder(insert_at_end);
-
-  std::string sort_name = ast_to_string(sort);
-  bool indirect
-      = sort_name == "SortBool{}" || sort_name.substr(0, 9) == "SortMInt{";
+uint64_t proof_event::get_block_header(std::string const &sort_name) {
   std::string inj_name;
   if (sort_name == "SortKItem{}") {
     inj_name = "rawTerm{}";
@@ -43,8 +40,40 @@ llvm::CallInst *proof_event::emit_serialize_term(
     inj_name = "inj{" + sort_name + ", SortKItem{}}";
   }
   auto *symbol = definition_->get_all_symbols().at(inj_name);
-  uint64_t block_header = get_block_header_val(
+  return get_block_header_val(
       module_, symbol, get_block_type(module_, definition_, symbol));
+}
+
+llvm::CallInst *proof_event::emit_write_hook_event_pre(
+    llvm::Value *proof_writer, std::string const &name,
+    std::string const &pattern, std::string const &location_stack,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i8_ptr_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_hook_event_pre_to_proof_trace", func_ty);
+
+  auto *var_name = b.CreateGlobalStringPtr(name, "", 0, module_);
+  auto *var_pattern = b.CreateGlobalStringPtr(pattern, "", 0, module_);
+  auto *var_location = b.CreateGlobalStringPtr(location_stack, "", 0, module_);
+  return b.CreateCall(
+      func, {proof_writer, var_name, var_pattern, var_location});
+}
+
+llvm::CallInst *proof_event::emit_write_hook_event_post(
+    llvm::Value *proof_writer, llvm::Value *val, kore_composite_sort &sort,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  std::string sort_name = ast_to_string(sort);
+  bool indirect = get_indirect(sort_name);
+  uint64_t block_header = get_block_header(sort_name);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
@@ -54,68 +83,186 @@ llvm::CallInst *proof_event::emit_serialize_term(
   auto *func_ty = llvm::FunctionType::get(
       void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
 
-  auto *serialize = get_or_insert_function(
-      module_, "serialize_term_to_proof_trace", func_ty);
+  auto *func = get_or_insert_function(
+      module_, "write_hook_event_post_to_proof_trace", func_ty);
 
+  auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
+  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
   return b.CreateCall(
-      serialize,
-      {proof_writer, term, llvm::ConstantInt::get(i64_ty, block_header),
-       llvm::ConstantInt::get(i1_ty, indirect)});
+      func, {proof_writer, val, var_block_header, var_indirect});
 }
 
-llvm::CallInst *proof_event::emit_write_uint64(
-    llvm::Value *proof_writer, uint64_t value,
+llvm::CallInst *proof_event::emit_write_argument(
+    llvm::Value *proof_writer, llvm::Value *val, kore_composite_sort &sort,
     llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  std::string sort_name = ast_to_string(sort);
+  bool indirect = get_indirect(sort_name);
+  uint64_t block_header = get_block_header(sort_name);
+
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  auto *i64_ptr_ty = llvm::Type::getInt64Ty(ctx_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
-  auto *func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ptr_ty}, false);
-  auto *func
-      = get_or_insert_function(module_, "write_uint64_to_proof_trace", func_ty);
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
 
-  auto *i64_value = llvm::ConstantInt::get(i64_ptr_ty, value);
+  auto *func = get_or_insert_function(
+      module_, "write_argument_to_proof_trace", func_ty);
 
-  return llvm::CallInst::Create(
-      func, {proof_writer, i64_value}, "", insert_at_end);
+  auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
+  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
+  return b.CreateCall(
+      func, {proof_writer, val, var_block_header, var_indirect});
 }
 
-llvm::CallInst *proof_event::emit_write_bool(
-    llvm::Value *proof_writer, llvm::Value *term,
+llvm::CallInst *proof_event::emit_write_rewrite_event_pre(
+    llvm::Value *proof_writer, uint64_t ordinal, uint64_t arity,
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
-
-  term = b.CreateIntToPtr(term, i8_ptr_ty);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ty, i64_ty}, false);
 
-  auto *serialize
-      = get_or_insert_function(module_, "write_bool_to_proof_trace", func_ty);
+  auto *func = get_or_insert_function(
+      module_, "write_rewrite_event_pre_to_proof_trace", func_ty);
 
-  return b.CreateCall(serialize, {proof_writer, term});
+  auto *var_ordinal = llvm::ConstantInt::get(i64_ty, ordinal);
+  auto *var_arity = llvm::ConstantInt::get(i64_ty, arity);
+  return b.CreateCall(func, {proof_writer, var_ordinal, var_arity});
 }
 
-llvm::CallInst *proof_event::emit_write_string(
-    llvm::Value *proof_writer, std::string const &str,
+llvm::CallInst *proof_event::emit_write_variable(
+    llvm::Value *proof_writer, std::string const &name, llvm::Value *val,
+    kore_composite_sort &sort, llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  std::string sort_name = ast_to_string(sort);
+  bool indirect = get_indirect(sort_name);
+  uint64_t block_header = get_block_header(sort_name);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_variable_to_proof_trace", func_ty);
+
+  auto *var_name = b.CreateGlobalStringPtr(name, "", 0, module_);
+  auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
+  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
+  return b.CreateCall(
+      func, {proof_writer, var_name, val, var_block_header, var_indirect});
+}
+
+llvm::CallInst *proof_event::emit_write_rewrite_event_post(
+    llvm::Value *proof_writer, llvm::Value *val, kore_composite_sort &sort,
     llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  std::string sort_name = ast_to_string(sort);
+  bool indirect = get_indirect(sort_name);
+  uint64_t block_header = get_block_header(sort_name);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_rewrite_event_post_to_proof_trace", func_ty);
+
+  auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
+  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
+  return b.CreateCall(
+      func, {proof_writer, val, var_block_header, var_indirect});
+}
+
+llvm::CallInst *proof_event::emit_write_function_event_pre(
+    llvm::Value *proof_writer, std::string const &name,
+    std::string const &location_stack, llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
 
+  auto *func_ty = llvm::FunctionType::get(
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_function_event_pre_to_proof_trace", func_ty);
+
+  auto *var_name = b.CreateGlobalStringPtr(name, "", 0, module_);
+  auto *var_location = b.CreateGlobalStringPtr(location_stack, "", 0, module_);
+  return b.CreateCall(func, {proof_writer, var_name, var_location});
+}
+
+llvm::CallInst *proof_event::emit_write_function_event_post(
+    llvm::Value *proof_writer, llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+
+  auto *func_ty = llvm::FunctionType::get(void_ty, {i8_ptr_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_function_event_post_to_proof_trace", func_ty);
+
+  return b.CreateCall(func, {proof_writer});
+}
+
+llvm::CallInst *proof_event::emit_write_side_condition_event_pre(
+    llvm::Value *proof_writer, uint64_t ordinal, uint64_t arity,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+
   auto *func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ty, i64_ty}, false);
 
-  auto *print
-      = get_or_insert_function(module_, "write_string_to_proof_trace", func_ty);
+  auto *func = get_or_insert_function(
+      module_, "write_side_condition_event_pre_to_proof_trace", func_ty);
 
-  auto *varname = b.CreateGlobalStringPtr(str, "", 0, module_);
-  return b.CreateCall(print, {proof_writer, varname});
+  auto *var_ordinal = llvm::ConstantInt::get(i64_ty, ordinal);
+  auto *var_arity = llvm::ConstantInt::get(i64_ty, arity);
+  return b.CreateCall(func, {proof_writer, var_ordinal, var_arity});
+}
+
+llvm::CallInst *proof_event::emit_write_side_condition_event_post(
+    llvm::Value *proof_writer, uint64_t ordinal, llvm::Value *val,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+
+  auto *func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ty, i1_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_side_condition_event_post_to_proof_trace", func_ty);
+
+  auto *var_ordinal = llvm::ConstantInt::get(i64_ty, ordinal);
+  return b.CreateCall(func, {proof_writer, var_ordinal, val});
 }
 
 llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
@@ -177,11 +324,9 @@ llvm::BasicBlock *proof_event::hook_event_pre(
   auto [true_block, merge_block, proof_writer]
       = event_prelude("hookpre", current_block);
 
-  emit_write_uint64(proof_writer, detail::word(0xAA), true_block);
-  emit_write_string(proof_writer, name, true_block);
-  emit_write_string(
-      proof_writer, ast_to_string(*pattern->get_constructor()), true_block);
-  emit_write_string(proof_writer, location_stack, true_block);
+  emit_write_hook_event_pre(
+      proof_writer, name, ast_to_string(*pattern->get_constructor()),
+      location_stack, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -197,9 +342,7 @@ llvm::BasicBlock *proof_event::hook_event_post(
   auto [true_block, merge_block, proof_writer]
       = event_prelude("hookpost", current_block);
 
-  emit_write_uint64(proof_writer, detail::word(0xBB), true_block);
-
-  emit_serialize_term(*sort, proof_writer, val, true_block);
+  emit_write_hook_event_post(proof_writer, val, *sort, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -223,7 +366,7 @@ llvm::BasicBlock *proof_event::argument(
   auto [true_block, merge_block, proof_writer]
       = event_prelude("eventarg", current_block);
 
-  emit_serialize_term(*sort, proof_writer, val, true_block);
+  emit_write_argument(proof_writer, val, *sort, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -245,9 +388,9 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
   auto [true_block, merge_block, proof_writer]
       = event_prelude("rewrite_pre", current_block);
 
-  emit_write_uint64(proof_writer, detail::word(0x22), true_block);
-  emit_write_uint64(proof_writer, axiom.get_ordinal(), true_block);
-  emit_write_uint64(proof_writer, arity, true_block);
+  emit_write_rewrite_event_pre(
+      proof_writer, axiom.get_ordinal(), arity, true_block);
+
   for (auto entry = subst.begin(); entry != subst.end(); ++entry) {
     auto key = entry->getKey();
     auto *val = entry->getValue();
@@ -255,8 +398,7 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
 
     auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->get_sort());
 
-    emit_write_string(proof_writer, key.str(), true_block);
-    emit_serialize_term(*sort, proof_writer, val, true_block);
+    emit_write_variable(proof_writer, key.str(), val, *sort, true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -276,8 +418,8 @@ llvm::BasicBlock *proof_event::rewrite_event_post(
   auto return_sort = std::dynamic_pointer_cast<kore_composite_sort>(
       axiom->get_right_hand_side()->get_sort());
 
-  emit_write_uint64(proof_writer, detail::word(0xFF), true_block);
-  emit_serialize_term(*return_sort, proof_writer, return_value, true_block);
+  emit_write_rewrite_event_post(
+      proof_writer, return_value, *return_sort, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -297,10 +439,9 @@ llvm::BasicBlock *proof_event::function_event_pre(
   auto [true_block, merge_block, proof_writer]
       = event_prelude("function_pre", current_block);
 
-  emit_write_uint64(proof_writer, detail::word(0xDD), true_block);
-  emit_write_string(
-      proof_writer, ast_to_string(*pattern->get_constructor()), true_block);
-  emit_write_string(proof_writer, location_stack, true_block);
+  emit_write_function_event_pre(
+      proof_writer, ast_to_string(*pattern->get_constructor()), location_stack,
+      true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;
@@ -315,7 +456,7 @@ proof_event::function_event_post(llvm::BasicBlock *current_block) {
   auto [true_block, merge_block, proof_writer]
       = event_prelude("function_post", current_block);
 
-  emit_write_uint64(proof_writer, detail::word(0x11), true_block);
+  emit_write_function_event_post(proof_writer, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 
@@ -335,9 +476,7 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
   size_t ordinal = axiom.get_ordinal();
   size_t arity = args.size();
 
-  emit_write_uint64(proof_writer, detail::word(0xEE), true_block);
-  emit_write_uint64(proof_writer, ordinal, true_block);
-  emit_write_uint64(proof_writer, arity, true_block);
+  emit_write_side_condition_event_pre(proof_writer, ordinal, arity, true_block);
 
   kore_pattern *pattern = axiom.get_requires();
   std::map<std::string, kore_variable_pattern *> vars;
@@ -351,8 +490,7 @@ llvm::BasicBlock *proof_event::side_condition_event_pre(
 
     auto sort = std::dynamic_pointer_cast<kore_composite_sort>(var->get_sort());
 
-    emit_write_string(proof_writer, var_name, true_block);
-    emit_serialize_term(*sort, proof_writer, val, true_block);
+    emit_write_variable(proof_writer, var_name, val, *sort, true_block);
   }
 
   llvm::BranchInst::Create(merge_block, true_block);
@@ -372,9 +510,8 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
 
   size_t ordinal = axiom.get_ordinal();
 
-  emit_write_uint64(proof_writer, detail::word(0x33), true_block);
-  emit_write_uint64(proof_writer, ordinal, true_block);
-  emit_write_bool(proof_writer, check_result, true_block);
+  emit_write_side_condition_event_post(
+      proof_writer, ordinal, check_result, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 

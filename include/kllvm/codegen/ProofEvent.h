@@ -44,37 +44,6 @@ private:
   event_prelude(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call that will serialize `term` to the specified `proof_writer` as
-   * binary KORE. This function can be called on any term, but the sort of that
-   * term must be known.
-   */
-  llvm::CallInst *emit_serialize_term(
-      kore_composite_sort &sort, llvm::Value *proof_writer, llvm::Value *term,
-      llvm::BasicBlock *insert_at_end);
-
-  /*
-   * Emit a call that will serialize `value` to the specified `proof_writer`.
-   */
-  llvm::CallInst *emit_write_uint64(
-      llvm::Value *proof_writer, uint64_t value,
-      llvm::BasicBlock *insert_at_end);
-
-  /*
-  * Emit a call that will serialize a boolean value to the specified
-  * `proof_writer`.
-  */
-  llvm::CallInst *emit_write_bool(
-      llvm::Value *proof_writer, llvm::Value *term,
-      llvm::BasicBlock *insert_at_end);
-
-  /*
-   * Emit a call that will serialize `str` to the specified `proof_writer`.
-   */
-  llvm::CallInst *emit_write_string(
-      llvm::Value *proof_writer, std::string const &str,
-      llvm::BasicBlock *insert_at_end);
-
-  /*
    * Emit an instruction that has no effect and will be removed by optimization
    * passes.
    *
@@ -90,6 +59,81 @@ private:
    * the data structure that outputs proof trace data.
    */
   llvm::LoadInst *emit_get_proof_trace_writer(llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Get the block header value for the given `sort_name`.
+   */
+  uint64_t get_block_header(std::string const &sort_name);
+
+  /*
+   * Emit a call to the `hook_event_pre` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_hook_event_pre(
+      llvm::Value *proof_writer, std::string const &name,
+      std::string const &pattern, std::string const &location_stack,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `hook_event_post` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_hook_event_post(
+      llvm::Value *proof_writer, llvm::Value *val, kore_composite_sort &sort,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `argument` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_argument(
+      llvm::Value *proof_writer, llvm::Value *val, kore_composite_sort &sort,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `rewrite_event_pre` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_rewrite_event_pre(
+      llvm::Value *proof_writer, uint64_t ordinal, uint64_t arity,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `variable` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_variable(
+      llvm::Value *proof_writer, std::string const &name, llvm::Value *val,
+      kore_composite_sort &sort, llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `rewrite_event_post` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_rewrite_event_post(
+      llvm::Value *proof_writer, llvm::Value *val, kore_composite_sort &sort,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `function_event_pre` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_function_event_pre(
+      llvm::Value *proof_writer, std::string const &name,
+      std::string const &location_stack, llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `function_event_post` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_function_event_post(
+      llvm::Value *proof_writer, llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `side_condition_event_pre` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_side_condition_event_pre(
+      llvm::Value *proof_writer, uint64_t ordinal, uint64_t arity,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `side_condition_event_post` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_side_condition_event_post(
+      llvm::Value *proof_writer, uint64_t ordinal, llvm::Value *val,
+      llvm::BasicBlock *insert_at_end);
 
 public:
   [[nodiscard]] llvm::BasicBlock *hook_event_pre(
