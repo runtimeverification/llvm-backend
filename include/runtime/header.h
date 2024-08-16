@@ -22,7 +22,6 @@
 #include <immer/map.hpp>
 #include <immer/set.hpp>
 #include <kllvm/ast/AST.h>
-#include <kllvm/binary/serializer.h>
 #include <runtime/collections/rangemap.h>
 #include <unordered_set>
 
@@ -351,11 +350,6 @@ void serialize_term_to_proof_trace(
 
 // The following functions are called by the generated code and runtime code to
 // ouput the proof trace data.
-void serialize_configuration_to_proof_writer(
-    void *proof_writer, block *subject);
-void write_uint64_to_proof_trace(void *proof_writer, uint64_t i);
-void write_bool_to_proof_trace(void *proof_writer, bool b);
-void write_string_to_proof_trace(void *proof_writer, char const *str);
 void write_hook_event_pre_to_proof_trace(
     void *proof_writer, char const *name, char const *pattern,
     char const *location_stack);
@@ -423,16 +417,16 @@ using visitor = struct {
 };
 
 using serialize_to_proof_trace_visitor = struct {
-  void (*visit_config)(void *, block *, uint32_t, bool);
-  void (*visit_map)(void *, map *, uint32_t, uint32_t, uint32_t);
-  void (*visit_list)(void *, list *, uint32_t, uint32_t, uint32_t);
-  void (*visit_set)(void *, set *, uint32_t, uint32_t, uint32_t);
-  void (*visit_int)(void *, mpz_t, uint32_t);
-  void (*visit_float)(void *, floating *, uint32_t);
-  void (*visit_bool)(void *, bool, uint32_t);
-  void (*visit_string_buffer)(void *, stringbuffer *, uint32_t);
-  void (*visit_m_int)(void *, size_t *, size_t, uint32_t);
-  void (*visit_range_map)(void *, rangemap *, uint32_t, uint32_t, uint32_t);
+  void (*visit_config)(FILE *, block *, uint32_t, bool);
+  void (*visit_map)(FILE *, map *, uint32_t, uint32_t, uint32_t);
+  void (*visit_list)(FILE *, list *, uint32_t, uint32_t, uint32_t);
+  void (*visit_set)(FILE *, set *, uint32_t, uint32_t, uint32_t);
+  void (*visit_int)(FILE *, mpz_t, uint32_t);
+  void (*visit_float)(FILE *, floating *, uint32_t);
+  void (*visit_bool)(FILE *, bool, uint32_t);
+  void (*visit_string_buffer)(FILE *, stringbuffer *, uint32_t);
+  void (*visit_m_int)(FILE *, size_t *, size_t, uint32_t);
+  void (*visit_range_map)(FILE *, rangemap *, uint32_t, uint32_t, uint32_t);
 };
 
 void print_map(
@@ -446,8 +440,7 @@ void print_list(
 void visit_children(
     block *subject, writer *file, visitor *printer, void *state);
 void visit_children_for_serialize_to_proof_trace(
-    block *subject, void *proof_writer,
-    serialize_to_proof_trace_visitor *printer);
+    block *subject, FILE *file, serialize_to_proof_trace_visitor *printer);
 
 stringbuffer *hook_BUFFER_empty(void);
 stringbuffer *hook_BUFFER_concat(stringbuffer *buf, string *s);
