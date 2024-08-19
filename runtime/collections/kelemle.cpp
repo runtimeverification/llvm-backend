@@ -146,9 +146,9 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
         case MINT_LAYOUT + 160: {
           auto *child1ptr = (int64_t *)(child1intptr);
           auto *child2ptr = (int64_t *)(child2intptr);
-          bool cmp = child1ptr[0] == child2ptr[0]
-                  && child1ptr[1] == child2ptr[1]
-                  && (child1ptr[2] & UINT32_MAX) == (child2ptr[2] & UINT32_MAX);
+          bool cmp
+              = child1ptr[0] == child2ptr[0] && child1ptr[1] == child2ptr[1]
+                && (child1ptr[2] & UINT32_MAX) == (child2ptr[2] & UINT32_MAX);
           if (!cmp) {
             return false;
           }
@@ -157,10 +157,9 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
         case MINT_LAYOUT + 256: {
           auto *child1ptr = (int64_t *)(child1intptr);
           auto *child2ptr = (int64_t *)(child2intptr);
-          bool cmp = child1ptr[0] == child2ptr[0]
-                  && child1ptr[1] == child2ptr[1]
-                  && child1ptr[2] == child2ptr[2]
-                  && child1ptr[3] == child2ptr[3];
+          bool cmp
+              = child1ptr[0] == child2ptr[0] && child1ptr[1] == child2ptr[1]
+                && child1ptr[2] == child2ptr[2] && child1ptr[3] == child2ptr[3];
           if (!cmp) {
             return false;
           }
