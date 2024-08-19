@@ -19,6 +19,14 @@ __attribute__((always_inline)) void add_hash8(void *h, uint8_t data) {
   hash_length++;
 }
 
+__attribute__((always_inline)) void add_hash32(void *h, uint32_t data) {
+  auto *buf = (uint8_t *)&data;
+  add_hash8(h, buf[0]);
+  add_hash8(h, buf[1]);
+  add_hash8(h, buf[2]);
+  add_hash8(h, buf[3]);
+}
+
 __attribute__((always_inline)) void add_hash64(void *h, uint64_t data) {
   auto *buf = (uint8_t *)&data;
   add_hash8(h, buf[0]);
@@ -114,6 +122,16 @@ void k_hash(block *arg, void *h) {
           case VARIABLE_LAYOUT: {
             auto **childptrptr = (block **)(argintptr + offset);
             k_hash(*childptrptr, h);
+            break;
+          }
+          case MINT_LAYOUT + 32: {
+            auto *intptr = (uint32_t *)(argintptr + offset);
+            add_hash32(h, *intptr);
+            break;
+          }
+          case MINT_LAYOUT + 64: {
+            auto *intptr = (uint64_t *)(argintptr + offset);
+            add_hash64(h, *intptr);
             break;
           }
           case MINT_LAYOUT + 160: {
