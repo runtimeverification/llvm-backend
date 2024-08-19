@@ -252,17 +252,17 @@ llvm::CallInst *proof_event::emit_write_side_condition_event_post(
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ty, i1_ty}, false);
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ty, i8_ptr_ty}, false);
 
   auto *func = get_or_insert_function(
       module_, "write_side_condition_event_post_to_proof_trace", func_ty);
 
   auto *var_ordinal = llvm::ConstantInt::get(i64_ty, ordinal);
-  return b.CreateCall(func, {proof_writer, var_ordinal, val});
+  auto *var_val = b.CreateIntToPtr(val, i8_ptr_ty);
+  return b.CreateCall(func, {proof_writer, var_ordinal, var_val});
 }
 
 llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
