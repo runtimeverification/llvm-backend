@@ -1048,10 +1048,7 @@ bool can_tail_call(llvm::Type *type) {
   auto *int_type = dyn_cast<llvm::IntegerType>(type);
   // integer types that cannot fit in 3 64-bit registers cannot be tail
   // called on X86
-  if (int_type->getBitWidth() > 192) {
-    return false;
-  }
-  return true;
+  return int_type->getBitWidth() <= 192;
 }
 
 bool make_function(
