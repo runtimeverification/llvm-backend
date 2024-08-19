@@ -116,6 +116,21 @@ void k_hash(block *arg, void *h) {
             k_hash(*childptrptr, h);
             break;
           }
+          case MINT_LAYOUT + 160: {
+            auto *intptr = (uint64_t *)(argintptr + offset);
+            add_hash64(h, intptr[0]);
+            add_hash64(h, intptr[1]);
+            add_hash64(h, intptr[2] & UINT32_MAX);
+            break;
+          }
+          case MINT_LAYOUT + 256: {
+            auto *intptr = (uint64_t *)(argintptr + offset);
+            add_hash64(h, intptr[0]);
+            add_hash64(h, intptr[1]);
+            add_hash64(h, intptr[2]);
+            add_hash64(h, intptr[3]);
+            break;
+          }
           default: abort();
           }
         }
