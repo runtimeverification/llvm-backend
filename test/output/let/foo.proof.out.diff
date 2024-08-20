@@ -1,4 +1,4 @@
-version: 11
+version: 12
 function: Lblexp'LParUndsRParUnds'LET-SYNTAX'Unds'Int'Unds'Int{} ()
 rule: 151 1
   VarX = kore[\dv{SortInt{}}("10")]

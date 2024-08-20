@@ -381,4 +381,24 @@ llvm::BasicBlock *proof_event::side_condition_event_post(
   return merge_block;
 }
 
+llvm::BasicBlock *proof_event::pattern_matching_failure(
+    kore_composite_pattern const &pattern, llvm::BasicBlock *current_block) {
+
+  if (!proof_hint_instrumentation) {
+    return current_block;
+  }
+
+  auto [true_block, merge_block, proof_writer]
+      = event_prelude("pattern_matching_failure", current_block);
+
+  std::string function_name = ast_to_string(*pattern.get_constructor());
+
+  emit_write_uint64(proof_writer, detail::word(0x44), true_block);
+  emit_write_string(proof_writer, function_name, true_block);
+
+  llvm::BranchInst::Create(merge_block, true_block);
+
+  return merge_block;
+}
+
 } // namespace kllvm

@@ -1,4 +1,4 @@
-version: 11
+version: 12
 hook: SET.element LblSetItem{} ()
   function: LblSetItem{} ()
   arg: kore[Lblc'Unds'SET-FUN-SYNTAX'Unds'Key{}()]
