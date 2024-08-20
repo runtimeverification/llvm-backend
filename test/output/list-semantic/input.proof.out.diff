@@ -1,4 +1,4 @@
-version: 11
+version: 12
 hook: LIST.element LblListItem{} ()
   function: LblListItem{} ()
   arg: kore[LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
