@@ -124,6 +124,8 @@ std::string make_side_condition_function(
     kore_axiom_declaration *axiom, kore_definition *definition,
     llvm::Module *module);
 
+bool can_tail_call(llvm::Type *type);
+
 extern std::string map_struct;
 extern std::string list_struct;
 extern std::string set_struct;
