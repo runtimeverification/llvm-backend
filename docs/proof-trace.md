@@ -37,6 +37,7 @@ event             ::= hook
                     | side_cond_entry
                     | side_cond_exit
                     | config
+                    | pattern_matching_failure
 
 argument          ::= hook
                     | function
@@ -44,6 +45,7 @@ argument          ::= hook
                     | side_cond_entry
                     | side_cond_exit
                     | kore_term
+                    | pattern_matching_failure
 
 name              ::= string
 location          ::= string
