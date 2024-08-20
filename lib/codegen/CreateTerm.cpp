@@ -1038,6 +1038,19 @@ void add_abort(llvm::BasicBlock *block, llvm::Module *module) {
   new llvm::UnreachableInst(module->getContext(), block);
 }
 
+bool can_tail_call(llvm::Type *type) {
+  if (type->isVoidTy()) {
+    return false;
+  }
+  if (!type->isIntegerTy()) {
+    return true;
+  }
+  auto *int_type = dyn_cast<llvm::IntegerType>(type);
+  // integer types that cannot fit in 3 64-bit registers cannot be tail
+  // called on X86
+  return int_type->getBitWidth() <= 192;
+}
+
 bool make_function(
     std::string const &name, kore_pattern *pattern, kore_definition *definition,
     llvm::Module *module, bool tailcc, bool big_step, bool apply,
@@ -1142,8 +1155,9 @@ bool make_function(
       // 2. Return returns return value of call (guaranteed)
       // 3. Calling convention is tailcc
       // 4. Function is not sret (here approximated by checking if return type is void)
+      // 5. Function is not "sret demoted" (here approximated by checking that it is not an MInt of size >192)
       if (call->getCallingConv() == llvm::CallingConv::Tail
-          && call->getType() != llvm::Type::getVoidTy(module->getContext())) {
+          && can_tail_call(call->getType())) {
         call->setTailCallKind(llvm::CallInst::TCK_MustTail);
       }
     }
