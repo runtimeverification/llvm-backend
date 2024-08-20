@@ -77,6 +77,13 @@ void llvm_side_condition_end_event::print(
       (result_ ? "true" : "false"));
 }
 
+void llvm_pattern_matching_failure_event::print(
+    std::ostream &out, bool expand_terms, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format(
+      "{}pattern matching failure: {}\n", indent, function_name_);
+}
+
 void llvm_function_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');

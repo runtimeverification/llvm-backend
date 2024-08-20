@@ -34,6 +34,7 @@ constexpr uint64_t hook_result_sentinel = detail::word(0xBB);
 constexpr uint64_t rule_event_sentinel = detail::word(0x22);
 constexpr uint64_t side_condition_event_sentinel = detail::word(0xEE);
 constexpr uint64_t side_condition_end_sentinel = detail::word(0x33);
+constexpr uint64_t pattern_matching_failure_sentinel = detail::word(0x44);
 
 class llvm_step_event : public std::enable_shared_from_this<llvm_step_event> {
 public:
@@ -144,6 +145,28 @@ public:
 
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] bool get_result() const { return result_; }
+
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
+};
+
+class llvm_pattern_matching_failure_event : public llvm_step_event {
+private:
+  std::string function_name_;
+
+  llvm_pattern_matching_failure_event(std::string function_name)
+      : function_name_(std::move(function_name)) { }
+
+public:
+  static sptr<llvm_pattern_matching_failure_event>
+  create(std::string function_name) {
+    return sptr<llvm_pattern_matching_failure_event>(
+        new llvm_pattern_matching_failure_event(std::move(function_name)));
+  }
+
+  [[nodiscard]] std::string const &get_function_name() const {
+    return function_name_;
+  }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
       const override;
@@ -296,7 +319,7 @@ public:
 
 class proof_trace_parser {
 public:
-  static constexpr uint32_t expected_version = 11U;
+  static constexpr uint32_t expected_version = 12U;
 
 private:
   bool verbose_;
@@ -545,6 +568,22 @@ private:
     return event;
   }
 
+  sptr<llvm_pattern_matching_failure_event> static parse_pattern_matching_failure(
+      proof_trace_buffer &buffer) {
+    if (!buffer.check_word(pattern_matching_failure_sentinel)) {
+      return nullptr;
+    }
+
+    std::string function_name;
+    if (!buffer.read_string(function_name)) {
+      return nullptr;
+    }
+
+    auto event = llvm_pattern_matching_failure_event::create(function_name);
+
+    return event;
+  }
+
   bool parse_argument(proof_trace_buffer &buffer, llvm_event &event) {
     if (!buffer.eof() && buffer.peek() == '\x7F') {
       uint64_t pattern_len = 0;
@@ -608,6 +647,16 @@ private:
       return true;
     }
 
+    case pattern_matching_failure_sentinel: {
+      auto pattern_matching_failure_event
+          = parse_pattern_matching_failure(buffer);
+      if (!pattern_matching_failure_event) {
+        return false;
+      }
+      event.set_step_event(pattern_matching_failure_event);
+      return true;
+    }
+
     default: return false;
     }
   }
@@ -628,6 +677,9 @@ private:
     case side_condition_event_sentinel: return parse_side_condition(buffer);
 
     case side_condition_end_sentinel: return parse_side_condition_end(buffer);
+
+    case pattern_matching_failure_sentinel:
+      return parse_pattern_matching_failure(buffer);
 
     default: return nullptr;
     }

@@ -1,4 +1,4 @@
-version: 11
+version: 12
 function: Lbl'UndsPlus'left'UndsUnds'ASSOC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo'Unds'Foo{} ()
 rule: 103 2
   Var'Unds'X = kore[Lbla'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
