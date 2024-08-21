@@ -1,4 +1,4 @@
-version: 11
+version: 12
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 127 0
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
