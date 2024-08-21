@@ -258,5 +258,25 @@ entry:
   ret i64 %steps
 }
 
+define i1 @hook_MINT_eq_32(i32 %0, i32 %1) {
+  %ret = icmp eq i32 %0, %1
+  ret i1 %ret
+}
+
+define i1 @hook_MINT_eq_64(i64 %0, i64 %1) {
+  %ret = icmp eq i64 %0, %1
+  ret i1 %ret
+}
+
+define i1 @hook_MINT_eq_160(i160 %0, i160 %1) {
+  %ret = icmp eq i160 %0, %1
+  ret i1 %ret
+}
+
+define i1 @hook_MINT_eq_256(i256 %0, i256 %1) {
+  %ret = icmp eq i256 %0, %1
+  ret i1 %ret
+}
+
 attributes #0 = { noreturn }
 )LLVM"
