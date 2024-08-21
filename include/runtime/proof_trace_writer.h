@@ -40,7 +40,7 @@ class proof_trace_file_writer : public proof_trace_writer {
 private:
   FILE *file_;
 
-  void write(void const *ptr, size_t len) { fwrite(ptr, len, 1, file_); }
+  void write_bytes(void const *ptr, size_t len) { fwrite(ptr, len, 1, file_); }
 
   void write_string(char const *str, size_t len) { fwrite(str, 1, len, file_); }
 
@@ -52,13 +52,13 @@ private:
   // The passed string should be 0 terminated.
   void write_null_terminated_string(char const *str) {
     write_string(str);
-    char n = 0;
-    write(&n, 1);
+    char n = '\0';
+    write_bytes(&n, 1);
   }
 
-  void write_bool(bool b) { write(&b, sizeof(bool)); }
-  void write_uint32(uint32_t i) { write(&i, sizeof(uint32_t)); }
-  void write_uint64(uint64_t i) { write(&i, sizeof(uint64_t)); }
+  void write_bool(bool b) { write_bytes(&b, sizeof(bool)); }
+  void write_uint32(uint32_t i) { write_bytes(&i, sizeof(uint32_t)); }
+  void write_uint64(uint64_t i) { write_bytes(&i, sizeof(uint64_t)); }
 
 public:
   proof_trace_file_writer(FILE *file)
