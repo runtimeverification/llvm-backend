@@ -135,6 +135,13 @@ private:
       llvm::Value *proof_writer, uint64_t ordinal, llvm::Value *val,
       llvm::BasicBlock *insert_at_end);
 
+  /*
+   * Emit a call to the `patteern_matching_failure` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_pattern_matching_failure(
+      llvm::Value *proof_writer, std::string const &function_name,
+      llvm::BasicBlock *insert_at_end);
+
 public:
   [[nodiscard]] llvm::BasicBlock *hook_event_pre(
       std::string const &name, kore_composite_pattern *pattern,

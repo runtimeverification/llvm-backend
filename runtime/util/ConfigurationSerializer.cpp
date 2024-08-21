@@ -701,6 +701,12 @@ void write_side_condition_event_post_to_proof_trace(
       ->side_condition_event_post(ordinal, side_cond_result);
 }
 
+void write_pattern_matching_failure_to_proof_trace(
+    void *proof_writer, char const *function_name) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->pattern_matching_failure(function_name);
+}
+
 void write_configuration_to_proof_trace(void *proof_writer, block *config) {
   static_cast<proof_trace_writer *>(proof_writer)->configuration(config);
 }

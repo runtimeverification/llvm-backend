@@ -372,6 +372,8 @@ void write_side_condition_event_pre_to_proof_trace(
     void *proof_writer, uint64_t ordinal, uint64_t arity);
 void write_side_condition_event_post_to_proof_trace(
     void *proof_writer, uint64_t ordinal, bool side_cond_result);
+void write_pattern_matching_failure_to_proof_trace(
+    void *proof_writer, char const *function_name);
 void write_configuration_to_proof_trace(void *proof_writer, block *config);
 
 // The following functions have to be generated at kompile time

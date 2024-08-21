@@ -265,6 +265,25 @@ llvm::CallInst *proof_event::emit_write_side_condition_event_post(
   return b.CreateCall(func, {proof_writer, var_ordinal, var_val});
 }
 
+llvm::CallInst *proof_event::emit_write_pattern_matching_failure(
+    llvm::Value *proof_writer, std::string const &function_name,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+
+  auto *func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i8_ptr_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_pattern_matching_failure_to_proof_trace", func_ty);
+
+  auto *var_function_name
+      = b.CreateGlobalStringPtr(function_name, "", 0, module_);
+  return b.CreateCall(func, {proof_writer, var_function_name});
+}
+
 llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
   auto *i8_ty = llvm::Type::getInt8Ty(ctx_);
   auto *zero = llvm::ConstantInt::get(i8_ty, 0);
@@ -530,8 +549,7 @@ llvm::BasicBlock *proof_event::pattern_matching_failure(
 
   std::string function_name = ast_to_string(*pattern.get_constructor());
 
-  emit_write_uint64(proof_writer, detail::word(0x44), true_block);
-  emit_write_string(proof_writer, function_name, true_block);
+  emit_write_pattern_matching_failure(proof_writer, function_name, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 

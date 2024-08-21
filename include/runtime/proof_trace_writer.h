@@ -32,6 +32,7 @@ public:
   virtual void
   side_condition_event_post(uint64_t ordinal, bool side_cond_result)
       = 0;
+  virtual void pattern_matching_failure(char const *function_name) = 0;
   virtual void configuration(block *config) = 0;
   virtual void end_of_trace() = 0;
 };
@@ -129,6 +130,11 @@ public:
     write_uint64(kllvm::side_condition_end_sentinel);
     write_uint64(ordinal);
     write_bool(side_cond_result);
+  }
+
+  void pattern_matching_failure(char const *function_name) override {
+    write_uint64(kllvm::pattern_matching_failure_sentinel);
+    write_null_terminated_string(function_name);
   }
 
   void configuration(block *config) override {
