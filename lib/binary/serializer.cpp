@@ -210,16 +210,4 @@ void emit_kore_rich_header(std::ostream &os, kore_definition *definition) {
   }
 }
 
-void proof_trace_file_writer::write(void const *ptr, size_t len) {
-  fwrite(ptr, len, 1, file_);
-}
-
-void proof_trace_file_writer::write_string(char const *str, size_t len) {
-  fwrite(str, 1, len, file_);
-}
-
-void proof_trace_file_writer::write_string(char const *str) {
-  fputs(str, file_);
-}
-
 } // namespace kllvm
