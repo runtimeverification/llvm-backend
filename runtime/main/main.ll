@@ -19,7 +19,6 @@ declare void @print_proof_hint_header(ptr)
 @statistics.flag = private constant [13 x i8] c"--statistics\00"
 @binary_out.flag = private constant [16 x i8] c"--binary-output\00"
 @proof_out.flag = private constant [15 x i8] c"--proof-output\00"
-@use_shm.flag = private constant [20 x i8] c"--use-shared-memory\00"
 
 @proof_writer = external global ptr
 @statistics = external global i1

@@ -1,6 +1,5 @@
-#include <kllvm/binary/serializer.h>
-
 #include <runtime/header.h>
+#include <runtime/proof_trace_writer.h>
 
 #include <cstdint>
 #include <fcntl.h>
@@ -25,7 +24,7 @@ int32_t get_exit_code(block *);
 void init_outputs(char const *output_filename) {
   output_file = fopen(output_filename, "a");
   if (proof_output) {
-    proof_writer = new kllvm::proof_trace_file_writer(output_file);
+    proof_writer = new proof_trace_file_writer(output_file);
   }
 }
 
@@ -38,8 +37,8 @@ void init_outputs(char const *output_filename) {
       = std::unique_ptr<FILE, decltype(&fclose)>(output_file, fclose);
 
   // Similar for deletinging the proof_output_buffer data structure
-  auto *w = static_cast<kllvm::proof_trace_writer *>(proof_writer);
-  [[maybe_unused]] auto deleter = std::unique_ptr<kllvm::proof_trace_writer>(w);
+  auto *w = static_cast<proof_trace_writer *>(proof_writer);
+  [[maybe_unused]] auto deleter = std::unique_ptr<proof_trace_writer>(w);
 
   if (error && safe_partial) {
     throw std::runtime_error(
@@ -62,14 +61,13 @@ void init_outputs(char const *output_filename) {
       print_configuration(output_file, subject);
     }
   } else if (!error && !proof_hint_instrumentation_slow) {
-    w->write_uint64(0xFFFFFFFFFFFFFFFF);
-    serialize_configuration_to_proof_writer(proof_writer, subject);
+    write_configuration_to_proof_trace(proof_writer, subject);
   }
 
   auto exit_code = error ? 113 : get_exit_code(subject);
 
   if (proof_output) {
-    w->write_eof();
+    w->end_of_trace();
   }
 
   std::exit(exit_code);
