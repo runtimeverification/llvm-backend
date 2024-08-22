@@ -663,6 +663,6 @@ case class MIntS(bitwidth: Int) extends SortCategory {
     matrix.compiledCases,
     matrix.compiledDefault
   )
-  def equalityFun: String                  = ???
+  def equalityFun: String                  = "hook_MINT_eq_" + bitwidth
   override def length(rawLength: Int): Int = 1 << bitwidth
 }
