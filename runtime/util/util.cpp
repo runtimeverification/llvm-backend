@@ -1,4 +1,5 @@
 #include "runtime/header.h"
+#include "runtime/proof_trace_writer.h"
 
 #include <fmt/format.h>
 
@@ -34,9 +35,8 @@ block *construct_raw_term(void *subject, char const *sort, bool raw_value) {
   return static_cast<block *>(construct_composite_pattern(tag, args));
 }
 
-void print_proof_hint_header(kllvm::proof_trace_writer *writer) {
+void print_proof_hint_header(proof_trace_writer *writer) {
   uint32_t version = 12;
-  writer->write_string("HINT");
-  writer->write_uint32(version);
+  writer->proof_trace_header(version);
 }
 }
