@@ -1,4 +1,4 @@
-#include <kllvm/binary/ProofTraceParser.h>
+#include <kllvm/binary/ProofTraceUtils.h>
 
 #include <fmt/format.h>
 #include <fstream>
@@ -190,8 +190,23 @@ void llvm_rewrite_trace::print(
     pre_trace_event.print(out, expand_terms, false, ind);
   }
   initial_config_.print(out, expand_terms, false, ind);
+  auto current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
+      initial_config_.getkore_pattern());
   for (auto const &trace_event : trace_) {
-    trace_event.print(out, expand_terms, false, ind);
+    if (trace_event.is_pattern()) {
+      current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
+          trace_event.getkore_pattern());
+    } else {
+      trace_event.print(out, expand_terms, false, ind);
+      if (auto function_event = std::dynamic_pointer_cast<llvm_function_event>(
+              trace_event.get_step_event())) {
+        auto new_config_event = build_post_function_event(
+            current_config, function_event, expand_terms);
+        if (new_config_event) {
+          new_config_event->print(out, expand_terms, false, ind);
+        }
+      }
+    }
   }
 }
 
