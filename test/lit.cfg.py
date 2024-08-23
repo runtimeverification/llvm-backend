@@ -162,7 +162,7 @@ config.substitutions.extend([
     ('%check-proof-out', one_line('''
         %run-proof-out
         %kore-rich-header %s > %t.header.bin
-        %kore-proof-trace --verbose --expand-terms %t.header.bin %t.out.bin | diff - %test-proof-diff-out
+        %kore-proof-trace --verbose --expand-terms %t.header.bin %t.out.bin > %test-proof-diff-out
         result="$?"
         if [ "$result" -ne 0 ]; then
             echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
@@ -205,6 +205,28 @@ config.substitutions.extend([
                 exit 1
             fi
             %kore-proof-trace --streaming-parser --verbose --expand-terms %t.header.bin $hint | diff - $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
+                exit 1
+            fi
+        done
+    ''')),
+    
+     ('%check-dir-proof-intermediate-out', one_line('''
+        %kore-rich-header %s > %t.header.bin
+        for out in %test-dir-out/*.proof.intermediate.out.diff; do
+            in=%test-dir-in/`basename $out .proof.intermediate.out.diff`.in
+            hint=%t.`basename $out .proof.intermediate.out.diff`.hint
+            rm -f $hint
+            %t.interpreter $in -1 $hint --proof-output
+            %kore-proof-trace --verbose --expand-terms --intermediate-configs %t.header.bin $hint > $out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"
+                exit 1
+            fi
+            %kore-proof-trace --streaming-parser --verbose --expand-terms --intermediate-configs %t.header.bin $hint | diff - $out
             result="$?"
             if [ "$result" -ne 0 ]; then
                 echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms and streaming parser"
