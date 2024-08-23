@@ -32,6 +32,7 @@ config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash're
 rule: 130 1
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
 function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree{} (0:0:0)
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 217 2
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("1")]
   VarX = kore[\dv{SortInt{}}("1")]

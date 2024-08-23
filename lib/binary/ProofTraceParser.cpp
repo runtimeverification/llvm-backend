@@ -179,6 +179,25 @@ void llvm_rewrite_trace_iterator::print(
   out << fmt::format("{}version: {}\n", indent, version_);
   while (auto event = get_next_event()) {
     event.value().event.print(out, expand_terms, false, ind);
+    if (event.value().type == llvm_event_type::InitialConfig) {
+      current_config_ = std::dynamic_pointer_cast<kore_composite_pattern>(
+          event.value().event.getkore_pattern());
+    } else if (event.value().type == llvm_event_type::Trace) {
+      if (event.value().event.is_pattern()) {
+        current_config_ = std::dynamic_pointer_cast<kore_composite_pattern>(
+            event.value().event.getkore_pattern());
+      } else {
+        if (auto function_event
+            = std::dynamic_pointer_cast<llvm_function_event>(
+                event.value().event.get_step_event())) {
+          auto new_config_event
+              = build_post_function_event(current_config_, function_event, expand_terms);
+          if (new_config_event) {
+            new_config_event->print(out, expand_terms, false, ind);
+          }
+        }
+      }
+    }
   }
 }
 
@@ -193,11 +212,11 @@ void llvm_rewrite_trace::print(
   auto current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
       initial_config_.getkore_pattern());
   for (auto const &trace_event : trace_) {
+    trace_event.print(out, expand_terms, false, ind);
     if (trace_event.is_pattern()) {
       current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
           trace_event.getkore_pattern());
     } else {
-      trace_event.print(out, expand_terms, false, ind);
       if (auto function_event = std::dynamic_pointer_cast<llvm_function_event>(
               trace_event.get_step_event())) {
         auto new_config_event = build_post_function_event(

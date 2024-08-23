@@ -103,6 +103,7 @@ rule: 2758 5
   VarID = kore[\dv{SortInt{}}("1")]
   VarMSGS = kore[Lbl'Unds'MessageCellMap'Unds'{}(LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("200")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("oofAccount")))),LblMessageCellMapItem{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'message'-GT-'{}(Lbl'-LT-'msgID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'value'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'to'-GT-'{}(\dv{SortString{}}("fooAccount")))))]
 function: LblfindMsg'LParUndsCommUndsRParUnds'CELL-VALUE'Unds'Bool'Unds'Int'Unds'MessagesCell{} (0:0:0)
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(LblfindMsg'LParUndsCommUndsRParUnds'CELL-VALUE'Unds'Bool'Unds'Int'Unds'MessagesCell{}(),dotk{}())),Lbl'-LT-'messages'-GT-'{}(Lbl'Stop'MessageCellMap{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 2805 2
   VarID = kore[\dv{SortInt{}}("1")]
   VarID'Apos' = kore[\dv{SortInt{}}("2")]

@@ -34,6 +34,7 @@ rule: 107 3
   Var'Unds'DotVar1 = kore[dotk{}()]
   VarX = kore[Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()]
 function: Lblproject'Coln'Oof{} (0:0:0:0)
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblproject'Coln'Oof{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 161 1
   VarK = kore[Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()]
 rule: 108 3

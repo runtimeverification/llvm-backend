@@ -761,6 +761,7 @@ private:
   std::unique_ptr<proof_trace_buffer> buffer_;
   llvm_event_type type_ = llvm_event_type::PreTrace;
   proof_trace_parser parser_;
+  std::shared_ptr<kore_composite_pattern> current_config_;
 
 public:
   llvm_rewrite_trace_iterator(
