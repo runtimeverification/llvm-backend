@@ -1,5 +1,3 @@
-#include "kllvm/binary/ProofTraceUtils.h"
-
 #include <kllvm/ast/AST.h>
 #include <kllvm/binary/ProofTraceUtils.h>
 
@@ -23,8 +21,8 @@ std::vector<int> kllvm::parse_relative_location(std::string location) {
 }
 
 sptr<kore_composite_pattern> kllvm::replace_argument(
-    sptr<kore_composite_pattern> current_config,
-    sptr<kore_composite_pattern> function, std::vector<int> positions) {
+    sptr<kore_composite_pattern> &current_config,
+    sptr<kore_composite_pattern> &function, std::vector<int> positions) {
 
   // The function is in the rhs of a rewrite rule
   if (positions.empty()) {
@@ -56,14 +54,14 @@ sptr<kore_composite_pattern> kllvm::replace_argument(
 
 llvm_event *kllvm::build_post_function_event(
     sptr<kore_composite_pattern> current_config,
-    sptr<llvm_function_event> function_event, bool expand_terms) {
+    sptr<llvm_function_event> &function_event, bool expand_terms) {
   sptr<kore_composite_pattern> new_config = nullptr;
 
   // The name of the function is actually the kore_symbol
   // corresponding to the function's constructor: function_name{...}
   // We need to extract only the function name to build the composite pattern
   auto function_name = function_event->get_name();
-  auto delimiter = "{";
+  auto const *delimiter = "{";
   auto pos = function_name.find(delimiter);
   if (pos != std::string::npos) {
     function_name = function_name.substr(0, pos);
@@ -89,7 +87,7 @@ llvm_event *kllvm::build_post_function_event(
     new_config->print(ss);
     auto new_config_size = ss.str().size();
 
-    llvm_event *new_config_event = new llvm_event();
+    auto *new_config_event = new llvm_event();
     new_config_event->setkore_pattern(new_config, new_config_size);
 
     return new_config_event;

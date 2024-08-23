@@ -220,7 +220,7 @@ config.substitutions.extend([
             hint=%t.`basename $out .proof.intermediate.out.diff`.hint
             rm -f $hint
             %t.interpreter $in -1 $hint --proof-output
-            %kore-proof-trace --verbose --expand-terms --intermediate-configs %t.header.bin $hint > $out
+            %kore-proof-trace --verbose --expand-terms --intermediate-configs %t.header.bin $hint | diff - $out
             result="$?"
             if [ "$result" -ne 0 ]; then
                 echo "kore-proof-trace error while parsing proof hint trace with expanded kore terms"

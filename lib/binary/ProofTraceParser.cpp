@@ -259,7 +259,7 @@ std::optional<llvm_rewrite_trace> proof_trace_parser::parse_proof_trace(
   }
 
   if (verbose_) {
-    trace.print(std::cout, expand_terms_, intermediate_configs);
+    trace.print(std::cout, expand_terms_, 0U, intermediate_configs);
   }
 
   return trace;
@@ -278,7 +278,7 @@ proof_trace_parser::parse_proof_trace_from_file(
   }
 
   if (verbose_) {
-    trace.print(std::cout, expand_terms_, intermediate_configs);
+    trace.print(std::cout, expand_terms_, 0U, intermediate_configs);
   }
 
   return trace;
