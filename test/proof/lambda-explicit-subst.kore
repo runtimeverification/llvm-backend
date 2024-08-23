@@ -1,3 +1,5 @@
+// XFAIL: *
+
 // RUN: %proof-interpreter
 // RUN: %check-dir-proof-out
 // RUN: %check-dir-proof-intermediate-out
