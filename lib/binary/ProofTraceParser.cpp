@@ -192,7 +192,7 @@ void llvm_rewrite_trace_iterator::print(
           if (auto function_event
               = std::dynamic_pointer_cast<llvm_function_event>(
                   event.value().event.get_step_event())) {
-            auto new_config_event = build_post_function_event(
+            auto *new_config_event = build_post_function_event(
                 current_config_, function_event, expand_terms);
             if (new_config_event) {
               new_config_event->print(out, expand_terms, false, ind);
@@ -225,7 +225,7 @@ void llvm_rewrite_trace::print(
         if (auto function_event
             = std::dynamic_pointer_cast<llvm_function_event>(
                 trace_event.get_step_event())) {
-          auto new_config_event = build_post_function_event(
+          auto *new_config_event = build_post_function_event(
               current_config, function_event, expand_terms);
           if (new_config_event) {
             new_config_event->print(out, expand_terms, false, ind);
