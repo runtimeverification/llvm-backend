@@ -174,26 +174,29 @@ llvm_rewrite_trace_iterator::get_next_event() {
 }
 
 void llvm_rewrite_trace_iterator::print(
-    std::ostream &out, bool expand_terms, unsigned ind) {
+    std::ostream &out, bool expand_terms, unsigned ind,
+    bool intermediate_configs) {
   std::string indent(ind * indent_size, ' ');
   out << fmt::format("{}version: {}\n", indent, version_);
   while (auto event = get_next_event()) {
     event.value().event.print(out, expand_terms, false, ind);
-    if (event.value().type == llvm_event_type::InitialConfig) {
-      current_config_ = std::dynamic_pointer_cast<kore_composite_pattern>(
-          event.value().event.getkore_pattern());
-    } else if (event.value().type == llvm_event_type::Trace) {
-      if (event.value().event.is_pattern()) {
+    if (intermediate_configs) {
+      if (event.value().type == llvm_event_type::InitialConfig) {
         current_config_ = std::dynamic_pointer_cast<kore_composite_pattern>(
             event.value().event.getkore_pattern());
-      } else {
-        if (auto function_event
-            = std::dynamic_pointer_cast<llvm_function_event>(
-                event.value().event.get_step_event())) {
-          auto new_config_event
-              = build_post_function_event(current_config_, function_event, expand_terms);
-          if (new_config_event) {
-            new_config_event->print(out, expand_terms, false, ind);
+      } else if (event.value().type == llvm_event_type::Trace) {
+        if (event.value().event.is_pattern()) {
+          current_config_ = std::dynamic_pointer_cast<kore_composite_pattern>(
+              event.value().event.getkore_pattern());
+        } else {
+          if (auto function_event
+              = std::dynamic_pointer_cast<llvm_function_event>(
+                  event.value().event.get_step_event())) {
+            auto new_config_event = build_post_function_event(
+                current_config_, function_event, expand_terms);
+            if (new_config_event) {
+              new_config_event->print(out, expand_terms, false, ind);
+            }
           }
         }
       }
@@ -202,29 +205,37 @@ void llvm_rewrite_trace_iterator::print(
 }
 
 void llvm_rewrite_trace::print(
-    std::ostream &out, bool expand_terms, unsigned ind) const {
+    std::ostream &out, bool expand_terms, unsigned ind,
+    bool intermediate_configs) const {
   std::string indent(ind * indent_size, ' ');
   out << fmt::format("{}version: {}\n", indent, version_);
   for (auto const &pre_trace_event : pre_trace_) {
     pre_trace_event.print(out, expand_terms, false, ind);
   }
   initial_config_.print(out, expand_terms, false, ind);
-  auto current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
-      initial_config_.getkore_pattern());
-  for (auto const &trace_event : trace_) {
-    trace_event.print(out, expand_terms, false, ind);
-    if (trace_event.is_pattern()) {
-      current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
-          trace_event.getkore_pattern());
-    } else {
-      if (auto function_event = std::dynamic_pointer_cast<llvm_function_event>(
-              trace_event.get_step_event())) {
-        auto new_config_event = build_post_function_event(
-            current_config, function_event, expand_terms);
-        if (new_config_event) {
-          new_config_event->print(out, expand_terms, false, ind);
+  if (intermediate_configs) {
+    auto current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
+        initial_config_.getkore_pattern());
+    for (auto const &trace_event : trace_) {
+      trace_event.print(out, expand_terms, false, ind);
+      if (trace_event.is_pattern()) {
+        current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
+            trace_event.getkore_pattern());
+      } else {
+        if (auto function_event
+            = std::dynamic_pointer_cast<llvm_function_event>(
+                trace_event.get_step_event())) {
+          auto new_config_event = build_post_function_event(
+              current_config, function_event, expand_terms);
+          if (new_config_event) {
+            new_config_event->print(out, expand_terms, false, ind);
+          }
         }
       }
+    }
+  } else {
+    for (auto const &trace_event : trace_) {
+      trace_event.print(out, expand_terms, false, ind);
     }
   }
 }
@@ -237,8 +248,8 @@ proof_trace_parser::proof_trace_parser(
     , header_(header)
     , kore_definition_(std::move(kore_definition)) { }
 
-std::optional<llvm_rewrite_trace>
-proof_trace_parser::parse_proof_trace(std::string const &data) {
+std::optional<llvm_rewrite_trace> proof_trace_parser::parse_proof_trace(
+    std::string const &data, bool intermediate_configs) {
   proof_trace_memory_buffer buffer(data.data(), data.data() + data.length());
   llvm_rewrite_trace trace;
   bool result = parse_trace(buffer, trace);
@@ -248,14 +259,15 @@ proof_trace_parser::parse_proof_trace(std::string const &data) {
   }
 
   if (verbose_) {
-    trace.print(std::cout, expand_terms_);
+    trace.print(std::cout, expand_terms_, intermediate_configs);
   }
 
   return trace;
 }
 
 std::optional<llvm_rewrite_trace>
-proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
+proof_trace_parser::parse_proof_trace_from_file(
+    std::string const &filename, bool intermediate_configs) {
   std::ifstream file(filename, std::ios_base::binary);
   proof_trace_file_buffer buffer(std::move(file));
   llvm_rewrite_trace trace;
@@ -266,7 +278,7 @@ proof_trace_parser::parse_proof_trace_from_file(std::string const &filename) {
   }
 
   if (verbose_) {
-    trace.print(std::cout, expand_terms_);
+    trace.print(std::cout, expand_terms_, intermediate_configs);
   }
 
   return trace;

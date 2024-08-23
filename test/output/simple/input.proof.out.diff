@@ -36,7 +36,6 @@ rule: 2683 2
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
   Var'Unds'Gen2 = kore[\dv{SortInt{}}("0")]
 function: Lblg'LParUndsRParUnds'SIMPLE'Unds'Expr'Unds'Int{} (0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'p'-GT-'{}(Lblg'LParUndsRParUnds'SIMPLE'Unds'Expr'Unds'Int{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 2730 1
   VarI = kore[\dv{SortInt{}}("0")]
 hook: INT.add Lbl'UndsPlus'Int'Unds'{} ()

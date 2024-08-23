@@ -31,6 +31,12 @@ cl::opt<bool> verbose_output(
     llvm::cl::desc("Print verbose information about the input proof trace"),
     llvm::cl::cat(kore_proof_trace_cat));
 
+cl::opt<bool> intermediate_configs(
+    "intermediate-configs",
+    llvm::cl::desc(
+        "Print intermediate configurations before function evaluations"),
+    llvm::cl::cat(kore_proof_trace_cat), llvm::cl::init(false));
+
 cl::opt<bool> expand_terms_in_output(
     "expand-terms", llvm::cl::desc("Expand KORE terms in the verbose output"),
     llvm::cl::cat(kore_proof_trace_cat));
@@ -53,7 +59,7 @@ int main(int argc, char **argv) {
     llvm_rewrite_trace_iterator it(
         std::make_unique<proof_trace_file_buffer>(std::move(file)), header);
     if (verbose_output) {
-      it.print(std::cout, expand_terms_in_output);
+      it.print(std::cout, expand_terms_in_output, intermediate_configs);
     }
     return 0;
   }
@@ -70,7 +76,8 @@ int main(int argc, char **argv) {
   proof_trace_parser parser(
       verbose_output, expand_terms_in_output, header, kore_def);
 
-  auto trace = parser.parse_proof_trace_from_file(input_filename);
+  auto trace = parser.parse_proof_trace_from_file(
+      input_filename, intermediate_configs);
   if (trace.has_value()) {
     return 0;
   }

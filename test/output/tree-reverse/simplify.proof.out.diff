@@ -34,16 +34,13 @@ rule: 105 1
 rule: 106 1
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
 function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} (0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 159 2
   VarT1 = kore[Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
   VarT2 = kore[Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
 function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} (0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}(),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 157 1
   Var'Unds'Gen0 = kore[Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
 function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}(),dotk{}())),Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}())]
 rule: 156 1
   Var'Unds'Gen0 = kore[Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblnode'LParUndsCommUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree'Unds'Tree{}(Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}(),Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

@@ -34,7 +34,6 @@ rule: 124 3
   Var'Unds'DotVar1 = kore[dotk{}()]
   VarX = kore[\dv{SortInt{}}("3")]
 function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (0:0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 156 1
   VarX = kore[\dv{SortInt{}}("3")]
 hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()

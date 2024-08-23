@@ -36,7 +36,6 @@ rule: 122 3
   Var'Unds'Gen0 = kore[Lbl'-LT-'bar'-GT-'{}(\dv{SortInt{}}("100"))]
   Var'Unds'Gen1 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
 function: Lblfoo'LParUndsRParUnds'FUN-CONTEXT-SYNTAX'Unds'Int'Unds'Int{} (0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfoo'LParUndsRParUnds'FUN-CONTEXT-SYNTAX'Unds'Int'Unds'Int{}(),dotk{}())),Lbl'-LT-'bar'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 154 4
   Var'Hash'Configuration = kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'exec'Unds'FUN-CONTEXT-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'bar'-GT-'{}(\dv{SortInt{}}("100")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
   Var'Unds'Gen0 = kore[Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'exec'Unds'FUN-CONTEXT-SYNTAX'Unds'KItem{}(),dotk{}()))]
