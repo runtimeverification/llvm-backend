@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
     llvm_rewrite_trace_iterator it(
         std::make_unique<proof_trace_file_buffer>(std::move(file)), header);
     if (verbose_output) {
-      it.print(std::cout, expand_terms_in_output, intermediate_configs);
+      it.print(std::cout, expand_terms_in_output, 0U, intermediate_configs);
     }
     return 0;
   }
