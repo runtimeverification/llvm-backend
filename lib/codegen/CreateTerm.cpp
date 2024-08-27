@@ -282,14 +282,10 @@ std::string escape(std::string const &str) {
 }
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-llvm::Value *create_term::create_hook(
-    kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
+llvm::Value *create_term::create_hardcoded_hook(
+    std::string const &name, kore_composite_pattern *pattern,
     std::string const &location_stack) {
   auto *ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  assert(hook_att->get_arguments().size() == 1);
-  auto *str_pattern
-      = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
-  std::string name = str_pattern->get_contents();
   if (name == "BOOL.and" || name == "BOOL.andThen") {
     assert(pattern->get_arguments().size() == 2);
     llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
@@ -669,10 +665,26 @@ llvm::Value *create_term::create_hook(
     assert(false && "not implemented yet: MInt");
     abort();
   }
+
+  return nullptr;
+}
+
+llvm::Value *create_term::create_hook(
+    kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
+    std::string const &location_stack) {
+  assert(hook_att->get_arguments().size() == 1);
+  auto *str_pattern
+      = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
+  std::string name = str_pattern->get_contents();
+  llvm::Value *result = create_hardcoded_hook(name, pattern, location_stack);
+  if (result) {
+    return result;
+  }
+
   std::string hook_name = "hook_" + name.substr(0, name.find('.')) + "_"
                           + name.substr(name.find('.') + 1);
   auto *old_val = disable_gc();
-  auto *result = create_function_call(
+  result = create_function_call(
       hook_name, pattern, true, false, true, location_stack);
   enable_gc(old_val);
   return result;

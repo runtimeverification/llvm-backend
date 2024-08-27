@@ -28,6 +28,9 @@ private:
   llvm::Value *alloc_arg(
       kore_composite_pattern *pattern, int idx, bool is_hook_arg,
       std::string const &location_stack);
+  llvm::Value *create_hardcoded_hook(
+      std::string const &name, kore_composite_pattern *pattern,
+      std::string const &location_stack);
   llvm::Value *create_hook(
       kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
       std::string const &location_stack = "");
