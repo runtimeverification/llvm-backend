@@ -1,4 +1,4 @@
-version: 12
+version: 13
 function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCodes{} ()
 rule: 2692 1
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())))]

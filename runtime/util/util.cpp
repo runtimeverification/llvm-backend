@@ -36,7 +36,7 @@ block *construct_raw_term(void *subject, char const *sort, bool raw_value) {
 }
 
 void print_proof_hint_header(proof_trace_writer *writer) {
-  uint32_t version = 12;
+  uint32_t version = 13;
   writer->proof_trace_header(version);
 }
 }
