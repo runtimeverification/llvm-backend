@@ -1,14 +1,11 @@
 version: 12
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
@@ -18,12 +15,11 @@ rule: 112 1
 function: LblinitKCell{} (0)
 rule: 113 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
 rule: 158 1
   VarK = kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
 function: LblinitGeneratedCounterCell{} (1)

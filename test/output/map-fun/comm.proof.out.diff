@@ -1,29 +1,23 @@
 version: 12
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("2")]
   arg: kore[\dv{SortInt{}}("3")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3"))]
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortInt{}}("1")]
   arg: kore[\dv{SortInt{}}("2")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3"))]
 hook result: kore[Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2")))]
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2"))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2")))]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2")))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2")))]
@@ -33,12 +27,11 @@ rule: 154 1
 function: LblinitKCell{} (0)
 rule: 155 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2")))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2")))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2"))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2")))]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2"))]
 rule: 199 1
   VarK = kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("2"))]
 function: LblinitGeneratedCounterCell{} (1)

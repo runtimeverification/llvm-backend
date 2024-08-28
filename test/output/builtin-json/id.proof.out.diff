@@ -2,24 +2,19 @@ version: 12
 function: Lblid'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'JSON'Unds'JSON{} ()
 rule: 216 1
   VarJ = kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+hook: JSON.json2string LblJSON2String{} (0)
+  arg: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+hook result: kore[\dv{SortString{}}("{\x22key\x22:2}")]
 hook: JSON.string2json LblString2JSON{} ()
-  function: LblString2JSON{} ()
-    hook: JSON.json2string LblJSON2String{} (0)
-      function: LblJSON2String{} (0)
-      arg: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
-    hook result: kore[\dv{SortString{}}("{\x22key\x22:2}")]
   arg: kore[\dv{SortString{}}("{\x22key\x22:2}")]
 hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
@@ -29,12 +24,11 @@ rule: 218 1
 function: LblinitKCell{} (0)
 rule: 219 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
 rule: 276 1
   VarK = kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
 function: LblinitGeneratedCounterCell{} (1)

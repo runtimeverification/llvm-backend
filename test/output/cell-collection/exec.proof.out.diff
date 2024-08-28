@@ -1,14 +1,11 @@
 version: 12
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}()]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}())]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}())]
@@ -18,18 +15,16 @@ rule: 245 1
 function: LblinitKCell{} (0)
 rule: 246 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}())]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}())]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}()]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}())]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}()]
 rule: 320 1
   VarK = kore[Lbl'Hash'exec'Unds'CELL-COLLECTION-SYNTAX'Unds'KItem{}()]
 function: LblinitMessagesCell{} (1)
 rule: 248 0
 hook: MAP.unit Lbl'Stop'MessageCellMap{} (0)
-  function: Lbl'Stop'MessageCellMap{} (0)
 hook result: kore[Lbl'Stop'MessageCellMap{}()]
 function: LblinitGeneratedCounterCell{} (2)
 rule: 244 0
@@ -38,6 +33,5 @@ rule: 197 2
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
   Var'Unds'Gen0 = kore[Lbl'Stop'MessageCellMap{}()]
 hook: MAP.unit Lbl'Stop'MessageCellMap{} (1:0)
-  function: Lbl'Stop'MessageCellMap{} (1:0)
 hook result: kore[Lbl'Stop'MessageCellMap{}()]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'messages'-GT-'{}(Lbl'Stop'MessageCellMap{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

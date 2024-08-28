@@ -1,14 +1,11 @@
 version: 12
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]
@@ -18,12 +15,11 @@ rule: 111 1 [] []
 function: LblinitKCell{} (0)
 rule: 112 1 [] []
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())]
 rule: 153 1 [] []
   VarK = kore[Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())]
 function: LblinitGeneratedCounterCell{} (1)
