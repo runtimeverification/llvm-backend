@@ -155,6 +155,15 @@ public:
       llvm::Value *val, kore_composite_sort *sort, bool is_hook_arg,
       llvm::BasicBlock *current_block);
 
+  [[nodiscard]] llvm::BasicBlock *short_circuit_hook_argument(
+      llvm::Value *val, llvm::Value *short_circuit_cond, bool invert_cond,
+      kore_composite_sort *sort, llvm::BasicBlock *current_block);
+
+  [[nodiscard]] llvm::BasicBlock *short_circuit_hook_argument(
+      llvm::Value *val_first, llvm::Value *val_second, llvm::Value *select_cond,
+      kore_composite_sort *sort_first, kore_composite_sort *sort_second,
+      llvm::BasicBlock *current_block);
+
   [[nodiscard]] llvm::BasicBlock *rewrite_event_pre(
       kore_axiom_declaration const &axiom, uint64_t arity,
       std::map<std::string, kore_variable_pattern *> vars,

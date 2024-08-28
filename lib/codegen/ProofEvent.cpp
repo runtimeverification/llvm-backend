@@ -391,6 +391,60 @@ llvm::BasicBlock *proof_event::argument(
   return merge_block;
 }
 
+llvm::BasicBlock *proof_event::short_circuit_hook_argument(
+    llvm::Value *val, llvm::Value *short_circuit_cond, bool invert_cond,
+    kore_composite_sort *sort, llvm::BasicBlock *current_block) {
+  if (!proof_hint_instrumentation) {
+    return current_block;
+  }
+
+  auto *f = current_block->getParent();
+  auto *true_block = llvm::BasicBlock::Create(ctx_, "if_no_short_circ", f);
+  auto *merge_block = llvm::BasicBlock::Create(ctx_, "tail_short_circ", f);
+
+  if (invert_cond) {
+    short_circuit_cond = llvm::BinaryOperator::Create(
+        llvm::Instruction::Xor, short_circuit_cond,
+        llvm::ConstantInt::get(llvm::Type::getInt1Ty(ctx_), 1), "",
+        current_block);
+  }
+  llvm::BranchInst::Create(
+      true_block, merge_block, short_circuit_cond, current_block);
+
+  true_block = argument(val, sort, true, true_block);
+  llvm::BranchInst::Create(merge_block, true_block);
+
+  return merge_block;
+}
+
+llvm::BasicBlock *proof_event::short_circuit_hook_argument(
+    llvm::Value *val_first, llvm::Value *val_second, llvm::Value *select_cond,
+    kore_composite_sort *sort_first, kore_composite_sort *sort_second,
+    llvm::BasicBlock *current_block) {
+  if (!proof_hint_instrumentation) {
+    return current_block;
+  }
+
+  auto *f = current_block->getParent();
+  auto *first_block
+      = llvm::BasicBlock::Create(ctx_, "if_short_circ_select_first", f);
+  auto *second_block
+      = llvm::BasicBlock::Create(ctx_, "if_short_circ_select_second", f);
+  auto *merge_block
+      = llvm::BasicBlock::Create(ctx_, "tail_short_circ_select", f);
+
+  llvm::BranchInst::Create(
+      first_block, second_block, select_cond, current_block);
+
+  first_block = argument(val_first, sort_first, true, first_block);
+  llvm::BranchInst::Create(merge_block, first_block);
+
+  second_block = argument(val_second, sort_second, true, second_block);
+  llvm::BranchInst::Create(merge_block, second_block);
+
+  return merge_block;
+}
+
 /*
  * Rewrite Events
  */

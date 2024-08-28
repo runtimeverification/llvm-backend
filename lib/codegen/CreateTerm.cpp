@@ -718,12 +718,50 @@ llvm::Value *create_term::create_hook(
   proof_event e(definition_, module_);
   current_block_
       = e.hook_event_pre(name, pattern, current_block_, location_stack);
-  size_t i = 0;
-  for (auto const &p : pattern->get_arguments()) {
-    auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
-    current_block_ = e.argument(args[i], sort, true, current_block_);
-    i++;
+
+  // We handle short-circuiting hooks individually, checking for potentially not
+  // evaluated arguments.
+  if (name == "BOOL.and" || name == "BOOL.andThen" || name == "BOOL.implies") {
+    auto const &p = pattern->get_arguments();
+    auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
+    auto *sort_1 = dynamic_cast<kore_composite_sort *>(p[1]->get_sort().get());
+
+    current_block_ = e.argument(args[0], sort_0, true, current_block_);
+
+    // These do not short circuit when the first argument is true.
+    current_block_ = e.short_circuit_hook_argument(
+        args[1], args[0], false, sort_1, current_block_);
+  } else if (name == "BOOL.or" || name == "BOOL.orElse") {
+    auto const &p = pattern->get_arguments();
+    auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
+    auto *sort_1 = dynamic_cast<kore_composite_sort *>(p[1]->get_sort().get());
+
+    current_block_ = e.argument(args[0], sort_0, true, current_block_);
+
+    // These do not short circuit when the first argument is false.
+    current_block_ = e.short_circuit_hook_argument(
+        args[1], args[0], true, sort_1, current_block_);
+  } else if (name == "KEQUAL.ite") {
+    auto const &p = pattern->get_arguments();
+    auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
+    auto *sort_1 = dynamic_cast<kore_composite_sort *>(p[1]->get_sort().get());
+    auto *sort_2 = dynamic_cast<kore_composite_sort *>(p[2]->get_sort().get());
+
+    current_block_ = e.argument(args[0], sort_0, true, current_block_);
+
+    // The second argument does not short circuit when the first argument is true, while
+    // the third argument does not short circuit when the first argument is false.
+    current_block_ = e.short_circuit_hook_argument(
+        args[1], args[2], args[0], sort_1, sort_2, current_block_);
+  } else {
+    size_t i = 0;
+    for (auto const &p : pattern->get_arguments()) {
+      auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
+      current_block_ = e.argument(args[i], sort, true, current_block_);
+      i++;
+    }
   }
+
   current_block_ = e.hook_event_post(result, result_sort, current_block_);
 
   return result;
