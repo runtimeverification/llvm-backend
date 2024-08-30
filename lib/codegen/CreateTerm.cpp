@@ -827,6 +827,7 @@ llvm::Value *create_term::create_function_call(
     for (auto const &p : pattern->get_arguments()) {
       auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
       current_block_ = e.argument(args[i], sort, false, current_block_);
+      i++;
     }
     current_block_ = e.function_event_post(current_block_);
   }
