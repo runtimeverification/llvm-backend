@@ -319,7 +319,7 @@ public:
 
 class proof_trace_parser {
 public:
-  static constexpr uint32_t expected_version = 12U;
+  static constexpr uint32_t expected_version = 13U;
 
 private:
   bool verbose_;
@@ -585,80 +585,18 @@ private:
   }
 
   bool parse_argument(proof_trace_buffer &buffer, llvm_event &event) {
-    if (!buffer.eof() && buffer.peek() == '\x7F') {
-      uint64_t pattern_len = 0;
-      auto kore_term = parse_kore_term(buffer, pattern_len);
-      if (!kore_term) {
-        return false;
-      }
-      event.setkore_pattern(kore_term, pattern_len);
-
-      return true;
-    }
-
-    if (!buffer.has_word()) {
+    if (buffer.eof() || buffer.peek() != '\x7F') {
       return false;
     }
 
-    switch (buffer.peek_word()) {
-
-    case hook_event_sentinel: {
-      auto hook_event = parse_hook(buffer);
-      if (!hook_event) {
-        return false;
-      }
-      event.set_step_event(hook_event);
-      return true;
+    uint64_t pattern_len = 0;
+    auto kore_term = parse_kore_term(buffer, pattern_len);
+    if (!kore_term) {
+      return false;
     }
+    event.setkore_pattern(kore_term, pattern_len);
 
-    case function_event_sentinel: {
-      auto function_event = parse_function(buffer);
-      if (!function_event) {
-        return false;
-      }
-      event.set_step_event(function_event);
-      return true;
-    }
-
-    case rule_event_sentinel: {
-      auto rule_event = parse_rule(buffer);
-      if (!rule_event) {
-        return false;
-      }
-      event.set_step_event(rule_event);
-      return true;
-    }
-
-    case side_condition_event_sentinel: {
-      auto side_condition_event = parse_side_condition(buffer);
-      if (!side_condition_event) {
-        return false;
-      }
-      event.set_step_event(side_condition_event);
-      return true;
-    }
-
-    case side_condition_end_sentinel: {
-      auto side_condition_end_event = parse_side_condition_end(buffer);
-      if (!side_condition_end_event) {
-        return false;
-      }
-      event.set_step_event(side_condition_end_event);
-      return true;
-    }
-
-    case pattern_matching_failure_sentinel: {
-      auto pattern_matching_failure_event
-          = parse_pattern_matching_failure(buffer);
-      if (!pattern_matching_failure_event) {
-        return false;
-      }
-      event.set_step_event(pattern_matching_failure_event);
-      return true;
-    }
-
-    default: return false;
-    }
+    return true;
   }
 
   sptr<llvm_step_event> parse_step_event(proof_trace_buffer &buffer) {
