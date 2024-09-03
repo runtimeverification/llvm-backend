@@ -39,13 +39,7 @@ event             ::= hook
                     | config
                     | pattern_matching_failure
 
-argument          ::= hook
-                    | function
-                    | rule
-                    | side_cond_entry
-                    | side_cond_exit
-                    | kore_term
-                    | pattern_matching_failure
+arg               ::= kore_term
 
 name              ::= string
 location          ::= string
@@ -81,7 +75,7 @@ uint64            ::= <64-bit unsigned little endian integer>
 - The `relative_position` is a null terminated string of positive integers
   separated by `:` (ie. `0:1:1`)
 - The `arg*` in the `function` and `hook` event is a list of arguments that
-  are either `hook`, `function`, `rule`, `side_cond_entry`, `side_cond_exit`, or `kore_term`.
+  are `kore_term`s passed to the function or hook.
 
 
 ## Tools

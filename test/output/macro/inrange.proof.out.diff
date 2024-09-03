@@ -1,31 +1,26 @@
-version: 12
+version: 13
 function: LblinRange'LParUndsRParUnds'MACRO-SYNTAX'Unds'Bool'Unds'Int{} ()
 rule: 151 1
   VarX = kore[\dv{SortInt{}}("10")]
+hook: INT.le Lbl'Unds-LT-Eqls'Int'Unds'{} (0)
+  arg: kore[\dv{SortInt{}}("0")]
+  arg: kore[\dv{SortInt{}}("10")]
+hook result: kore[\dv{SortBool{}}("true")]
+hook: INT.le Lbl'Unds-LT-Eqls'Int'Unds'{} (1)
+  arg: kore[\dv{SortInt{}}("10")]
+  arg: kore[\dv{SortInt{}}("99")]
+hook result: kore[\dv{SortBool{}}("true")]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
-  hook: INT.le Lbl'Unds-LT-Eqls'Int'Unds'{} (0)
-    function: Lbl'Unds-LT-Eqls'Int'Unds'{} (0)
-    arg: kore[\dv{SortInt{}}("0")]
-    arg: kore[\dv{SortInt{}}("10")]
-  hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
-  hook: INT.le Lbl'Unds-LT-Eqls'Int'Unds'{} (1)
-    function: Lbl'Unds-LT-Eqls'Int'Unds'{} (1)
-    arg: kore[\dv{SortInt{}}("10")]
-    arg: kore[\dv{SortInt{}}("99")]
-  hook result: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("true")]
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("true"))]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("true"))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("true"))]
@@ -35,12 +30,11 @@ rule: 153 1
 function: LblinitKCell{} (0)
 rule: 154 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("true"))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("true"))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[\dv{SortBool{}}("true")]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("true"))]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[\dv{SortBool{}}("true")]
 rule: 197 1
   VarK = kore[\dv{SortBool{}}("true")]
 function: LblinitGeneratedCounterCell{} (1)
