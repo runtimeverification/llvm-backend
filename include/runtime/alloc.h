@@ -12,11 +12,14 @@ extern size_t const BLOCK_SIZE;
 #define YOUNGSPACE_ID 0
 #define OLDSPACE_ID 1
 #define ALWAYSGCSPACE_ID 3
+#define LIVE_FOREVER_ID 4
 
 char youngspace_collection_id(void);
 char oldspace_collection_id(void);
 size_t youngspace_size(void);
 
+// allocates exactly requested bytes into the live forever arena
+void *kore_alloc_forever(size_t requested);
 // allocates exactly requested bytes into the young generation
 void *kore_alloc(size_t requested);
 // allocates enough space for a string token whose raw size is requested into

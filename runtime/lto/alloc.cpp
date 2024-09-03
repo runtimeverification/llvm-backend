@@ -14,6 +14,7 @@ extern "C" {
 REGISTER_ARENA(youngspace, YOUNGSPACE_ID);
 REGISTER_ARENA(oldspace, OLDSPACE_ID);
 REGISTER_ARENA(alwaysgcspace, ALWAYSGCSPACE_ID);
+REGISTER_ARENA(liveforeverspace, LIVE_FOREVER_ID);
 
 char *youngspace_ptr() {
   return arena_start_ptr(&youngspace);
@@ -73,6 +74,10 @@ void set_kore_memory_functions_for_gmp() {
 
 __attribute__((always_inline)) void *kore_alloc(size_t requested) {
   return kore_arena_alloc(&youngspace, requested);
+}
+
+__attribute((always_inline)) void *kore_alloc_forever(size_t requested) {
+  return kore_arena_alloc(&liveforeverspace, requested);
 }
 
 __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
