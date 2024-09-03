@@ -454,6 +454,8 @@ size_t hook_SET_size_long(set *);
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool is_signed);
 
+block *hook_KREFLECTION_freeze(block *term);
+
 block *debruijnize(block *);
 block *increment_debruijn(block *);
 block *alpha_rename(block *);
