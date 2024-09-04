@@ -85,7 +85,8 @@ __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   return kore_arena_alloc(&youngspace, size < 16 ? 16 : size);
 }
 
-__attribute__((always_inline)) void *kore_alloc_token_forever(size_t requested) {
+__attribute__((always_inline)) void *
+kore_alloc_token_forever(size_t requested) {
   size_t size = (requested + 7) & ~7;
   return kore_arena_alloc(&liveforeverspace, size < 16 ? 16 : size);
 }
@@ -147,7 +148,8 @@ void *kore_realloc_mp(void *ptr, size_t old_size, size_t new_size) {
 
 void kore_free(void *ptr, size_t size) { }
 
-__attribute__((always_inline)) void *kore_alloc_integer_forever(size_t requested) {
+__attribute__((always_inline)) void *
+kore_alloc_integer_forever(size_t requested) {
   auto *result = (mpz_hdr *)kore_alloc_forever(sizeof(mpz_hdr));
   init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
@@ -157,6 +159,13 @@ __attribute__((always_inline)) void *kore_alloc_integer(size_t requested) {
   auto *result = (mpz_hdr *)kore_alloc(sizeof(mpz_hdr));
   init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
   return &result->i;
+}
+
+__attribute__((always_inline)) void *
+kore_alloc_floating_forever(size_t requested) {
+  auto *result = (floating_hdr *)kore_alloc(sizeof(floating_hdr));
+  init_with_len(result, sizeof(floating_hdr) - sizeof(blockheader));
+  return &result->f;
 }
 
 __attribute__((always_inline)) void *kore_alloc_floating(size_t requested) {

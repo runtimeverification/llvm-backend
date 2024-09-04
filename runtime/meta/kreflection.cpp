@@ -22,7 +22,6 @@ block *copy_block_to_eternal_lifetime(block *term) {
   }
 
   auto *layout_data = get_layout_data(layout);
-
   auto *new_block = (block *)kore_alloc_forever(size_hdr(term->h.hdr));
 
   // Copy the block header and set the it as not young object, so gc does not collect it
@@ -131,7 +130,38 @@ block *copy_block_to_eternal_lifetime(block *term) {
       break;
     }
     case FLOAT_LAYOUT: {
-      *(void **)(((char *)new_block) + arg_data->offset) = *(void **)arg;
+      floating **floating_ptr = static_cast<floating **>((floating **)arg);
+      floating_hdr *flt = STRUCT_BASE(floating_hdr, f, *floating_ptr);
+      uint64_t const hdr = flt->h.hdr;
+      bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+
+      if (!hasForwardingAddress) {
+        floating_hdr *new_flt = nullptr;
+        string *new_limbs = nullptr;
+        string *limbs = STRUCT_BASE(string, data, flt->f.f->_mpfr_d - 1);
+        size_t len_limbs = len(limbs);
+
+        assert(
+            ((flt->f.f->_mpfr_prec + mp_bits_per_limb - 1) / mp_bits_per_limb)
+                * sizeof(mp_limb_t)
+            <= len_limbs);
+
+        new_flt = STRUCT_BASE(floating_hdr, f, kore_alloc_floating_forever(0));
+        new_limbs
+            = (string *)kore_alloc_token_forever(sizeof(string) + len_limbs);
+
+        memcpy(new_limbs, limbs, sizeof(string) + len_limbs);
+        memcpy(new_flt, flt, sizeof(floating_hdr));
+
+        new_flt->h.hdr |= NOT_YOUNG_OBJECT_BIT;
+        new_flt->f.f->_mpfr_d = (mp_limb_t *)new_limbs->data + 1;
+
+        *(floating **)(flt->f.f->_mpfr_d) = &new_flt->f;
+        flt->h.hdr |= FWD_PTR_BIT;
+      }
+
+      *floating_ptr = *(floating **)(flt->f.f->_mpfr_d);
+      *(void **)(((char *)new_block) + arg_data->offset) = *(void **)floating_ptr;
       break;
     }
     case BOOL_LAYOUT: {

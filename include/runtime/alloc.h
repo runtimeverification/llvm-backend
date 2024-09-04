@@ -63,6 +63,7 @@ void kore_free(void *, size_t);
 void *kore_alloc_integer_forever(size_t requested);
 void *kore_alloc_integer(size_t requested);
 void *kore_alloc_floating(size_t requested);
+void *kore_alloc_floating_forever(size_t requested);
 void *kore_alloc_integer_old(size_t requested);
 void *kore_alloc_floating_old(size_t requested);
 
