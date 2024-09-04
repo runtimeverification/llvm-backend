@@ -85,6 +85,11 @@ __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   return kore_arena_alloc(&youngspace, size < 16 ? 16 : size);
 }
 
+__attribute__((always_inline)) void *kore_alloc_token_forever(size_t requested) {
+  size_t size = (requested + 7) & ~7;
+  return kore_arena_alloc(&liveforeverspace, size < 16 ? 16 : size);
+}
+
 __attribute__((always_inline)) void *kore_alloc_old(size_t requested) {
   return kore_arena_alloc(&oldspace, requested);
 }

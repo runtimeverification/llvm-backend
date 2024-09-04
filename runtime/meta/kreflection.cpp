@@ -3,6 +3,11 @@
 #include "runtime/header.h"
 
 extern "C" {
+map map_map(void *, block *(block *));
+rangemap rangemap_map(void *, block *(block *));
+list list_map(void *, block *(block *));
+set set_map(void *, block *(block *));
+
 block *copy_block_to_eternal_lifetime(block *term) {
   if (is_leaf_block(term)) {
     return term;
@@ -11,7 +16,7 @@ block *copy_block_to_eternal_lifetime(block *term) {
   // Get the layout data for the block and allocate a new block with the same size as the original block
   auto layout = get_layout(term);
 
-  // If the block is string term we can just return it as we do for leaf blocks 
+  // If the block is string term we can just return it as we do for leaf blocks
   if (layout == 0) {
     return term;
   }
@@ -33,23 +38,31 @@ block *copy_block_to_eternal_lifetime(block *term) {
     // Copy the argument based on the category of the argument
     switch (arg_data->cat) {
     case MAP_LAYOUT: {
-      auto *new_arg = copy_block_to_eternal_lifetime(*(block **)arg);
-      *(block **)(((char *)new_block) + arg_data->offset) = new_arg;
+      map new_arg = map_map(arg, copy_block_to_eternal_lifetime);
+      memcpy(new_block->children, term->children, arg_data->offset - 8);
+      map *new_ptr = (map *)(((char *)term) + arg_data->offset);
+      *new_ptr = new_arg;
       break;
     }
     case RANGEMAP_LAYOUT: {
-      auto *new_arg = copy_block_to_eternal_lifetime(*(block **)arg);
-      *(block **)(((char *)new_block) + arg_data->offset) = new_arg;
+      rangemap new_arg = rangemap_map(arg, copy_block_to_eternal_lifetime);
+      memcpy(new_block->children, term->children, arg_data->offset - 8);
+      rangemap *new_ptr = (rangemap *)(((char *)term) + arg_data->offset);
+      *new_ptr = new_arg;
       break;
     }
     case LIST_LAYOUT: {
-      auto *new_arg = copy_block_to_eternal_lifetime(*(block **)arg);
-      *(block **)(((char *)new_block) + arg_data->offset) = new_arg;
+      list new_arg = list_map(arg, copy_block_to_eternal_lifetime);
+      memcpy(new_block->children, term->children, arg_data->offset - 8);
+      list *new_ptr = (list *)(((char *)term) + arg_data->offset);
+      *new_ptr = new_arg;
       break;
     }
     case SET_LAYOUT: {
-      auto *new_arg = copy_block_to_eternal_lifetime(*(block **)arg);
-      *(block **)(((char *)new_block) + arg_data->offset) = new_arg;
+      set new_arg = set_map(arg, copy_block_to_eternal_lifetime);
+      memcpy(new_block->children, term->children, arg_data->offset - 8);
+      set *new_ptr = (set *)(((char *)term) + arg_data->offset);
+      *new_ptr = new_arg;
       break;
     }
     case VARIABLE_LAYOUT: {
@@ -63,7 +76,18 @@ block *copy_block_to_eternal_lifetime(block *term) {
       break;
     }
     case STRINGBUFFER_LAYOUT: {
-      *(void **)(((char *)new_block) + arg_data->offset) = *(void **)arg;
+      auto new_buffer = (stringbuffer *)new_block;
+      auto buffer = (stringbuffer *)arg;
+
+      uint64_t const cap = len(buffer->contents);
+      string *new_contents
+          = (string *)kore_alloc_token_forever(sizeof(string) + cap);
+
+      memcpy(new_contents, buffer->contents, sizeof(string) + buffer->strlen);
+      memcpy(new_buffer, buffer, sizeof(stringbuffer));
+
+      new_buffer->contents = new_contents;
+      *(stringbuffer **)(buffer->contents) = new_buffer;
       break;
     }
     case INT_LAYOUT: {

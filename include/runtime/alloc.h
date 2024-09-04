@@ -20,6 +20,10 @@ size_t youngspace_size(void);
 
 // allocates exactly requested bytes into the live forever arena
 void *kore_alloc_forever(size_t requested);
+// allocates enough space for a string token whose raw size is requested into
+// the live forever arena. rounds up to the nearest 8 bytes and always allocates
+// at least 16 bytes
+void *kore_alloc_token_forever(size_t requested);
 // allocates exactly requested bytes into the young generation
 void *kore_alloc(size_t requested);
 // allocates enough space for a string token whose raw size is requested into
