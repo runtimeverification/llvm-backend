@@ -1,14 +1,11 @@
-version: 12
+version: 13
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
@@ -18,12 +15,11 @@ rule: 278 1
 function: LblinitKCell{} (0)
 rule: 279 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}())]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
 rule: 378 1
   VarK = kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
 function: LblinitFooCell{} (1)

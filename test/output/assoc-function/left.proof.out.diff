@@ -1,4 +1,4 @@
-version: 12
+version: 13
 function: Lbl'UndsPlus'left'UndsUnds'ASSOC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo'Unds'Foo{} ()
 rule: 103 2
   Var'Unds'X = kore[Lbla'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
@@ -12,15 +12,12 @@ rule: 103 2
   Var'Unds'X = kore[Lblc'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
   VarY = kore[Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}())]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}())]
@@ -30,12 +27,11 @@ rule: 108 1
 function: LblinitKCell{} (0)
 rule: 109 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}())]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}())]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}())]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
 rule: 149 1
   VarK = kore[Lbld'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
 function: LblinitGeneratedCounterCell{} (1)

@@ -258,16 +258,13 @@ sptr<kore_sort> term_sort(kore_pattern *pattern) {
 }
 
 llvm::Value *create_term::alloc_arg(
-    kore_composite_pattern *pattern, int idx, bool is_hook_arg,
+    kore_composite_pattern *pattern, int idx,
     std::string const &location_stack) {
   kore_pattern *p = pattern->get_arguments()[idx].get();
   std::string new_location = location_stack.empty()
                                  ? fmt::format("{}", idx)
                                  : fmt::format("{}:{}", location_stack, idx);
   llvm::Value *ret = create_allocation(p, new_location).first;
-  auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
-  proof_event e(definition_, module_);
-  current_block_ = e.argument(ret, sort, is_hook_arg, current_block_);
   return ret;
 }
 
@@ -282,17 +279,14 @@ std::string escape(std::string const &str) {
 }
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
-llvm::Value *create_term::create_hook(
-    kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
-    std::string const &location_stack) {
+llvm::Value *create_term::create_hardcoded_hook(
+    std::string const &name, kore_composite_pattern *pattern,
+    std::vector<llvm::Value *> &args, std::string const &location_stack) {
   auto *ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  assert(hook_att->get_arguments().size() == 1);
-  auto *str_pattern
-      = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
-  std::string name = str_pattern->get_contents();
   if (name == "BOOL.and" || name == "BOOL.andThen") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    args.push_back(first_arg);
     llvm::BasicBlock *cond_block = current_block_;
     llvm::BasicBlock *true_block
         = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
@@ -301,7 +295,8 @@ llvm::Value *create_term::create_hook(
     llvm::BranchInst::Create(
         true_block, merge_block, first_arg, current_block_);
     current_block_ = true_block;
-    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    args.push_back(second_arg);
     llvm::BranchInst::Create(merge_block, current_block_);
     llvm::PHINode *phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(ctx_), 2, "phi", merge_block);
@@ -312,7 +307,8 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.or" || name == "BOOL.orElse") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    args.push_back(first_arg);
     llvm::BasicBlock *cond_block = current_block_;
     llvm::BasicBlock *false_block
         = llvm::BasicBlock::Create(ctx_, "else", current_block_->getParent());
@@ -321,7 +317,8 @@ llvm::Value *create_term::create_hook(
     llvm::BranchInst::Create(
         merge_block, false_block, first_arg, current_block_);
     current_block_ = false_block;
-    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    args.push_back(second_arg);
     llvm::BranchInst::Create(merge_block, current_block_);
     llvm::PHINode *phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(ctx_), 2, "phi", merge_block);
@@ -332,7 +329,8 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.not") {
     assert(pattern->get_arguments().size() == 1);
-    llvm::Value *arg = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *arg = alloc_arg(pattern, 0, location_stack);
+    args.push_back(arg);
     llvm::BinaryOperator *neg = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, arg,
         llvm::ConstantInt::get(llvm::Type::getInt1Ty(ctx_), 1), "hook_BOOL_not",
@@ -341,7 +339,8 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.implies") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    args.push_back(first_arg);
     llvm::BasicBlock *cond_block = current_block_;
     llvm::BasicBlock *true_block
         = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
@@ -350,7 +349,8 @@ llvm::Value *create_term::create_hook(
     llvm::BranchInst::Create(
         true_block, merge_block, first_arg, current_block_);
     current_block_ = true_block;
-    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    args.push_back(second_arg);
     llvm::BranchInst::Create(merge_block, current_block_);
     llvm::PHINode *phi = llvm::PHINode::Create(
         llvm::Type::getInt1Ty(ctx_), 2, "phi", merge_block);
@@ -362,8 +362,10 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.ne" || name == "BOOL.xor") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
-    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    args.push_back(first_arg);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    args.push_back(second_arg);
     llvm::BinaryOperator *xor_op = llvm::BinaryOperator::Create(
         llvm::Instruction::Xor, first_arg, second_arg, "hook_BOOL_ne",
         current_block_);
@@ -371,8 +373,10 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "BOOL.eq") {
     assert(pattern->get_arguments().size() == 2);
-    llvm::Value *first_arg = alloc_arg(pattern, 0, true, location_stack);
-    llvm::Value *second_arg = alloc_arg(pattern, 1, true, location_stack);
+    llvm::Value *first_arg = alloc_arg(pattern, 0, location_stack);
+    args.push_back(first_arg);
+    llvm::Value *second_arg = alloc_arg(pattern, 1, location_stack);
+    args.push_back(second_arg);
     auto *eq = new llvm::ICmpInst(
         *current_block_, llvm::CmpInst::ICMP_EQ, first_arg, second_arg,
         "hook_BOOL_eq");
@@ -380,7 +384,8 @@ llvm::Value *create_term::create_hook(
   }
   if (name == "KEQUAL.ite") {
     assert(pattern->get_arguments().size() == 3);
-    llvm::Value *cond = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *cond = alloc_arg(pattern, 0, location_stack);
+    args.push_back(cond);
     llvm::BasicBlock *true_block
         = llvm::BasicBlock::Create(ctx_, "then", current_block_->getParent());
     llvm::BasicBlock *false_block
@@ -389,10 +394,12 @@ llvm::Value *create_term::create_hook(
         ctx_, "hook_KEQUAL_ite", current_block_->getParent());
     llvm::BranchInst::Create(true_block, false_block, cond, current_block_);
     current_block_ = true_block;
-    llvm::Value *true_arg = alloc_arg(pattern, 1, true, location_stack);
+    llvm::Value *true_arg = alloc_arg(pattern, 1, location_stack);
+    args.push_back(true_arg);
     llvm::BasicBlock *new_true_block = current_block_;
     current_block_ = false_block;
-    llvm::Value *false_arg = alloc_arg(pattern, 2, true, location_stack);
+    llvm::Value *false_arg = alloc_arg(pattern, 2, location_stack);
+    args.push_back(false_arg);
     if (true_arg->getType()->isPointerTy()
         && !false_arg->getType()->isPointerTy()) {
       auto *alloc_collection
@@ -417,7 +424,8 @@ llvm::Value *create_term::create_hook(
     return phi;
   }
   if (name == "MINT.uvalue") {
-    llvm::Value *mint = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *mint = alloc_arg(pattern, 0, location_stack);
+    args.push_back(mint);
     value_type cat = dynamic_cast<kore_composite_sort *>(
                          pattern->get_constructor()->get_arguments()[0].get())
                          ->get_category(definition_);
@@ -468,7 +476,8 @@ llvm::Value *create_term::create_hook(
     return result;
   }
   if (name == "MINT.svalue") {
-    llvm::Value *mint = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *mint = alloc_arg(pattern, 0, location_stack);
+    args.push_back(mint);
     value_type cat = dynamic_cast<kore_composite_sort *>(
                          pattern->get_constructor()->get_arguments()[0].get())
                          ->get_category(definition_);
@@ -519,7 +528,8 @@ llvm::Value *create_term::create_hook(
     return result;
   }
   if (name == "MINT.integer") {
-    llvm::Value *mpz = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *mpz = alloc_arg(pattern, 0, location_stack);
+    args.push_back(mpz);
     value_type cat = dynamic_cast<kore_composite_sort *>(
                          pattern->get_constructor()->get_sort().get())
                          ->get_category(definition_);
@@ -566,7 +576,8 @@ llvm::Value *create_term::create_hook(
     return result;
   }
   if (name == "MINT.round") {
-    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
     auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
     assert(type_in);
     unsigned bits_in = type_in->getBitWidth();
@@ -585,7 +596,8 @@ llvm::Value *create_term::create_hook(
     return new llvm::TruncInst(in, type_out, "trunc", current_block_);
   }
   if (name == "MINT.sext") {
-    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
     auto *type_in = llvm::dyn_cast<llvm::IntegerType>(in->getType());
     assert(type_in);
     unsigned bits_in = type_in->getBitWidth();
@@ -604,17 +616,21 @@ llvm::Value *create_term::create_hook(
     return new llvm::TruncInst(in, type_out, "trunc", current_block_);
   }
   if (name == "MINT.neg") {
-    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
     return llvm::BinaryOperator::CreateNeg(in, "hook_MINT_neg", current_block_);
   }
   if (name == "MINT.not") {
-    llvm::Value *in = alloc_arg(pattern, 0, true, location_stack);
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
     return llvm::BinaryOperator::CreateNot(in, "hook_MINT_not", current_block_);
 #define MINT_MINMAX(hookname, inst)                                            \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
-    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
-    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
+    llvm::Value *first = alloc_arg(pattern, 0, location_stack);                \
+    args.push_back(first);                                                     \
+    llvm::Value *second = alloc_arg(pattern, 1, location_stack);               \
+    args.push_back(second);                                                    \
     auto *cmp = new llvm::ICmpInst(                                            \
         *current_block_, llvm::CmpInst::inst, first, second,                   \
         "cmp_" #hookname);                                                     \
@@ -627,8 +643,10 @@ llvm::Value *create_term::create_hook(
 #define MINT_CMP(hookname, inst)                                               \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
-    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
-    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
+    llvm::Value *first = alloc_arg(pattern, 0, location_stack);                \
+    args.push_back(first);                                                     \
+    llvm::Value *second = alloc_arg(pattern, 1, location_stack);               \
+    args.push_back(second);                                                    \
   return new llvm::ICmpInst(                                                   \
       *current_block_, llvm::CmpInst::inst, first, second,                     \
       "hook_MINT_" #hookname)
@@ -645,8 +663,10 @@ llvm::Value *create_term::create_hook(
 #define MINT_BINOP(hookname, inst)                                             \
   }                                                                            \
   if (name == "MINT." #hookname) {                                             \
-    llvm::Value *first = alloc_arg(pattern, 0, true, location_stack);          \
-    llvm::Value *second = alloc_arg(pattern, 1, true, location_stack);         \
+    llvm::Value *first = alloc_arg(pattern, 0, location_stack);                \
+    args.push_back(first);                                                     \
+    llvm::Value *second = alloc_arg(pattern, 1, location_stack);               \
+    args.push_back(second);                                                    \
   return llvm::BinaryOperator::Create(                                         \
       llvm::Instruction::inst, first, second, "hook_MINT_" #hookname,          \
       current_block_)
@@ -669,12 +689,81 @@ llvm::Value *create_term::create_hook(
     assert(false && "not implemented yet: MInt");
     abort();
   }
-  std::string hook_name = "hook_" + name.substr(0, name.find('.')) + "_"
-                          + name.substr(name.find('.') + 1);
-  auto *old_val = disable_gc();
-  auto *result = create_function_call(
-      hook_name, pattern, true, false, true, location_stack);
-  enable_gc(old_val);
+
+  return nullptr;
+}
+
+llvm::Value *create_term::create_hook(
+    kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
+    std::string const &location_stack) {
+  assert(hook_att->get_arguments().size() == 1);
+  auto *str_pattern
+      = dynamic_cast<kore_string_pattern *>(hook_att->get_arguments()[0].get());
+  std::string name = str_pattern->get_contents();
+  auto *result_sort
+      = dynamic_cast<kore_composite_sort *>(pattern->get_sort().get());
+
+  std::vector<llvm::Value *> args;
+  llvm::Value *result
+      = create_hardcoded_hook(name, pattern, args, location_stack);
+  if (!result) {
+    auto *old_val = disable_gc();
+    std::string hook_name = "hook_" + name.substr(0, name.find('.')) + "_"
+                            + name.substr(name.find('.') + 1);
+    result = create_function_call(
+        hook_name, pattern, true, false, true, args, location_stack);
+    enable_gc(old_val);
+  }
+
+  proof_event e(definition_, module_);
+  current_block_
+      = e.hook_event_pre(name, pattern, current_block_, location_stack);
+
+  // We handle short-circuiting hooks individually, checking for potentially not
+  // evaluated arguments.
+  if (name == "BOOL.and" || name == "BOOL.andThen" || name == "BOOL.implies") {
+    auto const &p = pattern->get_arguments();
+    auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
+    auto *sort_1 = dynamic_cast<kore_composite_sort *>(p[1]->get_sort().get());
+
+    current_block_ = e.argument(args[0], sort_0, true, current_block_);
+
+    // These do not short circuit when the first argument is true.
+    current_block_ = e.short_circuit_hook_argument(
+        args[1], args[0], false, sort_1, current_block_);
+  } else if (name == "BOOL.or" || name == "BOOL.orElse") {
+    auto const &p = pattern->get_arguments();
+    auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
+    auto *sort_1 = dynamic_cast<kore_composite_sort *>(p[1]->get_sort().get());
+
+    current_block_ = e.argument(args[0], sort_0, true, current_block_);
+
+    // These do not short circuit when the first argument is false.
+    current_block_ = e.short_circuit_hook_argument(
+        args[1], args[0], true, sort_1, current_block_);
+  } else if (name == "KEQUAL.ite") {
+    auto const &p = pattern->get_arguments();
+    auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
+    auto *sort_1 = dynamic_cast<kore_composite_sort *>(p[1]->get_sort().get());
+    auto *sort_2 = dynamic_cast<kore_composite_sort *>(p[2]->get_sort().get());
+
+    current_block_ = e.argument(args[0], sort_0, true, current_block_);
+
+    // The second argument does not short circuit when the first argument is true, while
+    // the third argument does not short circuit when the first argument is false.
+    current_block_ = e.short_circuit_hook_argument(
+        args[1], args[2], args[0], sort_1, sort_2, current_block_);
+  } else {
+    size_t i = 0;
+    for (auto const &p : pattern->get_arguments()) {
+      auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
+      current_block_ = e.argument(args[i], sort, true, current_block_);
+      i++;
+    }
+  }
+
+  current_block_ = e.hook_event_post(result, result_sort, current_block_);
+
   return result;
 }
 
@@ -701,20 +790,15 @@ void create_term::enable_gc(llvm::Value *was_enabled) {
 // recursive.
 llvm::Value *create_term::create_function_call(
     std::string const &name, kore_composite_pattern *pattern, bool sret,
-    bool tailcc, bool is_hook, std::string const &location_stack) {
-  auto event = proof_event(definition_, module_);
-
-  current_block_
-      = event.function_event_pre(current_block_, pattern, location_stack);
-
-  std::vector<llvm::Value *> args;
+    bool tailcc, bool is_hook, std::vector<llvm::Value *> &args,
+    std::string const &location_stack) {
   auto *return_sort = dynamic_cast<kore_composite_sort *>(
       pattern->get_constructor()->get_sort().get());
   auto return_cat = return_sort->get_category(definition_);
   int i = 0;
   for (auto const &sort : pattern->get_constructor()->get_arguments()) {
     auto *concrete_sort = dynamic_cast<kore_composite_sort *>(sort.get());
-    llvm::Value *arg = alloc_arg(pattern, i, false, location_stack);
+    llvm::Value *arg = alloc_arg(pattern, i, location_stack);
     i++;
     switch (concrete_sort->get_category(definition_).cat) {
     case sort_category::Map:
@@ -735,16 +819,17 @@ llvm::Value *create_term::create_function_call(
     }
   }
 
-  current_block_ = event.function_event_post(current_block_);
-
-  if (is_hook) {
-    int i = 0;
+  if (!is_hook) {
+    proof_event e(definition_, module_);
+    current_block_
+        = e.function_event_pre(current_block_, pattern, location_stack);
+    size_t i = 0;
     for (auto const &p : pattern->get_arguments()) {
       auto *sort = dynamic_cast<kore_composite_sort *>(p->get_sort().get());
-      proof_event e(definition_, module_);
-      current_block_ = e.argument(args[i], sort, true, current_block_);
+      current_block_ = e.argument(args[i], sort, false, current_block_);
       i++;
     }
+    current_block_ = e.function_event_post(current_block_);
   }
 
   return create_function_call(name, return_cat, args, sret, tailcc);
@@ -940,29 +1025,16 @@ std::pair<llvm::Value *, bool> create_term::create_allocation(
         || (symbol_decl->attributes().contains(attribute_set::key::Anywhere)
             && !is_anywhere_owise_)) {
       if (symbol_decl->attributes().contains(attribute_set::key::Hook)) {
-        auto *sort = dynamic_cast<kore_composite_sort *>(
-            constructor->get_sort().get());
-        auto *str_pattern = dynamic_cast<kore_string_pattern *>(
-            symbol_decl->attributes()
-                .get(attribute_set::key::Hook)
-                ->get_arguments()[0]
-                .get());
-        std::string name = str_pattern->get_contents();
-
-        proof_event p(definition_, module_);
-        current_block_ = p.hook_event_pre(
-            name, constructor, current_block_, location_stack);
         llvm::Value *val = create_hook(
             symbol_decl->attributes().get(attribute_set::key::Hook).get(),
             constructor, location_stack);
-        current_block_ = p.hook_event_post(val, sort, current_block_);
-
         return std::make_pair(val, true);
       }
       auto fn_name = fmt::format("eval_{}", ast_to_string(*symbol, 0, false));
+      std::vector<llvm::Value *> args;
       return std::make_pair(
           create_function_call(
-              fn_name, constructor, false, true, false, location_stack),
+              fn_name, constructor, false, true, false, args, location_stack),
           true);
     }
     if (auto *sort

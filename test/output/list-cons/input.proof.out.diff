@@ -1,4 +1,4 @@
-version: 12
+version: 13
 function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCodes{} ()
 rule: 103 1
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
@@ -16,15 +16,12 @@ function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-CONS-SYNTAX'Unds'OpCo
 rule: 104 1
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
 hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  function: Lbl'UndsPipe'-'-GT-Unds'{} ()
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
   arg: kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())))]
 hook: MAP.unit Lbl'Stop'Map{} ()
-  function: Lbl'Stop'Map{} ()
 hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
-  function: Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())))]
@@ -34,12 +31,11 @@ rule: 109 1
 function: LblinitKCell{} (0)
 rule: 110 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
 function: Lblproject'Coln'KItem{} (0:0)
-  hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
-    function: LblMap'Coln'lookup{} (0:0:0:0)
-    arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())))]
-    arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  hook result: kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
 rule: 151 1
   VarK = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
 function: LblinitGeneratedCounterCell{} (1)
