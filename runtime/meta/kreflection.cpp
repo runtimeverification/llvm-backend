@@ -29,10 +29,10 @@ block *copy_block_to_eternal_lifetime(block *term) {
   new_block->h = term->h;
   new_block->h.hdr |= NOT_YOUNG_OBJECT_BIT;
 
-  for (unsigned i = 0; i < layout_data->nargs; i++) {
+  for (unsigned j = 0; j < layout_data->nargs; j++) {
 
     // Get the layout item for the argument and the argument itself
-    auto *arg_data = layout_data->args + i;
+    auto *arg_data = layout_data->args + j;
     auto *arg = ((char *)term) + arg_data->offset;
 
     // Copy the argument based on the category of the argument
@@ -40,29 +40,25 @@ block *copy_block_to_eternal_lifetime(block *term) {
     case MAP_LAYOUT: {
       map new_arg = map_map(arg, copy_block_to_eternal_lifetime);
       memcpy(new_block->children, term->children, arg_data->offset - 8);
-      map *new_ptr = (map *)(((char *)term) + arg_data->offset);
-      *new_ptr = new_arg;
+      *(map *)(((char *)new_block) + arg_data->offset) = new_arg;
       break;
     }
     case RANGEMAP_LAYOUT: {
       rangemap new_arg = rangemap_map(arg, copy_block_to_eternal_lifetime);
       memcpy(new_block->children, term->children, arg_data->offset - 8);
-      rangemap *new_ptr = (rangemap *)(((char *)term) + arg_data->offset);
-      *new_ptr = new_arg;
+      *(rangemap *)(((char *)new_block) + arg_data->offset) = new_arg;
       break;
     }
     case LIST_LAYOUT: {
       list new_arg = list_map(arg, copy_block_to_eternal_lifetime);
       memcpy(new_block->children, term->children, arg_data->offset - 8);
-      list *new_ptr = (list *)(((char *)term) + arg_data->offset);
-      *new_ptr = new_arg;
+      *(list *)(((char *)new_block) + arg_data->offset) = new_arg;
       break;
     }
     case SET_LAYOUT: {
       set new_arg = set_map(arg, copy_block_to_eternal_lifetime);
       memcpy(new_block->children, term->children, arg_data->offset - 8);
-      set *new_ptr = (set *)(((char *)term) + arg_data->offset);
-      *new_ptr = new_arg;
+      *(set *)(((char *)new_block) + arg_data->offset) = new_arg;
       break;
     }
     case VARIABLE_LAYOUT: {
@@ -78,20 +74,60 @@ block *copy_block_to_eternal_lifetime(block *term) {
     case STRINGBUFFER_LAYOUT: {
       auto new_buffer = (stringbuffer *)new_block;
       auto buffer = (stringbuffer *)arg;
+      uint64_t const hdr = buffer->h.hdr;
+      bool hasForwardingAddress = hdr & FWD_PTR_BIT;
 
-      uint64_t const cap = len(buffer->contents);
-      string *new_contents
-          = (string *)kore_alloc_token_forever(sizeof(string) + cap);
+      if (!hasForwardingAddress) {
+        uint64_t const cap = len(buffer->contents);
+        string *new_contents
+            = (string *)kore_alloc_token_forever(sizeof(string) + cap);
 
-      memcpy(new_contents, buffer->contents, sizeof(string) + buffer->strlen);
-      memcpy(new_buffer, buffer, sizeof(stringbuffer));
+        memcpy(new_contents, buffer->contents, sizeof(string) + buffer->strlen);
+        memcpy(new_buffer, buffer, sizeof(stringbuffer));
 
-      new_buffer->contents = new_contents;
-      *(stringbuffer **)(buffer->contents) = new_buffer;
+        new_buffer->h.hdr |= NOT_YOUNG_OBJECT_BIT;
+        new_buffer->contents = new_contents;
+        *(stringbuffer **)(buffer->contents) = new_buffer;
+        buffer->h.hdr |= FWD_PTR_BIT;
+      }
+      *(stringbuffer **)(((char *)new_block) + arg_data->offset)
+          = *(stringbuffer **)(buffer->contents);
       break;
     }
     case INT_LAYOUT: {
-      *(void **)(((char *)new_block) + arg_data->offset) = *(void **)arg;
+      mpz_ptr *ptr = static_cast<mpz_ptr *>((mpz_ptr *)arg);
+      mpz_hdr *new_arg = STRUCT_BASE(mpz_hdr, i, *ptr);
+      uint64_t const hdr = new_arg->h.hdr;
+      bool hasForwardingAddress = hdr & FWD_PTR_BIT;
+
+      if (!hasForwardingAddress) {
+        mpz_hdr *new_intgr = nullptr;
+        string *new_limbs = nullptr;
+        bool has_limbs = new_arg->i->_mp_alloc > 0;
+        if (has_limbs) {
+          string *limbs = STRUCT_BASE(string, data, new_arg->i->_mp_d);
+          size_t len_limbs = len(limbs);
+
+          assert(new_arg->i->_mp_alloc * sizeof(mp_limb_t) == len_limbs);
+
+          new_intgr = STRUCT_BASE(mpz_hdr, i, kore_alloc_integer_forever(0));
+          new_limbs
+              = (string *)kore_alloc_token_forever(sizeof(string) + len_limbs);
+
+          memcpy(new_limbs, limbs, sizeof(string) + len_limbs);
+        } else {
+          new_intgr = STRUCT_BASE(mpz_hdr, i, kore_alloc_integer_forever(0));
+        }
+        memcpy(new_intgr, new_arg, sizeof(mpz_hdr));
+        new_intgr->h.hdr |= NOT_YOUNG_OBJECT_BIT;
+        if (has_limbs) {
+          new_intgr->i->_mp_d = (mp_limb_t *)new_limbs->data;
+        }
+        *(mpz_ptr *)(&new_arg->i->_mp_d) = new_intgr->i;
+        new_arg->h.hdr |= FWD_PTR_BIT;
+      }
+      *ptr = *(mpz_ptr *)(&new_arg->i->_mp_d);
+      *(void **)(((char *)new_block) + arg_data->offset) = *(void **)ptr;
       break;
     }
     case FLOAT_LAYOUT: {

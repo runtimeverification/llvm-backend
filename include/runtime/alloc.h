@@ -60,6 +60,7 @@ void kore_free(void *, size_t);
 // the blockheader with the correct length. The size argument is ignored but
 // exists for uniformity with the standard malloc signature. The caller has to
 // set the appropriate gc bits.
+void *kore_alloc_integer_forever(size_t requested);
 void *kore_alloc_integer(size_t requested);
 void *kore_alloc_floating(size_t requested);
 void *kore_alloc_integer_old(size_t requested);

@@ -147,6 +147,12 @@ void *kore_realloc_mp(void *ptr, size_t old_size, size_t new_size) {
 
 void kore_free(void *ptr, size_t size) { }
 
+__attribute__((always_inline)) void *kore_alloc_integer_forever(size_t requested) {
+  auto *result = (mpz_hdr *)kore_alloc_forever(sizeof(mpz_hdr));
+  init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
+  return &result->i;
+}
+
 __attribute__((always_inline)) void *kore_alloc_integer(size_t requested) {
   auto *result = (mpz_hdr *)kore_alloc(sizeof(mpz_hdr));
   init_with_len(result, sizeof(mpz_hdr) - sizeof(blockheader));
