@@ -16,9 +16,14 @@ block *copy_block_to_eternal_lifetime(block *term) {
   // Get the layout data for the block and allocate a new block with the same size as the original block
   auto layout = get_layout(term);
 
-  // If the block is string term we can just return it as we do for leaf blocks
+  // If the block is string term we have reallocate it so it wouldn't be catched by the gc
   if (layout == 0) {
-    return term;
+    auto str = (string *)term;
+    auto new_str
+        = (string *)kore_alloc_token_forever(sizeof(string) + len(str));
+    memcpy(new_str, str, sizeof(string) + len(str));
+    new_str->h.hdr |= NOT_YOUNG_OBJECT_BIT;
+    return (block *)new_str;
   }
 
   auto *layout_data = get_layout_data(layout);
