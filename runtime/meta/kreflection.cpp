@@ -2,11 +2,103 @@
 #include "runtime/arena.h"
 #include "runtime/header.h"
 
+#include "config/macros.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <vector>
+
+#include <gmp.h>
+#include <mpfr.h>
+
+#include <fmt/printf.h>
+
+
+#include "runtime/fmt_error_handling.h"
+
+#ifndef IMMER_TAGGED_NODE
+#define IMMER_TAGGED_NODE 0
+#endif
+#include "immer/flex_vector_transient.hpp"
+#include "immer/map_transient.hpp"
+#include "immer/set_transient.hpp"
+#include <immer/flex_vector.hpp>
+#include <immer/map.hpp>
+#include <immer/set.hpp>
+#include <kllvm/ast/AST.h>
+#include <runtime/collections/rangemap.h>
+#include <unordered_set>
+
+struct kore_alloc_forever_heap {
+
+  template <typename... Tags>
+  static void *allocate(size_t size, Tags...) {
+    if (during_gc()) {
+      return ::operator new(size);
+    }
+    bool enabled = gc_enabled;
+    gc_enabled = false;
+    auto *result
+        = (string *)kore_alloc_token_forever(size + sizeof(blockheader));
+    gc_enabled = enabled;
+    init_with_len(result, size);
+    return result->data;
+  }
+
+  static void deallocate(size_t size, void *data) {
+    if (during_gc()) {
+      std::cerr << "Trying to deallocate during gc" << std::endl;
+      ::operator delete(data);
+    }
+  }
+};
+
+using list_forever = immer::flex_vector<
+    k_elem, immer::memory_policy<
+                immer::heap_policy<kore_alloc_forever_heap>,
+                immer::no_refcount_policy, immer::no_lock_policy>>;
+
+using map_forever = immer::map<
+    k_elem, k_elem, hash_block, std::equal_to<>, list_forever::memory_policy>;
+using set_forever = immer::set<
+    k_elem, hash_block, std::equal_to<>, list_forever::memory_policy>;
+
+
+list_forever list_map_forever(list *l, block *(process)(block *)) {
+  auto tmp = list_forever().transient();
+
+  for (auto iter = l->begin(); iter != l->end(); ++iter) {
+    tmp.push_back(process(*iter));
+  }
+
+  return tmp.persistent();
+}
+
+map_forever map_map_forever(map *m, block *(process)(block *)) {
+  auto tmp = map_forever().transient();
+
+  for (auto iter = m->begin(); iter != m->end(); ++iter) {
+    auto key = process(iter->first);
+    auto value = process(iter->second);
+    tmp.insert(std::make_pair(key, value));
+  }
+
+  return tmp.persistent();
+}
+
+set_forever set_map_forever(set *s, block *(process)(block *)) {
+  auto tmp = set_forever().transient();
+
+  for (auto iter = s->begin(); iter != s->end(); ++iter) {
+    tmp.insert(process(*iter));
+  }
+
+  return tmp.persistent();
+}
+
 extern "C" {
-map map_map(void *, block *(block *));
 rangemap rangemap_map(void *, block *(block *));
-list list_map(void *, block *(block *));
-set set_map(void *, block *(block *));
 
 block *copy_block_to_eternal_lifetime(block *term) {
   if (is_leaf_block(term)) {
@@ -42,9 +134,10 @@ block *copy_block_to_eternal_lifetime(block *term) {
     // Copy the argument based on the category of the argument
     switch (arg_data->cat) {
     case MAP_LAYOUT: {
-      map new_arg = map_map(arg, copy_block_to_eternal_lifetime);
+      map_forever new_arg
+          = map_map_forever((map *)arg, copy_block_to_eternal_lifetime);
       memcpy(new_block->children, term->children, arg_data->offset - 8);
-      *(map *)(((char *)new_block) + arg_data->offset) = new_arg;
+      *(map_forever *)(((char *)new_block) + arg_data->offset) = new_arg;
       break;
     }
     case RANGEMAP_LAYOUT: {
@@ -54,15 +147,17 @@ block *copy_block_to_eternal_lifetime(block *term) {
       break;
     }
     case LIST_LAYOUT: {
-      list new_arg = list_map(arg, copy_block_to_eternal_lifetime);
+      list_forever new_arg
+          = list_map_forever((list *)arg, copy_block_to_eternal_lifetime);
       memcpy(new_block->children, term->children, arg_data->offset - 8);
-      *(list *)(((char *)new_block) + arg_data->offset) = new_arg;
+      *(list_forever *)(((char *)new_block) + arg_data->offset) = new_arg;
       break;
     }
     case SET_LAYOUT: {
-      set new_arg = set_map(arg, copy_block_to_eternal_lifetime);
+      set_forever new_arg
+          = set_map_forever((set *)arg, copy_block_to_eternal_lifetime);
       memcpy(new_block->children, term->children, arg_data->offset - 8);
-      *(set *)(((char *)new_block) + arg_data->offset) = new_arg;
+      *(set_forever *)(((char *)new_block) + arg_data->offset) = new_arg;
       break;
     }
     case VARIABLE_LAYOUT: {
