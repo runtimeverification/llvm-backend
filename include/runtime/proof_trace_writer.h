@@ -145,4 +145,195 @@ public:
   void end_of_trace() override { }
 };
 
+class proof_trace_callback_writer : public proof_trace_writer {
+private:
+  struct kore_term_construction {
+    void *subject;
+    uint64_t block_header;
+    bool indirect;
+
+    kore_term_construction()
+        : subject(nullptr)
+        , block_header(0)
+        , indirect(false) { }
+
+    kore_term_construction(void *subject, uint64_t block_header, bool indirect)
+        : subject(subject)
+        , block_header(block_header)
+        , indirect(indirect) { }
+  };
+
+  struct kore_configuration_construction {
+    void *subject;
+
+    kore_configuration_construction(void *subject)
+        : subject(subject) { }
+  };
+
+  struct pattern_matching_failure_construction {
+    char const *function_name;
+
+    pattern_matching_failure_construction(char const *function_name)
+        : function_name(function_name) { }
+  };
+
+  struct side_condition_result_construction {
+    uint64_t ordinal;
+    bool result;
+
+    side_condition_result_construction(uint64_t ordinal, bool result)
+        : ordinal(ordinal)
+        , result(result) { }
+  };
+
+  struct call_event_construction {
+    char const *hook_name;
+    char const *symbol_name;
+    char const *location;
+    std::vector<kore_term_construction> arguments;
+    std::optional<kore_term_construction> result;
+
+    call_event_construction(
+        char const *hook_name, char const *symbol_name, char const *location)
+        : hook_name(hook_name)
+        , symbol_name(symbol_name)
+        , location(location) { }
+
+    call_event_construction(char const *symbol_name, char const *location)
+        : hook_name(nullptr)
+        , symbol_name(symbol_name)
+        , location(location) { }
+  };
+
+  struct rewrite_event_construction {
+    using subst_t
+        = std::vector<std::pair<char const *, kore_term_construction>>;
+
+    uint64_t ordinal;
+    uint64_t arity;
+    size_t pos;
+    subst_t substitution;
+
+    rewrite_event_construction(uint64_t ordinal, uint64_t arity)
+        : ordinal(ordinal)
+        , arity(arity)
+        , pos(0) {
+      substitution.resize(arity);
+    }
+  };
+
+  std::optional<call_event_construction> current_call_event_;
+
+  std::optional<rewrite_event_construction> current_rewrite_event_{
+      std::nullopt};
+
+  [[clang::optnone]] void proof_trace_header_callback(uint32_t version) { }
+  [[clang::optnone]] void
+  hook_event_callback(call_event_construction const &event) { }
+  [[clang::optnone]] void
+  rewrite_event_callback(rewrite_event_construction const &event) { }
+  [[clang::optnone]] void
+  configuration_term_event_callback(kore_term_construction const &config) { }
+  [[clang::optnone]] void
+  function_event_callback(call_event_construction const &event) { }
+  [[clang::optnone]] void
+  side_condition_event_callback(rewrite_event_construction const &event) { }
+  [[clang::optnone]] void side_condition_result_callback(
+      side_condition_result_construction const &event) { }
+  [[clang::optnone]] void pattern_matching_failure_callback(
+      pattern_matching_failure_construction const &event) { }
+  [[clang::optnone]] void
+  configuration_event_callback(kore_configuration_construction const &config) {
+  }
+
+public:
+  proof_trace_callback_writer() { }
+
+  void proof_trace_header(uint32_t version) override {
+    proof_trace_header_callback(version);
+  }
+
+  void hook_event_pre(
+      char const *name, char const *pattern,
+      char const *location_stack) override {
+    current_call_event_.reset();
+    current_call_event_.emplace(name, pattern, location_stack);
+  }
+
+  void hook_event_post(
+      void *hook_result, uint64_t block_header, bool indirect) override {
+    current_call_event_->result.emplace(hook_result, block_header, indirect);
+    hook_event_callback(current_call_event_.value());
+  }
+
+  void argument(void *arg, uint64_t block_header, bool indirect) override {
+    current_call_event_->arguments.emplace_back(arg, block_header, indirect);
+  }
+
+  void rewrite_event_pre(uint64_t ordinal, uint64_t arity) override {
+    current_rewrite_event_.reset();
+    current_rewrite_event_.emplace(ordinal, arity);
+    if (arity == 0) {
+      rewrite_event_callback(current_rewrite_event_.value());
+    }
+  }
+
+  void variable(
+      char const *name, void *var, uint64_t block_header,
+      bool indirect) override {
+    auto &p = current_rewrite_event_->substitution[current_rewrite_event_->pos];
+    p.first = name;
+    p.second.subject = var;
+    p.second.block_header = block_header;
+    p.second.indirect = indirect;
+    size_t new_pos = ++current_rewrite_event_->pos;
+    if (new_pos == current_rewrite_event_->arity) {
+      rewrite_event_callback(current_rewrite_event_.value());
+    }
+  }
+
+  void rewrite_event_post(
+      void *config, uint64_t block_header, bool indirect) override {
+    kore_term_construction configuration(config, block_header, indirect);
+    configuration_term_event_callback(configuration);
+  }
+
+  void
+  function_event_pre(char const *name, char const *location_stack) override {
+    current_call_event_.reset();
+    current_call_event_.emplace(name, location_stack);
+  }
+
+  void function_event_post() override {
+    function_event_callback(current_call_event_.value());
+  }
+
+  void side_condition_event_pre(uint64_t ordinal, uint64_t arity) override {
+    current_rewrite_event_.reset();
+    current_rewrite_event_.emplace(ordinal, arity);
+    if (arity == 0) {
+      side_condition_event_callback(current_rewrite_event_.value());
+    }
+  }
+
+  void
+  side_condition_event_post(uint64_t ordinal, bool side_cond_result) override {
+    side_condition_result_construction side_condition_result(
+        ordinal, side_cond_result);
+    side_condition_result_callback(side_condition_result);
+  }
+
+  void pattern_matching_failure(char const *function_name) override {
+    pattern_matching_failure_construction pm_failure(function_name);
+    pattern_matching_failure_callback(pm_failure);
+  }
+
+  void configuration(block *config) override {
+    kore_configuration_construction configuration(config);
+    configuration_event_callback(configuration);
+  }
+
+  void end_of_trace() override { }
+};
+
 #endif // RUNTIME_PROOF_TRACE_WRITER_H
