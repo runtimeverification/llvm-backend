@@ -42,7 +42,7 @@ struct kore_alloc_forever_heap {
     auto *result
         = (string *)kore_alloc_token_forever(size + sizeof(blockheader));
     gc_enabled = enabled;
-    init_with_len(result, size);
+    init_with_len_forever(result, size);
     return result->data;
   }
 

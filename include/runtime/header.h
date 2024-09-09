@@ -129,6 +129,11 @@ __attribute__((always_inline)) constexpr void init_with_len(T *s, uint64_t l) {
   s->h.hdr = l | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
 }
 
+template <typename T>
+__attribute__((always_inline)) constexpr void init_with_len_forever(T *s, uint64_t l) {
+  s->h.hdr = l | NOT_YOUNG_OBJECT_BIT;
+}
+
 __attribute__((always_inline)) constexpr uint64_t size_hdr(uint64_t hdr) {
   return ((hdr >> 32) & 0xff) * 8;
 }
