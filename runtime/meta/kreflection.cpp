@@ -1,34 +1,18 @@
+#include "config/macros.h"
 #include "runtime/alloc.h"
-#include "runtime/arena.h"
+#include "runtime/collections/rangemap.h"
 #include "runtime/header.h"
 
-#include "config/macros.h"
-
 #include <cstddef>
-#include <cstdint>
-#include <limits>
-#include <vector>
-
-#include <gmp.h>
-#include <mpfr.h>
-
 #include <fmt/printf.h>
+#include <gmp.h>
 
-
-#include "runtime/fmt_error_handling.h"
-
-#ifndef IMMER_TAGGED_NODE
-#define IMMER_TAGGED_NODE 0
-#endif
-#include "immer/flex_vector_transient.hpp"
-#include "immer/map_transient.hpp"
-#include "immer/set_transient.hpp"
 #include <immer/flex_vector.hpp>
+#include <immer/flex_vector_transient.hpp>
 #include <immer/map.hpp>
+#include <immer/map_transient.hpp>
 #include <immer/set.hpp>
-#include <kllvm/ast/AST.h>
-#include <runtime/collections/rangemap.h>
-#include <unordered_set>
+#include <immer/set_transient.hpp>
 
 struct kore_alloc_forever_heap {
 
@@ -47,10 +31,8 @@ struct kore_alloc_forever_heap {
   }
 
   static void deallocate(size_t size, void *data) {
-    if (during_gc()) {
-      std::cerr << "Trying to deallocate during gc" << std::endl;
-      ::operator delete(data);
-    }
+    // This should never be called
+    abort();
   }
 };
 
@@ -63,7 +45,6 @@ using map_forever = immer::map<
     k_elem, k_elem, hash_block, std::equal_to<>, list_forever::memory_policy>;
 using set_forever = immer::set<
     k_elem, hash_block, std::equal_to<>, list_forever::memory_policy>;
-
 
 list_forever list_map_forever(list *l, block *(process)(block *)) {
   auto tmp = list_forever().transient();
@@ -79,8 +60,8 @@ map_forever map_map_forever(map *m, block *(process)(block *)) {
   auto tmp = map_forever().transient();
 
   for (auto iter = m->begin(); iter != m->end(); ++iter) {
-    auto key = process(iter->first);
-    auto value = process(iter->second);
+    auto *key = process(iter->first);
+    auto *value = process(iter->second);
     tmp.insert(std::make_pair(key, value));
   }
 
@@ -110,8 +91,8 @@ block *copy_block_to_eternal_lifetime(block *term) {
 
   // If the block is string term we have reallocate it so it wouldn't be catched by the gc
   if (layout == 0) {
-    auto str = (string *)term;
-    auto new_str
+    auto *str = (string *)term;
+    auto *new_str
         = (string *)kore_alloc_token_forever(sizeof(string) + len(str));
     memcpy(new_str, str, sizeof(string) + len(str));
     new_str->h.hdr |= NOT_YOUNG_OBJECT_BIT;
@@ -171,11 +152,11 @@ block *copy_block_to_eternal_lifetime(block *term) {
       break;
     }
     case STRINGBUFFER_LAYOUT: {
-      auto new_buffer = (stringbuffer *)new_block;
-      auto buffer = (stringbuffer *)arg;
+      auto *new_buffer = (stringbuffer *)new_block;
+      auto *buffer = (stringbuffer *)arg;
 
       uint64_t const cap = len(buffer->contents);
-      string *new_contents
+      auto *new_contents
           = (string *)kore_alloc_token_forever(sizeof(string) + cap);
 
       memcpy(new_contents, buffer->contents, sizeof(string) + buffer->strlen);
@@ -190,7 +171,7 @@ block *copy_block_to_eternal_lifetime(block *term) {
       break;
     }
     case INT_LAYOUT: {
-      mpz_ptr *ptr = static_cast<mpz_ptr *>((mpz_ptr *)arg);
+      auto *ptr = static_cast<mpz_ptr *>((mpz_ptr *)arg);
       mpz_hdr *new_arg = STRUCT_BASE(mpz_hdr, i, *ptr);
 
       mpz_hdr *new_intgr = nullptr;
@@ -220,7 +201,7 @@ block *copy_block_to_eternal_lifetime(block *term) {
       break;
     }
     case FLOAT_LAYOUT: {
-      floating **floating_ptr = static_cast<floating **>((floating **)arg);
+      auto **floating_ptr = static_cast<floating **>((floating **)arg);
       floating_hdr *flt = STRUCT_BASE(floating_hdr, f, *floating_ptr);
 
       floating_hdr *new_flt = nullptr;

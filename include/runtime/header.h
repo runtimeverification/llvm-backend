@@ -130,7 +130,8 @@ __attribute__((always_inline)) constexpr void init_with_len(T *s, uint64_t l) {
 }
 
 template <typename T>
-__attribute__((always_inline)) constexpr void init_with_len_forever(T *s, uint64_t l) {
+__attribute__((always_inline)) constexpr void
+init_with_len_forever(T *s, uint64_t l) {
   s->h.hdr = l | NOT_YOUNG_OBJECT_BIT;
 }
 
