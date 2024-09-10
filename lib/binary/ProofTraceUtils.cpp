@@ -20,38 +20,6 @@ std::vector<int> kllvm::parse_relative_location(std::string location) {
   return positions;
 }
 
-sptr<kore_composite_pattern> kllvm::replace_argument(
-    sptr<kore_composite_pattern> &current_config,
-    sptr<kore_composite_pattern> &function, std::vector<int> positions) {
-
-  // The function is in the rhs of a rewrite rule
-  if (positions.empty()) {
-    return nullptr;
-  }
-  // Create a new configuration, set the ith argument to be replaced by the function or a pattern with it
-  auto new_config = kllvm::kore_composite_pattern::create(
-      current_config->get_constructor());
-  int index = positions[0];
-  auto pattern = function;
-
-  // If there function is still nested, we need to call replace the argument in the nested configuration
-  if (positions.size() > 1) {
-    positions.erase(positions.begin());
-    auto config = std::dynamic_pointer_cast<kore_composite_pattern>(
-        current_config->get_arguments()[index]);
-
-    pattern = kllvm::replace_argument(config, function, positions);
-  }
-
-  // Add the new pattern to the new configuration
-  for (int i = 0; i < current_config->get_arguments().size(); i++) {
-    auto argument = i == index ? pattern : current_config->get_arguments()[i];
-    new_config->add_argument(argument);
-  }
-
-  return new_config;
-}
-
 llvm_event *kllvm::build_post_function_event(
     sptr<kore_composite_pattern> current_config,
     sptr<llvm_function_event> &function_event, bool expand_terms) {
@@ -81,7 +49,18 @@ llvm_event *kllvm::build_post_function_event(
   // We can only replace the argument and build a new configuration if we have a location
   // And it's a top level function.
   if (positions.size() == 1) {
-    auto new_config = replace_argument(current_config, function, positions);
+
+    // Create a new configuration, set the ith argument to be replaced by the function or a pattern with it
+    sptr<kore_composite_pattern> new_config
+        = kore_composite_pattern::create(current_config->get_constructor());
+    int index = positions[0];
+
+    // Add the new pattern to the new configuration
+    for (int i = 0; i < current_config->get_arguments().size(); i++) {
+      auto argument
+          = i == index ? function : current_config->get_arguments()[i];
+      new_config->add_argument(argument);
+    }
 
     // Get new configuration size
     std::stringstream ss;

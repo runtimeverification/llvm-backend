@@ -13,10 +13,6 @@ namespace kllvm {
 
 std::vector<int> parse_relative_location(std::string location);
 
-sptr<kore_composite_pattern> replace_argument(
-    sptr<kore_composite_pattern> &current_config,
-    sptr<kore_composite_pattern> &function, std::vector<int> positions);
-
 llvm_event *build_post_function_event(
     sptr<kore_composite_pattern> current_config,
     sptr<llvm_function_event> &function_event, bool expand_terms);
