@@ -195,6 +195,9 @@ void llvm_rewrite_trace_iterator::print(
             auto *new_config_event = build_post_function_event(
                 current_config_, function_event, expand_terms);
             if (new_config_event) {
+              current_config_
+                  = std::dynamic_pointer_cast<kore_composite_pattern>(
+                      new_config_event->getkore_pattern());
               new_config_event->print(out, expand_terms, false, ind);
             }
           }
@@ -228,6 +231,8 @@ void llvm_rewrite_trace::print(
           auto *new_config_event = build_post_function_event(
               current_config, function_event, expand_terms);
           if (new_config_event) {
+            current_config = std::dynamic_pointer_cast<kore_composite_pattern>(
+                new_config_event->getkore_pattern());
             new_config_event->print(out, expand_terms, false, ind);
           }
         }

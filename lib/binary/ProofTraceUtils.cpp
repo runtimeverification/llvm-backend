@@ -79,7 +79,8 @@ llvm_event *kllvm::build_post_function_event(
   std::vector<int> positions = kllvm::parse_relative_location(location);
 
   // We can only replace the argument and build a new configuration if we have a location
-  if (!positions.empty()) {
+  // And it's a top level function.
+  if (positions.size() == 1) {
     auto new_config = replace_argument(current_config, function, positions);
 
     // Get new configuration size
