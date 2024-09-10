@@ -14,7 +14,7 @@ namespace kllvm {
 std::vector<int> parse_relative_location(std::string location);
 
 llvm_event *build_post_function_event(
-    sptr<kore_composite_pattern> current_config,
+    sptr<kore_composite_pattern> &current_config,
     sptr<llvm_function_event> &function_event, bool expand_terms);
 
 } // namespace kllvm

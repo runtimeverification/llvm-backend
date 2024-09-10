@@ -21,7 +21,7 @@ std::vector<int> kllvm::parse_relative_location(std::string location) {
 }
 
 llvm_event *kllvm::build_post_function_event(
-    sptr<kore_composite_pattern> current_config,
+    sptr<kore_composite_pattern> &current_config,
     sptr<llvm_function_event> &function_event, bool expand_terms) {
   sptr<kore_composite_pattern> new_config = nullptr;
 
