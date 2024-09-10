@@ -10,9 +10,11 @@ hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}())]
 function: LblinitGeneratedTopCell{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}())]
 rule: 165 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}())]
 function: LblinitKCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}())]
 rule: 166 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}())]
 hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
@@ -20,6 +22,7 @@ hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
 hook result: kore[Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}()]
 function: Lblproject'Coln'KItem{} (0:0)
+  arg: kore[kseq{}(Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}(),dotk{}())]
 rule: 211 1
   VarK = kore[Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}()]
 function: LblinitGeneratedCounterCell{} (1)
@@ -28,7 +31,7 @@ config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash're
 rule: 130 1
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
 function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree{} (0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[\dv{SortInt{}}("1")]
 rule: 217 2
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("1")]
   VarX = kore[\dv{SortInt{}}("1")]

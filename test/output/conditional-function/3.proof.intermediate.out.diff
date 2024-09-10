@@ -10,9 +10,11 @@ hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
 function: LblinitGeneratedTopCell{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
 rule: 161 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
 function: LblinitKCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
 rule: 162 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))))]
 hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
@@ -20,6 +22,7 @@ hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
 hook result: kore[Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3")))]
 function: Lblproject'Coln'KItem{} (0:0)
+  arg: kore[kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())]
 rule: 208 1
   VarK = kore[Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3")))]
 function: LblinitGeneratedCounterCell{} (1)
@@ -30,7 +33,7 @@ rule: 124 3
   Var'Unds'DotVar1 = kore[dotk{}()]
   VarX = kore[\dv{SortInt{}}("3")]
 function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (0:0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[\dv{SortInt{}}("3")]
 side condition entry: 156 1
   VarX = kore[\dv{SortInt{}}("3")]
 hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
@@ -45,7 +48,8 @@ hook: INT.sub Lbl'Unds'-Int'Unds'{} (1:0)
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortInt{}}("2")]
 function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())),Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}())]
+  arg: kore[\dv{SortInt{}}("2")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())),Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}(\dv{SortInt{}}("2")))]
 side condition entry: 156 1
   VarX = kore[\dv{SortInt{}}("2")]
 hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
@@ -60,7 +64,8 @@ hook: INT.sub Lbl'Unds'-Int'Unds'{} (1:0)
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortInt{}}("1")]
 function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())),Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}())]
+  arg: kore[\dv{SortInt{}}("1")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())),Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}(\dv{SortInt{}}("1")))]
 side condition entry: 156 1
   VarX = kore[\dv{SortInt{}}("1")]
 hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
@@ -75,7 +80,8 @@ hook: INT.sub Lbl'Unds'-Int'Unds'{} (1:0)
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortInt{}}("0")]
 function: Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())),Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}())]
+  arg: kore[\dv{SortInt{}}("0")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())),Lblfactorial'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Int'Unds'Int{}(\dv{SortInt{}}("0")))]
 side condition entry: 156 1
   VarX = kore[\dv{SortInt{}}("0")]
 hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()

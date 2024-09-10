@@ -10,9 +10,11 @@ hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
 function: LblinitGeneratedTopCell{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
 rule: 104 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
 function: LblinitKCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
 rule: 105 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())))]
 hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
@@ -20,6 +22,7 @@ hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
 hook result: kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()))]
 function: Lblproject'Coln'KItem{} (0:0)
+  arg: kore[kseq{}(Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())),dotk{}())]
 rule: 145 1
   VarK = kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblbaz'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()))]
 function: LblinitGeneratedCounterCell{} (1)
@@ -30,11 +33,11 @@ rule: 99 3
   Var'Unds'DotVar1 = kore[dotk{}()]
   VarX = kore[Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()]
 function: Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} (0:0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())]
 rule: 102 1
   VarX = kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())]
 function: Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} (0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblid'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())]
 rule: 102 1
   VarX = kore[Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}())]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'NON-REC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lbla'Unds'NON-REC-FUNCTION-SYNTAX'Unds'Foo{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

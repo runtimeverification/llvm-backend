@@ -10,9 +10,11 @@ hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))))]
 function: LblinitGeneratedTopCell{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))))]
 rule: 2758 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))))]
 function: LblinitKCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))))]
 rule: 2759 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))))]
 hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
@@ -20,6 +22,7 @@ hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
 hook result: kore[Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")))]
 function: Lblproject'Coln'KItem{} (0:0)
+  arg: kore[kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())]
 rule: 2843 1
   VarK = kore[Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")))]
 function: LblinitGeneratedCounterCell{} (1)
@@ -28,7 +31,7 @@ config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUnd
 side condition entry: 2708 1
   VarHOLE = kore[Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))]
 function: LblisKResult{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisKResult{}()))]
+  arg: kore[kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),dotk{}())]
 rule: 2798 1
   VarK = kore[kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),dotk{}())]
 hook: BOOL.not LblnotBool'Unds'{} (1)
@@ -44,10 +47,11 @@ rule: 2708 4
   Var'Unds'DotVar1 = kore[dotk{}()]
   VarHOLE = kore[Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))]
   VarK1 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),kseq{}(Lbl'Hash'freezer'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term0'Unds'{}(kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),dotk{}())),dotk{}()))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 2708 1
   VarHOLE = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1"))))]
 function: LblisKResult{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisKResult{}()))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1"))))]
 hook: BOOL.not LblnotBool'Unds'{} (1)
@@ -62,7 +66,7 @@ side condition entry: 2709 2
   VarHOLE = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
   VarK0 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1"))))]
 function: LblisKResult{} (0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(LblisKResult{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1"))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
@@ -70,7 +74,7 @@ hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisKResult{}()))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
 hook: BOOL.not LblnotBool'Unds'{} (1)
@@ -89,7 +93,9 @@ rule: 2710 6
   VarT = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))]
   VarX = kore[\dv{SortInt{}}("1")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))]
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
 side condition entry: 2865 3
   VarS = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
   VarX = kore[\dv{SortInt{}}("2")]
@@ -99,7 +105,8 @@ hook: INT.ne Lbl'UndsEqlsSlshEqls'Int'Unds'{} (0)
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
 function: LblisFreeIn'LParUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Bool'Unds'Int'Unds'Term{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisFreeIn'LParUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Bool'Unds'Int'Unds'Term{}()))]
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
 rule: 2767 2
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("2")]
   VarX = kore[\dv{SortInt{}}("2")]
@@ -117,14 +124,20 @@ rule: 2865 4
   VarX = kore[\dv{SortInt{}}("2")]
   VarY = kore[\dv{SortInt{}}("1")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}())]
+  arg: kore[Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1"))]
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),kseq{}(Lbl'Hash'freezer'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term0'Unds'{}(kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),dotk{}())),dotk{}()))),Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")),\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 rule: 2863 4
   VarR = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
   VarS = kore[\dv{SortInt{}}("1")]
   VarT = kore[\dv{SortInt{}}("2")]
   VarX = kore[\dv{SortInt{}}("1")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")),\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 side condition entry: 2861 2
   VarX = kore[\dv{SortInt{}}("2")]
   VarY = kore[\dv{SortInt{}}("1")]
@@ -139,7 +152,10 @@ rule: 2861 4
   VarX = kore[\dv{SortInt{}}("2")]
   VarY = kore[\dv{SortInt{}}("1")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}())]
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 side condition entry: 2861 2
   VarX = kore[\dv{SortInt{}}("1")]
   VarY = kore[\dv{SortInt{}}("1")]
@@ -151,10 +167,12 @@ side condition exit: 2861 false
 rule: 2864 2
   VarT = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
   VarX = kore[\dv{SortInt{}}("1")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))),kseq{}(Lbl'Hash'freezer'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term0'Unds'{}(kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),dotk{}())),dotk{}()))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 2706 1
   Var'Unds'Gen2 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 function: LblisKResult{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),LblisKResult{}())]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))),dotk{}())]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))),kseq{}(Lbl'Hash'freezer'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term0'Unds'{}(kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),dotk{}())),dotk{}()))),LblisKResult{}(kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))),dotk{}())))]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
@@ -168,10 +186,11 @@ rule: 2706 5
   Var'Unds'Gen2 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
   VarHOLE = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
   VarK1 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 2708 1
   VarHOLE = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 function: LblisKResult{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisKResult{}()))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 hook: BOOL.not LblnotBool'Unds'{} (1)
@@ -186,7 +205,7 @@ side condition entry: 2709 2
   VarHOLE = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
   VarK0 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 function: LblisKResult{} (0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(LblisKResult{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
@@ -194,7 +213,7 @@ hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisKResult{}()))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
 hook: BOOL.not LblnotBool'Unds'{} (1)
@@ -213,14 +232,19 @@ rule: 2710 6
   VarT = kore[Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))]
   VarX = kore[\dv{SortInt{}}("2")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")))]
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
 rule: 2863 4
   VarR = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
   VarS = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
   VarT = kore[\dv{SortInt{}}("2")]
   VarX = kore[\dv{SortInt{}}("2")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 2861 2
   VarX = kore[\dv{SortInt{}}("2")]
   VarY = kore[\dv{SortInt{}}("2")]
@@ -233,16 +257,20 @@ rule: 2864 2
   VarT = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
   VarX = kore[\dv{SortInt{}}("2")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (1)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}())]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
+  arg: kore[\dv{SortInt{}}("2")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")),\dv{SortInt{}}("2"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))))]
 rule: 2862 4
   Var'Unds'Gen0 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
   Var'Unds'Gen1 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
   VarT = kore[\dv{SortInt{}}("2")]
   VarX = kore[\dv{SortInt{}}("2")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 2708 1
   VarHOLE = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
 function: LblisKResult{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisKResult{}()))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
 hook: BOOL.not LblnotBool'Unds'{} (1)
@@ -257,7 +285,7 @@ side condition entry: 2709 2
   VarHOLE = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
   VarK0 = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
 function: LblisKResult{} (0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(LblisKResult{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1")),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))]
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
@@ -265,7 +293,7 @@ hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),Lbl'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Term'Unds'Term'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("1")))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))),Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("1"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(LblisKResult{}()))]
+  arg: kore[kseq{}(Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2")),dotk{}())]
 rule: 2799 1
   VarKResult = kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
 hook: BOOL.not LblnotBool'Unds'{} (1)
@@ -284,7 +312,9 @@ rule: 2710 6
   VarT = kore[\dv{SortInt{}}("1")]
   VarX = kore[\dv{SortInt{}}("1")]
 function: Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{} (0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblsubstitute'LParUndsCommUndsCommUndsRParUnds'LAMBDA-EXPLICIT-SUBST'Unds'Term'Unds'Term'Unds'Int'Unds'Term{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[\dv{SortInt{}}("1")]
+  arg: kore[Lbllambda'UndsUndsUnds'LAMBDA-EXPLICIT-SUBST-SYNTAX'Unds'Value'Unds'Int'Unds'Term{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("2"))]
 side condition entry: 2861 2
   VarX = kore[\dv{SortInt{}}("1")]
   VarY = kore[\dv{SortInt{}}("1")]

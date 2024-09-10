@@ -10,12 +10,15 @@ hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 function: LblinitGeneratedTopCell{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 rule: 533 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 function: LblinitTCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 rule: 536 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 function: LblinitKCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 rule: 534 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}())]
 hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
@@ -23,6 +26,7 @@ hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
 hook result: kore[Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}()]
 function: Lblproject'Coln'Pgm{} (0:0)
+  arg: kore[kseq{}(Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}(),dotk{}())]
 rule: 644 1
   VarK = kore[Lbl'LBraRBraUnds'IMP5-RW-SUCC-SYNTAX'Unds'Block{}()]
 function: LblinitX1Cell{} (1)

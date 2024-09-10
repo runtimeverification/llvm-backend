@@ -10,9 +10,11 @@ hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
 hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
 function: LblinitGeneratedTopCell{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
 rule: 2761 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
 function: LblinitKCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
 rule: 2762 1
   VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("input_file"))]
 hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0:0)
@@ -20,6 +22,7 @@ hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0:0)
   arg: kore[\dv{SortKConfigVar{}}("$PGM")]
 hook result: kore[\dv{SortString{}}("input_file")]
 function: Lblproject'Coln'String{} (0:0:0)
+  arg: kore[kseq{}(\dv{SortString{}}("input_file"),dotk{}())]
 rule: 2841 1
   VarK = kore[\dv{SortString{}}("input_file")]
 function: LblinitFdCell{} (1)
@@ -35,13 +38,14 @@ rule: 2712 4
   Var'Unds'Gen2 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
   VarFILE = kore[\dv{SortString{}}("input_file")]
 function: Lbl'Hash'open'LParUndsRParUnds'K-IO'Unds'IOInt'Unds'String{} (0:0:0:0)
-config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(LblreadFromFile'LParUndsRParUnds'BUILTIN-IO'Unds'KItem'Unds'String{}(Lbl'Hash'open'LParUndsRParUnds'K-IO'Unds'IOInt'Unds'String{}()),dotk{}())),Lbl'-LT-'fd'-GT-'{}(\dv{SortInt{}}("-1")),Lbl'-LT-'buffer'-GT-'{}(\dv{SortString{}}("")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+  arg: kore[\dv{SortString{}}("input_file")]
 rule: 2702 1
   VarS = kore[\dv{SortString{}}("input_file")]
 hook: IO.open Lbl'Hash'open'LParUndsCommUndsRParUnds'K-IO'Unds'IOInt'Unds'String'Unds'String{} ()
   arg: kore[\dv{SortString{}}("input_file")]
   arg: kore[\dv{SortString{}}("r+")]
 hook result: kore[Lbl'Hash'ENOENT{}()]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblopen'LParUndsRParUnds'BUILTIN-IO'Unds'KItem'Unds'IOInt{}(Lbl'Hash'ENOENT{}()),dotk{}())),Lbl'-LT-'fd'-GT-'{}(\dv{SortInt{}}("-1")),Lbl'-LT-'buffer'-GT-'{}(\dv{SortString{}}("")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 2710 4
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("-1")]
   Var'Unds'Gen1 = kore[Lbl'-LT-'buffer'-GT-'{}(\dv{SortString{}}(""))]
