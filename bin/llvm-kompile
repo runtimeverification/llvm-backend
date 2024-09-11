@@ -44,6 +44,7 @@ Options:
                                     "hidden"
   --profile-matching                Instrument interpeter to emit a profile of time spent in
                                     top-level rule matching on stderr.
+  --verify-ir                       Verify result of IR generation.
   -O[0123]                          Set the optimization level for code generation.
 
 Any option not listed above will be passed through to clang; use '--' to
@@ -89,6 +90,7 @@ llvm_major_version () {
 positional_args=()
 reading_clang_args=false
 codegen_flags=()
+codegen_verify_flags=()
 if [[ -z "${NIX_LLVM_KOMPILE_LIBS}" ]]; then
   kompile_clang_flags=()
 else
@@ -105,6 +107,7 @@ embedded_files=()
 embedded_names=()
 use_opt=false
 emit_ir=false
+verify_ir=false
 frame_pointer=false
 
 export verbose=false
@@ -175,23 +178,32 @@ while [[ $# -gt 0 ]]; do
       ;;
     --proof-hint-instrumentation)
       codegen_flags+=("--proof-hint-instrumentation")
+      codegen_verify_flags+=("--proof-hint-instrumentation")
       shift
       ;;
     --proof-hint-instrumentation-slow)
       codegen_flags+=("--proof-hint-instrumentation-slow")
+      codegen_verify_flags+=("--proof-hint-instrumentation-slow")
       shift
       ;;
     --mutable-bytes)
       codegen_flags+=("--mutable-bytes")
+      codegen_verify_flags+=("--mutable-bytes")
       shift
       ;;
     --hidden-visibility)
       codegen_flags+=("--hidden-visibility")
+      codegen_verify_flags+=("--hidden-visibility")
       kompile_clang_flags+=("--hidden-visibility")
       shift
       ;;
     --profile-matching)
       codegen_flags+=("--profile-matching")
+      codegen_verify_flags+=("--profile-matching")
+      shift
+      ;;
+    --verify-ir)
+      verify_ir=true
       shift
       ;;
     -O*)
@@ -236,17 +248,19 @@ if [[ "$emit_ir" == "false" ]]; then
   codegen_flags+=("--emit-object")
   if [[ "$frame_pointer" == "true" ]]; then
     codegen_flags+=("-fno-omit-frame-pointer")
+    codegen_verify_flags+=("-fno-omit-frame-pointer")
   fi
 else
   codegen_flags+=("--binary-ir")
 fi
 
 mod="$(mktemp tmp.XXXXXXXXXX)"
+modtmp="$(mktemp tmp.XXXXXXXXXX)"
 modopt_tmp="$(mktemp tmp.XXXXXXXXXX)"
 tmpdir="$(mktemp -d tmp.XXXXXXXXXX)"
 modopt="$modopt_tmp"
 if [ "$save_temps" = false ]; then
-  trap 'rm -rf "$mod" "$modopt_tmp" "$tmpdir"' INT TERM EXIT
+  trap 'rm -rf "$mod" "$modtmp" "$modopt_tmp" "$tmpdir"' INT TERM EXIT
 fi
 
 definition="${positional_args[0]}"
@@ -271,18 +285,26 @@ if [[ "$compile" = "default" ]]; then
   # flag.
   if [[ "$main" = "c" ]] || [[ "$main" = "python" ]]; then
     codegen_flags+=("--safe-partial")
+    codegen_verify_flags+=("--safe-partial")
   fi
 
   for arg in "${clang_args[@]}"; do
     case "$arg" in
       -g)
         codegen_flags+=("--debug")
+        codegen_verify_flags+=("--debug")
         ;;
     esac
   done
 
   run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_flags[@]}" \
     "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$mod"
+
+  if [[ "$verify_ir" == "true" ]]; then
+    run "$(dirname "$0")"/llvm-kompile-codegen "${codegen_verify_flags[@]}" \
+      "$definition" "$dt_dir"/dt.yaml "$dt_dir" -o "$modtmp" --no-optimize
+    run @OPT@ -passes=verify "$modtmp" -o /dev/null
+  fi
 
   if [[ "$use_opt" = "true" ]]; then
     if [ "$(llvm_major_version)" -ge "16" ]; then
