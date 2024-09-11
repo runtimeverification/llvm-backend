@@ -35,41 +35,48 @@ case class NonEmpty() extends Constructor {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
-case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Option[Occurrence]]])
-    extends Constructor {
+case class HasKey(
+    cat: SortCategory,
+    element: SymbolOrAlias,
+    key: Option[Pattern[Option[Occurrence]]]
+) extends Constructor {
   def name                                              = "1"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[immutable.Seq[Fringe]] = {
     val sorts = f.symlib.signatures(element)._1
     key match {
       case None =>
-        if (isSet) {
-          Some(
-            immutable.Seq(
-              Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
-              Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+        cat match {
+          case SetS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+              )
             )
-          )
-        } else {
-          Some(
-            immutable.Seq(
-              Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
-              Fringe(f.symlib, sorts(1), ChoiceValue(f.occurrence), isExact = false),
-              Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+          case MapS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
+                Fringe(f.symlib, sorts(1), ChoiceValue(f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+              )
             )
-          )
+          case _ => ???
         }
       case Some(k) =>
-        if (isSet) {
-          Some(immutable.Seq(Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false), f))
-        } else {
-          Some(
-            immutable.Seq(
-              Fringe(f.symlib, sorts(1), Value(k, f.occurrence), isExact = false),
-              Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false),
-              f
+        cat match {
+          case SetS() =>
+            Some(immutable.Seq(Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false), f))
+          case MapS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts(1), Value(k, f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false),
+                f
+              )
             )
-          )
+          case _ => ???
         }
     }
   }
