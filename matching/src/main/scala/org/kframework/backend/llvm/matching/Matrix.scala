@@ -132,7 +132,7 @@ class Column(
         c
       } else {
         val hasKey = c.asInstanceOf[HasKey]
-        HasKey(hasKey.isSet, hasKey.element, None)
+        HasKey(hasKey.cat, hasKey.element, None)
       }
     }
 
@@ -307,8 +307,8 @@ class SortInfo private (sort: Sort, symlib: Parser.SymLib) {
   val exactLength: Int = category.length(exactConstructors.size)
   val isCollection: Boolean =
     category match {
-      case MapS() | SetS() => true
-      case _               => false
+      case MapS() | SetS() | ListS() => true
+      case _                         => false
     }
 }
 object SortInfo {

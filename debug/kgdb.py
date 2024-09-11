@@ -359,6 +359,7 @@ class termPrinter:
         self.used_var_names = set()
         self.long_int = gdb.lookup_type("long int")
         self.bool_ptr = gdb.lookup_type("bool").pointer()
+        self.char_ptr = gdb.lookup_type("unsigned char").pointer()
         self.unsigned_char = gdb.lookup_type("unsigned char")
         self.string_ptr = gdb.lookup_type("string").pointer()
         self.stringbuffer_ptr = gdb.lookup_type("stringbuffer").pointer()
@@ -482,6 +483,20 @@ class termPrinter:
         else:
             self.appendLimbs(size, val.dereference()['_mp_d'])
         self.result += "\")"
+
+    def appendMInt(self, val, width, sort):
+        self.result += "\\dv{" + sort + "}(\""
+        self.appendLE(val.cast(self.char_ptr), width)
+        self.result += "\")"
+
+    def appendLE(self, ptr, size):
+        accum = 0
+        for i in range(size-1,-1,-1):
+            accum <<= 8
+            byte = int(ptr[i])
+            accum |= byte
+        self.result += str(accum)
+        self.result += "p" + str(size * 8)
 
     def appendList(self, val, sort):
         length = val.dereference()['impl_']['size']
@@ -632,6 +647,14 @@ class termPrinter:
                 self.result += "\\dv{" + sort + "}(\"" + string + "\")"
             elif cat == @STRINGBUFFER_LAYOUT@:
                 self.appendStringBuffer(arg.cast(self.stringbuffer_ptr_ptr).dereference(), sort)
+            elif cat == @MINT_LAYOUT@ + 32:
+                self.appendMInt(arg, 4, sort)
+            elif cat == @MINT_LAYOUT@ + 64:
+                self.appendMInt(arg, 8, sort)
+            elif cat == @MINT_LAYOUT@ + 160:
+                self.appendMInt(arg, 20, sort)
+            elif cat == @MINT_LAYOUT@ + 256:
+                self.appendMInt(arg, 32, sort)
             else:
                 raise ValueError()
             if i != nargs - 1:
