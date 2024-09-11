@@ -84,20 +84,24 @@ case class HasKey(
     val child                  = children.last
     var key: Pattern[String]   = null
     var value: Pattern[String] = null
-    assert((isSet && children.size == 2) || (!isSet && children.size == 3))
+    assert((cat == SetS() && children.size == 2) || (cat != SetS() && children.size == 3))
     if (this.key.isEmpty) {
-      if (isSet) {
-        key = children.head
-      } else {
-        key = children.head
-        value = children(1)
+      cat match {
+        case SetS() =>
+          key = children.head
+        case MapS() =>
+          key = children.head
+          value = children(1)
+        case _ => ???
       }
     } else {
-      if (isSet) {
-        key = this.key.get.decanonicalize
-      } else {
-        key = this.key.get.decanonicalize
-        value = children.head
+      cat match {
+        case SetS() =>
+          key = this.key.get.decanonicalize
+        case MapS() =>
+          key = this.key.get.decanonicalize
+          value = children.head
+        case _ => ???
       }
     }
     def element(k: Pattern[String], v: Pattern[String]): Pattern[String] =
@@ -112,21 +116,23 @@ case class HasKey(
       case SetP(elems, frame, ctr, orig) =>
         SetP(key +: elems, frame, ctr, orig)
       case WildcardP() | VariableP(_, _) =>
-        if (isSet) {
-          SetP(
-            immutable.Seq(key),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(setElement(key), child)
-          )
-        } else {
-          MapP(
-            immutable.Seq(key),
-            immutable.Seq(value),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(element(key, value), child)
-          )
+        cat match {
+          case SetS() =>
+            SetP(
+              immutable.Seq(key),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(setElement(key), child)
+            )
+          case MapS() =>
+            MapP(
+              immutable.Seq(key),
+              immutable.Seq(value),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(element(key, value), child)
+            )
+          case _ => ???
         }
       case _ => ???
     }
@@ -134,7 +140,8 @@ case class HasKey(
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
-case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) extends Constructor {
+case class HasNoKey(cat: SortCategory, key: Option[Pattern[Option[Occurrence]]])
+    extends Constructor {
   def name                                              = "0"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[immutable.Seq[Fringe]]  = Some(immutable.Seq(f))
@@ -161,21 +168,23 @@ case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) ex
       case SetP(elems, frame, ctr, orig) =>
         SetP(wildcard +: elems, frame, ctr, concat(setElement(wildcard), orig))
       case WildcardP() | VariableP(_, _) =>
-        if (isSet) {
-          SetP(
-            immutable.Seq(wildcard),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(setElement(wildcard), child)
-          )
-        } else {
-          MapP(
-            immutable.Seq(wildcard),
-            immutable.Seq(wildcard),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(element(wildcard, wildcard), child)
-          )
+        cat match {
+          case SetS() =>
+            SetP(
+              immutable.Seq(wildcard),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(setElement(wildcard), child)
+            )
+          case MapS() =>
+            MapP(
+              immutable.Seq(wildcard),
+              immutable.Seq(wildcard),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(element(wildcard, wildcard), child)
+            )
+          case _ => ???
         }
       case _ => ???
     }

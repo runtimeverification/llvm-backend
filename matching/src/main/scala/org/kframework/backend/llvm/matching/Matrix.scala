@@ -132,7 +132,7 @@ class Column(
         c
       } else {
         val hasKey = c.asInstanceOf[HasKey]
-        HasKey(hasKey.isSet, hasKey.element, None)
+        HasKey(hasKey.cat, hasKey.element, None)
       }
     }
 

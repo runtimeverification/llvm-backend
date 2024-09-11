@@ -342,15 +342,15 @@ case class MapP[T] private (
     } else if (frame.isEmpty) {
       keys.flatMap(key =>
         immutable.Seq(
-          HasKey(isSet = false, ctr, clause.canonicalize(key)),
-          HasNoKey(isSet = false, clause.canonicalize(key))
+          HasKey(MapS(), ctr, clause.canonicalize(key)),
+          HasNoKey(MapS(), clause.canonicalize(key))
         )
       )
     } else {
       keys.flatMap(key =>
         immutable.Seq(
-          HasKey(isSet = false, ctr, clause.canonicalize(key)),
-          HasNoKey(isSet = false, clause.canonicalize(key))
+          HasKey(MapS(), ctr, clause.canonicalize(key)),
+          HasNoKey(MapS(), clause.canonicalize(key))
         )
       ) ++ frame.get.signature(clause)
     }
@@ -573,15 +573,15 @@ case class SetP[T] private (
     } else if (frame.isEmpty) {
       elements.flatMap(elem =>
         immutable.Seq(
-          HasKey(isSet = true, ctr, clause.canonicalize(elem)),
-          HasNoKey(isSet = true, clause.canonicalize(elem))
+          HasKey(SetS(), ctr, clause.canonicalize(elem)),
+          HasNoKey(SetS(), clause.canonicalize(elem))
         )
       )
     } else {
       elements.flatMap(elem =>
         immutable.Seq(
-          HasKey(isSet = true, ctr, clause.canonicalize(elem)),
-          HasNoKey(isSet = true, clause.canonicalize(elem))
+          HasKey(SetS(), ctr, clause.canonicalize(elem)),
+          HasNoKey(SetS(), clause.canonicalize(elem))
         )
       ) ++ frame.get.signature(clause)
     }
