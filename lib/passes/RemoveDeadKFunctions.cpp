@@ -47,7 +47,7 @@ static bool remove_dead_instruction(
       // If the operand is an instruction that became dead as we nulled out the
       // operand, and if it is 'trivially' dead, delete it in a future loop
       // iteration.
-      if (Instruction *op_i = dyn_cast<Instruction>(op_v)) {
+      if (auto *op_i = dyn_cast<Instruction>(op_v)) {
         if (is_dead(op_i) || isInstructionTriviallyDead(op_i, tli)) {
           work_list.insert(op_i);
         }
