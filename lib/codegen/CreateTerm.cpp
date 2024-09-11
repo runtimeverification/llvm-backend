@@ -1182,6 +1182,7 @@ bool make_function(
   llvm::FunctionType *func_type
       = llvm::FunctionType::get(return_type, param_types, false);
   llvm::Function *apply_rule = get_or_insert_function(module, name, func_type);
+  apply_rule->setLinkage(llvm::GlobalValue::InternalLinkage);
   init_debug_axiom(axiom->attributes());
   std::string debug_name = name;
   if (axiom->attributes().contains(attribute_set::key::Label)) {
