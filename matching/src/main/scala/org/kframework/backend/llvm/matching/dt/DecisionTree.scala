@@ -377,10 +377,11 @@ object MakePattern {
       case VariableP(Some(o), h) =>
         result.put("hook", h.hookAtt)
         result.put("occurrence", o.representation)
-      case AsP(_, _, p)         => return representPattern(p)
-      case MapP(_, _, _, _, o)  => return representPattern(o)
-      case SetP(_, _, _, o)     => return representPattern(o)
-      case ListP(_, _, _, _, o) => return representPattern(o)
+      case AsP(_, _, p)            => return representPattern(p)
+      case MapP(_, _, _, _, o)     => return representPattern(o)
+      case SetP(_, _, _, o)        => return representPattern(o)
+      case ListP(_, _, _, _, o)    => return representPattern(o)
+      case ListGetP(_, _, _, _, o) => return representPattern(o)
       case LiteralP(s, h) =>
         result.put("hook", h.hookAtt)
         if (h.hookAtt == "BYTES.Bytes") {
@@ -405,10 +406,11 @@ object MakePattern {
       case VariableP(o, h) =>
         result.put("hook", h.hookAtt)
         result.put("occurrence", o)
-      case AsP(_, _, p)         => return representResidual(p)
-      case MapP(_, _, _, _, o)  => return representResidual(o)
-      case SetP(_, _, _, o)     => return representResidual(o)
-      case ListP(_, _, _, _, o) => return representResidual(o)
+      case AsP(_, _, p)            => return representResidual(p)
+      case MapP(_, _, _, _, o)     => return representResidual(o)
+      case SetP(_, _, _, o)        => return representResidual(o)
+      case ListP(_, _, _, _, o)    => return representResidual(o)
+      case ListGetP(_, _, _, _, o) => return representResidual(o)
       case LiteralP(s, h) =>
         result.put("hook", h.hookAtt)
         result.put("literal", s)
