@@ -307,7 +307,7 @@ class SortInfo private (sort: Sort, symlib: Parser.SymLib) {
   val exactLength: Int = category.length(exactConstructors.size)
   val isCollection: Boolean =
     category match {
-      case MapS() | SetS() => true
+      case MapS() | SetS() | ListS() => true
       case _               => false
     }
 }
