@@ -171,7 +171,7 @@ case class ListS() extends SortCategory {
       sigma: immutable.Seq[Constructor],
       isExact: Boolean,
       sortInfo: SortInfo
-  ): Boolean = true
+  ): Boolean = sigma.isEmpty || sigma.head.isInstanceOf[ListC]
   def missingConstructor(sigma: immutable.Seq[Constructor], f: Fringe): Pattern[String] = {
     val maxSize = sigma.map(_.asInstanceOf[ListC].length).max
     def element(v: Pattern[String]): Pattern[String] =
