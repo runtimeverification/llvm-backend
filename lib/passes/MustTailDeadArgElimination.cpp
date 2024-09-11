@@ -58,11 +58,13 @@ using namespace kllvm;
 
 #define DEBUG_TYPE "deadargelim"
 
+#if LLVM_VERSION_MAJOR == 16
 STATISTIC(NumArgumentsEliminated, "Number of unread args removed");
 STATISTIC(NumRetValsEliminated, "Number of unused return values removed");
 STATISTIC(
     NumArgumentsReplacedWithPoison,
     "Number of unread args replaced with poison");
+#endif
 
 namespace {
 
