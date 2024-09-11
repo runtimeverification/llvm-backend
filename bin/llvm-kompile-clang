@@ -152,9 +152,9 @@ if ! $save_temps; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  set_visibility_hidden="$LIBDIR/libSetVisibilityHidden.dylib"
+  passes="$LIBDIR/libKLLVMPass.dylib"
 else
-  set_visibility_hidden="$LIBDIR/libSetVisibilityHidden.so"
+  passes="$LIBDIR/libKLLVMPass.so"
 fi
 
 # On macOS, we get libunwind supplied as part of the developer tools in the OS,
@@ -186,7 +186,7 @@ if [ "$main" != "python_ast" ]; then
       fi
       if $visibility_hidden; then
         modhidden="$tmpdir/hidden.bc"
-        run @OPT@ "$modopt" -load-pass-plugin "$set_visibility_hidden" -set-visibility-hidden -o "$modhidden"
+        run @OPT@ "$modopt" -load-pass-plugin "$passes" -set-visibility-hidden -o "$modhidden"
         modopt="$modhidden"
       fi
       run @LLC@ \
