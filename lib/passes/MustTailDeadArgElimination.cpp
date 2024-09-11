@@ -82,12 +82,16 @@ public:
   }
 
   bool runOnModule(Module &M) override {
+#if LLVM_VERSION_MAJOR == 16
     if (skipModule(M))
       return false;
     DeadArgumentEliminationPass DAEP(shouldHackArguments());
     ModuleAnalysisManager DummyMAM;
     PreservedAnalyses PA = DAEP.run(M, DummyMAM);
     return !PA.areAllPreserved();
+#else
+    return true;
+#endif
   }
 
   virtual bool shouldHackArguments() const { return false; }
@@ -130,6 +134,8 @@ ModulePass *llvm::createDeadArgEliminationPass() {
 ModulePass *llvm::createDeadArgHackingPass() {
   return new DAH();
 }
+
+#if LLVM_VERSION_MAJOR == 16
 
 /// If this is an function that takes a ... list, and if llvm.vastart is never
 /// called, the varargs list is dead for the function.
@@ -1102,9 +1108,10 @@ bool DeadArgumentEliminationPass::removeDeadStuffFromFunction(Function *F) {
 
   return true;
 }
-
+#endif
 PreservedAnalyses
 DeadArgumentEliminationPass::run(Module &M, ModuleAnalysisManager &) {
+#if LLVM_VERSION_MAJOR == 16
   bool Changed = false;
 
   // First pass: Do a simple check to see if any functions can have their "..."
@@ -1137,6 +1144,9 @@ DeadArgumentEliminationPass::run(Module &M, ModuleAnalysisManager &) {
   if (!Changed)
     return PreservedAnalyses::all();
   return PreservedAnalyses::none();
+#else
+  return PreservedAnalyses::all();
+#endif
 }
 
 // NOLINTEND

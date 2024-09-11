@@ -49,6 +49,7 @@ namespace kllvm {
 class DeadArgumentEliminationPass
     : public PassInfoMixin<DeadArgumentEliminationPass> {
 public:
+#if LLVM_VERSION_MAJOR == 16
   /// Struct that represents (part of) either a return value or a function
   /// argument.  Used so that arguments and return values can be used
   /// interchangeably.
@@ -87,9 +88,9 @@ public:
 
   DeadArgumentEliminationPass(bool ShouldHackArguments = false)
       : ShouldHackArguments(ShouldHackArguments) { }
-
+#endif
   PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
-
+#if LLVM_VERSION_MAJOR == 16
   /// Convenience wrapper
   RetOrArg createRet(Function const *F, unsigned Idx) {
     return RetOrArg(F, Idx, false);
@@ -149,6 +150,7 @@ private:
   bool removeDeadStuffFromFunction(Function *F);
   bool deleteDeadVarargs(Function &F);
   bool removeDeadArgumentsFromCallers(Function &F);
+#endif
 };
 
 } // namespace kllvm
