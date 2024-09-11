@@ -62,6 +62,14 @@ case class HasKey(
                 Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
               )
             )
+          case ListS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts(1), Choice(f.occurrence), isExact = false),
+                Fringe(f.symlib, sorts(2), ChoiceValue(f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+              )
+            )
           case _ => ???
         }
       case Some(k) =>
@@ -73,6 +81,14 @@ case class HasKey(
               immutable.Seq(
                 Fringe(f.symlib, sorts(1), Value(k, f.occurrence), isExact = false),
                 Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false),
+                f
+              )
+            )
+          case ListS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts(2), Value(k, f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, f.occurrence, isExact = false),
                 f
               )
             )
@@ -98,7 +114,7 @@ case class HasKey(
       cat match {
         case SetS() =>
           key = this.key.get.decanonicalize
-        case MapS() =>
+        case ListS() | MapS() =>
           key = this.key.get.decanonicalize
           value = children.head
         case _ => ???
@@ -110,9 +126,16 @@ case class HasKey(
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, immutable.Seq(k))
     def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] =
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, immutable.Seq(m1, m2))
+    def update(m1: Pattern[String], m2: Pattern[String], m3: Pattern[String]): Pattern[String] =
+      SymbolP(
+        Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+        immutable.Seq(m1, m2, m3)
+      )
     child match {
       case MapP(keys, values, frame, ctr, orig) =>
         MapP(key +: keys, value +: values, frame, ctr, orig)
+      case ListGetP(keys, values, frame, ctr, orig) =>
+        ListGetP(key +: keys, value +: values, frame, ctr, orig)
       case SetP(elems, frame, ctr, orig) =>
         SetP(key +: elems, frame, ctr, orig)
       case WildcardP() | VariableP(_, _) =>
@@ -131,6 +154,14 @@ case class HasKey(
               Some(child),
               Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
               concat(element(key, value), child)
+            )
+          case ListS() =>
+            ListGetP(
+              immutable.Seq(key),
+              immutable.Seq(value),
+              child,
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+              update(child, key, value)
             )
           case _ => ???
         }
@@ -155,6 +186,11 @@ case class HasNoKey(cat: SortCategory, key: Option[Pattern[Option[Occurrence]]])
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, immutable.Seq())
     def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] =
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, immutable.Seq(m1, m2))
+    def update(m1: Pattern[String], m2: Pattern[String], m3: Pattern[String]): Pattern[String] =
+      SymbolP(
+        Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+        immutable.Seq(m1, m2, m3)
+      )
     def wildcard = WildcardP[String]()
     child match {
       case MapP(keys, values, frame, ctr, orig) =>
@@ -183,6 +219,14 @@ case class HasNoKey(cat: SortCategory, key: Option[Pattern[Option[Occurrence]]])
               Some(child),
               Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
               concat(element(wildcard, wildcard), child)
+            )
+          case ListS() =>
+            ListGetP(
+              immutable.Seq(wildcard),
+              immutable.Seq(wildcard),
+              child,
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+              update(child, wildcard, wildcard)
             )
           case _ => ???
         }
