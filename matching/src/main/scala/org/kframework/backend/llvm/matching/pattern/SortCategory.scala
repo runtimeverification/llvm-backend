@@ -267,8 +267,9 @@ case class ListS() extends SortCategory {
       )
     } else if (matrix.bestCol.isChoice) {
       throw new MatchingException(
-          MatchingException.Type.COMPILER_ERROR,
-          "LLVM backend does not support random access list patterns with unbound keys.")
+        MatchingException.Type.COMPILER_ERROR,
+        "LLVM backend does not support random access list patterns with unbound keys."
+      )
     } else {
       val key = matrix.bestCol.bestKey
       key match {

@@ -71,10 +71,10 @@ object Pattern {
       case (LiteralP(c1, _), LiteralP(c2, _)) => c1 == c2
       case (SymbolP(c1, ps1), SymbolP(c2, ps2)) =>
         c1 == c2 && ps1.lazyZip(ps2).toSeq.forall(t => Pattern.mightUnify(t._1, t._2))
-      case (ListP(_, _, _, _, _), ListP(_, _, _, _, _)) => true
-      case (MapP(_, _, _, _, _), MapP(_, _, _, _, _))   => true
+      case (ListP(_, _, _, _, _), ListP(_, _, _, _, _))       => true
+      case (MapP(_, _, _, _, _), MapP(_, _, _, _, _))         => true
       case (ListGetP(_, _, _, _, _), ListGetP(_, _, _, _, _)) => true
-      case (SetP(_, _, _, _), SetP(_, _, _, _))         => true
+      case (SetP(_, _, _, _), SetP(_, _, _, _))               => true
       case (
             LiteralP(_, _) | SymbolP(_, _) | ListP(_, _, _, _, _) | MapP(_, _, _, _, _) |
             SetP(_, _, _, _) | ListGetP(_, _, _, _, _),
@@ -177,11 +177,11 @@ case class ListGetP[T] private (
   ): Boolean =
     ix match {
       case HasKey(_, _, Some(_)) => true
-      case HasNoKey(_, Some(p)) => !keys.map(_.canonicalize(clause)).contains(p)
+      case HasNoKey(_, Some(p))  => !keys.map(_.canonicalize(clause)).contains(p)
       // needed for usefulness
-      case HasKey(_, _, None)   => clause.action.priority <= maxPriority
-      case HasNoKey(_, None) => keys.nonEmpty && clause.action.priority > maxPriority
-      case _                    => ???
+      case HasKey(_, _, None) => clause.action.priority <= maxPriority
+      case HasNoKey(_, None)  => keys.nonEmpty && clause.action.priority > maxPriority
+      case _                  => ???
     }
   def score(
       h: Heuristic,
@@ -236,12 +236,14 @@ case class ListGetP[T] private (
         } else {
           immutable.Seq(keys.head, values.head, ListGetP(keys.tail, values.tail, frame, ctr, orig))
         }
-      case _              => ???
+      case _ => ???
     }
   def expandOr: immutable.Seq[Pattern[T]] = {
     val withKeys = keys.indices.foldLeft(immutable.Seq(this))((accum, ix) =>
       accum.flatMap(m =>
-        m.keys(ix).expandOr.map(p => new ListGetP(m.keys.updated(ix, p), m.values, m.frame, ctr, orig))
+        m.keys(ix)
+          .expandOr
+          .map(p => new ListGetP(m.keys.updated(ix, p), m.values, m.frame, ctr, orig))
       )
     )
     val withValues = values.indices.foldLeft(withKeys)((accum, ix) =>
@@ -251,15 +253,14 @@ case class ListGetP[T] private (
           .map(p => new ListGetP(m.keys, m.values.updated(ix, p), m.frame, ctr, orig))
       )
     )
-    withValues.flatMap(m =>
-      m.frame.expandOr.map(p => ListGetP(m.keys, m.values, p, ctr, orig))
-    )
+    withValues.flatMap(m => m.frame.expandOr.map(p => ListGetP(m.keys, m.values, p, ctr, orig)))
   }
 
   override def mapOrSetKeys: immutable.Seq[Pattern[T]] = keys
 
   def category: Option[SortCategory] = Some(ListS())
-  lazy val variables: Set[T] = keys.flatMap(_.variables).toSet ++ values.flatMap(_.variables) ++ frame.variables
+  lazy val variables: Set[T] =
+    keys.flatMap(_.variables).toSet ++ values.flatMap(_.variables) ++ frame.variables
   def canonicalize(clause: Clause): ListGetP[Option[Occurrence]] = new ListGetP(
     keys.map(_.canonicalize(clause)),
     values.map(_.canonicalize(clause)),

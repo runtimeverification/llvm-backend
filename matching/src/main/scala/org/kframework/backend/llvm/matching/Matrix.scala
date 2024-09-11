@@ -308,7 +308,7 @@ class SortInfo private (sort: Sort, symlib: Parser.SymLib) {
   val isCollection: Boolean =
     category match {
       case MapS() | SetS() | ListS() => true
-      case _               => false
+      case _                         => false
     }
 }
 object SortInfo {
