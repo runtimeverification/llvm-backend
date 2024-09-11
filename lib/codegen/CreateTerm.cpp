@@ -795,6 +795,11 @@ llvm::Value *create_term::create_function_call(
   auto *return_sort = dynamic_cast<kore_composite_sort *>(
       pattern->get_constructor()->get_sort().get());
   auto return_cat = return_sort->get_category(definition_);
+  bool impure = definition_->get_symbol_declarations()
+                    .at(pattern->get_constructor()->get_name())
+                    ->attributes()
+                    .contains(attribute_set::key::Impure);
+
   int i = 0;
   for (auto const &sort : pattern->get_constructor()->get_arguments()) {
     auto *concrete_sort = dynamic_cast<kore_composite_sort *>(sort.get());
@@ -832,12 +837,13 @@ llvm::Value *create_term::create_function_call(
     current_block_ = e.function_event_post(current_block_);
   }
 
-  return create_function_call(name, return_cat, args, sret, tailcc);
+  return create_function_call(name, return_cat, args, sret, tailcc, impure);
 }
 
 llvm::Value *create_term::create_function_call(
     std::string const &name, value_type return_cat,
-    std::vector<llvm::Value *> const &args, bool sret, bool tailcc) {
+    std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
+    bool impure) {
   llvm::Type *return_type = getvalue_type(return_cat, module_);
   std::vector<llvm::Type *> types;
   bool collection = false;
@@ -872,6 +878,9 @@ llvm::Value *create_term::create_function_call(
   llvm::FunctionType *func_type
       = llvm::FunctionType::get(return_type, types, false);
   llvm::Function *func = get_or_insert_function(module_, name, func_type);
+  if (!impure) {
+    func->addFnAttr("kllvm-pure");
+  }
 
   auto *call = llvm::CallInst::Create(func, real_args, "", current_block_);
   set_debug_loc(call);

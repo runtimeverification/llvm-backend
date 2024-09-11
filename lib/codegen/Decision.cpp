@@ -440,7 +440,7 @@ void function_node::codegen(decision *d) {
       final_subst, d->definition_, d->current_block_, d->module_, false);
   auto *call = creator.create_function_call(
       function_, cat_, args, function_.substr(0, 5) == "hook_",
-      is_side_condition);
+      is_side_condition, false);
   call->setName(name_.substr(0, max_name_length));
   d->store(std::make_pair(name_, type_), call);
 
@@ -806,6 +806,12 @@ void make_eval_or_anywhere_function(
   // have one correct version of the function body after code generation
   // finishes.
   match_func->deleteBody();
+  if (!definition->get_symbol_declarations()
+           .at(function->get_name())
+           ->attributes()
+           .contains(attribute_set::key::Impure)) {
+    match_func->addFnAttr("kllvm-pure");
+  }
   [[maybe_unused]] kore_symbol_declaration *symbol_decl
       = definition->get_symbol_declarations().at(function->get_name());
   init_debug_axiom(symbol_decl->attributes());
