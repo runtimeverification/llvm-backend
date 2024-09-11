@@ -127,16 +127,6 @@ INITIALIZE_PASS(
     DAH, "deadarghaX0r",
     "Dead Argument Hacking (BUGPOINT USE ONLY; DO NOT USE)", false, false)
 
-/// This pass removes arguments from functions which are not used by the body of
-/// the function.
-ModulePass *llvm::createDeadArgEliminationPass() {
-  return new DAE();
-}
-
-ModulePass *llvm::createDeadArgHackingPass() {
-  return new DAH();
-}
-
 #if LLVM_VERSION_MAJOR == 16
 
 /// If this is an function that takes a ... list, and if llvm.vastart is never
