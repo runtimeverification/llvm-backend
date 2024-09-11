@@ -240,30 +240,59 @@ case class ListS() extends SortCategory {
     val listO   = matrix.bestCol.fringe.occurrence
     val newO    = Size(listO)
     val maxList = matrix.bestCol.maxListSize
-    // test the length of the list against the specializations of the matrix
-    // if it succeeds, bind the occurrences and continue with the specialized matrix
-    // otherwise, try the default case
-    Function(
-      "hook_LIST_size_long",
-      newO,
-      immutable.Seq((listO, hookAtt)),
-      "MINT.MInt 64",
-      SwitchLit(
+    if (matrix.sigma(0).isInstanceOf[ListC]) {
+      // test the length of the list against the specializations of the matrix
+      // if it succeeds, bind the occurrences and continue with the specialized matrix
+      // otherwise, try the default case
+      Function(
+        "hook_LIST_size_long",
         newO,
+        immutable.Seq((listO, hookAtt)),
         "MINT.MInt 64",
-        64,
-        matrix.cases.zipWithIndex.map(l =>
-          (
-            l._1._1,
-            l._1._2,
-            expandListPattern(l._1._3, listO, matrix.sigma(l._2).asInstanceOf[ListC])
-          )
-        ),
-        matrix
-          .default(matrix.bestColIx, matrix.sigma)
-          .map(expandListPatternDefault(_, listO, maxList))
+        SwitchLit(
+          newO,
+          "MINT.MInt 64",
+          64,
+          matrix.cases.zipWithIndex.map(l =>
+            (
+              l._1._1,
+              l._1._2,
+              expandListPattern(l._1._3, listO, matrix.sigma(l._2).asInstanceOf[ListC])
+            )
+          ),
+          matrix
+            .default(matrix.bestColIx, matrix.sigma)
+            .map(expandListPatternDefault(_, listO, maxList))
+        )
       )
-    )
+    } else if (matrix.bestCol.isChoice) {
+      throw new MatchingException(
+          MatchingException.Type.COMPILER_ERROR,
+          "LLVM backend does not support random access list patterns with unbound keys.")
+    } else {
+      val key = matrix.bestCol.bestKey
+      key match {
+        case None => Switch(listO, hookAtt, matrix.compiledCases, matrix.compiledDefault)
+        case Some(k) =>
+          MakePattern(
+            newO,
+            "STRING.String",
+            k,
+            Function(
+              "hook_LIST_get_null",
+              Value(k, listO),
+              immutable.Seq((listO, hookAtt), (newO, "STRING.String")),
+              "STRING.String",
+              CheckNull(
+                Value(k, listO),
+                "STRING.String",
+                matrix.compiledCases,
+                matrix.compiledDefault
+              )
+            )
+          )
+      }
+    }
   }
 }
 case class MapS() extends SortCategory {
