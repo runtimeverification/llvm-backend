@@ -176,7 +176,6 @@ fi
 if [ "$main" != "python_ast" ]; then
   if [ "$lto" = "lto" ]; then
     flags+=("-flto")
-    files=("$LIBDIR"/llvm/*.ll)
   else
     files=()
     if $compile; then
