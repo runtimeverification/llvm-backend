@@ -80,7 +80,9 @@ public:
 
   DAE()
       : ModulePass(ID) {
+#if LLVM_VERSION_MAJOR == 16
     initializeDAEPass(*PassRegistry::getPassRegistry());
+#endif
   }
 
   bool runOnModule(Module &M) override {
@@ -103,8 +105,10 @@ public:
 
 char DAE::ID = 0;
 
+#if LLVM_VERSION_MAJOR == 16
 INITIALIZE_PASS(
     DAE, "deadargelim-musttail", "Dead Argument Elimination", false, false)
+#endif
 
 namespace {
 
