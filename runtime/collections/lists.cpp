@@ -52,6 +52,20 @@ SortKItem hook_LIST_get_long(SortList list, ssize_t idx) {
   return list->at(abs_idx);
 }
 
+SortKItem hook_LIST_get_null(SortList list, SortInt index) {
+  if (!mpz_fits_slong_p(index)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Index is too large for get: {}", int_to_string(index));
+  }
+  ssize_t idx = mpz_get_si(index);
+  size_t size = list->size();
+  size_t abs_idx = idx < 0 ? (long)size + idx : idx;
+  if (abs_idx >= size) {
+    return nullptr;
+  }
+  return list->at(abs_idx);
+}
+
 SortKItem hook_LIST_get(SortList list, SortInt index) {
   if (!mpz_fits_slong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
