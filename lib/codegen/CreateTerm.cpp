@@ -730,7 +730,7 @@ llvm::Value *create_term::create_hook(
 
     // These do not short circuit when the first argument is true.
     current_block_ = e.short_circuit_hook_argument(
-        args[1], args[0], false, sort_1, current_block_);
+        result, args[0], false, sort_1, current_block_);
   } else if (name == "BOOL.or" || name == "BOOL.orElse") {
     auto const &p = pattern->get_arguments();
     auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
@@ -740,7 +740,7 @@ llvm::Value *create_term::create_hook(
 
     // These do not short circuit when the first argument is false.
     current_block_ = e.short_circuit_hook_argument(
-        args[1], args[0], true, sort_1, current_block_);
+        result, args[0], true, sort_1, current_block_);
   } else if (name == "KEQUAL.ite") {
     auto const &p = pattern->get_arguments();
     auto *sort_0 = dynamic_cast<kore_composite_sort *>(p[0]->get_sort().get());
@@ -752,7 +752,7 @@ llvm::Value *create_term::create_hook(
     // The second argument does not short circuit when the first argument is true, while
     // the third argument does not short circuit when the first argument is false.
     current_block_ = e.short_circuit_hook_argument(
-        args[1], args[2], args[0], sort_1, sort_2, current_block_);
+        result, result, args[0], sort_1, sort_2, current_block_);
   } else {
     size_t i = 0;
     for (auto const &p : pattern->get_arguments()) {
