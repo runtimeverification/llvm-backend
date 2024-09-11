@@ -381,6 +381,7 @@ object MakePattern {
       case MapP(_, _, _, _, o)  => return representPattern(o)
       case SetP(_, _, _, o)     => return representPattern(o)
       case ListP(_, _, _, _, o) => return representPattern(o)
+      case ListGetP(_, _, _, _, o) => return representPattern(o)
       case LiteralP(s, h) =>
         result.put("hook", h.hookAtt)
         if (h.hookAtt == "BYTES.Bytes") {
@@ -409,6 +410,7 @@ object MakePattern {
       case MapP(_, _, _, _, o)  => return representResidual(o)
       case SetP(_, _, _, o)     => return representResidual(o)
       case ListP(_, _, _, _, o) => return representResidual(o)
+      case ListGetP(_, _, _, _, o) => return representResidual(o)
       case LiteralP(s, h) =>
         result.put("hook", h.hookAtt)
         result.put("literal", s)
