@@ -1,3 +1,4 @@
+#include <kllvm/codegen/MustTailDeadArgElimination.h>
 #include <kllvm/codegen/RemoveDeadKFunctions.h>
 #include <kllvm/codegen/SetVisibilityHidden.h>
 
@@ -17,6 +18,10 @@ llvm::PassPluginLibraryInfo get_kllvm_plugin_info() {
                ArrayRef<llvm::PassBuilder::PipelineElement>) {
               if (name == "set-visibility-hidden") {
                 pm.addPass(set_visibility_hidden());
+                return true;
+              }
+              if (name == "deadargelim-musttail") {
+                pm.addPass(DeadArgumentEliminationPass());
                 return true;
               }
               return false;

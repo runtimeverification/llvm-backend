@@ -1,12 +1,14 @@
 add_library(KLLVMPassInternal
   SetVisibilityHidden.cpp
   RemoveDeadKFunctions.cpp
+  MustTailDeadArgElimination.cpp
   PluginInfo.cpp
 )
 
 add_library(KLLVMPass MODULE
   SetVisibilityHidden.cpp
   RemoveDeadKFunctions.cpp
+  MustTailDeadArgElimination.cpp
   PluginInfo.cpp
 )
 
