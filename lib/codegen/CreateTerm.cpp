@@ -795,10 +795,12 @@ llvm::Value *create_term::create_function_call(
   auto *return_sort = dynamic_cast<kore_composite_sort *>(
       pattern->get_constructor()->get_sort().get());
   auto return_cat = return_sort->get_category(definition_);
-  bool impure = definition_->get_symbol_declarations()
-                    .at(pattern->get_constructor()->get_name())
-                    ->attributes()
-                    .contains(attribute_set::key::Impure);
+  auto const &att = definition_->get_symbol_declarations()
+                        .at(pattern->get_constructor()->get_name())
+                        ->attributes();
+
+  bool impure = att.contains(attribute_set::key::Impure)
+                || !att.contains(attribute_set::key::Total);
 
   int i = 0;
   for (auto const &sort : pattern->get_constructor()->get_arguments()) {

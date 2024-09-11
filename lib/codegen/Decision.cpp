@@ -806,10 +806,11 @@ void make_eval_or_anywhere_function(
   // have one correct version of the function body after code generation
   // finishes.
   match_func->deleteBody();
-  if (!definition->get_symbol_declarations()
-           .at(function->get_name())
-           ->attributes()
-           .contains(attribute_set::key::Impure)) {
+  auto const &att = definition->get_symbol_declarations()
+                        .at(function->get_name())
+                        ->attributes();
+  if (!att.contains(attribute_set::key::Impure)
+      && att.contains(attribute_set::key::Total)) {
     match_func->addFnAttr("kllvm-pure");
   }
   [[maybe_unused]] kore_symbol_declaration *symbol_decl
