@@ -71,12 +71,13 @@ object Pattern {
       case (LiteralP(c1, _), LiteralP(c2, _)) => c1 == c2
       case (SymbolP(c1, ps1), SymbolP(c2, ps2)) =>
         c1 == c2 && ps1.lazyZip(ps2).toSeq.forall(t => Pattern.mightUnify(t._1, t._2))
-      case (ListP(_, _, _, _, _), ListP(_, _, _, _, _)) => true
-      case (MapP(_, _, _, _, _), MapP(_, _, _, _, _))   => true
-      case (SetP(_, _, _, _), SetP(_, _, _, _))         => true
+      case (ListP(_, _, _, _, _), ListP(_, _, _, _, _))       => true
+      case (MapP(_, _, _, _, _), MapP(_, _, _, _, _))         => true
+      case (ListGetP(_, _, _, _, _), ListGetP(_, _, _, _, _)) => true
+      case (SetP(_, _, _, _), SetP(_, _, _, _))               => true
       case (
             LiteralP(_, _) | SymbolP(_, _) | ListP(_, _, _, _, _) | MapP(_, _, _, _, _) |
-            SetP(_, _, _, _),
+            SetP(_, _, _, _) | ListGetP(_, _, _, _, _),
             _
           ) =>
         false
@@ -145,6 +146,158 @@ case class AsP[T](name: T, sort: SortCategory, pat: Pattern[T]) extends Pattern[
   def toShortString: String                      = pat.toShortString + " #as " + name.toString
   def toKORE(f: Fringe): kore.Pattern =
     B.And(f.sort, pat.toKORE(f), B.Variable(name.toString, f.sort))
+}
+
+case class ListGetP[T] private (
+    keys: immutable.Seq[Pattern[T]],
+    values: immutable.Seq[Pattern[T]],
+    frame: Pattern[T],
+    ctr: SymbolOrAlias,
+    orig: Pattern[T]
+) extends Pattern[T] {
+  def signature(clause: Clause): immutable.Seq[Constructor] =
+    if (keys.isEmpty) {
+      frame.signature(clause)
+    } else {
+      keys.flatMap(key =>
+        immutable.Seq(
+          HasKey(ListS(), ctr, clause.canonicalize(key)),
+          HasNoKey(ListS(), clause.canonicalize(key))
+        )
+      ) ++ frame.signature(clause)
+    }
+  def isWildcard: Boolean = keys.isEmpty && values.isEmpty && frame.isWildcard
+  def isDefault: Boolean  = true
+  def isSpecialized(
+      ix: Constructor,
+      isExact: Boolean,
+      fringe: Fringe,
+      clause: Clause,
+      maxPriority: Int
+  ): Boolean =
+    ix match {
+      case HasKey(_, _, Some(_)) => true
+      case HasNoKey(_, Some(p))  => !keys.map(_.canonicalize(clause)).contains(p)
+      // needed for usefulness
+      case HasKey(_, _, None) => clause.action.priority <= maxPriority
+      case HasNoKey(_, None)  => keys.nonEmpty && clause.action.priority > maxPriority
+      case _                  => ???
+    }
+  def score(
+      h: Heuristic,
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = h.scoreListGet(this, f, c, key, isEmpty)
+  override def isChoice: Boolean = keys.nonEmpty
+  def bindings(
+      ix: Option[Constructor],
+      residual: Option[Pattern[String]],
+      occurrence: Occurrence,
+      symlib: Parser.SymLib
+  ): immutable.Seq[VariableBinding[T]] =
+    if (keys.isEmpty && values.isEmpty) {
+      frame.bindings(None, residual, occurrence, symlib)
+    } else {
+      immutable.Seq()
+    }
+  def expand(
+      ix: Constructor,
+      isExact: Boolean,
+      fringes: immutable.Seq[Fringe],
+      f: Fringe,
+      clause: Clause,
+      maxPriority: Int
+  ): immutable.Seq[Pattern[T]] =
+    ix match {
+      case HasKey(_, _, Some(p)) =>
+        val canonKs = keys.map(_.canonicalize(clause))
+        canonKs.indexOf(p) match {
+          case -1 => immutable.Seq(WildcardP(), WildcardP(), this)
+          case i =>
+            immutable.Seq(
+              values(i),
+              ListGetP(
+                keys.take(i) ++ keys.takeRight(keys.size - i - 1),
+                values.take(i) ++ values.takeRight(values.size - i - 1),
+                frame,
+                ctr,
+                orig
+              ),
+              WildcardP()
+            )
+        }
+      case HasNoKey(_, _) => immutable.Seq(this)
+      // needed for usefulness
+      case HasKey(_, _, None) =>
+        if (keys.isEmpty) {
+          frame.expand(ix, isExact, fringes, f, clause, maxPriority)
+        } else {
+          immutable.Seq(keys.head, values.head, ListGetP(keys.tail, values.tail, frame, ctr, orig))
+        }
+      case _ => ???
+    }
+  def expandOr: immutable.Seq[Pattern[T]] = {
+    val withKeys = keys.indices.foldLeft(immutable.Seq(this))((accum, ix) =>
+      accum.flatMap(m =>
+        m.keys(ix)
+          .expandOr
+          .map(p => new ListGetP(m.keys.updated(ix, p), m.values, m.frame, ctr, orig))
+      )
+    )
+    val withValues = values.indices.foldLeft(withKeys)((accum, ix) =>
+      accum.flatMap(m =>
+        m.values(ix)
+          .expandOr
+          .map(p => new ListGetP(m.keys, m.values.updated(ix, p), m.frame, ctr, orig))
+      )
+    )
+    withValues.flatMap(m => m.frame.expandOr.map(p => ListGetP(m.keys, m.values, p, ctr, orig)))
+  }
+
+  override def mapOrSetKeys: immutable.Seq[Pattern[T]] = keys
+
+  def category: Option[SortCategory] = Some(ListS())
+  lazy val variables: Set[T] =
+    keys.flatMap(_.variables).toSet ++ values.flatMap(_.variables) ++ frame.variables
+  def canonicalize(clause: Clause): ListGetP[Option[Occurrence]] = new ListGetP(
+    keys.map(_.canonicalize(clause)),
+    values.map(_.canonicalize(clause)),
+    frame.canonicalize(clause),
+    ctr,
+    orig.canonicalize(clause)
+  )
+  def decanonicalize: ListGetP[String] = new ListGetP(
+    keys.map(_.decanonicalize),
+    values.map(_.decanonicalize),
+    frame.decanonicalize,
+    ctr,
+    orig.decanonicalize
+  )
+  def isBound(clause: Clause): Boolean =
+    keys.forall(_.isBound(clause)) && values.forall(_.isBound(clause)) && frame.isBound(clause)
+  def isResidual(symlib: Parser.SymLib) = true
+  override lazy val hashCode: Int       = scala.runtime.ScalaRunTime._hashCode(this)
+  def toShortString: String             = "LG(" + keys.size + ")"
+  def toKORE(f: Fringe): kore.Pattern   = orig.toKORE(f)
+}
+
+object ListGetP {
+  def apply[T](
+      keys: immutable.Seq[Pattern[T]],
+      values: immutable.Seq[Pattern[T]],
+      frame: Pattern[T],
+      ctr: SymbolOrAlias,
+      orig: Pattern[T]
+  ): Pattern[T] =
+    if (keys.length != values.length) {
+      throw new AssertionError("invalid ListGEtP")
+    } else if (keys.isEmpty) {
+      frame
+    } else {
+      new ListGetP(keys, values, frame, ctr, orig)
+    }
 }
 
 case class ListP[T] private (
@@ -342,15 +495,15 @@ case class MapP[T] private (
     } else if (frame.isEmpty) {
       keys.flatMap(key =>
         immutable.Seq(
-          HasKey(isSet = false, ctr, clause.canonicalize(key)),
-          HasNoKey(isSet = false, clause.canonicalize(key))
+          HasKey(MapS(), ctr, clause.canonicalize(key)),
+          HasNoKey(MapS(), clause.canonicalize(key))
         )
       )
     } else {
       keys.flatMap(key =>
         immutable.Seq(
-          HasKey(isSet = false, ctr, clause.canonicalize(key)),
-          HasNoKey(isSet = false, clause.canonicalize(key))
+          HasKey(MapS(), ctr, clause.canonicalize(key)),
+          HasNoKey(MapS(), clause.canonicalize(key))
         )
       ) ++ frame.get.signature(clause)
     }
@@ -573,15 +726,15 @@ case class SetP[T] private (
     } else if (frame.isEmpty) {
       elements.flatMap(elem =>
         immutable.Seq(
-          HasKey(isSet = true, ctr, clause.canonicalize(elem)),
-          HasNoKey(isSet = true, clause.canonicalize(elem))
+          HasKey(SetS(), ctr, clause.canonicalize(elem)),
+          HasNoKey(SetS(), clause.canonicalize(elem))
         )
       )
     } else {
       elements.flatMap(elem =>
         immutable.Seq(
-          HasKey(isSet = true, ctr, clause.canonicalize(elem)),
-          HasNoKey(isSet = true, clause.canonicalize(elem))
+          HasKey(SetS(), ctr, clause.canonicalize(elem)),
+          HasNoKey(SetS(), clause.canonicalize(elem))
         )
       ) ++ frame.get.signature(clause)
     }

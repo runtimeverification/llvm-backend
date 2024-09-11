@@ -35,6 +35,13 @@ sealed trait Heuristic {
       key: Option[Pattern[Option[Occurrence]]],
       isEmpty: Boolean
   ): Double = ???
+  def scoreListGet[T](
+      p: ListGetP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double = ???
   def scoreOr[T](
       p: OrP[T],
       f: Fringe,
@@ -143,6 +150,20 @@ object DefaultHeuristic extends Heuristic {
       0.0
     } else if (p.keys.isEmpty) {
       p.frame.get.score(this, f, c, key, isEmpty)
+    } else if (key.isDefined) {
+      if (p.canonicalize(c).keys.contains(key.get)) 1.0 else 0.0
+    } else {
+      1.0
+    }
+  override def scoreListGet[T](
+      p: ListGetP[T],
+      f: Fringe,
+      c: Clause,
+      key: Option[Pattern[Option[Occurrence]]],
+      isEmpty: Boolean
+  ): Double =
+    if (p.keys.isEmpty) {
+      p.frame.score(this, f, c, key, isEmpty)
     } else if (key.isDefined) {
       if (p.canonicalize(c).keys.contains(key.get)) 1.0 else 0.0
     } else {
