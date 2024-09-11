@@ -64,7 +64,6 @@ STATISTIC(NumRetValsEliminated, "Number of unused return values removed");
 STATISTIC(
     NumArgumentsReplacedWithPoison,
     "Number of unread args replaced with poison");
-#endif
 
 namespace {
 
@@ -80,22 +79,16 @@ public:
 
   DAE()
       : ModulePass(ID) {
-#if LLVM_VERSION_MAJOR == 16
     initializeDAEPass(*PassRegistry::getPassRegistry());
-#endif
   }
 
   bool runOnModule(Module &M) override {
-#if LLVM_VERSION_MAJOR == 16
     if (skipModule(M))
       return false;
     DeadArgumentEliminationPass DAEP(shouldHackArguments());
     ModuleAnalysisManager DummyMAM;
     PreservedAnalyses PA = DAEP.run(M, DummyMAM);
     return !PA.areAllPreserved();
-#else
-    return true;
-#endif
   }
 
   virtual bool shouldHackArguments() const { return false; }
@@ -105,10 +98,8 @@ public:
 
 char DAE::ID = 0;
 
-#if LLVM_VERSION_MAJOR == 16
 INITIALIZE_PASS(
     DAE, "deadargelim-musttail", "Dead Argument Elimination", false, false)
-#endif
 
 namespace {
 
@@ -130,8 +121,6 @@ char DAH::ID = 0;
 INITIALIZE_PASS(
     DAH, "deadarghaX0r",
     "Dead Argument Hacking (BUGPOINT USE ONLY; DO NOT USE)", false, false)
-
-#if LLVM_VERSION_MAJOR == 16
 
 /// If this is an function that takes a ... list, and if llvm.vastart is never
 /// called, the varargs list is dead for the function.
