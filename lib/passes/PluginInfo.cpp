@@ -9,10 +9,6 @@ llvm::PassPluginLibraryInfo get_kllvm_plugin_info() {
   return {
       LLVM_PLUGIN_API_VERSION, "SetVisibilityHidden", LLVM_VERSION_STRING,
       [](PassBuilder &pb) {
-        pb.registerPipelineStartEPCallback(
-            [](llvm::ModulePassManager &pm, OptimizationLevel level) {
-              pm.addPass(set_visibility_hidden());
-            });
         pb.registerPipelineParsingCallback(
             [](StringRef name, llvm::ModulePassManager &pm,
                ArrayRef<llvm::PassBuilder::PipelineElement>) {
