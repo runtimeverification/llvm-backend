@@ -50,10 +50,7 @@ bool youngspace_almost_full(size_t threshold) {
     // allocating for now.
     return false;
   }
-  ptrdiff_t free_bytes = youngspace.block_end - youngspace.block;
-  size_t total_bytes
-      = youngspace.num_blocks * (BLOCK_SIZE - sizeof(memory_block_header));
-  return (total_bytes - free_bytes) * 100 > threshold * 95;
+  return true;
 }
 
 void kore_alloc_swap(bool swap_old) {

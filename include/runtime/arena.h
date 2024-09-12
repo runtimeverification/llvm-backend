@@ -35,6 +35,10 @@ using memory_block_header = struct {
 #define MEM_BLOCK_START(ptr)                                                   \
   ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
 
+extern bool time_for_collection;
+
+size_t get_gc_threshold();
+
 // Resets the given arena.
 void arena_reset(struct arena *);
 
