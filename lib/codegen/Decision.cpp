@@ -1003,12 +1003,11 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       module->getContext(), "checkCollect", block->getParent());
   llvm::BranchInst::Create(stuck, check_collect, is_finished, block);
 
-  auto *collection = get_or_insert_function(
-      module, "is_collection",
-      llvm::FunctionType::get(
-          llvm::Type::getInt1Ty(module->getContext()), {}, false));
-  auto *is_collection
-      = llvm::CallInst::Create(collection, {}, "", check_collect);
+  auto *collection = module->getOrInsertGlobal(
+      "time_for_collection", llvm::Type::getInt1Ty(module->getContext()));
+  auto *is_collection = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(module->getContext()), collection, "is_collection",
+      check_collect);
   set_debug_loc(is_collection);
   auto *collect = llvm::BasicBlock::Create(
       module->getContext(), "isCollect", block->getParent());

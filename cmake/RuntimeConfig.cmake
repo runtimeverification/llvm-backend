@@ -1,4 +1,4 @@
-set(GC_THRESHOLD          2097152
+set(GC_THRESHOLD          3
     CACHE STRING "Initial Young Generation Size")
 
 set(NOT_YOUNG_OBJECT_BIT  0x10000000000000)
