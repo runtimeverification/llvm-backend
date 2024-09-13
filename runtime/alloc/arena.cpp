@@ -76,6 +76,8 @@ static void *megabyte_malloc() {
   return result;
 }
 
+bool time_for_collection;
+
 static void fresh_block(struct arena *arena) {
   char *next_block = nullptr;
   if (arena->block_start == nullptr) {
@@ -106,7 +108,11 @@ static void fresh_block(struct arena *arena) {
       next_header->next_block = nullptr;
       next_header->semispace = arena->allocation_semispace_id;
       arena->num_blocks++;
+      time_for_collection = true;
     }
+  }
+  if (!*(char **)next_block && arena->num_blocks >= get_gc_threshold()) {
+    time_for_collection = true;
   }
   arena->block = next_block + sizeof(memory_block_header);
   arena->block_start = next_block;

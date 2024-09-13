@@ -204,11 +204,6 @@ declare void @write_configuration_to_proof_trace(ptr, ptr)
 
 @gc_roots = global [256 x ptr] zeroinitializer
 
-define void @set_gc_threshold(i64 %threshold) {
-  store i64 %threshold, ptr @GC_THRESHOLD
-  ret void
-}
-
 define i64 @get_gc_threshold() {
   %threshold = load i64, ptr @GC_THRESHOLD
   ret i64 %threshold

@@ -25,9 +25,6 @@ static char *last_alloc_ptr;
 #endif
 
 size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
-void set_gc_threshold(size_t);
-size_t get_gc_threshold(void);
-bool youngspace_almost_full(size_t);
 
 bool during_gc() {
   return is_gc;
@@ -285,6 +282,7 @@ void init_static_objects(void) {
 
 void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
   is_gc = true;
+  time_for_collection = false;
   collect_old = should_collect_old_gen();
   MEM_LOG("Starting garbage collection\n");
 #ifdef GC_DBG
@@ -349,16 +347,10 @@ void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
 #endif
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
-  set_gc_threshold(youngspace_size());
 }
 
 void free_all_kore_mem() {
   kore_collect(nullptr, 0, nullptr);
   kore_clear();
-}
-
-bool is_collection() {
-  size_t threshold = get_gc_threshold();
-  return youngspace_almost_full(threshold);
 }
 }

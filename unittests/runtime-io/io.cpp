@@ -60,6 +60,10 @@ bool during_gc() {
 
 void add_hash64(void *, uint64_t) { }
 
+size_t get_gc_threshold() {
+  return SIZE_MAX;
+}
+
 void flush_io_logs();
 string *make_string(const KCHAR *, int64_t len = -1);
 blockheader header_err();
