@@ -7,7 +7,7 @@ using namespace kllvm;
 /* New PM Registration */
 llvm::PassPluginLibraryInfo get_kllvm_plugin_info() {
   return {
-      LLVM_PLUGIN_API_VERSION, "SetVisibilityHidden", LLVM_VERSION_STRING,
+      LLVM_PLUGIN_API_VERSION, "KLLVMPass", LLVM_VERSION_STRING,
       [](PassBuilder &pb) {
         pb.registerPipelineParsingCallback(
             [](StringRef name, llvm::ModulePassManager &pm,
