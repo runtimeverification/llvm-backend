@@ -35,41 +35,64 @@ case class NonEmpty() extends Constructor {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
-case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Option[Occurrence]]])
-    extends Constructor {
+case class HasKey(
+    cat: SortCategory,
+    element: SymbolOrAlias,
+    key: Option[Pattern[Option[Occurrence]]]
+) extends Constructor {
   def name                                              = "1"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[immutable.Seq[Fringe]] = {
     val sorts = f.symlib.signatures(element)._1
     key match {
       case None =>
-        if (isSet) {
-          Some(
-            immutable.Seq(
-              Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
-              Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+        cat match {
+          case SetS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+              )
             )
-          )
-        } else {
-          Some(
-            immutable.Seq(
-              Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
-              Fringe(f.symlib, sorts(1), ChoiceValue(f.occurrence), isExact = false),
-              Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+          case MapS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts.head, Choice(f.occurrence), isExact = false),
+                Fringe(f.symlib, sorts(1), ChoiceValue(f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+              )
             )
-          )
+          case ListS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts(1), Choice(f.occurrence), isExact = false),
+                Fringe(f.symlib, sorts(2), ChoiceValue(f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, ChoiceRem(f.occurrence), isExact = false)
+              )
+            )
+          case _ => ???
         }
       case Some(k) =>
-        if (isSet) {
-          Some(immutable.Seq(Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false), f))
-        } else {
-          Some(
-            immutable.Seq(
-              Fringe(f.symlib, sorts(1), Value(k, f.occurrence), isExact = false),
-              Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false),
-              f
+        cat match {
+          case SetS() =>
+            Some(immutable.Seq(Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false), f))
+          case MapS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts(1), Value(k, f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, Rem(k, f.occurrence), isExact = false),
+                f
+              )
             )
-          )
+          case ListS() =>
+            Some(
+              immutable.Seq(
+                Fringe(f.symlib, sorts(2), Value(k, f.occurrence), isExact = false),
+                Fringe(f.symlib, f.sort, f.occurrence, isExact = false),
+                f
+              )
+            )
+          case _ => ???
         }
     }
   }
@@ -77,20 +100,24 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
     val child                  = children.last
     var key: Pattern[String]   = null
     var value: Pattern[String] = null
-    assert((isSet && children.size == 2) || (!isSet && children.size == 3))
+    assert((cat == SetS() && children.size == 2) || (cat != SetS() && children.size == 3))
     if (this.key.isEmpty) {
-      if (isSet) {
-        key = children.head
-      } else {
-        key = children.head
-        value = children(1)
+      cat match {
+        case SetS() =>
+          key = children.head
+        case MapS() =>
+          key = children.head
+          value = children(1)
+        case _ => ???
       }
     } else {
-      if (isSet) {
-        key = this.key.get.decanonicalize
-      } else {
-        key = this.key.get.decanonicalize
-        value = children.head
+      cat match {
+        case SetS() =>
+          key = this.key.get.decanonicalize
+        case ListS() | MapS() =>
+          key = this.key.get.decanonicalize
+          value = children.head
+        case _ => ???
       }
     }
     def element(k: Pattern[String], v: Pattern[String]): Pattern[String] =
@@ -99,27 +126,44 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get, immutable.Seq(k))
     def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] =
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, immutable.Seq(m1, m2))
+    def update(m1: Pattern[String], m2: Pattern[String], m3: Pattern[String]): Pattern[String] =
+      SymbolP(
+        Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+        immutable.Seq(m1, m2, m3)
+      )
     child match {
       case MapP(keys, values, frame, ctr, orig) =>
         MapP(key +: keys, value +: values, frame, ctr, orig)
+      case ListGetP(keys, values, frame, ctr, orig) =>
+        ListGetP(key +: keys, value +: values, frame, ctr, orig)
       case SetP(elems, frame, ctr, orig) =>
         SetP(key +: elems, frame, ctr, orig)
       case WildcardP() | VariableP(_, _) =>
-        if (isSet) {
-          SetP(
-            immutable.Seq(key),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(setElement(key), child)
-          )
-        } else {
-          MapP(
-            immutable.Seq(key),
-            immutable.Seq(value),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(element(key, value), child)
-          )
+        cat match {
+          case SetS() =>
+            SetP(
+              immutable.Seq(key),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(setElement(key), child)
+            )
+          case MapS() =>
+            MapP(
+              immutable.Seq(key),
+              immutable.Seq(value),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(element(key, value), child)
+            )
+          case ListS() =>
+            ListGetP(
+              immutable.Seq(key),
+              immutable.Seq(value),
+              child,
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+              update(child, key, value)
+            )
+          case _ => ???
         }
       case _ => ???
     }
@@ -127,7 +171,8 @@ case class HasKey(isSet: Boolean, element: SymbolOrAlias, key: Option[Pattern[Op
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
 }
 
-case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) extends Constructor {
+case class HasNoKey(cat: SortCategory, key: Option[Pattern[Option[Occurrence]]])
+    extends Constructor {
   def name                                              = "0"
   def isBest(pat: Pattern[Option[Occurrence]]): Boolean = key.isDefined && pat == key.get
   def expand(f: Fringe): Option[immutable.Seq[Fringe]]  = Some(immutable.Seq(f))
@@ -141,6 +186,11 @@ case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) ex
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "unit").get, immutable.Seq())
     def concat(m1: Pattern[String], m2: Pattern[String]): Pattern[String] =
       SymbolP(Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "concat").get, immutable.Seq(m1, m2))
+    def update(m1: Pattern[String], m2: Pattern[String], m3: Pattern[String]): Pattern[String] =
+      SymbolP(
+        Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+        immutable.Seq(m1, m2, m3)
+      )
     def wildcard = WildcardP[String]()
     child match {
       case MapP(keys, values, frame, ctr, orig) =>
@@ -154,21 +204,31 @@ case class HasNoKey(isSet: Boolean, key: Option[Pattern[Option[Occurrence]]]) ex
       case SetP(elems, frame, ctr, orig) =>
         SetP(wildcard +: elems, frame, ctr, concat(setElement(wildcard), orig))
       case WildcardP() | VariableP(_, _) =>
-        if (isSet) {
-          SetP(
-            immutable.Seq(wildcard),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(setElement(wildcard), child)
-          )
-        } else {
-          MapP(
-            immutable.Seq(wildcard),
-            immutable.Seq(wildcard),
-            Some(child),
-            Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
-            concat(element(wildcard, wildcard), child)
-          )
+        cat match {
+          case SetS() =>
+            SetP(
+              immutable.Seq(wildcard),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(setElement(wildcard), child)
+            )
+          case MapS() =>
+            MapP(
+              immutable.Seq(wildcard),
+              immutable.Seq(wildcard),
+              Some(child),
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "element").get,
+              concat(element(wildcard, wildcard), child)
+            )
+          case ListS() =>
+            ListGetP(
+              immutable.Seq(wildcard),
+              immutable.Seq(wildcard),
+              child,
+              Parser.getSymbolAtt(f.symlib.sortAtt(f.sort), "update").get,
+              update(child, wildcard, wildcard)
+            )
+          case _ => ???
         }
       case _ => ???
     }
