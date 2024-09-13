@@ -1,5 +1,7 @@
 #include <kllvm/codegen/ApplyPasses.h>
+#include <kllvm/codegen/MustTailDeadArgElimination.h>
 #include <kllvm/codegen/Options.h>
+#include <kllvm/codegen/RemoveDeadKFunctions.h>
 #include <kllvm/codegen/SetVisibilityHidden.h>
 
 #include "runtime/alloc_cpp.h"
@@ -92,6 +94,16 @@ void apply_kllvm_opt_passes(llvm::Module &mod, bool hidden_visibility) {
         if (hidden_visibility) {
           pm.addPass(set_visibility_hidden());
         }
+      });
+  pb.registerScalarOptimizerLateEPCallback(
+      [](llvm::FunctionPassManager &pm, OptimizationLevel level) {
+        pm.addPass(remove_dead_k_functions());
+      });
+  pb.registerOptimizerEarlyEPCallback(
+      [](llvm::ModulePassManager &pm, OptimizationLevel level) {
+        pm.addPass(DeadArgumentEliminationPass());
+        pm.addPass(
+            llvm::createModuleToFunctionPassAdaptor(remove_dead_k_functions()));
       });
 
   // Create the pass manager.

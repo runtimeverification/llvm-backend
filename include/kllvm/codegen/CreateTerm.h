@@ -82,7 +82,8 @@ public:
     */
   llvm::Value *create_function_call(
       std::string const &name, value_type return_cat,
-      std::vector<llvm::Value *> const &args, bool sret, bool tailcc);
+      std::vector<llvm::Value *> const &args, bool sret, bool tailcc,
+      bool impure);
 
   [[nodiscard]] llvm::BasicBlock *get_current_block() const {
     return current_block_;
