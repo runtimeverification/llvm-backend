@@ -284,6 +284,22 @@ llvm::CallInst *proof_event::emit_write_pattern_matching_failure(
   return b.CreateCall(func, {proof_writer, var_function_name});
 }
 
+llvm::CallInst *proof_event::emit_start_new_chunk(
+    llvm::Value *proof_writer, llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+
+  auto *func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "start_new_chunk_in_proof_trace", func_ty);
+
+  return b.CreateCall(func, {proof_writer});
+}
+
 llvm::BinaryOperator *proof_event::emit_no_op(llvm::BasicBlock *insert_at_end) {
   auto *i8_ty = llvm::Type::getInt8Ty(ctx_);
   auto *zero = llvm::ConstantInt::get(i8_ty, 0);
@@ -299,6 +315,24 @@ proof_event::emit_get_proof_trace_writer(llvm::BasicBlock *insert_at_end) {
       = module_->getOrInsertGlobal("proof_writer", i8_ptr_ty);
   return new llvm::LoadInst(
       i8_ptr_ty, file_name_pointer, "output", insert_at_end);
+}
+
+llvm::LoadInst *
+proof_event::emit_get_steps(llvm::BasicBlock *insert_at_end) {
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+  auto *steps_pointer
+      = module_->getOrInsertGlobal("steps", i64_ty);
+  return new llvm::LoadInst(
+      i64_ty, steps_pointer, "steps", insert_at_end);
+}
+
+llvm::LoadInst *
+proof_event::emit_get_proof_chunk_size(llvm::BasicBlock *insert_at_end) {
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+  auto *proof_chunk_size_pointer
+      = module_->getOrInsertGlobal("proof_chunk_size", i64_ty);
+  return new llvm::LoadInst(
+      i64_ty, proof_chunk_size_pointer, "proof_chunk_size", insert_at_end);
 }
 
 std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proof_branch(
@@ -327,6 +361,35 @@ proof_event::event_prelude(
     std::string const &label, llvm::BasicBlock *insert_at_end) {
   auto [true_block, merge_block] = proof_branch(label, insert_at_end);
   return {true_block, merge_block, emit_get_proof_trace_writer(true_block)};
+}
+
+llvm::BasicBlock *proof_event::check_for_emit_new_chunk(
+    llvm::BasicBlock *insert_at_end, llvm::BasicBlock *merge_block) {
+  auto *f = insert_at_end->getParent();
+  auto *check_steps_block = llvm::BasicBlock::Create(ctx_, "if_do_chunks", f);
+  auto *emit_new_chunk_block = llvm::BasicBlock::Create(ctx_, "if_new_chunk", f);
+
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+  auto *zero = llvm::ConstantInt::get(i64_ty, 0);
+
+  auto *chunk_size = emit_get_proof_chunk_size(insert_at_end);
+  auto *do_chunks_cond = llvm::CmpInst::Create(
+      llvm::Instruction::ICmp, llvm::CmpInst::ICMP_NE, chunk_size, zero,
+      "do_chunks", insert_at_end);
+  llvm::BranchInst::Create(
+      check_steps_block, merge_block, do_chunks_cond, insert_at_end);
+
+  auto *steps = emit_get_steps(check_steps_block);
+  auto *chunk_steps = llvm::BinaryOperator::Create(
+      llvm::Instruction::URem, steps, chunk_size, "current_chunk_steps",
+      check_steps_block);
+  auto *new_chunk_cond = llvm::CmpInst::Create(
+      llvm::Instruction::ICmp, llvm::CmpInst::ICMP_EQ, chunk_steps, zero,
+      "start_new_chunk", check_steps_block);
+  llvm::BranchInst::Create(
+      emit_new_chunk_block, merge_block, new_chunk_cond, check_steps_block);
+
+  return emit_new_chunk_block;
 }
 
 /*
@@ -481,18 +544,23 @@ llvm::BasicBlock *proof_event::rewrite_event_pre(
 llvm::BasicBlock *proof_event::rewrite_event_post(
     kore_axiom_declaration *axiom, llvm::Value *return_value,
     llvm::BasicBlock *current_block) {
-  if (!proof_hint_instrumentation_slow) {
+  if (!proof_hint_instrumentation) {
     return current_block;
   }
 
   auto [true_block, merge_block, proof_writer]
       = event_prelude("rewrite_post", current_block);
 
-  auto return_sort = std::dynamic_pointer_cast<kore_composite_sort>(
-      axiom->get_right_hand_side()->get_sort());
+  if (proof_hint_instrumentation_slow) {
+    auto return_sort = std::dynamic_pointer_cast<kore_composite_sort>(
+        axiom->get_right_hand_side()->get_sort());
 
-  emit_write_rewrite_event_post(
-      proof_writer, return_value, *return_sort, true_block);
+    emit_write_rewrite_event_post(
+        proof_writer, return_value, *return_sort, true_block);
+  }
+
+  true_block = check_for_emit_new_chunk(true_block, merge_block);
+  emit_start_new_chunk(proof_writer, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
   return merge_block;

@@ -707,8 +707,12 @@ void write_pattern_matching_failure_to_proof_trace(
       ->pattern_matching_failure(function_name);
 }
 
-void write_configuration_to_proof_trace(void *proof_writer, block *config) {
-  static_cast<proof_trace_writer *>(proof_writer)->configuration(config);
+void write_configuration_to_proof_trace(void *proof_writer, block *config, bool is_initial) {
+  static_cast<proof_trace_writer *>(proof_writer)->configuration(config, is_initial);
+}
+
+void start_new_chunk_in_proof_trace(void *proof_writer) {
+  static_cast<proof_trace_writer *>(proof_writer)->start_new_chunk();
 }
 
 void serialize_term_to_file(

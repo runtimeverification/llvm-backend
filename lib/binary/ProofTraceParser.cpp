@@ -115,7 +115,7 @@ void llvm_event::print(
     std::ostream &out, bool expand_terms, bool is_arg, unsigned ind) const {
   if (is_step_event_) {
     step_event_->print(out, expand_terms, ind);
-  } else {
+  } else if (kore_pattern_) {
     std::string indent(ind * indent_size, ' ');
     if (expand_terms) {
       out << fmt::format("{}{}: kore[", indent, is_arg ? "arg" : "config");
@@ -133,8 +133,11 @@ llvm_rewrite_trace_iterator::llvm_rewrite_trace_iterator(
     std::unique_ptr<proof_trace_buffer> buffer, kore_header const &header)
     : buffer_(std::move(buffer))
     , parser_(false, false, header) {
-  if (!proof_trace_parser::parse_header(*buffer_, version_)) {
+  if (!proof_trace_parser::parse_header(*buffer_, kind_, version_)) {
     throw std::runtime_error("invalid header");
+  }
+  if (kind_ != proof_trace_parser::trace_kind::HINT) {
+    throw std::runtime_error("invalid hint file: streaming parser does not work with partial traces");
   }
 }
 

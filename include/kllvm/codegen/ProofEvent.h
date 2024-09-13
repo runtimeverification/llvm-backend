@@ -44,6 +44,16 @@ private:
   event_prelude(std::string const &label, llvm::BasicBlock *insert_at_end);
 
   /*
+   * Set up a check of whether a new proof hint chunk should be started. The
+   * condition for that is
+   *   proof_chunk_size != 0 and steps % proof_chunk_size = 0
+   * Returns a block intended for adding code that starts a new chunk. If the
+   * condition is false, we branch to the given merge_block.
+   */
+  llvm::BasicBlock *check_for_emit_new_chunk(
+      llvm::BasicBlock *insert_at_end, llvm::BasicBlock *merge_block);
+
+  /*
    * Emit an instruction that has no effect and will be removed by optimization
    * passes.
    *
@@ -59,6 +69,19 @@ private:
    * the data structure that outputs proof trace data.
    */
   llvm::LoadInst *emit_get_proof_trace_writer(llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit instructions to get the current value of the steps global variable,
+   * which counts the number of rewrite steps taken.
+   */
+  llvm::LoadInst *emit_get_steps(llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit instructions to get the current value of the hproof_chunk_size global
+   * variable, which dictates how many rewrite steps should be included per
+   * chunk of the hint trace.
+   */
+  llvm::LoadInst *emit_get_proof_chunk_size(llvm::BasicBlock *insert_at_end);
 
   /*
    * Get the block header value for the given `sort_name`.
@@ -136,11 +159,17 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call to the `patteern_matching_failure` API of the specified `proof_writer`.
+   * Emit a call to the `pattern_matching_failure` API of the specified `proof_writer`.
    */
   llvm::CallInst *emit_write_pattern_matching_failure(
       llvm::Value *proof_writer, std::string const &function_name,
       llvm::BasicBlock *insert_at_end);
+
+  /*
+   * Emit a call to the `start_new_chunk` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_start_new_chunk(
+      llvm::Value *proof_writer, llvm::BasicBlock *insert_at_end);
 
 public:
   [[nodiscard]] llvm::BasicBlock *hook_event_pre(
