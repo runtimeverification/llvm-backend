@@ -82,6 +82,10 @@ bool during_gc() {
   return false;
 }
 
+size_t get_gc_threshold() {
+  return SIZE_MAX;
+}
+
 void print_configuration_internal(
     writer *file, block *subject, char const *sort, bool, void *) { }
 void sfprintf(writer *, char const *, ...) { }
