@@ -374,7 +374,8 @@ void write_side_condition_event_post_to_proof_trace(
     void *proof_writer, uint64_t ordinal, bool side_cond_result);
 void write_pattern_matching_failure_to_proof_trace(
     void *proof_writer, char const *function_name);
-void write_configuration_to_proof_trace(void *proof_writer, block *config, bool is_initial);
+void write_configuration_to_proof_trace(
+    void *proof_writer, block *config, bool is_initial);
 void start_new_chunk_in_proof_trace(void *proof_writer);
 
 // The following functions have to be generated at kompile time

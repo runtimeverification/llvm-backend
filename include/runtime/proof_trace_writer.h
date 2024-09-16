@@ -71,16 +71,16 @@ private:
   void write_uint64(uint64_t i) { write_bytes(&i, sizeof(uint64_t)); }
 
 public:
-  proof_trace_file_writer(const char *filename_base, size_t chunk_size)
+  proof_trace_file_writer(char const *filename_base, size_t chunk_size)
       : filename_base_(filename_base)
       , chunk_size_(chunk_size)
       , file_number_(0)
       , version_(0) {
     if (chunk_size_ > 0) {
-       std::string filename = std::string(filename_base_) + ".pre_trace";
-       file_ = std::fopen(filename.c_str(), "w");
+      std::string filename = std::string(filename_base_) + ".pre_trace";
+      file_ = std::fopen(filename.c_str(), "w");
     } else {
-       file_ = std::fopen(filename_base_, "w");
+      file_ = std::fopen(filename_base_, "w");
     }
     output_file = file_;
   }
@@ -174,7 +174,8 @@ public:
 
   void start_new_chunk() override {
     std::fclose(file_);
-    std::string filename = std::string(filename_base_) + "." + std::to_string(file_number_);
+    std::string filename
+        = std::string(filename_base_) + "." + std::to_string(file_number_);
     file_number_++;
     file_ = std::fopen(filename.c_str(), "w");
     output_file = file_;
@@ -282,9 +283,8 @@ private:
       side_condition_result_construction const &event) { }
   [[clang::optnone]] void pattern_matching_failure_callback(
       pattern_matching_failure_construction const &event) { }
-  [[clang::optnone]] void
-  configuration_event_callback(kore_configuration_construction const &config, bool is_initial) {
-  }
+  [[clang::optnone]] void configuration_event_callback(
+      kore_configuration_construction const &config, bool is_initial) { }
 
 public:
   proof_trace_callback_writer() { }

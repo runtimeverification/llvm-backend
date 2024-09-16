@@ -24,7 +24,8 @@ int32_t get_exit_code(block *);
 
 void init_outputs(char const *output_filename) {
   if (proof_output) {
-    proof_writer = new proof_trace_file_writer(output_filename, proof_chunk_size);
+    proof_writer
+        = new proof_trace_file_writer(output_filename, proof_chunk_size);
     return;
   }
   output_file = fopen(output_filename, "a");

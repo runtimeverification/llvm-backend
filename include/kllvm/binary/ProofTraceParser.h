@@ -321,11 +321,7 @@ class proof_trace_parser {
 public:
   static constexpr uint32_t expected_version = 13U;
 
-  enum class trace_kind {
-    HINT,
-    PRE_TRACE,
-    CHUNK
-  };
+  enum class trace_kind { HINT, PRE_TRACE, CHUNK };
 
 private:
   bool verbose_;
@@ -349,7 +345,8 @@ private:
     return result;
   }
 
-  static bool parse_header(proof_trace_buffer &buffer, trace_kind &kind, uint32_t &version) {
+  static bool parse_header(
+      proof_trace_buffer &buffer, trace_kind &kind, uint32_t &version) {
     std::array<char, 4> magic{};
     if (!buffer.read(magic.data(), sizeof(magic))) {
       return false;
@@ -357,10 +354,12 @@ private:
     if (magic[0] == 'H' && magic[1] == 'I' && magic[2] == 'N'
         && magic[3] == 'T') {
       kind = trace_kind::HINT;
-    } else if (magic[0] == 'P' && magic[1] == 'T' && magic[2] == 'R'
+    } else if (
+        magic[0] == 'P' && magic[1] == 'T' && magic[2] == 'R'
         && magic[3] == 'C') {
       kind = trace_kind::PRE_TRACE;
-    } else if (magic[0] == 'C' && magic[1] == 'H' && magic[2] == 'N'
+    } else if (
+        magic[0] == 'C' && magic[1] == 'H' && magic[2] == 'N'
         && magic[3] == 'K') {
       kind = trace_kind::CHUNK;
     } else {

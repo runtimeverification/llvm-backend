@@ -137,7 +137,8 @@ llvm_rewrite_trace_iterator::llvm_rewrite_trace_iterator(
     throw std::runtime_error("invalid header");
   }
   if (kind_ != proof_trace_parser::trace_kind::HINT) {
-    throw std::runtime_error("invalid hint file: streaming parser does not work with partial traces");
+    throw std::runtime_error("invalid hint file: streaming parser does not "
+                             "work with partial traces");
   }
 }
 

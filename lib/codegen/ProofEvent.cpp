@@ -291,8 +291,7 @@ llvm::CallInst *proof_event::emit_start_new_chunk(
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
 
-  auto *func_ty
-      = llvm::FunctionType::get(void_ty, {i8_ptr_ty}, false);
+  auto *func_ty = llvm::FunctionType::get(void_ty, {i8_ptr_ty}, false);
 
   auto *func = get_or_insert_function(
       module_, "start_new_chunk_in_proof_trace", func_ty);
@@ -317,13 +316,10 @@ proof_event::emit_get_proof_trace_writer(llvm::BasicBlock *insert_at_end) {
       i8_ptr_ty, file_name_pointer, "output", insert_at_end);
 }
 
-llvm::LoadInst *
-proof_event::emit_get_steps(llvm::BasicBlock *insert_at_end) {
+llvm::LoadInst *proof_event::emit_get_steps(llvm::BasicBlock *insert_at_end) {
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
-  auto *steps_pointer
-      = module_->getOrInsertGlobal("steps", i64_ty);
-  return new llvm::LoadInst(
-      i64_ty, steps_pointer, "steps", insert_at_end);
+  auto *steps_pointer = module_->getOrInsertGlobal("steps", i64_ty);
+  return new llvm::LoadInst(i64_ty, steps_pointer, "steps", insert_at_end);
 }
 
 llvm::LoadInst *
@@ -367,7 +363,8 @@ llvm::BasicBlock *proof_event::check_for_emit_new_chunk(
     llvm::BasicBlock *insert_at_end, llvm::BasicBlock *merge_block) {
   auto *f = insert_at_end->getParent();
   auto *check_steps_block = llvm::BasicBlock::Create(ctx_, "if_do_chunks", f);
-  auto *emit_new_chunk_block = llvm::BasicBlock::Create(ctx_, "if_new_chunk", f);
+  auto *emit_new_chunk_block
+      = llvm::BasicBlock::Create(ctx_, "if_new_chunk", f);
 
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
   auto *zero = llvm::ConstantInt::get(i64_ty, 0);
