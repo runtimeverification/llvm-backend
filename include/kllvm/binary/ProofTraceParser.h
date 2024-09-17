@@ -321,7 +321,7 @@ class proof_trace_parser {
 public:
   static constexpr uint32_t expected_version = 13U;
 
-  enum class trace_kind { HINT, PRE_TRACE, CHUNK };
+  enum class trace_kind { Hint, PreTrace, Chunk };
 
 private:
   bool verbose_;
@@ -353,15 +353,15 @@ private:
     }
     if (magic[0] == 'H' && magic[1] == 'I' && magic[2] == 'N'
         && magic[3] == 'T') {
-      kind = trace_kind::HINT;
+      kind = trace_kind::Hint;
     } else if (
         magic[0] == 'P' && magic[1] == 'T' && magic[2] == 'R'
         && magic[3] == 'C') {
-      kind = trace_kind::PRE_TRACE;
+      kind = trace_kind::PreTrace;
     } else if (
         magic[0] == 'C' && magic[1] == 'H' && magic[2] == 'N'
         && magic[3] == 'K') {
-      kind = trace_kind::CHUNK;
+      kind = trace_kind::Chunk;
     } else {
       return false;
     }
@@ -661,13 +661,13 @@ private:
 
   bool parse_trace(proof_trace_buffer &buffer, llvm_rewrite_trace &trace) {
     uint32_t version = 0;
-    trace_kind kind;
+    trace_kind kind = trace_kind::Hint;
     if (!parse_header(buffer, kind, version)) {
       return false;
     }
     trace.set_version(version);
 
-    if (kind == trace_kind::HINT || kind == trace_kind::PRE_TRACE) {
+    if (kind == trace_kind::Hint || kind == trace_kind::PreTrace) {
       while (buffer.has_word() && buffer.peek_word() != config_sentinel) {
         llvm_event event;
         if (!parse_event(buffer, event)) {
