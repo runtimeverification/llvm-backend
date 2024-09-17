@@ -440,7 +440,7 @@ void function_node::codegen(decision *d) {
       final_subst, d->definition_, d->current_block_, d->module_, false);
   auto *call = creator.create_function_call(
       function_, cat_, args, function_.substr(0, 5) == "hook_",
-      is_side_condition);
+      is_side_condition, false);
   call->setName(name_.substr(0, max_name_length));
   d->store(std::make_pair(name_, type_), call);
 
@@ -806,6 +806,13 @@ void make_eval_or_anywhere_function(
   // have one correct version of the function body after code generation
   // finishes.
   match_func->deleteBody();
+  auto const &att = definition->get_symbol_declarations()
+                        .at(function->get_name())
+                        ->attributes();
+  if (!att.contains(attribute_set::key::Impure)
+      && att.contains(attribute_set::key::Total)) {
+    match_func->addFnAttr("kllvm-pure");
+  }
   [[maybe_unused]] kore_symbol_declaration *symbol_decl
       = definition->get_symbol_declarations().at(function->get_name());
   init_debug_axiom(symbol_decl->attributes());
@@ -1003,12 +1010,11 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       module->getContext(), "checkCollect", block->getParent());
   llvm::BranchInst::Create(stuck, check_collect, is_finished, block);
 
-  auto *collection = get_or_insert_function(
-      module, "is_collection",
-      llvm::FunctionType::get(
-          llvm::Type::getInt1Ty(module->getContext()), {}, false));
-  auto *is_collection
-      = llvm::CallInst::Create(collection, {}, "", check_collect);
+  auto *collection = module->getOrInsertGlobal(
+      "time_for_collection", llvm::Type::getInt1Ty(module->getContext()));
+  auto *is_collection = new llvm::LoadInst(
+      llvm::Type::getInt1Ty(module->getContext()), collection, "is_collection",
+      check_collect);
   set_debug_loc(is_collection);
   auto *collect = llvm::BasicBlock::Create(
       module->getContext(), "isCollect", block->getParent());

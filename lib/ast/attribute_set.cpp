@@ -27,6 +27,7 @@ std::unordered_map<attribute_set::key, std::string> const &attribute_table() {
       {attribute_set::key::Functional, "functional"},
       {attribute_set::key::Hook, "hook"},
       {attribute_set::key::Idem, "idem"},
+      {attribute_set::key::Impure, "impure"},
       {attribute_set::key::Label, "label"},
       {attribute_set::key::Left, "left"},
       {attribute_set::key::Location,

@@ -51,6 +51,7 @@ public:
     Functional,
     Hook,
     Idem,
+    Impure,
     Label,
     Left,
     Location,

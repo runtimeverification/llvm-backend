@@ -4,6 +4,7 @@ import com.runtimeverification.k.kore._
 import org.kframework.backend.llvm.matching.dt.DecisionTree
 import org.kframework.backend.llvm.matching.pattern.{ Pattern => P }
 import org.kframework.backend.llvm.matching.pattern.AsP
+import org.kframework.backend.llvm.matching.pattern.ListGetP
 import org.kframework.backend.llvm.matching.pattern.ListP
 import org.kframework.backend.llvm.matching.pattern.LiteralP
 import org.kframework.backend.llvm.matching.pattern.MapP
@@ -48,6 +49,25 @@ object Generator {
         ListP(immutable.Seq(), None, immutable.Seq(), c, SymbolP(sym, immutable.Seq()))
       case (Element(), immutable.Seq(p)) =>
         ListP(immutable.Seq(p), None, immutable.Seq(), c, SymbolP(sym, immutable.Seq(p)))
+      case _ => ???
+    }
+
+  private def listGetPattern(
+      sym: SymbolOrAlias,
+      ps: immutable.Seq[P[String]],
+      c: SymbolOrAlias
+  ): P[String] =
+    ps match {
+      case immutable.Seq(p @ (WildcardP() | VariableP(_, _)), k, v) =>
+        ListGetP(immutable.Seq(k), immutable.Seq(v), p, c, SymbolP(sym, immutable.Seq(p, k, v)))
+      case immutable.Seq(ListGetP(ks, vs, frame, _, o), k, v) =>
+        ListGetP(
+          ks ++ immutable.Seq(k),
+          vs ++ immutable.Seq(v),
+          frame,
+          c,
+          SymbolP(sym, immutable.Seq(o, k, v))
+        )
       case _ => ???
     }
 
@@ -116,6 +136,8 @@ object Generator {
   ): List[P[String]] = {
     def getElementSym(sort: Sort): SymbolOrAlias =
       Parser.getSymbolAtt(symlib.sortAtt(sort), "element").get
+    def getUpdateSym(sort: Sort): SymbolOrAlias =
+      Parser.getSymbolAtt(symlib.sortAtt(sort), "update").get
     def genPattern(pat: Pattern): P[String] =
       pat match {
         case Application(sym, ps) =>
@@ -128,6 +150,8 @@ object Generator {
             case Some("LIST.unit") => listPattern(sym, Unit(), immutable.Seq(), getElementSym(sort))
             case Some("LIST.element") =>
               listPattern(sym, Element(), ps.map(genPattern), getElementSym(sort))
+            case Some("LIST.update") =>
+              listGetPattern(sym, ps.map(genPattern), getUpdateSym(sort))
             case Some("MAP.concat") =>
               mapPattern(sym, Concat(), ps.map(genPattern), getElementSym(sort))
             case Some("MAP.unit") => mapPattern(sym, Unit(), immutable.Seq(), getElementSym(sort))

@@ -68,6 +68,10 @@ floating *move_float(floating *i) {
 
 void add_hash64(void *, uint64_t) { }
 
+size_t get_gc_threshold() {
+  return SIZE_MAX;
+}
+
 struct blockheader get_block_header_for_symbol(uint32_t tag) {
   return blockheader{tag};
 }

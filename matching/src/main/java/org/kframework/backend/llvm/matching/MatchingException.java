@@ -4,7 +4,7 @@ import com.runtimeverification.k.kore.Pattern;
 
 import java.util.Optional;
 
-public final class MatchingException extends Throwable {
+public final class MatchingException extends RuntimeException {
     public enum Type {
         USELESS_RULE,
         NON_EXHAUSTIVE_MATCH,
