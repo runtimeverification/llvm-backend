@@ -454,7 +454,7 @@ void bind_proof_trace(py::module_ &m) {
           [](py::bytes const &bytes, kore_header const &header) {
             proof_trace_parser parser(false, false, header);
             auto str = std::string(bytes);
-            return parser.parse_proof_trace(str);
+            return parser.parse_proof_trace(str, false);
           },
           py::arg("bytes"), py::arg("header"));
 

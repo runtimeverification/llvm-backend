@@ -1,5 +1,7 @@
 // RUN: %proof-interpreter
 // RUN: %check-dir-proof-out
+// RUN: %proof-slow-interpreter
+// RUN: %check-dir-proof-intermediate-out
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/dwightguth/proof-checker/generation/k-benchmarks/lambda-explicit-subst/lambda-explicit-subst.k)")]
 
 module BASIC-K
