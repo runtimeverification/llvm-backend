@@ -1,0 +1,44 @@
+version: 13
+hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+  arg: kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+hook: MAP.unit Lbl'Stop'Map{} ()
+hook result: kore[Lbl'Stop'Map{}()]
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+function: LblinitGeneratedTopCell{} ()
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+rule: 112 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+function: LblinitKCell{} (0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+rule: 113 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
+function: Lblproject'Coln'KItem{} (0:0)
+  arg: kore[kseq{}(Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()),dotk{}())]
+rule: 158 1
+  VarK = kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 111 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 107 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  VarX = kore[Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()]
+function: Lblproject'Coln'Oof{} (0:0:0:0)
+  arg: kore[kseq{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}(),dotk{}())]
+rule: 161 1
+  VarK = kore[Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblg'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Oof{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+rule: 108 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblh'LParRParUnds'TYPE-CAST-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

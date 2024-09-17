@@ -314,7 +314,9 @@ public:
   }
   void add_trace_event(llvm_event const &event) { trace_.push_back(event); }
 
-  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U) const;
+  void print(
+      std::ostream &out, bool expand_terms, unsigned indent = 0U,
+      bool intermediate_configs = false) const;
 };
 
 class proof_trace_parser {
@@ -686,9 +688,10 @@ public:
       bool verbose, bool expand_terms, kore_header const &header,
       std::optional<kore_definition> kore_definition = std::nullopt);
 
+  std::optional<llvm_rewrite_trace> parse_proof_trace_from_file(
+      std::string const &filename, bool intermediate_configs);
   std::optional<llvm_rewrite_trace>
-  parse_proof_trace_from_file(std::string const &filename);
-  std::optional<llvm_rewrite_trace> parse_proof_trace(std::string const &data);
+  parse_proof_trace(std::string const &data, bool intermediate_configs);
 
   friend class llvm_rewrite_trace_iterator;
 };
@@ -699,13 +702,16 @@ private:
   std::unique_ptr<proof_trace_buffer> buffer_;
   llvm_event_type type_ = llvm_event_type::PreTrace;
   proof_trace_parser parser_;
+  std::shared_ptr<kore_composite_pattern> current_config_;
 
 public:
   llvm_rewrite_trace_iterator(
       std::unique_ptr<proof_trace_buffer> buffer, kore_header const &header);
   [[nodiscard]] uint32_t get_version() const { return version_; }
   std::optional<annotated_llvm_event> get_next_event();
-  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U);
+  void print(
+      std::ostream &out, bool expand_terms, unsigned indent = 0U,
+      bool intermediate_configs = false);
 };
 
 } // namespace kllvm
