@@ -418,6 +418,14 @@ void bind_proof_trace(py::module_ &m) {
       .def_property_readonly(
           "check_result", &llvm_side_condition_end_event::get_result);
 
+  py::class_<
+      llvm_pattern_matching_failure_event,
+      std::shared_ptr<llvm_pattern_matching_failure_event>>(
+      proof_trace, "llvm_pattern_matching_failure_event", step_event)
+      .def_property_readonly(
+          "function_name",
+          &llvm_pattern_matching_failure_event::get_function_name);
+
   py::class_<llvm_function_event, std::shared_ptr<llvm_function_event>>(
       proof_trace, "llvm_function_event", step_event)
       .def_property_readonly("name", &llvm_function_event::get_name)
