@@ -134,6 +134,9 @@ config.substitutions.extend([
         %kore-convert %t.out.bin -o %t.out.kore
         %kore-convert %test-diff-out --to=text | diff - %t.out.kore
     ''')),
+    ('%check-statistics', one_line('''
+        %run-statistics | diff - %test-diff-statistics-out
+    ''')),
 
     ('%check-dir-grep', one_line('''
         for out in %test-dir-out/*.out.grep; do
@@ -238,6 +241,7 @@ config.substitutions.extend([
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
+    ('%run-statistics', '%t.interpreter %test-input -1 /dev/stdout --statistics'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),
@@ -249,6 +253,7 @@ config.substitutions.extend([
     ('%test-input', os.path.join('%input-dir', '%test-basename.in')),
     ('%test-grep-out', os.path.join('%output-dir', '%test-basename.out.grep')),
     ('%test-diff-out', os.path.join('%output-dir', '%test-basename.out.diff')),
+    ('%test-diff-statistics-out', os.path.join('%output-dir', '%test-basename.statistics.out.diff')),
     ('%test-dir-out', os.path.join('%output-dir', '%test-basename')),
     ('%test-dir-in', os.path.join('%input-dir', '%test-basename')),
     ('%test-proof-diff-out', os.path.join('%output-dir', '%test-basename.proof.out.diff')),
