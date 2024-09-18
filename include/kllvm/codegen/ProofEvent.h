@@ -77,7 +77,7 @@ private:
   llvm::LoadInst *emit_get_steps(llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit instructions to get the current value of the hproof_chunk_size global
+   * Emit instructions to get the current value of the proof_chunk_size global
    * variable, which dictates how many rewrite steps should be included per
    * chunk of the hint trace.
    */
