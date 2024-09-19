@@ -193,7 +193,7 @@ define i1 @string_equal(ptr %str1, ptr %str2, i64 %len1, i64 %len2) {
 
 declare tailcc ptr @k_step(ptr)
 declare tailcc void @step_all(ptr)
-declare void @write_configuration_to_proof_trace(ptr, ptr)
+declare void @write_configuration_to_proof_trace(ptr, ptr, i1)
 
 @proof_output = external global i1
 @proof_writer = external global ptr
@@ -231,7 +231,7 @@ define ptr @take_steps(i64 %depth, ptr %subject) {
   br i1 %proof_output, label %if, label %merge
 if:
   %proof_writer = load ptr, ptr @proof_writer
-  call void @write_configuration_to_proof_trace(ptr %proof_writer, ptr %subject)
+  call void @write_configuration_to_proof_trace(ptr %proof_writer, ptr %subject, i1 true)
   br label %merge
 merge:
   store i64 %depth, ptr @depth
