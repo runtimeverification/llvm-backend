@@ -19,11 +19,13 @@ declare void @print_proof_hint_header(ptr)
 @statistics.flag = private constant [13 x i8] c"--statistics\00"
 @binary_out.flag = private constant [16 x i8] c"--binary-output\00"
 @proof_out.flag = private constant [15 x i8] c"--proof-output\00"
+@proof_chunk.flag = private constant [19 x i8] c"--proof-chunk-size\00"
 
 @proof_writer = external global ptr
 @statistics = external global i1
 @binary_output = external global i1
 @proof_output = external global i1
+@proof_chunk_size = external global i64
 
 declare i32 @strcmp(ptr %a, ptr %b)
 
@@ -63,17 +65,31 @@ binary.set:
 proof.body:
   %proof.cmp = call i32 @strcmp(ptr %arg, ptr getelementptr inbounds ([15 x i8], ptr @proof_out.flag, i64 0, i64 0))
   %proof.eq = icmp eq i32 %proof.cmp, 0
-  br i1 %proof.eq, label %proof.set, label %body.tail
+  br i1 %proof.eq, label %proof.set, label %chunk.body
 
 proof.set:
   store i1 1, ptr @proof_output
+  br label %chunk.body
+
+chunk.body:
+  %chunk.cmp = call i32 @strcmp(ptr %arg, ptr getelementptr inbounds ([19 x i8], ptr @proof_chunk.flag, i64 0, i64 0))
+  %chunk.eq = icmp eq i32 %chunk.cmp, 0
+  br i1 %chunk.eq, label %chunk.set, label %body.tail
+
+chunk.set:
+  %idx.next = add i32 %idx, 1
+  %chunk_size_ptr = getelementptr inbounds ptr, ptr %argv, i32 %idx.next
+  %chunk_size_str = load ptr, ptr %chunk_size_ptr
+  %chunk_size = call i64 @atol(ptr %chunk_size_str)
+  store i64 %chunk_size, ptr @proof_chunk_size
   br label %body.tail
 
 body.tail:
+  %idx.updated = phi i32 [ %idx, %chunk.body ], [ %idx.next, %chunk.set ]
   br label %inc
 
 inc:
-  %idx.inc = add i32 %idx, 1
+  %idx.inc = add i32 %idx.updated, 1
   br label %header
 
 exit:

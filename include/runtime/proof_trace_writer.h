@@ -33,12 +33,21 @@ public:
   side_condition_event_post(uint64_t ordinal, bool side_cond_result)
       = 0;
   virtual void pattern_matching_failure(char const *function_name) = 0;
-  virtual void configuration(block *config) = 0;
+  virtual void configuration(block *config, bool is_initial) = 0;
+  virtual void start_new_chunk() = 0;
   virtual void end_of_trace() = 0;
 };
 
+extern "C" {
+extern FILE *output_file;
+}
+
 class proof_trace_file_writer : public proof_trace_writer {
 private:
+  char const *filename_base_;
+  size_t chunk_size_;
+  size_t file_number_;
+  uint32_t version_;
   FILE *file_;
 
   void write_bytes(void const *ptr, size_t len) { fwrite(ptr, len, 1, file_); }
@@ -62,12 +71,29 @@ private:
   void write_uint64(uint64_t i) { write_bytes(&i, sizeof(uint64_t)); }
 
 public:
-  proof_trace_file_writer(FILE *file)
-      : file_(file) { }
+  proof_trace_file_writer(char const *filename_base, size_t chunk_size)
+      : filename_base_(filename_base)
+      , chunk_size_(chunk_size)
+      , file_number_(0)
+      , version_(0) {
+    if (chunk_size_ > 0) {
+      std::string filename = std::string(filename_base_) + ".pre_trace";
+      file_ = std::fopen(filename.c_str(), "w");
+    } else {
+      file_ = std::fopen(filename_base_, "w");
+    }
+    output_file = file_;
+  }
 
   void proof_trace_header(uint32_t version) override {
-    write_string("HINT");
-    write_uint32(version);
+    if (chunk_size_ == 0) {
+      write_string("HINT");
+      write_uint32(version);
+    } else {
+      write_string("PTRC");
+      write_uint32(version);
+      version_ = version;
+    }
   }
 
   void hook_event_pre(
@@ -137,9 +163,24 @@ public:
     write_null_terminated_string(function_name);
   }
 
-  void configuration(block *config) override {
+  void configuration(block *config, bool is_initial) override {
     write_uint64(kllvm::config_sentinel);
     serialize_configuration_to_proof_trace(file_, config, 0);
+
+    if (chunk_size_ > 0 && is_initial) {
+      start_new_chunk();
+    }
+  }
+
+  void start_new_chunk() override {
+    std::fclose(file_);
+    std::string filename
+        = std::string(filename_base_) + "." + std::to_string(file_number_);
+    file_number_++;
+    file_ = std::fopen(filename.c_str(), "w");
+    output_file = file_;
+    write_string("CHNK");
+    write_uint32(version_);
   }
 
   void end_of_trace() override { }
@@ -242,9 +283,8 @@ private:
       side_condition_result_construction const &event) { }
   [[clang::optnone]] void pattern_matching_failure_callback(
       pattern_matching_failure_construction const &event) { }
-  [[clang::optnone]] void
-  configuration_event_callback(kore_configuration_construction const &config) {
-  }
+  [[clang::optnone]] void configuration_event_callback(
+      kore_configuration_construction const &config, bool is_initial) { }
 
 public:
   proof_trace_callback_writer() { }
@@ -328,10 +368,12 @@ public:
     pattern_matching_failure_callback(pm_failure);
   }
 
-  void configuration(block *config) override {
+  void configuration(block *config, bool is_initial) override {
     kore_configuration_construction configuration(config);
-    configuration_event_callback(configuration);
+    configuration_event_callback(configuration, is_initial);
   }
+
+  void start_new_chunk() override { }
 
   void end_of_trace() override { }
 };
