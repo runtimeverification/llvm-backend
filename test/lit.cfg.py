@@ -176,6 +176,34 @@ config.substitutions.extend([
         fi
     ''')),
 
+    ('%check-proof-chunks-out', one_line('''
+        %run-proof-chunks-out
+        %kore-rich-header %s > %t.header.bin
+        concat_out=%t.out.bin.concat
+        chunk_no=$(($(ls -l %t.out.bin.* | wc -l) - 2))
+        rm -f $concat_out
+        %kore-proof-trace --verbose --expand-terms %t.header.bin %t.out.bin.pre_trace >> $concat_out
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error while parsing the pre-trace of split proof hint trace"
+            exit 1
+        fi
+        for chunk in $(seq 0 $chunk_no); do
+            %kore-proof-trace --verbose --expand-terms %t.header.bin %t.out.bin.$chunk | tail -n +2 >> $concat_out
+            result="$?"
+            if [ "$result" -ne 0 ]; then
+                echo "kore-proof-trace error while parsing chunk $chunk of split proof hint trace"
+                exit 1
+            fi
+        done
+        diff $concat_out %test-proof-diff-out
+        result="$?"
+        if [ "$result" -ne 0 ]; then
+            echo "kore-proof-trace error when comparing split proof hint trace with reference trace"
+            exit 1
+        fi
+     ''')),
+
     ('%check-proof-debug-out', one_line('''
         out=%test-dir-out/*.proof.debug.out.diff
         in=%test-dir-in/`basename $out .proof.debug.out.diff`.in
@@ -238,6 +266,7 @@ config.substitutions.extend([
     ('%run-binary-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --binary-output'),
     ('%run-binary', 'rm -f %t.bin && %convert-input && %t.interpreter %t.bin -1 /dev/stdout'),
     ('%run-proof-out', 'rm -f %t.out.bin && %t.interpreter %test-input -1 %t.out.bin --proof-output'),
+    ('%run-proof-chunks-out', 'rm -f %t.out.bin.* && %t.interpreter %test-input -1 %t.out.bin --proof-output --proof-chunk-size 100'),
     ('%run', '%t.interpreter %test-input -1 /dev/stdout'),
 
     ('%kprint-check', 'kprint %S %s true | diff - %s.out'),

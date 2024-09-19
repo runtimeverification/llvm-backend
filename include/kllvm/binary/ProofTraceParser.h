@@ -323,6 +323,8 @@ class proof_trace_parser {
 public:
   static constexpr uint32_t expected_version = 13U;
 
+  enum class trace_kind { Hint, PreTrace, Chunk };
+
 private:
   bool verbose_;
   bool expand_terms_;
@@ -345,13 +347,24 @@ private:
     return result;
   }
 
-  static bool parse_header(proof_trace_buffer &buffer, uint32_t &version) {
+  static bool parse_header(
+      proof_trace_buffer &buffer, trace_kind &kind, uint32_t &version) {
     std::array<char, 4> magic{};
     if (!buffer.read(magic.data(), sizeof(magic))) {
       return false;
     }
-    if (magic[0] != 'H' || magic[1] != 'I' || magic[2] != 'N'
-        || magic[3] != 'T') {
+    if (magic[0] == 'H' && magic[1] == 'I' && magic[2] == 'N'
+        && magic[3] == 'T') {
+      kind = trace_kind::Hint;
+    } else if (
+        magic[0] == 'P' && magic[1] == 'T' && magic[2] == 'R'
+        && magic[3] == 'C') {
+      kind = trace_kind::PreTrace;
+    } else if (
+        magic[0] == 'C' && magic[1] == 'H' && magic[2] == 'N'
+        && magic[3] == 'K') {
+      kind = trace_kind::Chunk;
+    } else {
       return false;
     }
 
@@ -650,27 +663,30 @@ private:
 
   bool parse_trace(proof_trace_buffer &buffer, llvm_rewrite_trace &trace) {
     uint32_t version = 0;
-    if (!parse_header(buffer, version)) {
+    trace_kind kind = trace_kind::Hint;
+    if (!parse_header(buffer, kind, version)) {
       return false;
     }
     trace.set_version(version);
 
-    while (buffer.has_word() && buffer.peek_word() != config_sentinel) {
-      llvm_event event;
-      if (!parse_event(buffer, event)) {
+    if (kind == trace_kind::Hint || kind == trace_kind::PreTrace) {
+      while (buffer.has_word() && buffer.peek_word() != config_sentinel) {
+        llvm_event event;
+        if (!parse_event(buffer, event)) {
+          return false;
+        }
+        trace.add_pre_trace_event(event);
+      }
+
+      uint64_t pattern_len = 0;
+      auto config = parse_config(buffer, pattern_len);
+      if (!config) {
         return false;
       }
-      trace.add_pre_trace_event(event);
+      llvm_event config_event;
+      config_event.setkore_pattern(config, pattern_len);
+      trace.set_initial_config(config_event);
     }
-
-    uint64_t pattern_len = 0;
-    auto config = parse_config(buffer, pattern_len);
-    if (!config) {
-      return false;
-    }
-    llvm_event config_event;
-    config_event.setkore_pattern(config, pattern_len);
-    trace.set_initial_config(config_event);
 
     while (!buffer.eof()) {
       llvm_event event;
@@ -699,6 +715,7 @@ public:
 class llvm_rewrite_trace_iterator {
 private:
   uint32_t version_{};
+  proof_trace_parser::trace_kind kind_{};
   std::unique_ptr<proof_trace_buffer> buffer_;
   llvm_event_type type_ = llvm_event_type::PreTrace;
   proof_trace_parser parser_;

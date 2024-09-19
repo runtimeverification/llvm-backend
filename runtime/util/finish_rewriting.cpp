@@ -14,6 +14,7 @@ void *proof_writer = nullptr;
 bool statistics = false;
 bool binary_output = false;
 bool proof_output = false;
+size_t proof_chunk_size = 0;
 
 extern int64_t steps;
 extern bool safe_partial;
@@ -22,10 +23,12 @@ extern bool proof_hint_instrumentation_slow;
 int32_t get_exit_code(block *);
 
 void init_outputs(char const *output_filename) {
-  output_file = fopen(output_filename, "a");
   if (proof_output) {
-    proof_writer = new proof_trace_file_writer(output_file);
+    proof_writer
+        = new proof_trace_file_writer(output_filename, proof_chunk_size);
+    return;
   }
+  output_file = fopen(output_filename, "a");
 }
 
 [[noreturn]] void finish_rewriting(block *subject, bool error) {
@@ -61,7 +64,7 @@ void init_outputs(char const *output_filename) {
       print_configuration(output_file, subject);
     }
   } else if (!error && !proof_hint_instrumentation_slow) {
-    write_configuration_to_proof_trace(proof_writer, subject);
+    write_configuration_to_proof_trace(proof_writer, subject, false);
   }
 
   auto exit_code = error ? 113 : get_exit_code(subject);
