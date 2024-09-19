@@ -16,7 +16,7 @@ bool binary_output = false;
 bool proof_output = false;
 size_t proof_chunk_size = 0;
 
-extern int64_t steps;
+uint64_t get_steps();
 extern bool safe_partial;
 extern bool proof_hint_instrumentation_slow;
 
@@ -54,6 +54,7 @@ void init_outputs(char const *output_filename) {
   }
 
   if (statistics) {
+    uint64_t steps = get_steps();
     print_statistics(output_file, steps);
   }
 
