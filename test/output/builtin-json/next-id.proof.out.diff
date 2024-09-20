@@ -8,12 +8,6 @@ hook result: kore[\dv{SortString{}}("{\x22key\x22:2}")]
 hook: JSON.string2json LblString2JSON{} ()
   arg: kore[\dv{SortString{}}("{\x22key\x22:2}")]
 hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-JSON-SYNTAX'Unds'KItem'Unds'JSON{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))))]

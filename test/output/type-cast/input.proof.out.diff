@@ -1,10 +1,4 @@
 version: 13
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}())]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblf'LParUndsRParUnds'TYPE-CAST-SYNTAX'Unds'Foo'Unds'Foo{}(Lblsymbol'Unds'TYPE-CAST-SYNTAX'Unds'Oof{}()))]

@@ -1,10 +1,4 @@
 version: 13
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool{}(\dv{SortBool{}}("true"))]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool{}(\dv{SortBool{}}("true")))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblfoo'LParUndsRParUnds'BUILTIN-HOOK-EVENTS-SYNTAX'Unds'Foo'Unds'Bool{}(\dv{SortBool{}}("true")))]

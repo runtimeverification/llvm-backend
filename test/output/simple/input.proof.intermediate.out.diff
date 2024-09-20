@@ -3,12 +3,6 @@ function: Lblf'LParUndsRParUnds'SIMPLE'Unds'Expr'Unds'Int{} ()
   arg: kore[\dv{SortInt{}}("0")]
 rule: 2725 1
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("0")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[\dv{SortInt{}}("0")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("0"))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("0"))]
