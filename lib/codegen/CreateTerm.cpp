@@ -693,6 +693,12 @@ llvm::Value *create_term::create_hardcoded_hook(
   return nullptr;
 }
 
+static bool hook_is_collection_unit_or_element(std::string const &name) {
+  return name == "LIST.unit" || name == "LIST.element" || name == "MAP.unit"
+         || name == "MAP.element" || name == "SET.unit" || name == "SET.element"
+         || name == "RANGEMAP.unit" || name == "RANGEMAP.element";
+}
+
 llvm::Value *create_term::create_hook(
     kore_composite_pattern *hook_att, kore_composite_pattern *pattern,
     std::string const &location_stack) {
@@ -713,6 +719,11 @@ llvm::Value *create_term::create_hook(
     result = create_function_call(
         hook_name, pattern, true, false, true, args, location_stack);
     enable_gc(old_val);
+  }
+
+  if (hook_is_collection_unit_or_element(name)) {
+    // no proof trace event generation for unit/element collection hooks
+    return result;
   }
 
   proof_event e(definition_, module_);

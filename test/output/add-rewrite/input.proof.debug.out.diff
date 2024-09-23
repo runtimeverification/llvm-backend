@@ -1,10 +1,4 @@
 version: 13
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()))]

@@ -1,10 +1,4 @@
 version: 13
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lblsucc'LParUndsRParUnds'BUILTIN-INT-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'BUILTIN-INT-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5")))]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'BUILTIN-INT-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'BUILTIN-INT-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblsucc'LParUndsRParUnds'BUILTIN-INT-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'BUILTIN-INT-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("5"))))]
