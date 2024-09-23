@@ -1,13 +1,4 @@
 version: 13
-hook: LIST.element LblListItem{} ()
-  arg: kore[LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
-hook result: kore[LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
-hook: LIST.element LblListItem{} ()
-  arg: kore[Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
-hook result: kore[LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
-hook: LIST.element LblListItem{} ()
-  arg: kore[Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
-hook result: kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
 hook: LIST.concat Lbl'Unds'List'Unds'{} ()
   arg: kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
   arg: kore[LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
@@ -19,16 +10,11 @@ hook result: kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(Lbll
 function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'List{} ()
 rule: 96 1
   VarOPS = kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
-hook: LIST.unit Lbl'Stop'List{} (1)
-hook result: kore[Lbl'Stop'List{}()]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'List'Unds'List{} ()
 rule: 98 3
   VarOP = kore[Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'Unds'List'Unds'{}(LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
   VarOPS'Apos' = kore[Lbl'Stop'List{}()]
-hook: LIST.element LblListItem{} (1:0)
-  arg: kore[Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
-hook result: kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
 hook: LIST.concat Lbl'Unds'List'Unds'{} (1)
   arg: kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
   arg: kore[Lbl'Stop'List{}()]
@@ -38,9 +24,6 @@ rule: 98 3
   VarOP = kore[Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
   VarOPS'Apos' = kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
-hook: LIST.element LblListItem{} (1:0)
-  arg: kore[Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
-hook result: kore[LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
 hook: LIST.concat Lbl'Unds'List'Unds'{} (1)
   arg: kore[LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
   arg: kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
@@ -50,9 +33,6 @@ rule: 98 3
   VarOP = kore[LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'Stop'List{}()]
   VarOPS'Apos' = kore[Lbl'Unds'List'Unds'{}(LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
-hook: LIST.element LblListItem{} (1:0)
-  arg: kore[LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
-hook result: kore[LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
 hook: LIST.concat Lbl'Unds'List'Unds'{} (1)
   arg: kore[LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
   arg: kore[Lbl'Unds'List'Unds'{}(LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
@@ -60,12 +40,6 @@ hook result: kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(Lbln
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'List'Unds'List{} ()
 rule: 97 1
   VarOPS'Apos' = kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())))]

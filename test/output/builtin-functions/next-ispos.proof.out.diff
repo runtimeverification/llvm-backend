@@ -6,12 +6,6 @@ hook: INT.gt Lbl'Unds-GT-'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("0")]
   arg: kore[\dv{SortInt{}}("0")]
 hook result: kore[\dv{SortBool{}}("false")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lbl'Hash'next'LParUndsRParUnds'BUILTIN-FUNCTIONS-SYNTAX'Unds'KItem'Unds'KItem{}(\dv{SortBool{}}("false"))]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-FUNCTIONS-SYNTAX'Unds'KItem'Unds'KItem{}(\dv{SortBool{}}("false")))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'BUILTIN-FUNCTIONS-SYNTAX'Unds'KItem'Unds'KItem{}(\dv{SortBool{}}("false")))]

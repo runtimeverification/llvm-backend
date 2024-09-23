@@ -11,12 +11,6 @@ function: Lbl'UndsPlus'right'UndsUnds'ASSOC-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo'Un
 rule: 104 2
   Var'Unds'Y = kore[Lblb'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
   VarX = kore[Lbla'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lbl'Hash'next'LParUndsRParUnds'ASSOC-FUNCTION-SYNTAX'Unds'KItem'Unds'Foo{}(Lbla'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}())]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'ASSOC-FUNCTION-SYNTAX'Unds'KItem'Unds'Foo{}(Lbla'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Hash'next'LParUndsRParUnds'ASSOC-FUNCTION-SYNTAX'Unds'KItem'Unds'Foo{}(Lbla'Unds'ASSOC-FUNCTION-SYNTAX'Unds'Foo{}()))]

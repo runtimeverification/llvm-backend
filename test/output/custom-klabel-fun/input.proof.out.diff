@@ -11,12 +11,6 @@ rule: 94 1
 function: Lblbaz2'LParUndsRParUnds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 95 1
   VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]

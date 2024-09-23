@@ -1,10 +1,4 @@
 version: 13
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("n"),Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("sum"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}())),Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10")),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))),Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block{}(Lbl'BangUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'BExp{}(Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortId{}}("n"))),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),Lbl-'UndsUnds'IMP-SYNTAX'Unds'AExp'Unds'Int{}(\dv{SortInt{}}("1")))))))))]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("n"),Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("sum"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}())),Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10")),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))),Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block{}(Lbl'BangUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'BExp{}(Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortId{}}("n"))),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),Lbl-'UndsUnds'IMP-SYNTAX'Unds'AExp'Unds'Int{}(\dv{SortInt{}}("1"))))))))))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("n"),Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("sum"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}())),Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10")),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))),Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block{}(Lbl'BangUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'BExp{}(Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortId{}}("n"))),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),Lbl-'UndsUnds'IMP-SYNTAX'Unds'AExp'Unds'Int{}(\dv{SortInt{}}("1"))))))))))]
@@ -27,8 +21,6 @@ rule: 3034 1
   VarK = kore[Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("n"),Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("sum"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}())),Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10")),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))),Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block{}(Lbl'BangUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'BExp{}(Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortId{}}("n"))),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),Lbl-'UndsUnds'IMP-SYNTAX'Unds'AExp'Unds'Int{}(\dv{SortInt{}}("1")))))))))]
 function: LblinitStateCell{} (1)
 rule: 2933 0
-hook: MAP.unit Lbl'Stop'Map{} (0)
-hook result: kore[Lbl'Stop'Map{}()]
 function: LblinitGeneratedCounterCell{} (1)
 rule: 2930 0
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("n"),Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("sum"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}())),Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10")),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))),Lblwhile'LParUndsRParUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'BExp'Unds'Block{}(Lbl'BangUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'BExp{}(Lbl'Unds-LT-EqlsUndsUnds'IMP-SYNTAX'Unds'BExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))),Lbl'LBraUndsRBraUnds'IMP-SYNTAX'Unds'Block'Unds'Stmt{}(Lbl'UndsUndsUnds'IMP-SYNTAX'Unds'Stmt'Unds'Stmt'Unds'Stmt{}(Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("sum"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("sum"),\dv{SortId{}}("n"))),Lbl'UndsEqlsUndsSClnUnds'IMP-SYNTAX'Unds'Stmt'Unds'Id'Unds'AExp{}(\dv{SortId{}}("n"),Lbl'UndsPlusUndsUnds'IMP-SYNTAX'Unds'AExp'Unds'AExp'Unds'AExp{}(\dv{SortId{}}("n"),Lbl-'UndsUnds'IMP-SYNTAX'Unds'AExp'Unds'Int{}(\dv{SortInt{}}("1"))))))))),dotk{}())),Lbl'-LT-'state'-GT-'{}(Lbl'Stop'Map{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
@@ -52,10 +44,6 @@ rule: 2876 5
   VarRho = kore[Lbl'Stop'Map{}()]
   VarX = kore[\dv{SortId{}}("n")]
   VarXs = kore[Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("sum"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}())]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:1)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("0")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))]
@@ -80,10 +68,6 @@ rule: 2876 5
   VarRho = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))]
   VarX = kore[\dv{SortId{}}("sum")]
   VarXs = kore[Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}()]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:1)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("0")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))]
@@ -125,10 +109,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("0")]
   VarI = kore[\dv{SortInt{}}("10")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("10")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))]
@@ -153,10 +133,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("0")]
   VarI = kore[\dv{SortInt{}}("0")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("0")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("0"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10"))]
@@ -580,10 +556,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("0")]
   VarI = kore[\dv{SortInt{}}("10")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("10")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("10"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("10"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("10"))]
@@ -781,10 +753,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("10")]
   VarI = kore[\dv{SortInt{}}("9")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("9")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("9"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("9"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("10"))]
@@ -1208,10 +1176,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("10")]
   VarI = kore[\dv{SortInt{}}("19")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("19")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("19"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("19"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("9"))]
@@ -1409,10 +1373,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("9")]
   VarI = kore[\dv{SortInt{}}("8")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("8")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("8"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("8"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("19"))]
@@ -1836,10 +1796,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("19")]
   VarI = kore[\dv{SortInt{}}("27")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("27")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("27"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("27"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("8"))]
@@ -2037,10 +1993,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("8")]
   VarI = kore[\dv{SortInt{}}("7")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("7")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("7"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("7"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("27"))]
@@ -2464,10 +2416,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("27")]
   VarI = kore[\dv{SortInt{}}("34")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("34")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("34"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("34"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("7"))]
@@ -2665,10 +2613,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("7")]
   VarI = kore[\dv{SortInt{}}("6")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("6")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("6"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("6"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("34"))]
@@ -3092,10 +3036,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("34")]
   VarI = kore[\dv{SortInt{}}("40")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("40")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("40"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("40"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("6"))]
@@ -3293,10 +3233,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("6")]
   VarI = kore[\dv{SortInt{}}("5")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("5")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("5"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("5"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("40"))]
@@ -3720,10 +3656,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("40")]
   VarI = kore[\dv{SortInt{}}("45")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("45")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("45"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("45"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("5"))]
@@ -3921,10 +3853,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("5")]
   VarI = kore[\dv{SortInt{}}("4")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("4")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("4"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("4"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("45"))]
@@ -4348,10 +4276,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("45")]
   VarI = kore[\dv{SortInt{}}("49")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("49")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("49"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("49"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("4"))]
@@ -4549,10 +4473,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("4")]
   VarI = kore[\dv{SortInt{}}("3")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("3")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("3"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("3"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("49"))]
@@ -4976,10 +4896,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("49")]
   VarI = kore[\dv{SortInt{}}("52")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("52")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("52"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("52"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("3"))]
@@ -5177,10 +5093,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("3")]
   VarI = kore[\dv{SortInt{}}("2")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("2")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("2"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("2"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("52"))]
@@ -5604,10 +5516,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("52")]
   VarI = kore[\dv{SortInt{}}("54")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("54")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("54"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("54"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("2"))]
@@ -5805,10 +5713,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("2")]
   VarI = kore[\dv{SortInt{}}("1")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("1")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("1"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("1"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("54"))]
@@ -6232,10 +6136,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("54")]
   VarI = kore[\dv{SortInt{}}("55")]
   VarX = kore[\dv{SortId{}}("sum")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("sum")]
-  arg: kore[\dv{SortInt{}}("55")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("55"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("55"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("1"))]
@@ -6433,10 +6333,6 @@ rule: 2879 6
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("1")]
   VarI = kore[\dv{SortInt{}}("0")]
   VarX = kore[\dv{SortId{}}("n")]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} (0:1:0:0)
-  arg: kore[\dv{SortId{}}("n")]
-  arg: kore[\dv{SortInt{}}("0")]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} (0:1:0)
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("n"),\dv{SortInt{}}("0"))]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortId{}}("sum"),\dv{SortInt{}}("55"))]

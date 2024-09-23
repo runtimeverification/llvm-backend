@@ -17,12 +17,6 @@ rule: 103 3
   Var'Unds'Gen0 = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
   VarOP = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))]
-hook: MAP.element Lbl'UndsPipe'-'-GT-Unds'{} ()
-  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
-  arg: kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())))]
-hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
-hook: MAP.unit Lbl'Stop'Map{} ()
-hook result: kore[Lbl'Stop'Map{}()]
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
