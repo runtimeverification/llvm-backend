@@ -179,11 +179,18 @@ void emit_kore_rich_header(std::ostream &os, kore_definition *definition) {
   for (uint32_t i = 0; i < num_sorts; i++) {
     uint32_t idx = i + num_tags;
     os.write(reinterpret_cast<char const *>(&idx), 4);
-    if (!definition->get_all_sorts()[i]->get_arguments().empty()) {
-      throw std::runtime_error(
-          "cannot yet serialize sorts with sort parameters");
+    auto const &sort = definition->get_all_sorts().at(i);
+    uint8_t num_sort_params = sort->get_arguments().size();
+    os.write(reinterpret_cast<char const *>(&num_sort_params), 1);
+    for (uint8_t j = 0; j < num_sort_params; j++) {
+      auto *param_sort =
+        dynamic_cast<kore_composite_sort *>(sort->get_arguments()[j].get());
+      uint32_t param_ordinal = param_sort->get_ordinal();
+      if (param_ordinal >= i) {
+        throw std::runtime_error("found sort ordinal not in topological order");
+      }
+      os.write(reinterpret_cast<char const *>(&param_ordinal), 4);
     }
-    os.put('\000');
   }
 
   for (uint32_t i = 0; i < num_tags; i++) {
