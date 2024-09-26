@@ -280,7 +280,11 @@ void init_static_objects(void) {
   set_kore_memory_functions_for_gmp();
 }
 
-void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
+void kore_collect(
+    void **roots, uint8_t nroots, layoutitem *type_info, bool force) {
+  if (!force && !gc_enabled) {
+    return;
+  }
   is_gc = true;
   time_for_collection = false;
   collect_old = should_collect_old_gen();
@@ -350,7 +354,7 @@ void kore_collect(void **roots, uint8_t nroots, layoutitem *type_info) {
 }
 
 void free_all_kore_mem() {
-  kore_collect(nullptr, 0, nullptr);
+  kore_collect(nullptr, 0, nullptr, true);
   kore_clear();
 }
 }
