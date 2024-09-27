@@ -24,11 +24,33 @@ llvm::Constant *create_global_sort_string_ptr(
       ast_to_string(sort), fmt::format("{}_str", sort.get_name()), 0, mod);
 }
 
-bool get_indirect(std::string const &sort_name) {
-  return sort_name == "SortBool{}" || sort_name.substr(0, 9) == "SortMInt{";
+template <typename IRBuilder>
+llvm::Value *get_llvm_value_for_kore_term(llvm::Value *val, uint64_t bits,  IRBuilder &b,  llvm::Module *mod) {
+  if (bits <= 64) {
+    return val;
+  }
+
+  // If the llvm value is larger than 64 bits, we need to pass its address to
+  // the runtime functions that emit proof trace events.
+  auto *int_ty = llvm::IntegerType::get(mod->getContext(), bits);
+  auto *ptr_val = b.CreateAlloca(int_ty);
+  b.CreateStore(val, ptr_val);
+  return ptr_val;
 }
 
 } // namespace
+
+uint64_t proof_event::get_llvm_scalar_bits(kore_composite_sort &sort) {
+  value_type sort_category = sort.get_category(definition_);
+  switch (sort_category.cat) {
+  case sort_category::Bool:
+    return 1;
+  case sort_category::MInt:
+    return sort_category.bits;
+  default:
+    return 0;
+  }
+}
 
 uint64_t proof_event::get_block_header(std::string const &sort_name) {
   std::string inj_name;
@@ -71,25 +93,25 @@ llvm::CallInst *proof_event::emit_write_hook_event_post(
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
+  uint64_t bits = get_llvm_scalar_bits(sort);
   std::string sort_name = ast_to_string(sort);
-  bool indirect = get_indirect(sort_name);
   uint64_t block_header = get_block_header(sort_name);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i64_ty}, false);
 
   auto *func = get_or_insert_function(
       module_, "write_hook_event_post_to_proof_trace", func_ty);
 
+  auto *var_val = get_llvm_value_for_kore_term(val, bits, b, module_);
   auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
-  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
+  auto *var_bits = llvm::ConstantInt::get(i64_ty, bits);
   return b.CreateCall(
-      func, {proof_writer, val, var_block_header, var_indirect});
+      func, {proof_writer, var_val, var_block_header, var_bits});
 }
 
 llvm::CallInst *proof_event::emit_write_argument(
@@ -97,25 +119,25 @@ llvm::CallInst *proof_event::emit_write_argument(
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
+  uint64_t bits = get_llvm_scalar_bits(sort);
   std::string sort_name = ast_to_string(sort);
-  bool indirect = get_indirect(sort_name);
   uint64_t block_header = get_block_header(sort_name);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i64_ty}, false);
 
   auto *func = get_or_insert_function(
       module_, "write_argument_to_proof_trace", func_ty);
 
+  auto *var_val = get_llvm_value_for_kore_term(val, bits, b, module_);
   auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
-  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
+  auto *var_bits = llvm::ConstantInt::get(i64_ty, bits);
   return b.CreateCall(
-      func, {proof_writer, val, var_block_header, var_indirect});
+      func, {proof_writer, var_val, var_block_header, var_bits});
 }
 
 llvm::CallInst *proof_event::emit_write_rewrite_event_pre(
@@ -143,26 +165,26 @@ llvm::CallInst *proof_event::emit_write_variable(
     kore_composite_sort &sort, llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
+  uint64_t bits = get_llvm_scalar_bits(sort);
   std::string sort_name = ast_to_string(sort);
-  bool indirect = get_indirect(sort_name);
   uint64_t block_header = get_block_header(sort_name);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i8_ptr_ty, i64_ty, i64_ty}, false);
 
   auto *func = get_or_insert_function(
       module_, "write_variable_to_proof_trace", func_ty);
 
   auto *var_name = b.CreateGlobalStringPtr(name, "", 0, module_);
+  auto *var_val = get_llvm_value_for_kore_term(val, bits, b, module_);
   auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
-  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
+  auto *var_bits = llvm::ConstantInt::get(i64_ty, bits);
   return b.CreateCall(
-      func, {proof_writer, var_name, val, var_block_header, var_indirect});
+      func, {proof_writer, var_name, var_val, var_block_header, var_bits});
 }
 
 llvm::CallInst *proof_event::emit_write_rewrite_event_post(
@@ -170,25 +192,25 @@ llvm::CallInst *proof_event::emit_write_rewrite_event_post(
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
+  uint64_t bits = get_llvm_scalar_bits(sort);
   std::string sort_name = ast_to_string(sort);
-  bool indirect = get_indirect(sort_name);
   uint64_t block_header = get_block_header(sort_name);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
   auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
   auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
 
   auto *func_ty = llvm::FunctionType::get(
-      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i1_ty}, false);
+      void_ty, {i8_ptr_ty, i8_ptr_ty, i64_ty, i64_ty}, false);
 
   auto *func = get_or_insert_function(
       module_, "write_rewrite_event_post_to_proof_trace", func_ty);
 
+  auto *var_val = get_llvm_value_for_kore_term(val, bits, b, module_);
   auto *var_block_header = llvm::ConstantInt::get(i64_ty, block_header);
-  auto *var_indirect = llvm::ConstantInt::get(i1_ty, indirect);
+  auto *var_bits = llvm::ConstantInt::get(i64_ty, bits);
   return b.CreateCall(
-      func, {proof_writer, val, var_block_header, var_indirect});
+      func, {proof_writer, var_val, var_block_header, var_bits});
 }
 
 llvm::CallInst *proof_event::emit_write_function_event_pre(
