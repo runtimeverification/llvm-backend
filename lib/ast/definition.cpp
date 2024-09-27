@@ -305,8 +305,10 @@ void kore_definition::preprocess() {
                 // Defer processing this sort until its parameter sorts have
                 // been processed.
                 worklist.push(std::make_pair(sort_to_process, true));
-                for (auto const &param_sort : sort_to_process->get_arguments()) {
-                  auto *param_ctr = dynamic_cast<kore_composite_sort *>(param_sort.get());
+                for (auto const &param_sort :
+                     sort_to_process->get_arguments()) {
+                  auto *param_ctr
+                      = dynamic_cast<kore_composite_sort *>(param_sort.get());
                   worklist.push(std::make_pair(param_ctr, false));
                 }
                 continue;

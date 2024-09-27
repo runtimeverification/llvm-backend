@@ -25,7 +25,8 @@ llvm::Constant *create_global_sort_string_ptr(
 }
 
 template <typename IRBuilder>
-llvm::Value *get_llvm_value_for_kore_term(llvm::Value *val, uint64_t bits,  IRBuilder &b,  llvm::Module *mod) {
+llvm::Value *get_llvm_value_for_kore_term(
+    llvm::Value *val, uint64_t bits, IRBuilder &b, llvm::Module *mod) {
   if (bits <= 64) {
     return val;
   }
@@ -43,12 +44,9 @@ llvm::Value *get_llvm_value_for_kore_term(llvm::Value *val, uint64_t bits,  IRBu
 uint64_t proof_event::get_llvm_scalar_bits(kore_composite_sort &sort) {
   value_type sort_category = sort.get_category(definition_);
   switch (sort_category.cat) {
-  case sort_category::Bool:
-    return 1;
-  case sort_category::MInt:
-    return sort_category.bits;
-  default:
-    return 0;
+  case sort_category::Bool: return 1;
+  case sort_category::MInt: return sort_category.bits;
+  default: return 0;
   }
 }
 
