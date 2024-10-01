@@ -346,7 +346,7 @@ void serialize_raw_term_to_file(
 void serialize_configuration_to_proof_trace(
     FILE *file, block *subject, uint32_t sort);
 void serialize_term_to_proof_trace(
-    FILE *file, void *subject, uint64_t block_header, bool indirect);
+    FILE *file, void *subject, uint64_t block_header, uint64_t bits);
 
 // The following functions are called by the generated code and runtime code to
 // ouput the proof trace data.
@@ -355,16 +355,16 @@ void write_hook_event_pre_to_proof_trace(
     char const *location_stack);
 void write_hook_event_post_to_proof_trace(
     void *proof_writer, void *hook_result, uint64_t block_header,
-    bool indirect);
+    uint64_t bits);
 void write_argument_to_proof_trace(
-    void *proof_writer, void *arg, uint64_t block_header, bool indirect);
+    void *proof_writer, void *arg, uint64_t block_header, uint64_t bits);
 void write_rewrite_event_pre_to_proof_trace(
     void *proof_writer, uint64_t ordinal, uint64_t arity);
 void write_variable_to_proof_trace(
     void *proof_writer, char const *name, void *var, uint64_t block_header,
-    bool indirect);
+    uint64_t bits);
 void write_rewrite_event_post_to_proof_trace(
-    void *proof_writer, void *config, uint64_t block_header, bool indirect);
+    void *proof_writer, void *config, uint64_t block_header, uint64_t bits);
 void write_function_event_pre_to_proof_trace(
     void *proof_writer, char const *name, char const *location_stack);
 void write_function_event_post_to_proof_trace(void *proof_writer);

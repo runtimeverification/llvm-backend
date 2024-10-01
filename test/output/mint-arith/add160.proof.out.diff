@@ -1,0 +1,180 @@
+version: 13
+hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
+  arg: kore[Lbl'Stop'Map{}()]
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160")))]
+hook result: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160")))]
+function: LblinitGeneratedTopCell{} ()
+rule: 2960 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160")))]
+function: LblinitKCell{} (0)
+rule: 2961 1
+  VarInit = kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160")))]
+hook: MAP.lookup LblMap'Coln'lookup{} (0:0:0:0)
+  arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160")))]
+  arg: kore[\dv{SortKConfigVar{}}("$PGM")]
+hook result: kore[Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160"))]
+function: Lblproject'Coln'KItem{} (0:0)
+rule: 3069 1
+  VarK = kore[Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160"))]
+function: LblinitGeneratedCounterCell{} (1)
+rule: 2959 0
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbladd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int{}(\dv{SortInt{}}("3"),\dv{SortInt{}}("4"),\dv{SortInt{}}("160")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
+side condition entry: 2883 2
+  VarHOLE = kore[\dv{SortInt{}}("4")]
+  VarW = kore[\dv{SortInt{}}("160")]
+hook: INT.eq Lbl'UndsEqlsEqls'Int'Unds'{} (0)
+  arg: kore[\dv{SortInt{}}("160")]
+  arg: kore[\dv{SortInt{}}("160")]
+hook result: kore[\dv{SortBool{}}("true")]
+function: LblisKResult{} (1:0)
+rule: 3017 1
+  VarK = kore[kseq{}(\dv{SortInt{}}("4"),dotk{}())]
+hook: BOOL.not LblnotBool'Unds'{} (1)
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("true")]
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  arg: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 2883 true
+rule: 2883 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("3")]
+  VarHOLE = kore[\dv{SortInt{}}("4")]
+  VarW = kore[\dv{SortInt{}}("160")]
+rule: 2900 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'freezeradd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int1'Unds'4{}(kseq{}(\dv{SortInt{}}("160"),dotk{}()),kseq{}(\dv{SortInt{}}("3"),dotk{}())),dotk{}())]
+  VarI = kore[\dv{SortInt{}}("4")]
+hook: MINT.integer LblInt2MInt'LParUndsRParUnds'MINT'Unds'MInt'Unds'Int{Sort160{}} (0:0:0:0)
+  arg: kore[\dv{SortInt{}}("4")]
+hook result: kore[\dv{SortMInt{Sort160{}}}("4p160")]
+side condition entry: 2899 1
+  VarHOLE = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+function: LblisKResult{} (1)
+rule: 3018 1
+  VarKResult = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  arg: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 2899 true
+rule: 2899 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("3")]
+  VarHOLE = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+  VarW = kore[\dv{SortInt{}}("160")]
+side condition entry: 2883 2
+  VarHOLE = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+  VarW = kore[\dv{SortInt{}}("160")]
+hook: INT.eq Lbl'UndsEqlsEqls'Int'Unds'{} (0)
+  arg: kore[\dv{SortInt{}}("160")]
+  arg: kore[\dv{SortInt{}}("160")]
+hook result: kore[\dv{SortBool{}}("true")]
+function: LblisKResult{} (1:0)
+rule: 3018 1
+  VarKResult = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+hook: BOOL.not LblnotBool'Unds'{} (1)
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("false")]
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  arg: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 2883 false
+side condition entry: 2888 2
+  VarHOLE = kore[\dv{SortInt{}}("3")]
+  VarW = kore[\dv{SortInt{}}("160")]
+hook: INT.eq Lbl'UndsEqlsEqls'Int'Unds'{} (0)
+  arg: kore[\dv{SortInt{}}("160")]
+  arg: kore[\dv{SortInt{}}("160")]
+hook result: kore[\dv{SortBool{}}("true")]
+function: LblisKResult{} (1:0)
+rule: 3017 1
+  VarK = kore[kseq{}(\dv{SortInt{}}("3"),dotk{}())]
+hook: BOOL.not LblnotBool'Unds'{} (1)
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("true")]
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  arg: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 2888 true
+rule: 2888 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+  VarHOLE = kore[\dv{SortInt{}}("3")]
+  VarW = kore[\dv{SortInt{}}("160")]
+rule: 2900 3
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[kseq{}(Lbl'Hash'freezeradd'LParUndsCommUndsCommUndsRParUnds'MINT-ARITH-SYNTAX'Unds'KItem'Unds'Exp'Unds'Exp'Unds'Int0'Unds'4{}(kseq{}(\dv{SortInt{}}("160"),dotk{}()),kseq{}(\dv{SortMInt{Sort160{}}}("4p160"),dotk{}())),dotk{}())]
+  VarI = kore[\dv{SortInt{}}("3")]
+hook: MINT.integer LblInt2MInt'LParUndsRParUnds'MINT'Unds'MInt'Unds'Int{Sort160{}} (0:0:0:0)
+  arg: kore[\dv{SortInt{}}("3")]
+hook result: kore[\dv{SortMInt{Sort160{}}}("3p160")]
+side condition entry: 2898 1
+  VarHOLE = kore[\dv{SortMInt{Sort160{}}}("3p160")]
+function: LblisKResult{} (1)
+rule: 3018 1
+  VarKResult = kore[\dv{SortMInt{Sort160{}}}("3p160")]
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  arg: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("true")]
+side condition exit: 2898 true
+rule: 2898 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+  VarHOLE = kore[\dv{SortMInt{Sort160{}}}("3p160")]
+  VarW = kore[\dv{SortInt{}}("160")]
+side condition entry: 2883 2
+  VarHOLE = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+  VarW = kore[\dv{SortInt{}}("160")]
+hook: INT.eq Lbl'UndsEqlsEqls'Int'Unds'{} (0)
+  arg: kore[\dv{SortInt{}}("160")]
+  arg: kore[\dv{SortInt{}}("160")]
+hook result: kore[\dv{SortBool{}}("true")]
+function: LblisKResult{} (1:0)
+rule: 3018 1
+  VarKResult = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+hook: BOOL.not LblnotBool'Unds'{} (1)
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("false")]
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  arg: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 2883 false
+side condition entry: 2888 2
+  VarHOLE = kore[\dv{SortMInt{Sort160{}}}("3p160")]
+  VarW = kore[\dv{SortInt{}}("160")]
+hook: INT.eq Lbl'UndsEqlsEqls'Int'Unds'{} (0)
+  arg: kore[\dv{SortInt{}}("160")]
+  arg: kore[\dv{SortInt{}}("160")]
+hook result: kore[\dv{SortBool{}}("true")]
+function: LblisKResult{} (1:0)
+rule: 3018 1
+  VarKResult = kore[\dv{SortMInt{Sort160{}}}("3p160")]
+hook: BOOL.not LblnotBool'Unds'{} (1)
+  arg: kore[\dv{SortBool{}}("true")]
+hook result: kore[\dv{SortBool{}}("false")]
+hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
+  arg: kore[\dv{SortBool{}}("true")]
+  arg: kore[\dv{SortBool{}}("false")]
+hook result: kore[\dv{SortBool{}}("false")]
+side condition exit: 2888 false
+rule: 2893 5
+  Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
+  Var'Unds'DotVar1 = kore[dotk{}()]
+  Var'Unds'Gen0 = kore[\dv{SortInt{}}("160")]
+  VarA = kore[\dv{SortMInt{Sort160{}}}("3p160")]
+  VarB = kore[\dv{SortMInt{Sort160{}}}("4p160")]
+hook: MINT.add Lbl'UndsPlus'MInt'UndsUnds'MINT'Unds'MInt'Unds'MInt'Unds'MInt{Sort160{}} (0:0:0)
+  arg: kore[\dv{SortMInt{Sort160{}}}("3p160")]
+  arg: kore[\dv{SortMInt{Sort160{}}}("4p160")]
+hook result: kore[\dv{SortMInt{Sort160{}}}("7p160")]
+config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortMInt{Sort160{}}}("7p160"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

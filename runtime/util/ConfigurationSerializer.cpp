@@ -649,15 +649,15 @@ void write_hook_event_pre_to_proof_trace(
 
 void write_hook_event_post_to_proof_trace(
     void *proof_writer, void *hook_result, uint64_t block_header,
-    bool indirect) {
+    uint64_t bits) {
   static_cast<proof_trace_writer *>(proof_writer)
-      ->hook_event_post(hook_result, block_header, indirect);
+      ->hook_event_post(hook_result, block_header, bits);
 }
 
 void write_argument_to_proof_trace(
-    void *proof_writer, void *arg, uint64_t block_header, bool indirect) {
+    void *proof_writer, void *arg, uint64_t block_header, uint64_t bits) {
   static_cast<proof_trace_writer *>(proof_writer)
-      ->argument(arg, block_header, indirect);
+      ->argument(arg, block_header, bits);
 }
 
 void write_rewrite_event_pre_to_proof_trace(
@@ -668,15 +668,15 @@ void write_rewrite_event_pre_to_proof_trace(
 
 void write_variable_to_proof_trace(
     void *proof_writer, char const *name, void *var, uint64_t block_header,
-    bool indirect) {
+    uint64_t bits) {
   static_cast<proof_trace_writer *>(proof_writer)
-      ->variable(name, var, block_header, indirect);
+      ->variable(name, var, block_header, bits);
 }
 
 void write_rewrite_event_post_to_proof_trace(
-    void *proof_writer, void *config, uint64_t block_header, bool indirect) {
+    void *proof_writer, void *config, uint64_t block_header, uint64_t bits) {
   static_cast<proof_trace_writer *>(proof_writer)
-      ->rewrite_event_post(config, block_header, indirect);
+      ->rewrite_event_post(config, block_header, bits);
 }
 
 void write_function_event_pre_to_proof_trace(
@@ -734,8 +734,13 @@ void serialize_term_to_file(
 }
 
 void serialize_term_to_proof_trace(
-    FILE *file, void *subject, uint64_t block_header, bool indirect) {
-  void *arg = indirect ? (void *)&subject : subject;
+    FILE *file, void *subject, uint64_t block_header, uint64_t bits) {
+  void *arg = nullptr;
+  if (bits == 0 || bits > 64) {
+    arg = subject;
+  } else {
+    arg = (void *)&subject;
+  }
   struct blockheader header_val {
     block_header
   };

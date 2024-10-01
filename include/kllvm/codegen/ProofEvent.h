@@ -84,6 +84,13 @@ private:
   llvm::LoadInst *emit_get_proof_chunk_size(llvm::BasicBlock *insert_at_end);
 
   /*
+   * Check if a value of the given `sort` corresponds to an llvm scalar and
+   * return the size in bits of that scalar. Returns 0 if the given `sort` does
+   * not correspond to an llvm scalar.
+   */
+  uint64_t get_llvm_scalar_bits(kore_composite_sort &sort);
+
+  /*
    * Get the block header value for the given `sort_name`.
    */
   uint64_t get_block_header(std::string const &sort_name);

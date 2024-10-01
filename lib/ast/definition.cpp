@@ -1,6 +1,7 @@
 #include <kllvm/ast/AST.h>
 
 #include <iostream>
+#include <stack>
 #include <string>
 #include <unordered_set>
 
@@ -285,12 +286,40 @@ void kore_definition::preprocess() {
     for (auto *symbol : entry.second) {
       if (symbol->is_concrete()) {
         for (auto const &sort : symbol->get_arguments()) {
+          // We use a work list to ensure that parametric sorts get ordinals
+          // that are greater than the ordinals of any of their parameters.
+          // This invariant is usefull for serialization purposes, and given
+          // that all parametric sorts are statically known, it is sound to
+          // assign ordinals to them in such a topological order.
+          std::stack<std::pair<kore_composite_sort *, bool>> worklist;
           auto *ctr = dynamic_cast<kore_composite_sort *>(sort.get());
-          if (!sorts.contains(*ctr)) {
-            sorts.emplace(*ctr, next_sort++);
-            all_sorts_.push_back(ctr);
+          worklist.push(std::make_pair(ctr, false));
+
+          while (!worklist.empty()) {
+            auto *sort_to_process = worklist.top().first;
+            bool params_processed = worklist.top().second;
+            worklist.pop();
+
+            if (!sorts.contains(*sort_to_process)) {
+              if (!params_processed) {
+                // Defer processing this sort until its parameter sorts have
+                // been processed.
+                worklist.push(std::make_pair(sort_to_process, true));
+                for (auto const &param_sort :
+                     sort_to_process->get_arguments()) {
+                  auto *param_ctr
+                      = dynamic_cast<kore_composite_sort *>(param_sort.get());
+                  worklist.push(std::make_pair(param_ctr, false));
+                }
+                continue;
+              }
+
+              sorts.emplace(*sort_to_process, next_sort++);
+              all_sorts_.push_back(sort_to_process);
+            }
+
+            sort_to_process->set_ordinal(sorts[*sort_to_process]);
           }
-          ctr->set_ordinal(sorts[*ctr]);
         }
         if (!instantiations.contains(*symbol)) {
           instantiations.emplace(*symbol, next_symbol++);
