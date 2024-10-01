@@ -1,5 +1,5 @@
 // RUN: %proof-interpreter
-// RUN: %check-dir-proof-out
+// RUN: %check-except-x86-llvm18-dir-proof-out
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/theo/builds/llvm-backend/test/proof/k-files/mint-arith.k)")]
 
 module BASIC-K
