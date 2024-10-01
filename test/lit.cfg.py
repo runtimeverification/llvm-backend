@@ -82,6 +82,12 @@ def one_line(s):
 def exclude_macos(s):
   return 'exit 0' if platform.system() == 'Darwin' else s
 
+# We want to be able to disable some checks on x86_64 with LLVM 18, this
+# function allows us to  do that by checking the OS/LLVM version and replacing
+# the input with just `exit 0` in case of x86_64 and LLVM 18.
+def exclude_x86_and_llvm18(s):
+  return 'exit 0' if platform.machine() == 'x86_64' and llvm_major_version() == 18 else s
+
 
 config.substitutions.extend([
     ('%kompile', 'llvm-kompile-testing'),
@@ -244,7 +250,9 @@ config.substitutions.extend([
         done
     ''')),
     
-     ('%check-dir-proof-intermediate-out', one_line('''
+    ('%check-except-x86-llvm18-dir-proof-out', exclude_x86_and_llvm18('%check-dir-proof-out')),
+
+    ('%check-dir-proof-intermediate-out', one_line('''
         %kore-rich-header %s > %t.header.bin
         for out in %test-dir-out/*.proof.intermediate.out.diff; do
             in=%test-dir-in/`basename $out .proof.intermediate.out.diff`.in

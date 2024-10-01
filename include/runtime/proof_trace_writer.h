@@ -15,15 +15,15 @@ public:
       char const *name, char const *pattern, char const *location_stack)
       = 0;
   virtual void
-  hook_event_post(void *hook_result, uint64_t block_header, bool indirect)
+  hook_event_post(void *hook_result, uint64_t block_header, uint64_t bits)
       = 0;
-  virtual void argument(void *arg, uint64_t block_header, bool indirect) = 0;
+  virtual void argument(void *arg, uint64_t block_header, uint64_t bits) = 0;
   virtual void rewrite_event_pre(uint64_t ordinal, uint64_t arity) = 0;
   virtual void
-  variable(char const *name, void *var, uint64_t block_header, bool indirect)
+  variable(char const *name, void *var, uint64_t block_header, uint64_t bits)
       = 0;
   virtual void
-  rewrite_event_post(void *config, uint64_t block_header, bool indirect)
+  rewrite_event_post(void *config, uint64_t block_header, uint64_t bits)
       = 0;
   virtual void function_event_pre(char const *name, char const *location_stack)
       = 0;
@@ -106,13 +106,13 @@ public:
   }
 
   void hook_event_post(
-      void *hook_result, uint64_t block_header, bool indirect) override {
+      void *hook_result, uint64_t block_header, uint64_t bits) override {
     write_uint64(kllvm::hook_result_sentinel);
-    serialize_term_to_proof_trace(file_, hook_result, block_header, indirect);
+    serialize_term_to_proof_trace(file_, hook_result, block_header, bits);
   }
 
-  void argument(void *arg, uint64_t block_header, bool indirect) override {
-    serialize_term_to_proof_trace(file_, arg, block_header, indirect);
+  void argument(void *arg, uint64_t block_header, uint64_t bits) override {
+    serialize_term_to_proof_trace(file_, arg, block_header, bits);
   }
 
   void rewrite_event_pre(uint64_t ordinal, uint64_t arity) override {
@@ -123,15 +123,15 @@ public:
 
   void variable(
       char const *name, void *var, uint64_t block_header,
-      bool indirect) override {
+      uint64_t bits) override {
     write_null_terminated_string(name);
-    serialize_term_to_proof_trace(file_, var, block_header, indirect);
+    serialize_term_to_proof_trace(file_, var, block_header, bits);
   }
 
   void rewrite_event_post(
-      void *config, uint64_t block_header, bool indirect) override {
+      void *config, uint64_t block_header, uint64_t bits) override {
     write_uint64(kllvm::config_sentinel);
-    serialize_term_to_proof_trace(file_, config, block_header, indirect);
+    serialize_term_to_proof_trace(file_, config, block_header, bits);
   }
 
   void
@@ -191,17 +191,17 @@ private:
   struct kore_term_construction {
     void *subject;
     uint64_t block_header;
-    bool indirect;
+    uint64_t bits;
 
     kore_term_construction()
         : subject(nullptr)
         , block_header(0)
-        , indirect(false) { }
+        , bits(0) { }
 
-    kore_term_construction(void *subject, uint64_t block_header, bool indirect)
+    kore_term_construction(void *subject, uint64_t block_header, uint64_t bits)
         : subject(subject)
         , block_header(block_header)
-        , indirect(indirect) { }
+        , bits(bits) { }
   };
 
   struct kore_configuration_construction {
@@ -301,13 +301,13 @@ public:
   }
 
   void hook_event_post(
-      void *hook_result, uint64_t block_header, bool indirect) override {
-    current_call_event_->result.emplace(hook_result, block_header, indirect);
+      void *hook_result, uint64_t block_header, uint64_t bits) override {
+    current_call_event_->result.emplace(hook_result, block_header, bits);
     hook_event_callback(current_call_event_.value());
   }
 
-  void argument(void *arg, uint64_t block_header, bool indirect) override {
-    current_call_event_->arguments.emplace_back(arg, block_header, indirect);
+  void argument(void *arg, uint64_t block_header, uint64_t bits) override {
+    current_call_event_->arguments.emplace_back(arg, block_header, bits);
   }
 
   void rewrite_event_pre(uint64_t ordinal, uint64_t arity) override {
@@ -320,12 +320,12 @@ public:
 
   void variable(
       char const *name, void *var, uint64_t block_header,
-      bool indirect) override {
+      uint64_t bits) override {
     auto &p = current_rewrite_event_->substitution[current_rewrite_event_->pos];
     p.first = name;
     p.second.subject = var;
     p.second.block_header = block_header;
-    p.second.indirect = indirect;
+    p.second.bits = bits;
     size_t new_pos = ++current_rewrite_event_->pos;
     if (new_pos == current_rewrite_event_->arity) {
       rewrite_event_callback(current_rewrite_event_.value());
@@ -333,8 +333,8 @@ public:
   }
 
   void rewrite_event_post(
-      void *config, uint64_t block_header, bool indirect) override {
-    kore_term_construction configuration(config, block_header, indirect);
+      void *config, uint64_t block_header, uint64_t bits) override {
+    kore_term_construction configuration(config, block_header, bits);
     configuration_term_event_callback(configuration);
   }
 
