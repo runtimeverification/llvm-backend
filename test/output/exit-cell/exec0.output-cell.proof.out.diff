@@ -26,7 +26,3 @@ rule: 144 3
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("1")]
   VarI = kore[\dv{SortInt{}}("0")]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(dotk{}()),Lbl'-LT-'status-code'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
-rule: 189 3
-  Var'Unds'Gen0 = kore[Lbl'-LT-'k'-GT-'{}(dotk{}())]
-  Var'Unds'Gen1 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
-  VarExit = kore[\dv{SortInt{}}("0")]
