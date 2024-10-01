@@ -671,6 +671,8 @@ def kllvm_lookup_function(val):
                 kind = t.tag
             else:
                 kind = t.name
+            if not kind:
+                return None
             if kind.startswith('immer::list'):
                 return termPrinter(val.address, "list", "SortList{}")
             elif kind.startswith('immer::set'):
