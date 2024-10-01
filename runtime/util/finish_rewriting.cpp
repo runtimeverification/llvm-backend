@@ -68,9 +68,12 @@ void init_outputs(char const *output_filename) {
     write_configuration_to_proof_trace(proof_writer, subject, false);
   }
 
+  bool was_proof_output = proof_output;
+  proof_output = false;
+
   auto exit_code = error ? 113 : get_exit_code(subject);
 
-  if (proof_output) {
+  if (was_proof_output) {
     w->end_of_trace();
   }
 
