@@ -1106,14 +1106,15 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       llvm::FunctionType::get(
           llvm::Type::getVoidTy(module->getContext()),
           {arr->getType(), llvm::Type::getInt8Ty(module->getContext()), ptr_ty,
-           ptr_ty},
+           ptr_ty, llvm::Type::getInt1Ty(module->getContext())},
           false));
   auto *call = llvm::CallInst::Create(
       kore_collect,
       {arr,
        llvm::ConstantInt::get(
            llvm::Type::getInt8Ty(module->getContext()), nroots),
-       llvm::ConstantExpr::getBitCast(layout, ptr_ty)},
+       llvm::ConstantExpr::getBitCast(layout, ptr_ty),
+       llvm::ConstantInt::getFalse(module->getContext())},
       "", collect);
   set_debug_loc(call);
   std::vector<llvm::Value *> phis;
