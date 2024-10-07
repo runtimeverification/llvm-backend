@@ -131,6 +131,8 @@ void kore_simplify_binary(
 
 block *take_steps(int64_t depth, block *term);
 
+void init_static_objects(void);
+
 /* kore_sort */
 
 char *kore_sort_dump(kore_sort const *);

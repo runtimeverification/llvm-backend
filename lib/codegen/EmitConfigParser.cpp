@@ -635,8 +635,8 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
       = allocate_term(string_type, len, current_block, "kore_alloc_token");
   auto *hdr_ptr = llvm::GetElementPtrInst::CreateInBounds(
       string_type, block, {zero, zero32, zero32}, "", current_block);
-  auto *block_size
-      = module->getOrInsertGlobal("BLOCK_SIZE", llvm::Type::getInt64Ty(ctx));
+  auto *block_size = module->getOrInsertGlobal(
+      "VAR_BLOCK_SIZE", llvm::Type::getInt64Ty(ctx));
   auto *block_size_val = new llvm::LoadInst(
       llvm::Type::getInt64Ty(ctx), block_size, "", current_block);
   auto *block_alloc_size = llvm::BinaryOperator::Create(

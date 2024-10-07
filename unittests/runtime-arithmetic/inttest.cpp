@@ -8,7 +8,6 @@ extern "C" {
 void *kore_alloc_token(size_t requested) {
   return malloc(requested);
 }
-size_t const BLOCK_SIZE = -1;
 
 mpz_ptr hook_INT_tmod(mpz_t, mpz_t);
 mpz_ptr hook_INT_emod(mpz_t, mpz_t);
