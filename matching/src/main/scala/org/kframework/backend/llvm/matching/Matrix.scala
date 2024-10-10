@@ -766,13 +766,12 @@ class Matrix private (
       Leaf(row.clause.action.ordinal, newVars)
     }
     // check that all occurrences of the same variable are equal
-    val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](atomicLeaf)((e, dt) =>
-      e._2.foldRight(dt)((os, dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2))
-    )
     val sc = row.clause.action.scVars match {
       // if there is no side condition, continue
-      case None => nonlinearLeaf
+      case None => atomicLeaf
       case Some(cond) =>
+        // if there is a side condition but not all occurrences of the same variable are equal, continue
+        if (nonlinear.nonEmpty) return nonlinearLeaf
         val condVars = cond.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
         val newO     = SC(row.clause.action.ordinal)
         // evaluate the side condition and if it is true, continue, otherwise go to the next row
@@ -785,13 +784,16 @@ class Matrix private (
             newO,
             "BOOL.Bool",
             1,
-            immutable.Seq(("1", immutable.Seq(), nonlinearLeaf), ("0", immutable.Seq(), child)),
+            immutable.Seq(("1", immutable.Seq(), atomicLeaf), ("0", immutable.Seq(), child)),
             None
           )
         )
     }
+    val nonlinearLeaf = nonlinearPairs.foldRight[DecisionTree](sc)((e, dt) =>
+      e._2.foldRight(dt)((os, dt2) => makeEquality(os._1._1, (os._1._2, os._2._2), dt2))
+    )
     // fill out the bindings for list range variables
-    val withRanges = row.clause.listRanges.foldRight(sc) {
+    val withRanges = row.clause.listRanges.foldRight(nonlinearLeaf) {
       case ((o @ Num(_, o2), hd, tl), dt) =>
         Function(
           "hook_LIST_range_long",
