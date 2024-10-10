@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
+#include <sys/mman.h>
 
 #include "runtime/alloc.h"
 #include "runtime/arena.h"
@@ -47,33 +49,62 @@ get_arena_semispace_id_of_object(void *ptr) {
   return mem_block_header(ptr)->semispace;
 }
 
-static void *first_superblock_ptr = nullptr;
-static void *superblock_ptr = nullptr;
-static char **next_superblock_ptr = nullptr;
-static unsigned blocks_left = 0;
+//
+//	We will reserve enough address space for 1 million 1MB blocks. Might want to increase this on a > 1TB server.
+//
+size_t const HYPERBLOCK_SIZE = BLOCK_SIZE * 1024 * 1024;
+static void* hyperblock_ptr = nullptr;  // only needed for munmap()
 
-static void *megabyte_malloc() {
-  if (blocks_left == 0) {
-    blocks_left = 15;
-    if (int result
-        = posix_memalign(&superblock_ptr, BLOCK_SIZE, BLOCK_SIZE * 15)) {
-      errno = result;
-      perror("posix_memalign");
+static void*
+megabyte_malloc()
+{
+  //
+  //	Return pointer to a BLOCK_SIZE chunk of memory with BLOCK_SIZE alignment.
+  //
+  static char* currentblock_ptr = nullptr;  // char* rather than void* to permit pointer arithmetic
+  if (currentblock_ptr)
+    {
+      //
+      //	We expect an page fault due to not being able to map physical memory to this block or the
+      //	process to be killed by the OOM killer long before we run off the end of our address space.
+      //
+      currentblock_ptr += BLOCK_SIZE;
     }
-    if (!first_superblock_ptr) {
-      first_superblock_ptr = superblock_ptr;
+  else
+    {
+      //
+      //	First call - need to reserve the address space.
+      //
+      size_t request = HYPERBLOCK_SIZE;
+      void* addr = mmap(NULL,  // let OS choose the address
+			request,  // Linux and MacOS both allow up to 64TB
+			PROT_READ | PROT_WRITE,  // read, write but not execute
+			MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,  // allocate address space only
+			-1,  // no file backing
+			0);  // no offset
+      if (addr == MAP_FAILED)
+	{
+	  perror("mmap()");
+	  abort();
+	}
+      hyperblock_ptr = addr;
+      //
+      //	We ask for one block worth of address space less than we allocated so alignment will always succeed.
+      //	We don't worry about unused address space either side of our aligned address space because there will be no
+      //	memory mapped to it.
+      //
+      currentblock_ptr = reinterpret_cast<char*>(std::align(BLOCK_SIZE, HYPERBLOCK_SIZE - BLOCK_SIZE, addr, request));
     }
-    if (next_superblock_ptr) {
-      *next_superblock_ptr = (char *)superblock_ptr;
-    }
-    auto *hdr = (memory_block_header *)superblock_ptr;
-    next_superblock_ptr = &hdr->next_superblock;
-    hdr->next_superblock = nullptr;
-  }
-  blocks_left--;
-  void *result = superblock_ptr;
-  superblock_ptr = (char *)superblock_ptr + BLOCK_SIZE;
-  return result;
+  return currentblock_ptr;
+}
+
+void
+free_all_memory()
+{
+  //
+  //	Frees all memory that was demand paged into this address range.
+  //
+  munmap(hyperblock_ptr, HYPERBLOCK_SIZE);
 }
 
 bool time_for_collection;
@@ -228,17 +259,4 @@ size_t arena_size(const struct arena *arena) {
               ? arena->num_blocks
               : arena->num_collection_blocks)
          * (BLOCK_SIZE - sizeof(memory_block_header));
-}
-
-void free_all_memory() {
-  auto *superblock = (memory_block_header *)first_superblock_ptr;
-  while (superblock) {
-    auto *next_superblock = (memory_block_header *)superblock->next_superblock;
-    free(superblock);
-    superblock = next_superblock;
-  }
-  first_superblock_ptr = nullptr;
-  superblock_ptr = nullptr;
-  next_superblock_ptr = nullptr;
-  blocks_left = 0;
 }
