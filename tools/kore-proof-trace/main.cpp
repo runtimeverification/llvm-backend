@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv);
 
   FILE *in = fopen(header_path.getValue().c_str(), "r");
-  kore_header header(in);
+  auto header = std::make_shared<kore_header>(in);
   fclose(in);
 
   if (use_streaming_parser) {

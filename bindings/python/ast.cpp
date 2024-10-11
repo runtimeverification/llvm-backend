@@ -459,7 +459,7 @@ void bind_proof_trace(py::module_ &m) {
       .def_property_readonly("trace", &llvm_rewrite_trace::get_trace)
       .def_static(
           "parse",
-          [](py::bytes const &bytes, kore_header const &header) {
+          [](py::bytes const &bytes, std::shared_ptr<kore_header> &header) {
             proof_trace_parser parser(false, false, header);
             auto str = std::string(bytes);
             return parser.parse_proof_trace(str, false);
@@ -486,7 +486,8 @@ void bind_proof_trace(py::module_ &m) {
       .def("__repr__", print_repr_adapter<llvm_rewrite_trace_iterator>(true))
       .def_static(
           "from_file",
-          [](std::string const &filename, kore_header const &header) {
+          [](std::string const &filename,
+             std::shared_ptr<kore_header> const &header) {
             std::ifstream file(filename, std::ios_base::binary);
             return llvm_rewrite_trace_iterator(
                 std::make_unique<proof_trace_file_buffer>(std::move(file)),
