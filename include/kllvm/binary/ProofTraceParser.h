@@ -328,7 +328,7 @@ public:
 private:
   bool verbose_;
   bool expand_terms_;
-  [[maybe_unused]] kore_header const &header_;
+  [[maybe_unused]] std::shared_ptr<kore_header> header_;
   [[maybe_unused]] std::optional<kore_definition> kore_definition_
       = std::nullopt;
 
@@ -342,7 +342,7 @@ private:
         || magic[3] != '2') {
       return nullptr;
     }
-    auto result = detail::read_v2(buffer, header_, pattern_len);
+    auto result = detail::read_v2(buffer, *header_, pattern_len);
     pattern_len += 4;
     return result;
   }
@@ -701,7 +701,7 @@ private:
 
 public:
   proof_trace_parser(
-      bool verbose, bool expand_terms, kore_header const &header,
+      bool verbose, bool expand_terms, std::shared_ptr<kore_header> header,
       std::optional<kore_definition> kore_definition = std::nullopt);
 
   std::optional<llvm_rewrite_trace> parse_proof_trace_from_file(
@@ -723,7 +723,8 @@ private:
 
 public:
   llvm_rewrite_trace_iterator(
-      std::unique_ptr<proof_trace_buffer> buffer, kore_header const &header);
+      std::unique_ptr<proof_trace_buffer> buffer,
+      std::shared_ptr<kore_header> header);
   [[nodiscard]] uint32_t get_version() const { return version_; }
   std::optional<annotated_llvm_event> get_next_event();
   void print(

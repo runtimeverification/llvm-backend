@@ -130,9 +130,10 @@ void llvm_event::print(
 }
 
 llvm_rewrite_trace_iterator::llvm_rewrite_trace_iterator(
-    std::unique_ptr<proof_trace_buffer> buffer, kore_header const &header)
+    std::unique_ptr<proof_trace_buffer> buffer,
+    std::shared_ptr<kore_header> header)
     : buffer_(std::move(buffer))
-    , parser_(false, false, header) {
+    , parser_(false, false, std::move(header)) {
   if (!proof_trace_parser::parse_header(*buffer_, kind_, version_)) {
     throw std::runtime_error("invalid header");
   }
@@ -250,11 +251,11 @@ void llvm_rewrite_trace::print(
 }
 
 proof_trace_parser::proof_trace_parser(
-    bool verbose, bool expand_terms, kore_header const &header,
+    bool verbose, bool expand_terms, std::shared_ptr<kore_header> header,
     std::optional<kore_definition> kore_definition)
     : verbose_(verbose)
     , expand_terms_(expand_terms)
-    , header_(header)
+    , header_(std::move(header))
     , kore_definition_(std::move(kore_definition)) { }
 
 std::optional<llvm_rewrite_trace> proof_trace_parser::parse_proof_trace(
