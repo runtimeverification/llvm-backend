@@ -112,7 +112,7 @@ void k_hash(block *, void *);
 bool hash_enter(void);
 void hash_exit(void);
 
-extern bool gc_enabled;
+extern thread_local bool gc_enabled;
 }
 
 __attribute__((always_inline)) constexpr uint64_t len_hdr(uint64_t hdr) {

@@ -53,7 +53,7 @@ get_arena_semispace_id_of_object(void *ptr) {
 //	We will reserve enough address space for 1 million 1MB blocks. Might want to increase this on a > 1TB server.
 //
 size_t const HYPERBLOCK_SIZE = BLOCK_SIZE * 1024 * 1024;
-static void* hyperblock_ptr = nullptr;  // only needed for munmap()
+static thread_local void* hyperblock_ptr = nullptr;  // only needed for munmap()
 
 static void*
 megabyte_malloc()
@@ -61,7 +61,7 @@ megabyte_malloc()
   //
   //	Return pointer to a BLOCK_SIZE chunk of memory with BLOCK_SIZE alignment.
   //
-  static char* currentblock_ptr = nullptr;  // char* rather than void* to permit pointer arithmetic
+  static thread_local char* currentblock_ptr = nullptr;  // char* rather than void* to permit pointer arithmetic
   if (currentblock_ptr)
     {
       //
@@ -107,7 +107,7 @@ free_all_memory()
   munmap(hyperblock_ptr, HYPERBLOCK_SIZE);
 }
 
-bool time_for_collection;
+thread_local bool time_for_collection;
 
 static void fresh_block(struct arena *arena) {
   char *next_block = nullptr;
@@ -153,7 +153,7 @@ static void fresh_block(struct arena *arena) {
       BLOCK_SIZE - sizeof(memory_block_header));
 }
 
-bool gc_enabled = true;
+thread_local bool gc_enabled = true;
 
 __attribute__((noinline)) void *
 do_alloc_slow(size_t requested, struct arena *arena) {
