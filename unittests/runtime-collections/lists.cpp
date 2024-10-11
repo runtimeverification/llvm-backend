@@ -62,7 +62,7 @@ block D1 = {{1}};
 block *DUMMY1 = &D1;
 }
 
-bool gc_enabled;
+thread_local bool gc_enabled;
 size_t get_gc_threshold() {
   return SIZE_MAX;
 }
