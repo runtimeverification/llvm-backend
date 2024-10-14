@@ -26,12 +26,4 @@ rule: 191 4
   VarACCT = kore[\dv{SortInt{}}("0")]
   VarO = kore[Lbl'Hash'transferFunds'UndsUndsUndsUnds'SAME-NAME-DIFF-VALUE'Unds'Op'Unds'Int'Unds'Int'Unds'Int{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("0"),\dv{SortInt{}}("1"))]
   VarVALUE = kore[\dv{SortInt{}}("5")]
-side condition entry: 188 2
-  VarORIGFROM = kore[\dv{SortInt{}}("5")]
-  VarVALUE = kore[\dv{SortInt{}}("1")]
-hook: INT.le Lbl'Unds-LT-Eqls'Int'Unds'{} ()
-  arg: kore[\dv{SortInt{}}("1")]
-  arg: kore[\dv{SortInt{}}("5")]
-hook result: kore[\dv{SortBool{}}("true")]
-side condition exit: 188 true
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'transferFunds'UndsUndsUndsUnds'SAME-NAME-DIFF-VALUE'Unds'Op'Unds'Int'Unds'Int'Unds'Int{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("0"),\dv{SortInt{}}("1")),dotk{}())),Lbl'-LT-'accounts'-GT-'{}(LblAccountCellMapItem{}(Lbl'-LT-'acctID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'account'-GT-'{}(Lbl'-LT-'acctID'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'balance'-GT-'{}(\dv{SortInt{}}("5"))))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
