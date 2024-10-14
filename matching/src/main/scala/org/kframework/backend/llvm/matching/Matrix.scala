@@ -768,7 +768,7 @@ class Matrix private (
     // check that all occurrences of the same variable are equal
     val sc: DecisionTree = row.clause.action.scVars match {
       // if there is no side condition, continue
-      case None       => atomicLeaf
+      case None => atomicLeaf
       case Some(cond) =>
         val condVars = cond.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
         val newO     = SC(row.clause.action.ordinal)
