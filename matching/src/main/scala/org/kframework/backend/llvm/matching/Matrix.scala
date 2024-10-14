@@ -766,13 +766,10 @@ class Matrix private (
       Leaf(row.clause.action.ordinal, newVars)
     }
     // check that all occurrences of the same variable are equal
-    val sc = row.clause.action.scVars match {
+    val sc: DecisionTree = row.clause.action.scVars match {
       // if there is no side condition, continue
       case None       => atomicLeaf
       case Some(cond) =>
-        // if there is a side condition but not all occurrences of the same variable are equal,
-        // continue
-        if (nonlinear.nonEmpty) return nonlinearLeaf
         val condVars = cond.map(v => (grouped(v).head._2, grouped(v).head._1.hookAtt))
         val newO     = SC(row.clause.action.ordinal)
         // evaluate the side condition and if it is true, continue, otherwise go to the next row
