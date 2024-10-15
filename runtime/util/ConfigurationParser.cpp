@@ -304,7 +304,7 @@ block *deserialize_term_v2(char *data, size_t size) {
   auto header = kllvm::kore_header::create(
       &kompiled_directory + std::string("/header.bin"));
   auto buffer = kllvm::proof_trace_memory_buffer(data, data + size);
-  uint64_t len;
+  uint64_t len{};
   auto pat = kllvm::detail::read_v2(buffer, *header, len);
   auto *b = (block *)construct_initial_configuration(pat.get());
   deallocate_s_ptr_kore_pattern(std::move(pat));
