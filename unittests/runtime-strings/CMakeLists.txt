@@ -8,8 +8,8 @@ target_link_libraries(runtime-strings-tests
   PUBLIC
   strings
   arithmetic
-  alloc
   lto-static
+  alloc
   gmp
   mpfr
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES}
