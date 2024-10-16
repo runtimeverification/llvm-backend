@@ -58,7 +58,7 @@ static std::string drop_back(std::string const &s, int n) {
 void serialize_configuration_internal(
     writer *file, block *subject, char const *sort, bool is_var, void *state);
 void serialize_configuration_to_proof_trace_internal(
-    FILE *file, block *subject, uint32_t sort, bool is_var);
+    writer *file, block *subject, uint32_t sort, bool is_var);
 
 /**
  * Emit a symbol of the form ctor{...}(...); this should be preceded by the
@@ -79,9 +79,9 @@ const uint8_t COMPOSITE = 0x01;
 const uint8_t STRING = 0x00;
 const uint8_t NULL_BYTE = 0x00;
 
-static void emit_symbol_to_proof_trace(FILE *file, int32_t tag) {
-  fwrite(&COMPOSITE, sizeof(COMPOSITE), 1, file);
-  fwrite(&tag, sizeof(tag), 1, file);
+static void emit_symbol_to_proof_trace(writer *file, int32_t tag) {
+  sfwrite(&COMPOSITE, sizeof(COMPOSITE), 1, file);
+  sfwrite(&tag, sizeof(tag), 1, file);
 }
 
 /**
@@ -121,13 +121,13 @@ static void emit_token(
 }
 
 static void emit_token_to_proof_trace(
-    FILE *file, uint32_t sort, char const *str, size_t len) {
+    writer *file, uint32_t sort, char const *str, size_t len) {
   emit_symbol_to_proof_trace(file, sort);
 
-  fwrite(&STRING, sizeof(STRING), 1, file);
-  fwrite(&len, sizeof(len), 1, file);
-  fwrite(str, 1, len, file);
-  fwrite(&NULL_BYTE, sizeof(NULL_BYTE), 1, file);
+  sfwrite(&STRING, sizeof(STRING), 1, file);
+  sfwrite(&len, sizeof(len), 1, file);
+  sfwrite(str, 1, len, file);
+  sfwrite(&NULL_BYTE, sizeof(NULL_BYTE), 1, file);
 }
 
 void serialize_map(
@@ -158,7 +158,7 @@ void serialize_map(
 }
 
 void serialize_map_to_proof_trace(
-    FILE *file, map *map, uint32_t unit, uint32_t element, uint32_t concat) {
+    writer *file, map *map, uint32_t unit, uint32_t element, uint32_t concat) {
   size_t size = map->size();
   if (size == 0) {
     emit_symbol_to_proof_trace(file, unit);
@@ -216,7 +216,7 @@ void serialize_range_map(
 }
 
 void serialize_range_map_to_proof_trace(
-    FILE *file, rangemap *map, uint32_t unit, uint32_t element,
+    writer *file, rangemap *map, uint32_t unit, uint32_t element,
     uint32_t concat) {
   size_t size = map->size();
   if (size == 0) {
@@ -273,7 +273,8 @@ void serialize_list(
 }
 
 void serialize_list_to_proof_trace(
-    FILE *file, list *list, uint32_t unit, uint32_t element, uint32_t concat) {
+    writer *file, list *list, uint32_t unit, uint32_t element,
+    uint32_t concat) {
   size_t size = list->size();
   if (size == 0) {
     emit_symbol_to_proof_trace(file, unit);
@@ -319,7 +320,7 @@ void serialize_set(
 }
 
 void serialize_set_to_proof_trace(
-    FILE *file, set *set, uint32_t unit, uint32_t element, uint32_t concat) {
+    writer *file, set *set, uint32_t unit, uint32_t element, uint32_t concat) {
   size_t size = set->size();
   if (size == 0) {
     emit_symbol_to_proof_trace(file, unit);
@@ -347,7 +348,7 @@ void serialize_int(writer *file, mpz_t i, char const *sort, void *state) {
   emit_token(instance, sort, str.c_str());
 }
 
-void serialize_int_to_proof_trace(FILE *file, mpz_t i, uint32_t sort) {
+void serialize_int_to_proof_trace(writer *file, mpz_t i, uint32_t sort) {
   auto str = int_to_string(i);
   emit_token_to_proof_trace(file, sort, str.data(), str.length());
 }
@@ -359,7 +360,7 @@ void serialize_float(writer *file, floating *f, char const *sort, void *state) {
   emit_token(instance, sort, str.c_str());
 }
 
-void serialize_float_to_proof_trace(FILE *file, floating *f, uint32_t sort) {
+void serialize_float_to_proof_trace(writer *file, floating *f, uint32_t sort) {
   auto str = float_to_string(f);
   emit_token_to_proof_trace(file, sort, str.data(), str.length());
 }
@@ -371,7 +372,7 @@ void serialize_bool(writer *file, bool b, char const *sort, void *state) {
   emit_token(instance, sort, str);
 }
 
-void serialize_bool_to_proof_trace(FILE *file, bool b, uint32_t sort) {
+void serialize_bool_to_proof_trace(writer *file, bool b, uint32_t sort) {
   std::string str = b ? "true" : "false";
   emit_token_to_proof_trace(file, sort, str.data(), str.length());
 }
@@ -384,7 +385,7 @@ void serialize_string_buffer(
 }
 
 void serialize_string_buffer_to_proof_trace(
-    FILE *file, stringbuffer *b, uint32_t sort) {
+    writer *file, stringbuffer *b, uint32_t sort) {
   emit_token_to_proof_trace(file, sort, b->contents->data, b->strlen);
 }
 
@@ -400,7 +401,7 @@ void serialize_m_int(
 }
 
 void serialize_m_int_to_proof_trace(
-    FILE *file, size_t *i, size_t bits, uint32_t sort) {
+    writer *file, size_t *i, size_t bits, uint32_t sort) {
   auto str = (i == nullptr) ? std::string("0")
                             : int_to_string(hook_MINT_import(i, bits, false));
 
@@ -531,7 +532,7 @@ void serialize_configuration_internal(
 }
 
 void serialize_configuration_to_proof_trace_internal(
-    FILE *file, block *subject, uint32_t sort, bool is_var) {
+    writer *file, block *subject, uint32_t sort, bool is_var) {
   if (is_var) {
     throw std::invalid_argument("does not support bound variables yet");
   }
@@ -637,7 +638,16 @@ void serialize_configuration(
 void serialize_configuration_to_proof_trace(
     FILE *file, block *subject, uint32_t sort) {
   fputs("\x7FKR2", file);
-  serialize_configuration_to_proof_trace_internal(file, subject, sort, false);
+  writer w{};
+  w.file = file;
+  serialize_configuration_to_proof_trace_internal(&w, subject, sort, false);
+}
+
+string *serialize_term_to_string_v2(block *subject, uint32_t sort) {
+  writer w{};
+  w.buffer = hook_BUFFER_empty();
+  serialize_configuration_to_proof_trace_internal(&w, subject, sort, false);
+  return hook_BUFFER_toString(w.buffer);
 }
 
 void write_hook_event_pre_to_proof_trace(
@@ -748,6 +758,8 @@ void serialize_term_to_proof_trace(
   term->h = header_val;
   store_symbol_children(term, &arg);
   fputs("\x7FKR2", file);
+  writer w{};
+  w.file = file;
 
   serialize_to_proof_trace_visitor callbacks
       = {serialize_configuration_to_proof_trace_internal,
@@ -761,7 +773,7 @@ void serialize_term_to_proof_trace(
          serialize_m_int_to_proof_trace,
          serialize_range_map_to_proof_trace};
 
-  visit_children_for_serialize_to_proof_trace(term, file, &callbacks);
+  visit_children_for_serialize_to_proof_trace(term, &w, &callbacks);
 }
 
 void serialize_raw_term_to_file(
