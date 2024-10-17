@@ -7,7 +7,7 @@ extern "C" {
 
 // The maximum single allocation size in bytes.
 // A contiguous area larger than that size cannot be allocated in any arena.
-extern size_t const BLOCK_SIZE;
+#define BLOCK_SIZE (1024 * 1024)
 
 #define YOUNGSPACE_ID 0
 #define OLDSPACE_ID 1

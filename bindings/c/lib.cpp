@@ -67,7 +67,6 @@ auto managed(kore_symbol *ptr) {
  */
 
 extern "C" {
-void init_static_objects();
 void free_all_kore_mem();
 bool hook_BYTES_mutableBytesEnabled();
 }
