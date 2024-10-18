@@ -1012,6 +1012,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
 
   auto *collection = module->getOrInsertGlobal(
       "time_for_collection", llvm::Type::getInt1Ty(module->getContext()));
+  llvm::cast<llvm::GlobalVariable>(collection)->setThreadLocal(true);
   auto *is_collection = new llvm::LoadInst(
       llvm::Type::getInt1Ty(module->getContext()), collection, "is_collection",
       check_collect);
