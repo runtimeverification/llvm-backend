@@ -782,6 +782,7 @@ llvm::Value *create_term::disable_gc() {
   llvm::Constant *global
       = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setThreadLocal(true);
   auto *old_val = new llvm::LoadInst(
       llvm::Type::getInt1Ty(ctx_), global_var, "was_enabled", current_block_);
   new llvm::StoreInst(
@@ -793,6 +794,7 @@ void create_term::enable_gc(llvm::Value *was_enabled) {
   llvm::Constant *global
       = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setThreadLocal(true);
   new llvm::StoreInst(was_enabled, global_var, current_block_);
 }
 
