@@ -31,7 +31,6 @@ bool during_gc() {
 void *kore_alloc_token(size_t requested) {
   return malloc(requested);
 }
-size_t const BLOCK_SIZE = -1;
 
 char const **get_argument_sorts_for_tag(uint32_t tag) {
   return nullptr;

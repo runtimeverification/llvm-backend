@@ -39,6 +39,7 @@ void migrate_set(void *s);
 void migrate_collection_node(void **node_ptr);
 void set_kore_memory_functions_for_gmp(void);
 void kore_collect(void **, uint8_t, layoutitem *, bool force = false);
+void free_all_kore_mem();
 }
 
 #ifdef GC_DBG

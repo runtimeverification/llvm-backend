@@ -10,7 +10,7 @@
 #include "runtime/arena.h"
 #include "runtime/header.h"
 
-size_t const BLOCK_SIZE = 1024 * 1024;
+extern size_t const VAR_BLOCK_SIZE = BLOCK_SIZE;
 
 __attribute__((always_inline)) memory_block_header *
 mem_block_header(void *ptr) {
