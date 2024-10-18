@@ -52,7 +52,7 @@ get_arena_semispace_id_of_object(void *ptr) {
 //
 //	We will reserve enough address space for 1 million 1MB blocks. Might want to increase this on a > 1TB server.
 //
-size_t const HYPERBLOCK_SIZE = BLOCK_SIZE * 1024 * 1024;
+size_t const HYPERBLOCK_SIZE = (size_t) BLOCK_SIZE * 1024 * 1024;
 static thread_local void* hyperblock_ptr = nullptr;  // only needed for munmap()
 
 static void*
