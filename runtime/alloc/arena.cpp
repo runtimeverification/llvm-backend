@@ -73,7 +73,7 @@ static void *megabyte_malloc() {
     //
     size_t request = HYPERBLOCK_SIZE;
     void *addr = mmap(
-        NULL, // let OS choose the address
+        nullptr, // let OS choose the address
         request, // Linux and MacOS both allow up to 64TB
         PROT_READ | PROT_WRITE, // read, write but not execute
         MAP_ANONYMOUS | MAP_PRIVATE
