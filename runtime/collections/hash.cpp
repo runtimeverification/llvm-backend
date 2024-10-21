@@ -134,6 +134,12 @@ void k_hash(block *arg, void *h) {
             add_hash64(h, *intptr);
             break;
           }
+          case MINT_LAYOUT + 128: {
+            auto *intptr = (uint64_t *)(argintptr + offset);
+            add_hash64(h, intptr[0]);
+            add_hash64(h, intptr[1]);
+            break;
+          }
           case MINT_LAYOUT + 160: {
             auto *intptr = (uint64_t *)(argintptr + offset);
             add_hash64(h, intptr[0]);

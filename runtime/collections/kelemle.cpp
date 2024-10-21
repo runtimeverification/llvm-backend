@@ -143,6 +143,15 @@ bool hook_KEQUAL_eq(block *arg1, block *arg2) {
           }
           break;
         }
+         case MINT_LAYOUT + 128: {
+          auto *child1ptr = (int64_t *)(child1intptr);
+          auto *child2ptr = (int64_t *)(child2intptr);
+          bool cmp = child1ptr[0] == child2ptr[0] && child1ptr[1] == child2ptr[1];
+          if (!cmp) {
+            return false;
+          }
+          break;
+         }
         case MINT_LAYOUT + 160: {
           auto *child1ptr = (int64_t *)(child1intptr);
           auto *child2ptr = (int64_t *)(child2intptr);
