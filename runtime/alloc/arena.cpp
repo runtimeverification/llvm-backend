@@ -52,55 +52,51 @@ get_arena_semispace_id_of_object(void *ptr) {
 //
 //	We will reserve enough address space for 1 million 1MB blocks. Might want to increase this on a > 1TB server.
 //
-size_t const HYPERBLOCK_SIZE = (size_t) BLOCK_SIZE * 1024 * 1024;
-static thread_local void* hyperblock_ptr = nullptr;  // only needed for munmap()
+size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
+static thread_local void *hyperblock_ptr = nullptr; // only needed for munmap()
 
-static void*
-megabyte_malloc()
-{
+static void *megabyte_malloc() {
   //
   //	Return pointer to a BLOCK_SIZE chunk of memory with BLOCK_SIZE alignment.
   //
-  static thread_local char* currentblock_ptr = nullptr;  // char* rather than void* to permit pointer arithmetic
-  if (currentblock_ptr)
-    {
-      //
-      //	We expect an page fault due to not being able to map physical memory to this block or the
-      //	process to be killed by the OOM killer long before we run off the end of our address space.
-      //
-      currentblock_ptr += BLOCK_SIZE;
+  static thread_local char *currentblock_ptr
+      = nullptr; // char* rather than void* to permit pointer arithmetic
+  if (currentblock_ptr) {
+    //
+    //	We expect an page fault due to not being able to map physical memory to this block or the
+    //	process to be killed by the OOM killer long before we run off the end of our address space.
+    //
+    currentblock_ptr += BLOCK_SIZE;
+  } else {
+    //
+    //	First call - need to reserve the address space.
+    //
+    size_t request = HYPERBLOCK_SIZE;
+    void *addr = mmap(
+        NULL, // let OS choose the address
+        request, // Linux and MacOS both allow up to 64TB
+        PROT_READ | PROT_WRITE, // read, write but not execute
+        MAP_ANONYMOUS | MAP_PRIVATE
+            | MAP_NORESERVE, // allocate address space only
+        -1, // no file backing
+        0); // no offset
+    if (addr == MAP_FAILED) {
+      perror("mmap()");
+      abort();
     }
-  else
-    {
-      //
-      //	First call - need to reserve the address space.
-      //
-      size_t request = HYPERBLOCK_SIZE;
-      void* addr = mmap(NULL,  // let OS choose the address
-			request,  // Linux and MacOS both allow up to 64TB
-			PROT_READ | PROT_WRITE,  // read, write but not execute
-			MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,  // allocate address space only
-			-1,  // no file backing
-			0);  // no offset
-      if (addr == MAP_FAILED)
-	{
-	  perror("mmap()");
-	  abort();
-	}
-      hyperblock_ptr = addr;
-      //
-      //	We ask for one block worth of address space less than we allocated so alignment will always succeed.
-      //	We don't worry about unused address space either side of our aligned address space because there will be no
-      //	memory mapped to it.
-      //
-      currentblock_ptr = reinterpret_cast<char*>(std::align(BLOCK_SIZE, HYPERBLOCK_SIZE - BLOCK_SIZE, addr, request));
-    }
+    hyperblock_ptr = addr;
+    //
+    //	We ask for one block worth of address space less than we allocated so alignment will always succeed.
+    //	We don't worry about unused address space either side of our aligned address space because there will be no
+    //	memory mapped to it.
+    //
+    currentblock_ptr = reinterpret_cast<char *>(
+        std::align(BLOCK_SIZE, HYPERBLOCK_SIZE - BLOCK_SIZE, addr, request));
+  }
   return currentblock_ptr;
 }
 
-void
-free_all_memory()
-{
+void free_all_memory() {
   //
   //	Frees all memory that was demand paged into this address range.
   //
