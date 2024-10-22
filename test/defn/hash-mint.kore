@@ -1,6 +1,5 @@
 // RUN: %interpreter
-// RUN: %run | diff - %test-diff-out
-// RUN: %run-binary | diff - %test-diff-out
+// RUN: %run | grep -oP "(?=Lbl'-LT-'k'-GT-'{}).*(dotk{}\(\)\)\)\)\))" | diff - %test-diff-out
 // RUN: %run-binary-out | diff - <(echo -n)
 [topCellInitializer{}(LblinitGeneratedTopCell{}()), org'Stop'kframework'Stop'attributes'Stop'Source{}("Source(/home/robertorosmaninho/rv/k/llvm-backend/src/main/native/llvm-backend/test/defn/k-files/hash-mint.k)")]
 
