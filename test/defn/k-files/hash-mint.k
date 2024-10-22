@@ -14,8 +14,6 @@ module HASH-MINT
        <state> State </state>
   rule <k> bar() => baz() ~> State [ 0p160 ] ...</k>
        <state> State </state>
-  rule <k> bar() => State [ 0p160 ] ...</k>
-       <state> State </state> [owise]
   rule <k> baz() => State [ 0p128 ] ...</k>
        <state> State </state>
 
