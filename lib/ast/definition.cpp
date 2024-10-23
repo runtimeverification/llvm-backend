@@ -175,7 +175,7 @@ SymbolMap kore_definition::get_overloads() const {
 static void process_sort_ordinal(
     kore_sort *sort,
     std::unordered_map<kore_composite_sort, uint32_t, hash_sort> &sorts,
-    std::vector<kore_composite_sort *> &all_sorts_, uint32_t &next_sort) {
+    std::vector<kore_composite_sort *> &all_sorts, uint32_t &next_sort) {
   // We use a work list to ensure that parametric sorts get ordinals
   // that are greater than the ordinals of any of their parameters.
   // This invariant is usefull for serialization purposes, and given
@@ -204,7 +204,7 @@ static void process_sort_ordinal(
       }
 
       sorts.emplace(*sort_to_process, next_sort++);
-      all_sorts_.push_back(sort_to_process);
+      all_sorts.push_back(sort_to_process);
     }
 
     sort_to_process->set_ordinal(sorts[*sort_to_process]);
