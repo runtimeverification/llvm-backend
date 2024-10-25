@@ -786,7 +786,8 @@ llvm::Value *create_term::disable_gc() {
   llvm::IRBuilder b(current_block_);
   auto global_var_address = b.CreateThreadLocalAddress(global_var);
   auto *old_val = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(ctx_), global_var_address, "was_enabled", current_block_);
+      llvm::Type::getInt1Ty(ctx_), global_var_address, "was_enabled",
+      current_block_);
   new llvm::StoreInst(
       llvm::ConstantInt::getFalse(ctx_), global_var_address, current_block_);
   return old_val;
