@@ -1019,10 +1019,10 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
 #else
   auto *collection_address = collection;
 #endif
-  
+
   auto *is_collection = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(module->getContext()), collection_address, "is_collection",
-      check_collect);
+      llvm::Type::getInt1Ty(module->getContext()), collection_address,
+      "is_collection", check_collect);
   set_debug_loc(is_collection);
   auto *collect = llvm::BasicBlock::Create(
       module->getContext(), "isCollect", block->getParent());
