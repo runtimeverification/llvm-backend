@@ -48,7 +48,7 @@ void k_hash(block *, void *);
 bool hash_enter(void);
 void hash_exit(void);
 
-extern bool gc_enabled;
+extern thread_local bool gc_enabled;
 }
 
 class k_elem {

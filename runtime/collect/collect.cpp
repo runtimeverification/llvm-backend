@@ -16,15 +16,15 @@ char **old_alloc_ptr(void);
 char *youngspace_ptr(void);
 char *oldspace_ptr(void);
 
-static bool is_gc = false;
-bool collect_old = false;
+static thread_local bool is_gc = false;
+bool thread_local collect_old = false;
 #ifndef GC_DBG
-static uint8_t num_collection_only_young = 0;
+static thread_local uint8_t num_collection_only_young = 0;
 #else
-static char *last_alloc_ptr;
+static thread_local char *last_alloc_ptr;
 #endif
 
-size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
+size_t thread_local numBytesLiveAtCollection[1 << AGE_WIDTH];
 
 bool during_gc() {
   return is_gc;

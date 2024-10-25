@@ -30,12 +30,12 @@ using memory_block_header = struct {
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
 #define REGISTER_ARENA(name, id)                                               \
-  static struct arena name = {.allocation_semispace_id = (id)}
+  static thread_local struct arena name = {.allocation_semispace_id = (id)}
 
 #define MEM_BLOCK_START(ptr)                                                   \
   ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
 
-extern bool time_for_collection;
+extern thread_local bool time_for_collection;
 
 size_t get_gc_threshold();
 

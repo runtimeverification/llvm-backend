@@ -782,10 +782,14 @@ llvm::Value *create_term::disable_gc() {
   llvm::Constant *global
       = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setThreadLocal(true);
+  llvm::IRBuilder b(current_block_);
+  auto global_var_address = b.CreateThreadLocalAddress(global_var);
   auto *old_val = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(ctx_), global_var, "was_enabled", current_block_);
+      llvm::Type::getInt1Ty(ctx_), global_var_address, "was_enabled",
+      current_block_);
   new llvm::StoreInst(
-      llvm::ConstantInt::getFalse(ctx_), global_var, current_block_);
+      llvm::ConstantInt::getFalse(ctx_), global_var_address, current_block_);
   return old_val;
 }
 
@@ -793,7 +797,10 @@ void create_term::enable_gc(llvm::Value *was_enabled) {
   llvm::Constant *global
       = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
-  new llvm::StoreInst(was_enabled, global_var, current_block_);
+  global_var->setThreadLocal(true);
+  llvm::IRBuilder b(current_block_);
+  auto global_var_address = b.CreateThreadLocalAddress(global_var);
+  new llvm::StoreInst(was_enabled, global_var_address, current_block_);
 }
 
 // We use tailcc calling convention for apply_rule_* and eval_* functions to

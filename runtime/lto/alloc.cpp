@@ -159,8 +159,8 @@ static inline void *kore_alloc_collection(kllvm::sort_category cat) {
   void *mem
       = kore_alloc(sizeof(blockheader) + sizeof(collection) + sizeof(uint64_t));
   auto *hdr = (blockheader *)mem;
-  static std::string name = get_raw_symbol_name(cat) + "{}";
-  static blockheader hdr_val
+  static thread_local std::string name = get_raw_symbol_name(cat) + "{}";
+  static thread_local blockheader hdr_val
       = get_block_header_for_symbol(get_tag_for_symbol_name(name.c_str()));
   *hdr = hdr_val;
   auto *offset = (uint64_t *)(hdr + 1);
