@@ -327,8 +327,10 @@ void kore_definition::preprocess() {
         for (auto const &sort : symbol->get_arguments()) {
           process_sort_ordinal(sort.get(), sorts, all_sorts_, next_sort);
         }
-        process_sort_ordinal(
-            symbol->get_sort().get(), sorts, all_sorts_, next_sort);
+        if (symbol->get_sort()->is_concrete()) {
+          process_sort_ordinal(
+              symbol->get_sort().get(), sorts, all_sorts_, next_sort);
+        }
         if (!instantiations.contains(*symbol)) {
           instantiations.emplace(*symbol, next_symbol++);
         }
