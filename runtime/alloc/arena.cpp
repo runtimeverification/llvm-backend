@@ -149,7 +149,14 @@ static void fresh_block(struct arena *arena) {
       BLOCK_SIZE - sizeof(memory_block_header));
 }
 
+#ifdef __MACH__
+  //
+  //	thread_local disabled for Apple
+  //
+bool gc_enabled = true;
+#else
 thread_local bool gc_enabled = true;
+#endif
 
 __attribute__((noinline)) void *
 do_alloc_slow(size_t requested, struct arena *arena) {

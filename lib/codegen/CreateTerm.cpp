@@ -782,11 +782,17 @@ llvm::Value *create_term::disable_gc() {
   llvm::Constant *global
       = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
-  global_var->setThreadLocal(true);
 #ifdef __MACH__
+  //
+  //	thread_local disabled for Apple
+  //
+  /*
+  global_var->setThreadLocal(true);
   llvm::IRBuilder b(current_block_);
   auto *global_var_address = b.CreateThreadLocalAddress(global_var);
+  */
 #else
+  global_var->setThreadLocal(true);
   auto *global_var_address = global_var;
 #endif
   auto *old_val = new llvm::LoadInst(
@@ -801,11 +807,17 @@ void create_term::enable_gc(llvm::Value *was_enabled) {
   llvm::Constant *global
       = module_->getOrInsertGlobal("gc_enabled", llvm::Type::getInt1Ty(ctx_));
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
-  global_var->setThreadLocal(true);
 #ifdef __MACH__
+  //
+  //	thread_local disabled for Apple
+  //
+  /*
+  global_var->setThreadLocal(true);
   llvm::IRBuilder b(current_block_);
   auto *global_var_address = b.CreateThreadLocalAddress(global_var);
+  */
 #else
+  global_var->setThreadLocal(true);
   auto *global_var_address = global_var;
 #endif
   new llvm::StoreInst(was_enabled, global_var_address, current_block_);
