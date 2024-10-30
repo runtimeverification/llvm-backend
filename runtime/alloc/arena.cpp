@@ -150,9 +150,9 @@ static void fresh_block(struct arena *arena) {
 }
 
 #ifdef __MACH__
-  //
-  //	thread_local disabled for Apple
-  //
+//
+//	thread_local disabled for Apple
+//
 bool gc_enabled = true;
 #else
 thread_local bool gc_enabled = true;

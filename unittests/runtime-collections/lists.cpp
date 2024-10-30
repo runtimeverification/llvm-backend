@@ -63,9 +63,9 @@ block *DUMMY1 = &D1;
 }
 
 #ifdef __MACH__
-  //
-  //	thread_local disabled for Apple
-  //
+//
+//	thread_local disabled for Apple
+//
 bool gc_enabled;
 #else
 thread_local bool gc_enabled;

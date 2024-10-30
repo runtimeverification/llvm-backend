@@ -48,9 +48,9 @@ void k_hash(block *, void *);
 bool hash_enter(void);
 void hash_exit(void);
 #ifdef __MACH__
-  //
-  //	thread_local disabled for Apple
-  //
+//
+//	thread_local disabled for Apple
+//
 extern bool gc_enabled;
 #else
 extern thread_local bool gc_enabled;
