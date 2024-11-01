@@ -50,13 +50,13 @@ private:
   uint32_t version_;
   FILE *file_;
 
-  void write_bytes(void const *ptr, size_t len) { fwrite(ptr, len, 1, file_); }
+  void write_bytes(void const *ptr, size_t len) { /*fwrite(ptr, len, 1, file_);*/ }
 
-  void write_string(char const *str, size_t len) { fwrite(str, 1, len, file_); }
+  void write_string(char const *str, size_t len) { /*fwrite(str, 1, len, file_);*/ }
 
   // Note: This method will not write a 0 at the end of string.
   // The passed string should be 0 terminated.
-  void write_string(char const *str) { fputs(str, file_); }
+  void write_string(char const *str) { /* fputs(str, file_);*/ }
 
   // Note: this method will write a 0 at the end of the string.
   // The passed string should be 0 terminated.

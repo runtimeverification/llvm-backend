@@ -637,7 +637,7 @@ void serialize_configuration(
 
 void serialize_configuration_to_proof_trace(
     FILE *file, block *subject, uint32_t sort) {
-  fputs("\x7FKR2", file);
+  //fputs("\x7FKR2", file);
   writer w{};
   w.file = file;
   serialize_configuration_to_proof_trace_internal(&w, subject, sort, false);
@@ -757,7 +757,7 @@ void serialize_term_to_proof_trace(
   auto *term = (block *)kore_alloc(size_hdr(block_header));
   term->h = header_val;
   store_symbol_children(term, &arg);
-  fputs("\x7FKR2", file);
+  //fputs("\x7FKR2", file);
   writer w{};
   w.file = file;
 
