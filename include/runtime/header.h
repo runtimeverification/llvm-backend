@@ -346,7 +346,7 @@ void sfprintf(writer *file, char const *fmt, Args &&...args) {
 template <typename... Args>
 void sfwrite(void const *ptr, size_t size, size_t nmemb, writer *file) {
   if (file->file) {
-    fwrite(ptr, size, nmemb, file->file);
+    //fwrite(ptr, size, nmemb, file->file);
   } else {
     std::string output;
     output.resize(size * nmemb);
