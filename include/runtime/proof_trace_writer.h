@@ -108,11 +108,11 @@ public:
   void hook_event_post(
       void *hook_result, uint64_t block_header, uint64_t bits) override {
     write_uint64(kllvm::hook_result_sentinel);
-    serialize_term_to_proof_trace(file_, hook_result, block_header, bits);
+    //serialize_term_to_proof_trace(file_, hook_result, block_header, bits);
   }
 
   void argument(void *arg, uint64_t block_header, uint64_t bits) override {
-    serialize_term_to_proof_trace(file_, arg, block_header, bits);
+    //serialize_term_to_proof_trace(file_, arg, block_header, bits);
   }
 
   void rewrite_event_pre(uint64_t ordinal, uint64_t arity) override {
@@ -125,13 +125,13 @@ public:
       char const *name, void *var, uint64_t block_header,
       uint64_t bits) override {
     write_null_terminated_string(name);
-    serialize_term_to_proof_trace(file_, var, block_header, bits);
+    //serialize_term_to_proof_trace(file_, var, block_header, bits);
   }
 
   void rewrite_event_post(
       void *config, uint64_t block_header, uint64_t bits) override {
     write_uint64(kllvm::config_sentinel);
-    serialize_term_to_proof_trace(file_, config, block_header, bits);
+    //serialize_term_to_proof_trace(file_, config, block_header, bits);
   }
 
   void
@@ -165,7 +165,7 @@ public:
 
   void configuration(block *config, bool is_initial) override {
     write_uint64(kllvm::config_sentinel);
-    serialize_configuration_to_proof_trace(file_, config, 0);
+    //serialize_configuration_to_proof_trace(file_, config, 0);
 
     if (chunk_size_ > 0 && is_initial) {
       start_new_chunk();
