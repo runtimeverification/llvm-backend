@@ -791,6 +791,7 @@ llvm::Value *create_term::disable_gc() {
   llvm::IRBuilder b(current_block_);
   auto *global_var_address = b.CreateThreadLocalAddress(global_var);
   */
+  auto *global_var_address = global_var;
 #else
   global_var->setThreadLocal(true);
   auto *global_var_address = global_var;
@@ -816,6 +817,7 @@ void create_term::enable_gc(llvm::Value *was_enabled) {
   llvm::IRBuilder b(current_block_);
   auto *global_var_address = b.CreateThreadLocalAddress(global_var);
   */
+  auto *global_var_address = global_var;
 #else
   global_var->setThreadLocal(true);
   auto *global_var_address = global_var;
