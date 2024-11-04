@@ -35,7 +35,14 @@ using memory_block_header = struct {
 #define MEM_BLOCK_START(ptr)                                                   \
   ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
 
+#ifdef __MACH__
+//
+//	thread_local disabled for Apple
+//
+extern bool time_for_collection;
+#else
 extern thread_local bool time_for_collection;
+#endif
 
 size_t get_gc_threshold();
 

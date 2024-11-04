@@ -103,7 +103,14 @@ void free_all_memory() {
   munmap(hyperblock_ptr, HYPERBLOCK_SIZE);
 }
 
+#ifdef __MACH__
+//
+//	thread_local disabled for Apple
+//
+bool time_for_collection;
+#else
 thread_local bool time_for_collection;
+#endif
 
 static void fresh_block(struct arena *arena) {
   char *next_block = nullptr;
