@@ -1013,11 +1013,19 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
 
   auto *collection = module->getOrInsertGlobal(
       "time_for_collection", llvm::Type::getInt1Ty(module->getContext()));
-  llvm::cast<llvm::GlobalVariable>(collection)->setThreadLocal(true);
+
 #ifdef __MACH__
+  //
+  //	thread_local disabled for Apple
+  //
+  /*
+  llvm::cast<llvm::GlobalVariable>(collection)->setThreadLocal(true);
   llvm::IRBuilder b(check_collect);
   auto *collection_address = b.CreateThreadLocalAddress(collection);
+  */
+  auto *collection_address = collection;
 #else
+  llvm::cast<llvm::GlobalVariable>(collection)->setThreadLocal(true);
   auto *collection_address = collection;
 #endif
 
