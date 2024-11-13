@@ -19,7 +19,7 @@ mem_block_header(void *ptr) {
       ((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1));
 }
 
-__attribute__((always_inline)) void arena_reset(struct arena *arena) {
+__attribute__((always_inline)) void arena_reset(arena *arena) {
   char id = arena->allocation_semispace_id;
   if (id < 0) {
     id = ~arena->allocation_semispace_id;
@@ -35,12 +35,12 @@ __attribute__((always_inline)) void arena_reset(struct arena *arena) {
 }
 
 __attribute__((always_inline)) char
-get_arena_allocation_semispace_id(const struct arena *arena) {
+get_arena_allocation_semispace_id(const arena *arena) {
   return arena->allocation_semispace_id;
 }
 
 __attribute__((always_inline)) char
-get_arena_collection_semispace_id(const struct arena *arena) {
+get_arena_collection_semispace_id(const arena *arena) {
   return ~arena->allocation_semispace_id;
 }
 
@@ -112,7 +112,7 @@ bool time_for_collection;
 thread_local bool time_for_collection;
 #endif
 
-static void fresh_block(struct arena *arena) {
+void fresh_block(arena *arena) {
   char *next_block = nullptr;
   if (arena->block_start == nullptr) {
     next_block = (char *)megabyte_malloc();
@@ -166,7 +166,7 @@ thread_local bool gc_enabled = true;
 #endif
 
 __attribute__((noinline)) void *
-do_alloc_slow(size_t requested, struct arena *arena) {
+do_alloc_slow(size_t requested, arena *arena) {
   MEM_LOG(
       "Block at %p too small, %zd remaining but %zd needed\n", arena->block,
       arena->block_end - arena->block, requested);
@@ -183,7 +183,7 @@ do_alloc_slow(size_t requested, struct arena *arena) {
 }
 
 __attribute__((always_inline)) void *
-arena_resize_last_alloc(struct arena *arena, ssize_t increase) {
+arena_resize_last_alloc(arena *arena, ssize_t increase) {
   if (arena->block + increase <= arena->block_end) {
     arena->block += increase;
     return arena->block;
@@ -191,7 +191,7 @@ arena_resize_last_alloc(struct arena *arena, ssize_t increase) {
   return nullptr;
 }
 
-__attribute__((always_inline)) void arena_swap_and_clear(struct arena *arena) {
+__attribute__((always_inline)) void arena_swap_and_clear(arena *arena) {
   char *tmp = arena->first_block;
   arena->first_block = arena->first_collection_block;
   arena->first_collection_block = tmp;
@@ -202,7 +202,7 @@ __attribute__((always_inline)) void arena_swap_and_clear(struct arena *arena) {
   arena_clear(arena);
 }
 
-__attribute__((always_inline)) void arena_clear(struct arena *arena) {
+__attribute__((always_inline)) void arena_clear(arena *arena) {
   arena->block = arena->first_block
                      ? arena->first_block + sizeof(memory_block_header)
                      : nullptr;
@@ -212,12 +212,12 @@ __attribute__((always_inline)) void arena_clear(struct arena *arena) {
 }
 
 __attribute__((always_inline)) char *
-arena_start_ptr(const struct arena *arena) {
+arena_start_ptr(const arena *arena) {
   return arena->first_block ? arena->first_block + sizeof(memory_block_header)
                             : nullptr;
 }
 
-__attribute__((always_inline)) char **arena_end_ptr(struct arena *arena) {
+__attribute__((always_inline)) char **arena_end_ptr(arena *arena) {
   return &arena->block;
 }
 
@@ -264,7 +264,7 @@ ssize_t ptr_diff(char *ptr1, char *ptr2) {
   return -ptr_diff(ptr2, ptr1);
 }
 
-size_t arena_size(const struct arena *arena) {
+size_t arena_size(const arena *arena) {
   return (arena->num_blocks > arena->num_collection_blocks
               ? arena->num_blocks
               : arena->num_collection_blocks)
