@@ -179,16 +179,13 @@ __attribute__((always_inline)) void arena_swap_and_clear(arena *arena) {
   arena->num_blocks = arena->num_collection_blocks;
   arena->num_collection_blocks = tmp2;
   arena->allocation_semispace_id = ~arena->allocation_semispace_id;
-  arena_clear(arena);
+  arena->arena_clear();
 }
 
-__attribute__((always_inline)) void arena_clear(arena *arena) {
-  arena->block = arena->first_block
-                     ? arena->first_block + sizeof(memory_block_header)
-                     : nullptr;
-  arena->block_start = arena->first_block;
-  arena->block_end
-      = arena->first_block ? arena->first_block + BLOCK_SIZE : nullptr;
+__attribute__((always_inline)) void arena::arena_clear() {
+  block = first_block ? first_block + sizeof(memory_block_header) : nullptr;
+  block_start = first_block;
+  block_end = first_block ? first_block + BLOCK_SIZE : nullptr;
 }
 
 __attribute__((always_inline)) char *
@@ -244,9 +241,9 @@ ssize_t ptr_diff(char *ptr1, char *ptr2) {
   return -ptr_diff(ptr2, ptr1);
 }
 
-size_t arena_size(const arena *arena) {
-  return (arena->num_blocks > arena->num_collection_blocks
-              ? arena->num_blocks
-              : arena->num_collection_blocks)
+size_t arena::arena_size() const {
+  return (num_blocks > num_collection_blocks
+              ? num_blocks
+              : num_collection_blocks)
          * (BLOCK_SIZE - sizeof(memory_block_header));
 }

@@ -40,7 +40,7 @@ char oldspace_collection_id() {
 }
 
 size_t youngspace_size(void) {
-  return arena_size(&youngspace);
+  return youngspace.arena_size();
 }
 
 bool youngspace_almost_full(size_t threshold) {
@@ -56,7 +56,7 @@ void kore_alloc_swap(bool swap_old) {
 }
 
 void kore_clear() {
-  arena_clear(&alwaysgcspace);
+  alwaysgcspace.arena_clear();
 }
 
 void set_kore_memory_functions_for_gmp() {
