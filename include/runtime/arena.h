@@ -14,6 +14,15 @@ class arena {
 public:
   arena(char id) : allocation_semispace_id(id) {}
   void fresh_block();
+  
+  // return the total number of allocatable bytes currently in the arena in its
+  // active semispace.
+  size_t arena_size() const;
+  
+  // Clears the current allocation space by setting its start back to its first
+  // block. It is used during garbage collection to effectively collect all of the
+  // arena.
+  void arena_clear();
 
 private:
   char *first_block;
@@ -27,10 +36,8 @@ private:
   //
   //	These functions need to be friends because they are called from LLVM code.
   //
-  friend void arena_clear(arena *arena);
   friend char * arena_start_ptr(const arena *arena);
   friend char **arena_end_ptr(arena *arena);
-  friend size_t arena_size(const arena *arena);
   friend char get_arena_collection_semispace_id(const arena *arena);
   friend void arena_swap_and_clear(arena *arena);
   friend void *kore_arena_alloc(arena *arena, size_t requested);
@@ -105,11 +112,6 @@ void *arena_resize_last_alloc(arena *, ssize_t);
 // It is used before garbage collection.
 void arena_swap_and_clear(arena *);
 
-// Clears the current allocation space by setting its start back to its first
-// block. It is used during garbage collection to effectively collect all of the
-// arena.
-void arena_clear(arena *);
-
 // Returns the address of the first byte that belongs in the given arena.
 // Returns 0 if nothing has been allocated ever in that arena.
 char *arena_start_ptr(const arena *);
@@ -136,10 +138,6 @@ char *move_ptr(char *, size_t, char const *);
 // sentinel bytes. Undefined behavior will result if the pointers belong to
 // different arenas.
 ssize_t ptr_diff(char *, char *);
-
-// return the total number of allocatable bytes currently in the arena in its
-// active semispace.
-size_t arena_size(const arena *);
 
 // Deallocates all the memory allocated for registered arenas.
 void free_all_memory(void);
