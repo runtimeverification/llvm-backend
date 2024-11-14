@@ -20,11 +20,6 @@ mem_block_header(void *ptr) {
 }
 
 __attribute__((always_inline)) char
-get_arena_allocation_semispace_id(const arena *arena) {
-  return arena->allocation_semispace_id;
-}
-
-__attribute__((always_inline)) char
 get_arena_collection_semispace_id(const arena *arena) {
   return ~arena->allocation_semispace_id;
 }
