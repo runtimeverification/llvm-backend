@@ -25,28 +25,18 @@ private:
   size_t num_collection_blocks;
   char allocation_semispace_id;
   //
-  //	First step, make all the functions that look like they should be member
-  //	functions into friends so that they can access the data members.
-  //
-  friend void *kore_arena_alloc(arena *arena, size_t requested);
-
-  friend char get_arena_allocation_semispace_id(const arena *arena);
-  friend char get_arena_collection_semispace_id(const arena *arena);
-
-  friend void *do_alloc_slow(size_t requested, arena *arena);
-  friend void *arena_resize_last_alloc(arena *arena, ssize_t increase);
-  friend void arena_swap_and_clear(arena *arena);
-  //
-  //	These things probably shouldn't be friends but are needed to compile.
-  //
-  friend bool youngspace_almost_full(size_t threshold);
-  //
-  //	Needs to be a friend because called from LLVM code.
+  //	These functions need to be friends because they are called from LLVM code.
   //
   friend void arena_clear(arena *arena);
   friend char * arena_start_ptr(const arena *arena);
   friend char **arena_end_ptr(arena *arena);
   friend size_t arena_size(const arena *arena);
+  friend char get_arena_collection_semispace_id(const arena *arena);
+  friend void arena_swap_and_clear(arena *arena);
+  friend void *kore_arena_alloc(arena *arena, size_t requested);
+  friend void *do_alloc_slow(size_t requested, arena *arena);
+  friend void *arena_resize_last_alloc(arena *arena, ssize_t increase);
+  friend bool youngspace_almost_full(size_t threshold);
 };
 
 using memory_block_header = struct {
@@ -73,9 +63,6 @@ extern thread_local bool time_for_collection;
 #endif
 
 size_t get_gc_threshold();
-
-// Resets the given arena.
-void arena_reset(arena *);
 
 // Returns the given arena's current allocation semispace ID.
 // Each arena has 2 semispace IDs one equal to the arena ID and the other equal
