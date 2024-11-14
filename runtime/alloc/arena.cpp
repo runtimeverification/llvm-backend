@@ -19,21 +19,6 @@ mem_block_header(void *ptr) {
       ((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1));
 }
 
-__attribute__((always_inline)) void arena_reset(arena *arena) {
-  char id = arena->allocation_semispace_id;
-  if (id < 0) {
-    id = ~arena->allocation_semispace_id;
-  }
-  arena->first_block = nullptr;
-  arena->block = nullptr;
-  arena->block_start = nullptr;
-  arena->block_end = nullptr;
-  arena->first_collection_block = nullptr;
-  arena->num_blocks = 0;
-  arena->num_collection_blocks = 0;
-  arena->allocation_semispace_id = id;
-}
-
 __attribute__((always_inline)) char
 get_arena_allocation_semispace_id(const arena *arena) {
   return arena->allocation_semispace_id;
@@ -112,47 +97,47 @@ bool time_for_collection;
 thread_local bool time_for_collection;
 #endif
 
-void fresh_block(arena *arena) {
+void arena::fresh_block() {
   char *next_block = nullptr;
-  if (arena->block_start == nullptr) {
+  if (block_start == nullptr) {
     next_block = (char *)megabyte_malloc();
-    arena->first_block = next_block;
+    first_block = next_block;
     auto *next_header = (memory_block_header *)next_block;
     next_header->next_block = nullptr;
-    next_header->semispace = arena->allocation_semispace_id;
-    arena->num_blocks++;
+    next_header->semispace = allocation_semispace_id;
+    num_blocks++;
   } else {
-    next_block = *(char **)arena->block_start;
-    if (arena->block != arena->block_end) {
-      if (arena->block_end - arena->block == 8) {
-        *(uint64_t *)arena->block
+    next_block = *(char **)block_start;
+    if (block != block_end) {
+      if (block_end - block == 8) {
+        *(uint64_t *)block
             = NOT_YOUNG_OBJECT_BIT; // 8 bit sentinel value
       } else {
-        *(uint64_t *)arena->block = arena->block_end - arena->block
+        *(uint64_t *)block = block_end - block
                                     - 8; // 16-bit or more sentinel value
       }
     }
     if (!next_block) {
       MEM_LOG(
           "Allocating new block for the first time in arena %d\n",
-          arena->allocation_semispace_id);
+          allocation_semispace_id);
       next_block = (char *)megabyte_malloc();
-      *(char **)arena->block_start = next_block;
+      *(char **)block_start = next_block;
       auto *next_header = (memory_block_header *)next_block;
       next_header->next_block = nullptr;
-      next_header->semispace = arena->allocation_semispace_id;
-      arena->num_blocks++;
+      next_header->semispace = allocation_semispace_id;
+      num_blocks++;
       time_for_collection = true;
     }
   }
-  if (!*(char **)next_block && arena->num_blocks >= get_gc_threshold()) {
+  if (!*(char **)next_block && num_blocks >= get_gc_threshold()) {
     time_for_collection = true;
   }
-  arena->block = next_block + sizeof(memory_block_header);
-  arena->block_start = next_block;
-  arena->block_end = next_block + BLOCK_SIZE;
+  block = next_block + sizeof(memory_block_header);
+  block_start = next_block;
+  block_end = next_block + BLOCK_SIZE;
   MEM_LOG(
-      "New block at %p (remaining %zd)\n", arena->block,
+      "New block at %p (remaining %zd)\n", block,
       BLOCK_SIZE - sizeof(memory_block_header));
 }
 
@@ -173,7 +158,7 @@ do_alloc_slow(size_t requested, arena *arena) {
   if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
     return malloc(requested);
   }
-  fresh_block(arena);
+  arena->fresh_block();
   void *result = arena->block;
   arena->block += requested;
   MEM_LOG(
