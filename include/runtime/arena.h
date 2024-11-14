@@ -64,14 +64,10 @@ extern thread_local bool time_for_collection;
 
 size_t get_gc_threshold();
 
-// Returns the given arena's current allocation semispace ID.
+// Returns the given arena's current collection semispace ID.
 // Each arena has 2 semispace IDs one equal to the arena ID and the other equal
 // to the 1's complement of the arena ID. At any time one of these semispaces
 // is used for allocation and the other is used for collection.
-char get_arena_allocation_semispace_id(const arena *);
-
-// Returns the given arena's current collection semispace ID.
-// See above for details.
 char get_arena_collection_semispace_id(const arena *);
 
 // Returns the ID of the semispace where the given address was allocated.
