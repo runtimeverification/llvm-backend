@@ -52,10 +52,7 @@ void decision::operator()(decision_node *entry) {
     if (fail_pattern_) {
       llvm::Value *val = load(std::make_pair(
           "_1", getvalue_type({sort_category::Symbol, 0}, module_)));
-      fail_subject_->addIncoming(
-          new llvm::BitCastInst(
-              val, llvm::PointerType::getUnqual(ctx_), "", current_block_),
-          current_block_);
+      fail_subject_->addIncoming(val, current_block_);
       fail_pattern_->addIncoming(
           string_literal("\\bottom{SortGeneratedTopCell{}}()"), current_block_);
       fail_sort_->addIncoming(
@@ -71,8 +68,7 @@ llvm::Value *decision::ptr_term(llvm::Value *val) {
   if (val->getType()->isIntegerTy()) {
     val = allocate_term(val->getType(), current_block_, "kore_alloc_always_gc");
   }
-  return new llvm::BitCastInst(
-      val, llvm::PointerType::getUnqual(ctx_), "", current_block_);
+  return val;
 }
 
 bool decision_node::begin_node(decision *d, std::string const &name) {
@@ -236,14 +232,13 @@ void switch_node::codegen(decision *d) {
       int offset = 0;
       llvm::StructType *block_type = get_block_type(
           d->module_, d->definition_, switch_case.get_constructor());
-      auto *cast = new llvm::BitCastInst(val, ptr_ty, "", d->current_block_);
       kore_symbol_declaration *symbol_decl
           = d->definition_->get_symbol_declarations().at(
               switch_case.get_constructor()->get_name());
       llvm::Instruction *renamed = nullptr;
       for (auto const &binding : switch_case.get_bindings()) {
         llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
-            block_type, cast,
+            block_type, val,
             {llvm::ConstantInt::get(llvm::Type::getInt64Ty(d->ctx_), 0),
              llvm::ConstantInt::get(
                  llvm::Type::getInt32Ty(d->ctx_),
@@ -894,7 +889,7 @@ void abort_when_stuck(
       }
       new llvm::StoreInst(child_value, child_ptr, current_block);
     }
-    ptr = new llvm::BitCastInst(block, block_ptr, "", current_block);
+    ptr = block;
   }
   auto *func = get_or_insert_function(
       module, "finish_rewriting", llvm::Type::getVoidTy(ctx), block_ptr,
@@ -971,10 +966,8 @@ static void store_ptrs_for_gc(
         {zero, llvm::ConstantInt::get(
                    llvm::Type::getInt64Ty(module->getContext()), i)},
         "", collect);
-    auto *casted = new llvm::BitCastInst(
-        ptr, llvm::PointerType::getUnqual(module->getContext()), "", collect);
-    new llvm::StoreInst(roots[i], casted, collect);
-    root_ptrs.emplace_back(casted, ptr_types[i]);
+    new llvm::StoreInst(roots[i], ptr, collect);
+    root_ptrs.emplace_back(ptr, ptr_types[i]);
   }
 }
 
@@ -1113,8 +1106,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
       {arr,
        llvm::ConstantInt::get(
            llvm::Type::getInt8Ty(module->getContext()), nroots),
-       llvm::ConstantExpr::getBitCast(layout, ptr_ty),
-       llvm::ConstantInt::getFalse(module->getContext())},
+       layout, llvm::ConstantInt::getFalse(module->getContext())},
       "", collect);
   set_debug_loc(call);
   std::vector<llvm::Value *> phis;
