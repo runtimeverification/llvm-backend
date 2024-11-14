@@ -13,6 +13,7 @@ extern "C" {
 class arena {
 public:
   arena(char id) : allocation_semispace_id(id) {}
+  void fresh_block();
 
 private:
   char *first_block;
@@ -29,23 +30,23 @@ private:
   //
   friend void *kore_arena_alloc(arena *arena, size_t requested);
 
-  friend void arena_reset(arena *arena);
   friend char get_arena_allocation_semispace_id(const arena *arena);
   friend char get_arena_collection_semispace_id(const arena *arena);
-  friend void fresh_block(arena *arena);
 
-  friend void fresh_block(arena *arena);
   friend void *do_alloc_slow(size_t requested, arena *arena);
   friend void *arena_resize_last_alloc(arena *arena, ssize_t increase);
   friend void arena_swap_and_clear(arena *arena);
-  friend void arena_clear(arena *arena);
-  friend char * arena_start_ptr(const arena *arena);
-  friend char **arena_end_ptr(arena *arena);
-  friend size_t arena_size(const arena *arena);
   //
   //	These things probably shouldn't be friends but are needed to compile.
   //
   friend bool youngspace_almost_full(size_t threshold);
+  //
+  //	Needs to be a friend because called from LLVM code.
+  //
+  friend void arena_clear(arena *arena);
+  friend char * arena_start_ptr(const arena *arena);
+  friend char **arena_end_ptr(arena *arena);
+  friend size_t arena_size(const arena *arena);
 };
 
 using memory_block_header = struct {
