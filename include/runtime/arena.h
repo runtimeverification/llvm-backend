@@ -13,7 +13,6 @@ extern "C" {
 class arena {
 public:
   arena(char id) : allocation_semispace_id(id) {}
-  void fresh_block();
   
   // return the total number of allocatable bytes currently in the arena in its
   // active semispace.
@@ -35,8 +34,17 @@ public:
   // to the 1's complement of the arena ID. At any time one of these semispaces
   // is used for allocation and the other is used for collection.
   char get_arena_collection_semispace_id() const;
+  
+  // Exchanges the current allocation and collection semispaces and clears the new
+  // current allocation semispace by setting its start back to its first block.
+  // It is used before garbage collection.
+  void arena_swap_and_clear();
 
 private:
+  void fresh_block();
+  // helper function for `kore_arena_alloc`. Do not call directly.
+  void *do_alloc_slow(size_t requested);
+
   char *first_block;
   char *block;
   char *block_start;
@@ -50,9 +58,7 @@ private:
   //
   friend char * arena_start_ptr(const arena *arena);
   friend char **arena_end_ptr(arena *arena);
-  friend void arena_swap_and_clear(arena *arena);
   friend void *kore_arena_alloc(arena *arena, size_t requested);
-  friend void *do_alloc_slow(size_t requested, arena *arena);
   friend bool youngspace_almost_full(size_t threshold);
 };
 
@@ -87,8 +93,6 @@ size_t get_gc_threshold();
 // allocated within an arena.
 char get_arena_semispace_id_of_object(void *);
 
-// helper function for `kore_arena_alloc`. Do not call directly.
-void *do_alloc_slow(size_t, arena *);
 
 // Allocates the requested number of bytes as a contiguous region and returns a
 // pointer to the first allocated byte.
@@ -96,7 +100,7 @@ void *do_alloc_slow(size_t, arena *);
 // size, the space is allocated in a general (not garbage collected pool).
 inline void *kore_arena_alloc(arena *arena, size_t requested) {
   if (arena->block + requested > arena->block_end) {
-    return do_alloc_slow(requested, arena);
+    return arena->do_alloc_slow(requested);
   }
   void *result = arena->block;
   arena->block += requested;
@@ -106,10 +110,6 @@ inline void *kore_arena_alloc(arena *arena, size_t requested) {
   return result;
 }
 
-// Exchanges the current allocation and collection semispaces and clears the new
-// current allocation semispace by setting its start back to its first block.
-// It is used before garbage collection.
-void arena_swap_and_clear(arena *);
 
 // Returns the address of the first byte that belongs in the given arena.
 // Returns 0 if nothing has been allocated ever in that arena.

@@ -146,19 +146,19 @@ thread_local bool gc_enabled = true;
 #endif
 
 __attribute__((noinline)) void *
-do_alloc_slow(size_t requested, arena *arena) {
+arena::do_alloc_slow(size_t requested) {
   MEM_LOG(
-      "Block at %p too small, %zd remaining but %zd needed\n", arena->block,
-      arena->block_end - arena->block, requested);
+      "Block at %p too small, %zd remaining but %zd needed\n", block,
+      block_end - block, requested);
   if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
     return malloc(requested);
   }
-  arena->fresh_block();
-  void *result = arena->block;
-  arena->block += requested;
+  fresh_block();
+  void *result = block;
+  block += requested;
   MEM_LOG(
       "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, arena->block);
+      requested, block);
   return result;
 }
 
@@ -171,15 +171,15 @@ arena::arena_resize_last_alloc(ssize_t increase) {
   return nullptr;
 }
 
-__attribute__((always_inline)) void arena_swap_and_clear(arena *arena) {
-  char *tmp = arena->first_block;
-  arena->first_block = arena->first_collection_block;
-  arena->first_collection_block = tmp;
-  size_t tmp2 = arena->num_blocks;
-  arena->num_blocks = arena->num_collection_blocks;
-  arena->num_collection_blocks = tmp2;
-  arena->allocation_semispace_id = ~arena->allocation_semispace_id;
-  arena->arena_clear();
+__attribute__((always_inline)) void arena::arena_swap_and_clear() {
+  char *tmp = first_block;
+  first_block = first_collection_block;
+  first_collection_block = tmp;
+  size_t tmp2 = num_blocks;
+  num_blocks = num_collection_blocks;
+  num_collection_blocks = tmp2;
+  allocation_semispace_id = ~allocation_semispace_id;
+  arena_clear();
 }
 
 __attribute__((always_inline)) void arena::arena_clear() {
