@@ -105,11 +105,10 @@ void arena::fresh_block() {
     next_block = *(char **)block_start;
     if (block != block_end) {
       if (block_end - block == 8) {
-        *(uint64_t *)block
-            = NOT_YOUNG_OBJECT_BIT; // 8 bit sentinel value
+        *(uint64_t *)block = NOT_YOUNG_OBJECT_BIT; // 8 bit sentinel value
       } else {
-        *(uint64_t *)block = block_end - block
-                                    - 8; // 16-bit or more sentinel value
+        *(uint64_t *)block
+            = block_end - block - 8; // 16-bit or more sentinel value
       }
     }
     if (!next_block) {
@@ -145,8 +144,7 @@ bool gc_enabled = true;
 thread_local bool gc_enabled = true;
 #endif
 
-__attribute__((noinline)) void *
-arena::do_alloc_slow(size_t requested) {
+__attribute__((noinline)) void *arena::do_alloc_slow(size_t requested) {
   MEM_LOG(
       "Block at %p too small, %zd remaining but %zd needed\n", block,
       block_end - block, requested);
@@ -188,14 +186,11 @@ __attribute__((always_inline)) void arena::arena_clear() {
   block_end = first_block ? first_block + BLOCK_SIZE : nullptr;
 }
 
-__attribute__((always_inline)) char *
-arena::arena_start_ptr() const {
-  return first_block ? first_block + sizeof(memory_block_header)
-                     : nullptr;
+__attribute__((always_inline)) char *arena::arena_start_ptr() const {
+  return first_block ? first_block + sizeof(memory_block_header) : nullptr;
 }
 
-__attribute__((always_inline)) char **
-arena::arena_end_ptr() {
+__attribute__((always_inline)) char **arena::arena_end_ptr() {
   return &block;
 }
 
@@ -243,8 +238,7 @@ ssize_t ptr_diff(char *ptr1, char *ptr2) {
 }
 
 size_t arena::arena_size() const {
-  return (num_blocks > num_collection_blocks
-              ? num_blocks
-              : num_collection_blocks)
+  return (num_blocks > num_collection_blocks ? num_blocks
+                                             : num_collection_blocks)
          * (BLOCK_SIZE - sizeof(memory_block_header));
 }

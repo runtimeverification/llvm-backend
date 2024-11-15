@@ -12,9 +12,10 @@ extern "C" {
 // once.
 class arena {
 public:
-  arena(char id) : allocation_semispace_id(id) {}
+  arena(char id)
+      : allocation_semispace_id(id) { }
   void *kore_arena_alloc(size_t requested);
-  
+
   // Returns the address of the first byte that belongs in the given arena.
   // Returns 0 if nothing has been allocated ever in that arena.
   char *arena_start_ptr() const;
@@ -27,7 +28,7 @@ public:
   // return the total number of allocatable bytes currently in the arena in its
   // active semispace.
   size_t arena_size() const;
-  
+
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
   // arena.
@@ -38,13 +39,13 @@ public:
   // Returns the address of the byte following the last newlly allocated byte when
   // the resize succeeds, returns 0 otherwise.
   void *arena_resize_last_alloc(ssize_t increase);
-  
+
   // Returns the given arena's current collection semispace ID.
   // Each arena has 2 semispace IDs one equal to the arena ID and the other equal
   // to the 1's complement of the arena ID. At any time one of these semispaces
   // is used for allocation and the other is used for collection.
   char get_arena_collection_semispace_id() const;
-  
+
   // Exchanges the current allocation and collection semispaces and clears the new
   // current allocation semispace by setting its start back to its first block.
   // It is used before garbage collection.
@@ -52,7 +53,7 @@ public:
 
 private:
   void fresh_block();
-  
+
   // helper function for `kore_arena_alloc`. Do not call directly.
   void *do_alloc_slow(size_t requested);
 
@@ -74,8 +75,7 @@ using memory_block_header = struct {
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
-#define REGISTER_ARENA(name, id)                                               \
-  static thread_local arena name(id)
+#define REGISTER_ARENA(name, id) static thread_local arena name(id)
 
 #define MEM_BLOCK_START(ptr)                                                   \
   ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
@@ -91,19 +91,16 @@ extern thread_local bool time_for_collection;
 
 size_t get_gc_threshold();
 
-
 // Returns the ID of the semispace where the given address was allocated.
 // The behavior is undefined if called with an address that has not been
 // allocated within an arena.
 char get_arena_semispace_id_of_object(void *);
 
-
 // Allocates the requested number of bytes as a contiguous region and returns a
 // pointer to the first allocated byte.
 // If called with requested size greater than the maximun single allocation
 // size, the space is allocated in a general (not garbage collected pool).
-inline void
-*arena::kore_arena_alloc(size_t requested) {
+inline void *arena::kore_arena_alloc(size_t requested) {
   if (block + requested > block_end) {
     return do_alloc_slow(requested);
   }
@@ -114,7 +111,6 @@ inline void
       requested, block);
   return result;
 }
-
 
 // Given a starting pointer to an address allocated in an arena and a size in
 // bytes, this function returns a pointer to an address allocated in the
