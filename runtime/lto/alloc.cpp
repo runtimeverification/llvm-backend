@@ -16,19 +16,19 @@ REGISTER_ARENA(oldspace, OLDSPACE_ID);
 REGISTER_ARENA(alwaysgcspace, ALWAYSGCSPACE_ID);
 
 char *youngspace_ptr() {
-  return arena_start_ptr(&youngspace);
+  return youngspace.arena_start_ptr();
 }
 
 char *oldspace_ptr() {
-  return arena_start_ptr(&oldspace);
+  return oldspace.arena_start_ptr();
 }
 
 char **young_alloc_ptr() {
-  return arena_end_ptr(&youngspace);
+  return youngspace.arena_end_ptr();
 }
 
 char **old_alloc_ptr() {
-  return arena_end_ptr(&oldspace);
+  return oldspace.arena_end_ptr();
 }
 
 char youngspace_collection_id() {
@@ -85,7 +85,7 @@ kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
 
-  if (oldptr != *arena_end_ptr(&youngspace) - last_size) {
+  if (oldptr != *(youngspace.arena_end_ptr()) - last_size) {
     MEM_LOG(
         "May only reallocate last allocation. Tried to reallocate %p to %zd\n",
         oldptr, newrequest);

@@ -14,6 +14,15 @@ class arena {
 public:
   arena(char id) : allocation_semispace_id(id) {}
   void *kore_arena_alloc(size_t requested);
+  
+  // Returns the address of the first byte that belongs in the given arena.
+  // Returns 0 if nothing has been allocated ever in that arena.
+  char *arena_start_ptr() const;
+
+  // Returns a pointer to a location holding the address of last allocated
+  // byte in the given arena plus 1.
+  // This address is 0 if nothing has been allocated ever in that arena.
+  char **arena_end_ptr();
 
   // return the total number of allocatable bytes currently in the arena in its
   // active semispace.
@@ -55,12 +64,6 @@ private:
   size_t num_blocks;
   size_t num_collection_blocks;
   char allocation_semispace_id;
-  //
-  //	These functions need to be friends because they are called from LLVM code.
-  //
-  friend char *arena_start_ptr(const arena *arena);
-  friend char **arena_end_ptr(arena *arena);
-  //friend bool youngspace_almost_full(size_t threshold);
 };
 
 using memory_block_header = struct {
@@ -112,14 +115,6 @@ inline void
   return result;
 }
 
-// Returns the address of the first byte that belongs in the given arena.
-// Returns 0 if nothing has been allocated ever in that arena.
-char *arena_start_ptr(const arena *);
-
-// Returns a pointer to a location holding the address of last allocated
-// byte in the given arena plus 1.
-// This address is 0 if nothing has been allocated ever in that arena.
-char **arena_end_ptr(arena *);
 
 // Given a starting pointer to an address allocated in an arena and a size in
 // bytes, this function returns a pointer to an address allocated in the

@@ -189,13 +189,14 @@ __attribute__((always_inline)) void arena::arena_clear() {
 }
 
 __attribute__((always_inline)) char *
-arena_start_ptr(const arena *arena) {
-  return arena->first_block ? arena->first_block + sizeof(memory_block_header)
-                            : nullptr;
+arena::arena_start_ptr() const {
+  return first_block ? first_block + sizeof(memory_block_header)
+                     : nullptr;
 }
 
-__attribute__((always_inline)) char **arena_end_ptr(arena *arena) {
-  return &arena->block;
+__attribute__((always_inline)) char **
+arena::arena_end_ptr() {
+  return &block;
 }
 
 char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
