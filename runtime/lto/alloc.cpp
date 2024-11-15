@@ -49,9 +49,9 @@ bool youngspace_almost_full(size_t threshold) {
 }
 
 void kore_alloc_swap(bool swap_old) {
-  arena_swap_and_clear(&youngspace);
+  youngspace.arena_swap_and_clear();
   if (swap_old) {
-    arena_swap_and_clear(&oldspace);
+    oldspace.arena_swap_and_clear();
   }
 }
 
