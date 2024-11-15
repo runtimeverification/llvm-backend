@@ -13,7 +13,8 @@ extern "C" {
 class arena {
 public:
   arena(char id) : allocation_semispace_id(id) {}
-  
+  void *kore_arena_alloc(size_t requested);
+
   // return the total number of allocatable bytes currently in the arena in its
   // active semispace.
   size_t arena_size() const;
@@ -42,6 +43,7 @@ public:
 
 private:
   void fresh_block();
+  
   // helper function for `kore_arena_alloc`. Do not call directly.
   void *do_alloc_slow(size_t requested);
 
@@ -56,10 +58,9 @@ private:
   //
   //	These functions need to be friends because they are called from LLVM code.
   //
-  friend char * arena_start_ptr(const arena *arena);
+  friend char *arena_start_ptr(const arena *arena);
   friend char **arena_end_ptr(arena *arena);
-  friend void *kore_arena_alloc(arena *arena, size_t requested);
-  friend bool youngspace_almost_full(size_t threshold);
+  //friend bool youngspace_almost_full(size_t threshold);
 };
 
 using memory_block_header = struct {
@@ -98,18 +99,18 @@ char get_arena_semispace_id_of_object(void *);
 // pointer to the first allocated byte.
 // If called with requested size greater than the maximun single allocation
 // size, the space is allocated in a general (not garbage collected pool).
-inline void *kore_arena_alloc(arena *arena, size_t requested) {
-  if (arena->block + requested > arena->block_end) {
-    return arena->do_alloc_slow(requested);
+inline void
+*arena::kore_arena_alloc(size_t requested) {
+  if (block + requested > block_end) {
+    return do_alloc_slow(requested);
   }
-  void *result = arena->block;
-  arena->block += requested;
+  void *result = block;
+  block += requested;
   MEM_LOG(
       "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, arena->block);
+      requested, block);
   return result;
 }
-
 
 // Returns the address of the first byte that belongs in the given arena.
 // Returns 0 if nothing has been allocated ever in that arena.
