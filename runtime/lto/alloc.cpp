@@ -32,11 +32,11 @@ char **old_alloc_ptr() {
 }
 
 char youngspace_collection_id() {
-  return get_arena_collection_semispace_id(&youngspace);
+  return youngspace.get_arena_collection_semispace_id();
 }
 
 char oldspace_collection_id() {
-  return get_arena_collection_semispace_id(&oldspace);
+  return oldspace.get_arena_collection_semispace_id();
 }
 
 size_t youngspace_size(void) {
@@ -98,7 +98,7 @@ kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   }
 
   ssize_t increase = newrequest - last_size;
-  if (arena_resize_last_alloc(&youngspace, increase)) {
+  if (youngspace.arena_resize_last_alloc(increase)) {
     return oldptr;
   }
 

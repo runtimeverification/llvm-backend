@@ -20,8 +20,8 @@ mem_block_header(void *ptr) {
 }
 
 __attribute__((always_inline)) char
-get_arena_collection_semispace_id(const arena *arena) {
-  return ~arena->allocation_semispace_id;
+arena::get_arena_collection_semispace_id() const {
+  return ~allocation_semispace_id;
 }
 
 __attribute__((always_inline)) char
@@ -163,10 +163,10 @@ do_alloc_slow(size_t requested, arena *arena) {
 }
 
 __attribute__((always_inline)) void *
-arena_resize_last_alloc(arena *arena, ssize_t increase) {
-  if (arena->block + increase <= arena->block_end) {
-    arena->block += increase;
-    return arena->block;
+arena::arena_resize_last_alloc(ssize_t increase) {
+  if (block + increase <= block_end) {
+    block += increase;
+    return block;
   }
   return nullptr;
 }
