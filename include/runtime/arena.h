@@ -24,6 +24,18 @@ public:
   // arena.
   void arena_clear();
 
+  // Resizes the last allocation as long as the resize does not require a new
+  // block allocation.
+  // Returns the address of the byte following the last newlly allocated byte when
+  // the resize succeeds, returns 0 otherwise.
+  void *arena_resize_last_alloc(ssize_t increase);
+  
+  // Returns the given arena's current collection semispace ID.
+  // Each arena has 2 semispace IDs one equal to the arena ID and the other equal
+  // to the 1's complement of the arena ID. At any time one of these semispaces
+  // is used for allocation and the other is used for collection.
+  char get_arena_collection_semispace_id() const;
+
 private:
   char *first_block;
   char *block;
@@ -38,11 +50,9 @@ private:
   //
   friend char * arena_start_ptr(const arena *arena);
   friend char **arena_end_ptr(arena *arena);
-  friend char get_arena_collection_semispace_id(const arena *arena);
   friend void arena_swap_and_clear(arena *arena);
   friend void *kore_arena_alloc(arena *arena, size_t requested);
   friend void *do_alloc_slow(size_t requested, arena *arena);
-  friend void *arena_resize_last_alloc(arena *arena, ssize_t increase);
   friend bool youngspace_almost_full(size_t threshold);
 };
 
@@ -71,11 +81,6 @@ extern thread_local bool time_for_collection;
 
 size_t get_gc_threshold();
 
-// Returns the given arena's current collection semispace ID.
-// Each arena has 2 semispace IDs one equal to the arena ID and the other equal
-// to the 1's complement of the arena ID. At any time one of these semispaces
-// is used for allocation and the other is used for collection.
-char get_arena_collection_semispace_id(const arena *);
 
 // Returns the ID of the semispace where the given address was allocated.
 // The behavior is undefined if called with an address that has not been
@@ -100,12 +105,6 @@ inline void *kore_arena_alloc(arena *arena, size_t requested) {
       requested, arena->block);
   return result;
 }
-
-// Resizes the last allocation as long as the resize does not require a new
-// block allocation.
-// Returns the address of the byte following the last newlly allocated byte when
-// the resize succeeds, returns 0 otherwise.
-void *arena_resize_last_alloc(arena *, ssize_t);
 
 // Exchanges the current allocation and collection semispaces and clears the new
 // current allocation semispace by setting its start back to its first block.
