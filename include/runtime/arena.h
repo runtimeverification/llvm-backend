@@ -51,26 +51,49 @@ public:
   // It is used before garbage collection.
   void arena_swap_and_clear();
 
+  // Given two pointers to objects allocated in the same arena, return the number
+  // of bytes they are separated by within the virtual block of memory represented
+  // by the blocks of that arena. This difference will include blocks containing
+  // sentinel bytes. Undefined behavior will result if the pointers belong to
+  // different arenas.
+  static ssize_t ptr_diff(char *ptr1, char *ptr2);
+
+  // Given a starting pointer to an address allocated in an arena and a size in
+  // bytes, this function returns a pointer to an address allocated in the
+  // same arena after size bytes from the starting pointer.
+  //
+  // 1st argument: the starting pointer
+  // 2nd argument: the size in bytes to add to the starting pointer
+  // 3rd argument: the address of last allocated byte in the arena plus 1
+  // Return value: the address allocated in the arena after size bytes from the
+  //               starting pointer, or 0 if this is equal to the 3rd argument.
+  static char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr);
+  
+  // Returns the ID of the semispace where the given address was allocated.
+  // The behavior is undefined if called with an address that has not been
+  // allocated within an arena.
+  static char get_arena_semispace_id_of_object(void *ptr);
+
 private:
+  struct memory_block_header {
+    char *next_block;
+    char semispace;
+  };
+
   void fresh_block();
+  static memory_block_header *mem_block_header(void *ptr);
 
   // helper function for `kore_arena_alloc`. Do not call directly.
   void *do_alloc_slow(size_t requested);
 
-  char *first_block;
-  char *block;
-  char *block_start;
-  char *block_end;
-  char *first_collection_block;
-  size_t num_blocks;
-  size_t num_collection_blocks;
-  char allocation_semispace_id;
-};
-
-using memory_block_header = struct {
-  char *next_block;
-  char *next_superblock;
-  char semispace;
+  char *first_block;  // beginning of first block
+  char *block;  // where allocations are being made in current block
+  char *block_start;  // start of current block
+  char *block_end;  // 1 past end of current block
+  char *first_collection_block;  // beginning of other semispace
+  size_t num_blocks;  // number of blocks in current semispace
+  size_t num_collection_blocks;  // number of blocks in other semispace
+  char allocation_semispace_id;  // id of current semispace
 };
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
@@ -91,11 +114,6 @@ extern thread_local bool time_for_collection;
 
 size_t get_gc_threshold();
 
-// Returns the ID of the semispace where the given address was allocated.
-// The behavior is undefined if called with an address that has not been
-// allocated within an arena.
-char get_arena_semispace_id_of_object(void *);
-
 // Allocates the requested number of bytes as a contiguous region and returns a
 // pointer to the first allocated byte.
 // If called with requested size greater than the maximun single allocation
@@ -111,24 +129,6 @@ inline void *arena::kore_arena_alloc(size_t requested) {
       requested, block);
   return result;
 }
-
-// Given a starting pointer to an address allocated in an arena and a size in
-// bytes, this function returns a pointer to an address allocated in the
-// same arena after size bytes from the starting pointer.
-//
-// 1st argument: the starting pointer
-// 2nd argument: the size in bytes to add to the starting pointer
-// 3rd argument: the address of last allocated byte in the arena plus 1
-// Return value: the address allocated in the arena after size bytes from the
-//               starting pointer, or 0 if this is equal to the 3rd argument.
-char *move_ptr(char *, size_t, char const *);
-
-// Given two pointers to objects allocated in the same arena, return the number
-// of bytes they are separated by within the virtual block of memory represented
-// by the blocks of that arena. This difference will include blocks containing
-// sentinel bytes. Undefined behavior will result if the pointers belong to
-// different arenas.
-ssize_t ptr_diff(char *, char *);
 
 // Deallocates all the memory allocated for registered arenas.
 void free_all_memory(void);
