@@ -161,26 +161,20 @@ arena::arena_resize_last_alloc(ssize_t increase) {
 }
 
 __attribute__((always_inline)) void arena::arena_swap_and_clear() {
-  char *tmp = first_block;
-  first_block = first_collection_block;
-  first_collection_block = tmp;
-  size_t tmp2 = num_blocks;
-  num_blocks = num_collection_blocks;
-  num_collection_blocks = tmp2;
+  std::swap(first_block, first_collection_block);
+  std::swap(num_blocks, num_collection_blocks);
   allocation_semispace_id = ~allocation_semispace_id;
   arena_clear();
 }
 
 __attribute__((always_inline)) void arena::arena_clear() {
-  block = first_block ? first_block + sizeof(arena::memory_block_header)
-                      : nullptr;
+  block = first_block ? first_block + sizeof(arena::memory_block_header) : nullptr;
   block_start = first_block;
   block_end = first_block ? first_block + BLOCK_SIZE : nullptr;
 }
 
 __attribute__((always_inline)) char *arena::arena_start_ptr() const {
-  return first_block ? first_block + sizeof(arena::memory_block_header)
-                     : nullptr;
+  return first_block ? first_block + sizeof(arena::memory_block_header) : nullptr;
 }
 
 __attribute__((always_inline)) char **arena::arena_end_ptr() {
