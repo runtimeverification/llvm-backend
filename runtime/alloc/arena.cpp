@@ -33,7 +33,6 @@ arena::get_arena_semispace_id_of_object(void *ptr) {
 //	We will reserve enough address space for 1 million 1MB blocks. Might want to increase this on a > 1TB server.
 //
 size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
-static thread_local void *hyperblock_ptr = nullptr; // only needed for munmap()
 
 static void *megabyte_malloc() {
   //
@@ -64,7 +63,6 @@ static void *megabyte_malloc() {
       perror("mmap()");
       abort();
     }
-    hyperblock_ptr = addr;
     //
     //	We ask for one block worth of address space less than we allocated so alignment will always succeed.
     //	We don't worry about unused address space either side of our aligned address space because there will be no
@@ -74,13 +72,6 @@ static void *megabyte_malloc() {
         std::align(BLOCK_SIZE, HYPERBLOCK_SIZE - BLOCK_SIZE, addr, request));
   }
   return currentblock_ptr;
-}
-
-void free_all_memory() {
-  //
-  //	Frees all memory that was demand paged into this address range.
-  //
-  munmap(hyperblock_ptr, HYPERBLOCK_SIZE);
 }
 
 #ifdef __MACH__

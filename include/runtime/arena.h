@@ -14,6 +14,11 @@ class arena {
 public:
   arena(char id)
       : allocation_semispace_id(id) { }
+
+  // Allocates the requested number of bytes as a contiguous region and returns a
+  // pointer to the first allocated byte.
+  // If called with requested size greater than the maximun single allocation
+  // size, the space is allocated in a general (not garbage collected pool).
   void *kore_arena_alloc(size_t requested);
 
   // Returns the address of the first byte that belongs in the given arena.
@@ -114,10 +119,6 @@ extern thread_local bool time_for_collection;
 
 size_t get_gc_threshold();
 
-// Allocates the requested number of bytes as a contiguous region and returns a
-// pointer to the first allocated byte.
-// If called with requested size greater than the maximun single allocation
-// size, the space is allocated in a general (not garbage collected pool).
 inline void *arena::kore_arena_alloc(size_t requested) {
   if (block + requested > block_end) {
     return do_alloc_slow(requested);
@@ -130,8 +131,6 @@ inline void *arena::kore_arena_alloc(size_t requested) {
   return result;
 }
 
-// Deallocates all the memory allocated for registered arenas.
-void free_all_memory(void);
 }
 
 #endif // ARENA_H
