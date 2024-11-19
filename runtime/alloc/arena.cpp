@@ -34,18 +34,16 @@ arena::get_arena_semispace_id_of_object(void *ptr) {
 //
 size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
 
-static void *megabyte_malloc() {
+void *arena::megabyte_malloc() {
   //
   //	Return pointer to a BLOCK_SIZE chunk of memory with BLOCK_SIZE alignment.
   //
-  static thread_local char *currentblock_ptr
-      = nullptr; // char* rather than void* to permit pointer arithmetic
-  if (currentblock_ptr) {
+  if (current_block_ptr) {
     //
     //	We expect an page fault due to not being able to map physical memory to this block or the
     //	process to be killed by the OOM killer long before we run off the end of our address space.
     //
-    currentblock_ptr += BLOCK_SIZE;
+    current_block_ptr += BLOCK_SIZE;
   } else {
     //
     //	First call - need to reserve the address space.
@@ -68,10 +66,10 @@ static void *megabyte_malloc() {
     //	We don't worry about unused address space either side of our aligned address space because there will be no
     //	memory mapped to it.
     //
-    currentblock_ptr = reinterpret_cast<char *>(
+    current_block_ptr = reinterpret_cast<char *>(
         std::align(BLOCK_SIZE, HYPERBLOCK_SIZE - BLOCK_SIZE, addr, request));
   }
-  return currentblock_ptr;
+  return current_block_ptr;
 }
 
 #ifdef __MACH__
@@ -163,6 +161,7 @@ arena::arena_resize_last_alloc(ssize_t increase) {
 __attribute__((always_inline)) void arena::arena_swap_and_clear() {
   std::swap(first_block, first_collection_block);
   std::swap(num_blocks, num_collection_blocks);
+  std::swap(current_block_ptr, collection_block_ptr);
   allocation_semispace_id = ~allocation_semispace_id;
   arena_clear();
 }
