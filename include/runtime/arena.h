@@ -73,7 +73,7 @@ public:
   // Return value: the address allocated in the arena after size bytes from the
   //               starting pointer, or 0 if this is equal to the 3rd argument.
   static char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr);
-  
+
   // Returns the ID of the semispace where the given address was allocated.
   // The behavior is undefined if called with an address that has not been
   // allocated within an arena.
@@ -91,14 +91,14 @@ private:
   // helper function for `kore_arena_alloc`. Do not call directly.
   void *do_alloc_slow(size_t requested);
 
-  char *first_block;  // beginning of first block
-  char *block;  // where allocations are being made in current block
-  char *block_start;  // start of current block
-  char *block_end;  // 1 past end of current block
-  char *first_collection_block;  // beginning of other semispace
-  size_t num_blocks;  // number of blocks in current semispace
-  size_t num_collection_blocks;  // number of blocks in other semispace
-  char allocation_semispace_id;  // id of current semispace
+  char *first_block; // beginning of first block
+  char *block; // where allocations are being made in current block
+  char *block_start; // start of current block
+  char *block_end; // 1 past end of current block
+  char *first_collection_block; // beginning of other semispace
+  size_t num_blocks; // number of blocks in current semispace
+  size_t num_collection_blocks; // number of blocks in other semispace
+  char allocation_semispace_id; // id of current semispace
 };
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
@@ -130,7 +130,6 @@ inline void *arena::kore_arena_alloc(size_t requested) {
       requested, block);
   return result;
 }
-
 }
 
 #endif // ARENA_H

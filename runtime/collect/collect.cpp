@@ -85,9 +85,9 @@ void migrate_once(block **block_ptr) {
     return;
   }
   if (youngspace_collection_id()
-      == arena::get_arena_semispace_id_of_object((void *)curr_block)
+          == arena::get_arena_semispace_id_of_object((void *)curr_block)
       || oldspace_collection_id()
-      == arena::get_arena_semispace_id_of_object((void *)curr_block)) {
+             == arena::get_arena_semispace_id_of_object((void *)curr_block)) {
     migrate(block_ptr);
   }
 }
@@ -327,7 +327,8 @@ void kore_collect(
       // kore_arena_alloc, which will have allocated a fresh memory block and put
       // the allocation at the start of it. Thus, we use arena::move_ptr with a size
       // of zero to adjust and get the true address of the allocation.
-      scan_ptr = arena::move_ptr(previous_oldspace_alloc_ptr, 0, *old_alloc_ptr());
+      scan_ptr
+          = arena::move_ptr(previous_oldspace_alloc_ptr, 0, *old_alloc_ptr());
     } else {
       scan_ptr = previous_oldspace_alloc_ptr;
     }
@@ -340,7 +341,7 @@ void kore_collect(
   }
 #ifdef GC_DBG
   ssize_t numBytesAllocedSinceLastCollection
-    = arena::ptr_diff(current_alloc_ptr, last_alloc_ptr);
+      = arena::ptr_diff(current_alloc_ptr, last_alloc_ptr);
   assert(numBytesAllocedSinceLastCollection >= 0);
   fwrite(&numBytesAllocedSinceLastCollection, sizeof(ssize_t), 1, stderr);
   last_alloc_ptr = *young_alloc_ptr();

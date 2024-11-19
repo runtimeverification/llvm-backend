@@ -172,13 +172,15 @@ __attribute__((always_inline)) void arena::arena_swap_and_clear() {
 }
 
 __attribute__((always_inline)) void arena::arena_clear() {
-  block = first_block ? first_block + sizeof(arena::memory_block_header) : nullptr;
+  block = first_block ? first_block + sizeof(arena::memory_block_header)
+                      : nullptr;
   block_start = first_block;
   block_end = first_block ? first_block + BLOCK_SIZE : nullptr;
 }
 
 __attribute__((always_inline)) char *arena::arena_start_ptr() const {
-  return first_block ? first_block + sizeof(arena::memory_block_header) : nullptr;
+  return first_block ? first_block + sizeof(arena::memory_block_header)
+                     : nullptr;
 }
 
 __attribute__((always_inline)) char **arena::arena_end_ptr() {

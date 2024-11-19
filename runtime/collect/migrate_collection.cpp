@@ -7,9 +7,9 @@
 void migrate_collection_node(void **node_ptr) {
   string *curr_block = STRUCT_BASE(string, data, *node_ptr);
   if (youngspace_collection_id()
-      != arena::get_arena_semispace_id_of_object((void *)curr_block)
+          != arena::get_arena_semispace_id_of_object((void *)curr_block)
       && oldspace_collection_id()
-      != arena::get_arena_semispace_id_of_object((void *)curr_block)) {
+             != arena::get_arena_semispace_id_of_object((void *)curr_block)) {
     return;
   }
   uint64_t const hdr = curr_block->h.hdr;
