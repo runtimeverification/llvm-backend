@@ -61,7 +61,7 @@ public:
   // by the blocks of that arena. This difference will include blocks containing
   // sentinel bytes. Undefined behavior will result if the pointers belong to
   // different arenas.
-  static ssize_t ptr_diff(char *ptr1, char *ptr2);
+  static ssize_t ptr_diff(char *ptr1, char *ptr2) { return ptr1 - ptr2; }
 
   // Given a starting pointer to an address allocated in an arena and a size in
   // bytes, this function returns a pointer to an address allocated in the
