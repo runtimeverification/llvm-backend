@@ -8,6 +8,7 @@
 
 extern "C" {
 
+
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
 class arena {
@@ -23,12 +24,12 @@ public:
 
   // Returns the address of the first byte that belongs in the given arena.
   // Returns 0 if nothing has been allocated ever in that arena.
-  char *arena_start_ptr() const;
+  char *arena_start_ptr() const { return current_addr_ptr ?  current_addr_ptr + sizeof(memory_block_header) : nullptr; }
 
   // Returns a pointer to a location holding the address of last allocated
   // byte in the given arena plus 1.
   // This address is 0 if nothing has been allocated ever in that arena.
-  char **arena_end_ptr();
+  char **arena_end_ptr() { return &allocation_ptr; }
 
   // return the total number of allocatable bytes currently in the arena in its
   // active semispace.
@@ -37,19 +38,19 @@ public:
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
   // arena.
-  void arena_clear();
+  void arena_clear() { allocation_ptr = arena_start_ptr(); }
 
   // Resizes the last allocation as long as the resize does not require a new
   // block allocation.
   // Returns the address of the byte following the last newlly allocated byte when
   // the resize succeeds, returns 0 otherwise.
-  void *arena_resize_last_alloc(ssize_t increase);
+  void *arena_resize_last_alloc(ssize_t increase) { return (allocation_ptr += increase); }
 
   // Returns the given arena's current collection semispace ID.
   // Each arena has 2 semispace IDs one equal to the arena ID and the other equal
   // to the 1's complement of the arena ID. At any time one of these semispaces
   // is used for allocation and the other is used for collection.
-  char get_arena_collection_semispace_id() const;
+  char get_arena_collection_semispace_id() const { return ~allocation_semispace_id; }
 
   // Exchanges the current allocation and collection semispaces and clears the new
   // current allocation semispace by setting its start back to its first block.
@@ -85,6 +86,7 @@ private:
     char semispace;
   };
 
+  void *slow_alloc(size_t requested);
   void *megabyte_malloc();
   
   void fresh_block();
@@ -93,16 +95,12 @@ private:
   // helper function for `kore_arena_alloc`. Do not call directly.
   void *do_alloc_slow(size_t requested);
 
-  char *current_block_ptr = nullptr;  // pointer to current block within hyperblock
-  char *collection_block_ptr = nullptr;  // pointer to current block within collection hyperblock
+  char *current_addr_ptr = nullptr;  // pointer to start of current address space
+  char *collection_addr_ptr = nullptr;  // pointer to start of collection address space
+  char *current_tripwire = nullptr;  // allocating past this triggers slow allocation
+  char *collection_tripwire = nullptr;  // tripwire for collection semispace
+  char *allocation_ptr  = nullptr;  // next available location in current semispace
   
-  char *first_block = nullptr;  // beginning of first block
-  char *block = nullptr;  // where allocations are being made in current block
-  char *block_start = nullptr;  // start of current block
-  char *block_end = nullptr;  // 1 past end of current block
-  char *first_collection_block = nullptr;  // beginning of other semispace
-  size_t num_blocks = 0;  // number of blocks in current semispace
-  size_t num_collection_blocks = 0;  // number of blocks in other semispace
   char allocation_semispace_id;  // id of current semispace
 };
 
@@ -125,17 +123,21 @@ extern thread_local bool time_for_collection;
 size_t get_gc_threshold();
 
 inline void *arena::kore_arena_alloc(size_t requested) {
-  if (block + requested > block_end) {
-    return do_alloc_slow(requested);
+  if (allocation_ptr + requested >= current_tripwire) {
+    //
+    //	We got close to or past the last location accessed in this address range so far,
+    //	thus we should consider a garbage collection so we don't just keep accessing
+    //	fresh memory without bound.
+    //	This condition holds trivially if current_tripwire == nullptr since
+    //	all pointers are >= nullptr, and this indicates that no address range has been
+    //	reserved for this semispace so far.
+    //
+    return slow_alloc(requested);
   }
-  void *result = block;
-  block += requested;
-  MEM_LOG(
-      "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, block);
+  void *result = allocation_ptr;
+  allocation_ptr += requested;
+  MEM_LOG("Allocation at %p (size %zd), next alloc at %p\n", result, requested, block);
   return result;
 }
-
 }
-
 #endif // ARENA_H
