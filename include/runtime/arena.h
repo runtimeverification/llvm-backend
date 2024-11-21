@@ -87,13 +87,8 @@ private:
   };
 
   void *slow_alloc(size_t requested);
-  void *megabyte_malloc();
   
-  void fresh_block();
   static memory_block_header *mem_block_header(void *ptr);
-
-  // helper function for `kore_arena_alloc`. Do not call directly.
-  void *do_alloc_slow(size_t requested);
 
   char *current_addr_ptr = nullptr;  // pointer to start of current address space
   char *collection_addr_ptr = nullptr;  // pointer to start of collection address space

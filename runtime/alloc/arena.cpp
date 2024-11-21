@@ -104,7 +104,7 @@ void *arena::slow_alloc(size_t requested) {
     //
     current_addr_ptr = reinterpret_cast<char *>(
         std::align(HYPERBLOCK_SIZE, HYPERBLOCK_SIZE, addr, request));
-    auto *header = (arena::memory_block_header *) current_addr_ptr;
+    memory_block_header *header = reinterpret_cast<memory_block_header *>(current_addr_ptr);
     header->next_block = nullptr;
     header->semispace = allocation_semispace_id;
     allocation_ptr = current_addr_ptr + sizeof(arena::memory_block_header);
