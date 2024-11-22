@@ -1,4 +1,3 @@
-
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -17,25 +16,16 @@ arena::get_arena_semispace_id_of_object(void *ptr) {
   return mem_block_header(ptr)->semispace;
 }
 
-
 #ifdef __MACH__
 //
 //	thread_local disabled for Apple
 //
-bool time_for_collection;
-#else
-thread_local bool time_for_collection;
-#endif
-
-#ifdef __MACH__
-//
-//	thread_local disabled for Apple
-//
+bool time_for_collection = false;
 bool gc_enabled = true;
 #else
+thread_local bool time_for_collection = false;
 thread_local bool gc_enabled = true;
 #endif
-
 
 char *arena::move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
   char *next_ptr = ptr + size;
@@ -50,12 +40,6 @@ char *arena::move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
     return nullptr;
   }
   return next_block + sizeof(arena::memory_block_header);
-}
-
-size_t arena::arena_size() const {
-  size_t current_size = current_addr_ptr ? (BLOCK_SIZE + current_tripwire - current_addr_ptr) : 0;
-  size_t collection_size = collection_addr_ptr ? (BLOCK_SIZE + collection_tripwire - collection_addr_ptr) : 0;
-  return std::max(current_size, collection_size);
 }
 
 void arena::initialize_semispace() {
@@ -93,7 +77,8 @@ void arena::initialize_semispace() {
   //	We set the tripwire for this space so we get a slow_alloc() when we pass BLOCK_SIZE of memory
   //	allocated from this space.
   //
-  current_tripwire = current_addr_ptr + BLOCK_SIZE;
+  tripwire = current_addr_ptr + BLOCK_SIZE;
+  num_blocks = 2;
 }
 
 void *arena::slow_alloc(size_t requested) {
@@ -102,11 +87,15 @@ void *arena::slow_alloc(size_t requested) {
   //	We always move the tripwire to a BLOCK_SIZE boundry.
   //
   time_for_collection = true;
-  while (allocation_ptr + requested >= current_tripwire)
-    current_tripwire += BLOCK_SIZE;
+  tripwire = current_addr_ptr + num_blocks * BLOCK_SIZE;  // won't trigger again until after gc
   
   void *result = allocation_ptr;
   allocation_ptr += requested;
+  //
+  //	Set number of notional blocks that will have be written to after memory is used.
+  //
+  num_blocks = (allocation_ptr - current_addr_ptr - 1) / BLOCK_SIZE + 1;
+  
   MEM_LOG("Slow allocation at %p (size %zd), next alloc at %p\n", result, requested, block);
   return result;
 }

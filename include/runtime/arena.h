@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <utility>
+#include <algorithm>
 #include <sys/types.h>
 
 #include "runtime/alloc.h"
@@ -33,12 +34,12 @@ public:
 
   // return the total number of allocatable bytes currently in the arena in its
   // active semispace.
-  size_t arena_size() const;
+  size_t arena_size() const { return BLOCK_SIZE * std::max(num_blocks, num_collection_blocks); }
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
   // arena.
-  void arena_clear() { allocation_ptr = arena_start_ptr(); }
+  void arena_clear();
 
   // Resizes the last allocation as long as the resize does not require a new
   // block allocation.
@@ -97,13 +98,19 @@ private:
     return reinterpret_cast<arena::memory_block_header *>((address - 1) & ~(HYPERBLOCK_SIZE - 1));
   }
 
-  char *current_addr_ptr = nullptr;  // pointer to start of current address space
-  char *collection_addr_ptr = nullptr;  // pointer to start of collection address space
-  char *current_tripwire = nullptr;  // allocating past this triggers slow allocation
-  char *collection_tripwire = nullptr;  // tripwire for collection semispace
-  char *allocation_ptr  = nullptr;  // next available location in current semispace
-  
+  //
+  //	Current semispace where allocations are being made.
+  //
+  char *current_addr_ptr;  // pointer to start of current address space
+  char *allocation_ptr;  // next available location in current semispace
+  char *tripwire;  // allocating past this triggers slow allocation
+  size_t num_blocks;  // notional number of BLOCK_SIZE blocks in current semispace
   char allocation_semispace_id;  // id of current semispace
+  //
+  //	Semispace where allocations will be made during and after garbage collect.
+  //
+  char *collection_addr_ptr = nullptr;  // pointer to start of collection address space
+  size_t num_collection_blocks = 0;  // notional number of BLOCK_SIZE blocks in collection semispace
 };
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
@@ -125,14 +132,11 @@ extern thread_local bool time_for_collection;
 size_t get_gc_threshold();
 
 inline void *arena::kore_arena_alloc(size_t requested) {
-  if (allocation_ptr + requested >= current_tripwire) {
+  if (allocation_ptr + requested >= tripwire) {
     //
     //	We got close to or past the last location accessed in this address range so far,
     //	thus we should consider a garbage collection so we don't just keep accessing
     //	fresh memory without bound.
-    //	This condition holds trivially if current_tripwire == nullptr since
-    //	all pointers are >= nullptr, and this indicates that no address range has been
-    //	reserved for this semispace so far.
     //
     return slow_alloc(requested);
   }
@@ -142,9 +146,18 @@ inline void *arena::kore_arena_alloc(size_t requested) {
   return result;
 }
 
+inline void arena::arena_clear() {
+  //
+  //	We set the allocation pointer to the first available address and set
+  //	the tripwire to one block before the notional end.
+  //
+  allocation_ptr = arena_start_ptr();
+  tripwire = current_addr_ptr + (num_blocks - 1) * BLOCK_SIZE;
+}
+
 inline void arena::arena_swap_and_clear() {
   std::swap(current_addr_ptr, collection_addr_ptr);
-  std::swap(current_tripwire, collection_tripwire);
+  std::swap(num_blocks, num_collection_blocks);
   allocation_semispace_id = ~allocation_semispace_id;
   if (current_addr_ptr == nullptr)
     {
