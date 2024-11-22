@@ -2,24 +2,24 @@
 #define ARENA_H
 
 #include <cstddef>
+#include <cstdint>
+#include <utility>
 #include <sys/types.h>
 
 #include "runtime/alloc.h"
 
 extern "C" {
 
+size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
 
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
 class arena {
 public:
-  arena(char id)
-      : allocation_semispace_id(id) { }
+  arena(char id) : allocation_semispace_id(id) { initialize_semispace(); }
 
   // Allocates the requested number of bytes as a contiguous region and returns a
   // pointer to the first allocated byte.
-  // If called with requested size greater than the maximun single allocation
-  // size, the space is allocated in a general (not garbage collected pool).
   void *kore_arena_alloc(size_t requested);
 
   // Returns the address of the first byte that belongs in the given arena.
@@ -42,8 +42,7 @@ public:
 
   // Resizes the last allocation as long as the resize does not require a new
   // block allocation.
-  // Returns the address of the byte following the last newlly allocated byte when
-  // the resize succeeds, returns 0 otherwise.
+  // Returns the address of the byte following the last newlly allocated byte.
   void *arena_resize_last_alloc(ssize_t increase) { return (allocation_ptr += increase); }
 
   // Returns the given arena's current collection semispace ID.
@@ -81,14 +80,22 @@ public:
   static char get_arena_semispace_id_of_object(void *ptr);
 
 private:
-  struct memory_block_header {
-    char *next_block;
+  union memory_block_header {
+    //
+    //	Currently the header just holds the semispace id. But we need it to be a
+    //	multiple of sizeof(char*) for alignment purposes so we add a dummy char*.
+    //
     char semispace;
+    char *alignment_dummy;
   };
 
   void *slow_alloc(size_t requested);
+  void initialize_semispace();
   
-  static memory_block_header *mem_block_header(void *ptr);
+  static memory_block_header *mem_block_header(void *ptr) {
+    uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
+    return reinterpret_cast<arena::memory_block_header *>((address - 1) & ~(HYPERBLOCK_SIZE - 1));
+  }
 
   char *current_addr_ptr = nullptr;  // pointer to start of current address space
   char *collection_addr_ptr = nullptr;  // pointer to start of collection address space
@@ -134,5 +141,21 @@ inline void *arena::kore_arena_alloc(size_t requested) {
   MEM_LOG("Allocation at %p (size %zd), next alloc at %p\n", result, requested, block);
   return result;
 }
+
+inline void arena::arena_swap_and_clear() {
+  std::swap(current_addr_ptr, collection_addr_ptr);
+  std::swap(current_tripwire, collection_tripwire);
+  allocation_semispace_id = ~allocation_semispace_id;
+  if (current_addr_ptr == nullptr)
+    {
+      //
+      //	The other semispace hasn't be initialized yet.
+      //
+      void initialize_semispace();
+    }
+  else
+    arena_clear();
+}
+
 }
 #endif // ARENA_H
