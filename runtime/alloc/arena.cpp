@@ -35,11 +35,12 @@ char *arena::move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
   if (next_ptr != MEM_BLOCK_START(ptr) + BLOCK_SIZE) {
     return next_ptr;
   }
-  char *next_block = *(char **)MEM_BLOCK_START(ptr);
-  if (!next_block) {
-    return nullptr;
-  }
-  return next_block + sizeof(arena::memory_block_header);
+  //char *next_block = *(char **)MEM_BLOCK_START(ptr);
+  //if (!next_block) {
+  //  return nullptr;
+  //}
+  //return next_block + sizeof(arena::memory_block_header);
+  return MEM_BLOCK_START(ptr) + BLOCK_SIZE;
 }
 
 void arena::initialize_semispace() {
@@ -74,28 +75,9 @@ void arena::initialize_semispace() {
   header->semispace = allocation_semispace_id;
   allocation_ptr = current_addr_ptr + sizeof(arena::memory_block_header);
   //
-  //	We set the tripwire for this space so we get a slow_alloc() when we pass BLOCK_SIZE of memory
+  //	We set the tripwire for this space so we get trigger a garbage collection when we pass BLOCK_SIZE of memory
   //	allocated from this space.
   //
   tripwire = current_addr_ptr + BLOCK_SIZE;
-  num_blocks = 2;
-}
-
-void *arena::slow_alloc(size_t requested) {
-  //
-  //	Need a garbage collection. We also move the tripwire so we don't hit it repeatedly.
-  //	We always move the tripwire to a BLOCK_SIZE boundry.
-  //
-  time_for_collection = true;
-  tripwire = current_addr_ptr + num_blocks * BLOCK_SIZE;  // won't trigger again until after gc
-  
-  void *result = allocation_ptr;
-  allocation_ptr += requested;
-  //
-  //	Set number of notional blocks that will have be written to after memory is used.
-  //
-  num_blocks = (allocation_ptr - current_addr_ptr - 1) / BLOCK_SIZE + 1;
-  
-  MEM_LOG("Slow allocation at %p (size %zd), next alloc at %p\n", result, requested, block);
-  return result;
+  num_blocks = 1;
 }

@@ -32,9 +32,10 @@ public:
   // This address is 0 if nothing has been allocated ever in that arena.
   char **arena_end_ptr() { return &allocation_ptr; }
 
+
   // return the total number of allocatable bytes currently in the arena in its
   // active semispace.
-  size_t arena_size() const { return BLOCK_SIZE * std::max(num_blocks, num_collection_blocks); }
+  size_t arena_size() const { update_num_blocks(); return BLOCK_SIZE * std::max(num_blocks, num_collection_blocks); }
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
@@ -90,7 +91,19 @@ private:
     char *alignment_dummy;
   };
 
-  void *slow_alloc(size_t requested);
+  //
+  //	We update the number of 1MB blocks actually written to, only when we need this value,
+  //	or before a garbage collection rather than trying to determine when we write to a fresh block.
+  //
+  void update_num_blocks() const {
+    //
+    //	Calculate how many 1M blocks of the current arena we used.
+    //
+    size_t num_used_blocks = (allocation_ptr - current_addr_ptr - 1) / BLOCK_SIZE + 1;
+    if (num_used_blocks > num_blocks)
+      num_blocks = num_used_blocks;
+  }
+
   void initialize_semispace();
   
   static memory_block_header *mem_block_header(void *ptr) {
@@ -104,7 +117,7 @@ private:
   char *current_addr_ptr;  // pointer to start of current address space
   char *allocation_ptr;  // next available location in current semispace
   char *tripwire;  // allocating past this triggers slow allocation
-  size_t num_blocks;  // notional number of BLOCK_SIZE blocks in current semispace
+  mutable size_t num_blocks;  // notional number of BLOCK_SIZE blocks in current semispace
   char allocation_semispace_id;  // id of current semispace
   //
   //	Semispace where allocations will be made during and after garbage collect.
@@ -135,10 +148,11 @@ inline void *arena::kore_arena_alloc(size_t requested) {
   if (allocation_ptr + requested >= tripwire) {
     //
     //	We got close to or past the last location accessed in this address range so far,
-    //	thus we should consider a garbage collection so we don't just keep accessing
-    //	fresh memory without bound.
+    //	depending on the requested size and tripwire setting. This triggers a garbage
+    //	collect when allowed.
     //
-    return slow_alloc(requested);
+    time_for_collection = true;
+    tripwire = current_addr_ptr + HYPERBLOCK_SIZE;  // won't trigger again until arena swap
   }
   void *result = allocation_ptr;
   allocation_ptr += requested;
@@ -148,14 +162,20 @@ inline void *arena::kore_arena_alloc(size_t requested) {
 
 inline void arena::arena_clear() {
   //
-  //	We set the allocation pointer to the first available address and set
-  //	the tripwire to one block before the notional end.
+  //	We set the allocation pointer to the first available address.
   //
   allocation_ptr = arena_start_ptr();
-  tripwire = current_addr_ptr + (num_blocks - 1) * BLOCK_SIZE;
+  //
+  //	If the number of blocks we've touched is >= threshold, we want to trigger
+  //	a garbage collection if we get within 1 block of the end of this area.
+  //	Otherwise we only want to generate a garbage collect if we allocate off the
+  //	end of this area.
+  //
+  tripwire = current_addr_ptr + (num_blocks - (num_blocks >= get_gc_threshold())) * BLOCK_SIZE;
 }
 
 inline void arena::arena_swap_and_clear() {
+  update_num_blocks();  // so we save the correct number of touched blocks
   std::swap(current_addr_ptr, collection_addr_ptr);
   std::swap(num_blocks, num_collection_blocks);
   allocation_semispace_id = ~allocation_semispace_id;
