@@ -28,6 +28,8 @@ thread_local bool gc_enabled = true;
 #endif
 
 char *arena::move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
+  return ptr + size;
+  /*
   char *next_ptr = ptr + size;
   if (next_ptr == arena_end_ptr) {
     return nullptr;
@@ -35,12 +37,12 @@ char *arena::move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
   if (next_ptr != MEM_BLOCK_START(ptr) + BLOCK_SIZE) {
     return next_ptr;
   }
-  //char *next_block = *(char **)MEM_BLOCK_START(ptr);
-  //if (!next_block) {
-  //  return nullptr;
-  //}
-  //return next_block + sizeof(arena::memory_block_header);
-  return MEM_BLOCK_START(ptr) + BLOCK_SIZE;
+  char *next_block = *(char **)MEM_BLOCK_START(ptr);
+  if (!next_block) {
+    return nullptr;
+  }
+  return next_block + sizeof(arena::memory_block_header);
+  */
 }
 
 void arena::initialize_semispace() {
