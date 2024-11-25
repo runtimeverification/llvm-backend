@@ -83,10 +83,8 @@ llvm::Constant *create_static_term::not_injection_case(
 
   std::vector<llvm::Constant *> idxs
       = {llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx_), 0)};
-  return llvm::ConstantExpr::getBitCast(
-      llvm::ConstantExpr::getInBoundsGetElementPtr(
-          block_type, global_var, idxs),
-      llvm::PointerType::getUnqual(module_->getContext()));
+  return llvm::ConstantExpr::getInBoundsGetElementPtr(
+      block_type, global_var, idxs);
 }
 
 std::pair<llvm::Constant *, bool>

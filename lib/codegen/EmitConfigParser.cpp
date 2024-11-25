@@ -326,8 +326,7 @@ static llvm::Value *get_arg_value(
   case sort_category::Bool:
   case sort_category::MInt: {
     auto *val_ty = getvalue_type(cat, mod);
-    auto *cast = new llvm::BitCastInst(arg, ptr_ty, "", case_block);
-    auto *load = new llvm::LoadInst(val_ty, cast, "", case_block);
+    auto *load = new llvm::LoadInst(val_ty, arg, "", case_block);
     arg = load;
     break;
   }
@@ -335,15 +334,11 @@ static llvm::Value *get_arg_value(
   case sort_category::RangeMap:
   case sort_category::List:
   case sort_category::Set:
-    arg = new llvm::BitCastInst(arg, ptr_ty, "", case_block);
-    break;
   case sort_category::Int:
   case sort_category::Float:
   case sort_category::StringBuffer:
   case sort_category::Symbol:
-  case sort_category::Variable:
-    arg = new llvm::BitCastInst(arg, getvalue_type(cat, mod), "", case_block);
-    break;
+  case sort_category::Variable: break;
   case sort_category::MapIter:
   case sort_category::SetIter:
   case sort_category::Uncomputed: abort();
@@ -386,10 +381,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> get_eval(
   case sort_category::Map:
   case sort_category::RangeMap:
   case sort_category::List:
-  case sort_category::Set:
-    retval = new llvm::BitCastInst(
-        result, ptr_ty, "", creator.get_current_block());
-    break;
+  case sort_category::Set: retval = result; break;
   case sort_category::Bool:
   case sort_category::MInt: {
     auto *malloc = create_malloc(
@@ -397,8 +389,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> get_eval(
         llvm::ConstantExpr::getSizeOf(result->getType()),
         get_or_insert_function(mod, "malloc", ptr_ty, ptr_ty));
     new llvm::StoreInst(result, malloc, creator.get_current_block());
-    retval = new llvm::BitCastInst(
-        malloc, ptr_ty, "", creator.get_current_block());
+    retval = malloc;
     break;
   }
   case sort_category::MapIter:
@@ -554,8 +545,7 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
           case_block, llvm::ConstantExpr::getSizeOf(compare->getType()),
           get_or_insert_function(module, "malloc", ptr_ty, ptr_ty));
       new llvm::StoreInst(compare, malloc, case_block);
-      auto *result = new llvm::BitCastInst(malloc, ptr_ty, "", case_block);
-      phi->addIncoming(result, case_block);
+      phi->addIncoming(malloc, case_block);
       llvm::BranchInst::Create(merge_block, case_block);
       break;
     }
@@ -568,8 +558,7 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
           module, "init_float", llvm::Type::getVoidTy(ctx), ptr_ty, ptr_ty);
       llvm::CallInst::Create(
           init_float, {term, func->arg_begin() + 2}, "", case_block);
-      auto *cast = new llvm::BitCastInst(term, ptr_ty, "", case_block);
-      phi->addIncoming(cast, case_block);
+      phi->addIncoming(term, case_block);
       llvm::BranchInst::Create(merge_block, case_block);
       break;
     }
@@ -611,9 +600,8 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
           *case_block, llvm::CmpInst::ICMP_EQ, call, zero32);
       auto *abort_block = llvm::BasicBlock::Create(ctx, "invalid_int", func);
       add_abort(abort_block, module);
-      auto *cast = new llvm::BitCastInst(term, ptr_ty, "", case_block);
       llvm::BranchInst::Create(merge_block, abort_block, icmp, case_block);
-      phi->addIncoming(cast, case_block);
+      phi->addIncoming(term, case_block);
       break;
     }
     case sort_category::Variable:
@@ -661,9 +649,8 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
   llvm::CallInst::Create(
       memcpy, {str_ptr, func->arg_begin() + 2, func->arg_begin() + 1}, "",
       current_block);
-  auto *cast = new llvm::BitCastInst(block, ptr_ty, "", current_block);
   llvm::BranchInst::Create(merge_block, current_block);
-  phi->addIncoming(cast, current_block);
+  phi->addIncoming(block, current_block);
   llvm::ReturnInst::Create(ctx, phi, merge_block);
   merge_block->insertInto(func);
 }
@@ -777,8 +764,6 @@ static void get_store(
   llvm::Value *arguments_array = func->arg_begin() + 1;
   int idx = 0;
   auto *block_type = get_block_type(module, definition, symbol);
-  auto *cast = new llvm::BitCastInst(
-      func->arg_begin(), llvm::PointerType::getUnqual(ctx), "", case_block);
   for (auto const &sort : symbol->get_arguments()) {
     value_type cat = dynamic_cast<kore_composite_sort *>(sort.get())
                          ->get_category(definition);
@@ -786,7 +771,7 @@ static void get_store(
         = get_arg_value(arguments_array, idx, case_block, cat, module);
     llvm::Type *arg_ty = get_arg_type(cat, module);
     llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
-        block_type, cast,
+        block_type, func->arg_begin(),
         {zero, llvm::ConstantInt::get(
                    llvm::Type::getInt32Ty(ctx),
                    get_block_offset(definition, symbol, idx++))},
@@ -896,7 +881,6 @@ static void get_visitor(
   llvm::Function *func = case_block->getParent();
   int idx = 0;
   auto *block_type = get_block_type(module, definition, symbol);
-  auto *cast = new llvm::BitCastInst(func->arg_begin(), ptr_ty, "", case_block);
   unsigned i = 0;
 
   auto *state_ptr = func->arg_end() - 1;
@@ -905,7 +889,7 @@ static void get_visitor(
     auto *composite_sort = dynamic_cast<kore_composite_sort *>(sort.get());
     value_type cat = composite_sort->get_category(definition);
     llvm::Value *child_ptr = llvm::GetElementPtrInst::CreateInBounds(
-        block_type, cast,
+        block_type, func->arg_begin(),
         {zero, llvm::ConstantInt::get(
                    llvm::Type::getInt32Ty(ctx),
                    get_block_offset(definition, symbol, idx++))},
