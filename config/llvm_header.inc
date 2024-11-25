@@ -202,7 +202,7 @@ declare void @write_configuration_to_proof_trace(ptr, ptr, i1)
 @current_interval = thread_local global i64 0
 @GC_THRESHOLD = thread_local global i64 @GC_THRESHOLD@
 
-@gc_roots = global [256 x ptr] zeroinitializer
+@gc_roots = thread_local global [256 x ptr] zeroinitializer
 
 define i64 @get_gc_threshold() {
   %threshold = load i64, ptr @GC_THRESHOLD
