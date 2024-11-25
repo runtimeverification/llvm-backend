@@ -974,15 +974,14 @@ llvm::Value *create_term::not_injection_case(
   }
 
   auto *block_ptr = llvm::PointerType::getUnqual(module_->getContext());
-  auto *bitcast = new llvm::BitCastInst(block, block_ptr, "", current_block_);
   if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
     auto *call = llvm::CallInst::Create(
         get_or_insert_function(module_, "debruijnize", block_ptr, block_ptr),
-        bitcast, "withIndices", current_block_);
+        block, "withIndices", current_block_);
     set_debug_loc(call);
     return call;
   }
-  return bitcast;
+  return block;
 }
 
 // returns a value and a boolean indicating whether that value could be an
