@@ -39,6 +39,7 @@ llvm::Constant *create_static_term::not_injection_case(
   llvm::Constant *block
       = module_->getOrInsertGlobal(kore_string.str(), block_type);
   auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(block);
+  global_var->setConstant(true);
 
   if (!global_var->hasInitializer()) {
     std::vector<llvm::Constant *> block_vals;
@@ -151,6 +152,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
         "int_" + contents, llvm::StructType::getTypeByName(
                                module_->getContext(), int_wrapper_struct));
     auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    global_var->setConstant(true);
     if (!global_var->hasInitializer()) {
       mpz_t value;
       char const *data_start
@@ -163,6 +165,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
       llvm::Constant *limbs = module_->getOrInsertGlobal(
           "int_" + contents + "_limbs", limbs_type);
       auto *limbs_var = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
+      limbs_var->setConstant(true);
       std::vector<llvm::Constant *> allocd_limbs;
       for (size_t i = 0; i < size; i++) {
         allocd_limbs.push_back(llvm::ConstantInt::get(
@@ -205,6 +208,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
         "float_" + contents, llvm::StructType::getTypeByName(
                                  module_->getContext(), float_wrapper_struct));
     auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    global_var->setConstant(true);
     if (!global_var->hasInitializer()) {
       size_t prec = 0;
       size_t exp = 0;
@@ -246,6 +250,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
       llvm::Constant *limbs = module_->getOrInsertGlobal(
           "float_" + contents + "_limbs", limbs_type);
       auto *limbs_var = llvm::dyn_cast<llvm::GlobalVariable>(limbs);
+      limbs_var->setConstant(true);
       std::vector<llvm::Constant *> allocd_limbs;
       for (size_t i = 0; i < size; i++) {
         allocd_limbs.push_back(llvm::ConstantInt::get(
@@ -317,6 +322,7 @@ create_static_term::create_token(value_type sort, std::string contents) {
     llvm::Constant *global
         = module_->getOrInsertGlobal("token_" + escape(contents), string_type);
     auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
+    global_var->setConstant(true);
     if (!global_var->hasInitializer()) {
       llvm::StructType *block_header_type = llvm::StructType::getTypeByName(
           module_->getContext(), blockheader_struct);
