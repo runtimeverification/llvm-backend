@@ -695,6 +695,7 @@ llvm::Constant *decision::string_literal(std::string const &str) {
   auto *global
       = module_->getOrInsertGlobal("str_lit_" + str, str_cst->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setConstant(true);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(str_cst);
   }
@@ -1108,6 +1109,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   auto *layout = module->getOrInsertGlobal(
       "layout_item_rule_" + std::to_string(ordinal), layout_arr->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(layout);
+  global_var->setConstant(true);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(layout_arr);
   }
