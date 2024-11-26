@@ -274,9 +274,11 @@ static bool should_collect_old_gen() {
 }
 
 void init_static_objects(void) {
+  is_gc = true;
   map m = map();
   list l = list();
   set s = set();
+  is_gc = false;
   set_kore_memory_functions_for_gmp();
 }
 
