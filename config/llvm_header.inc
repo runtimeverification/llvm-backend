@@ -82,8 +82,8 @@ declare void @print_configuration(ptr, ptr)
 
 declare i64 @__gmpz_get_ui(ptr)
 
-@exit_int_0 = global %mpz { i32 0, i32 0, ptr getelementptr inbounds ([0 x i64], ptr @exit_int_0_limbs, i32 0, i32 0) }
-@exit_int_0_limbs = global [0 x i64] zeroinitializer
+@exit_int_0 = constant %mpz { i32 0, i32 0, ptr getelementptr inbounds ([0 x i64], ptr @exit_int_0_limbs, i32 0, i32 0) }
+@exit_int_0_limbs = constant [0 x i64] zeroinitializer
 
 define tailcc ptr @"eval_LblgetExitCode{SortGeneratedTopCell{}}"(ptr) {
   ret ptr @exit_int_0
@@ -110,8 +110,8 @@ declare ptr @hook_INT_add(ptr, ptr)
 declare ptr @evaluate_function_symbol(i32, ptr)
 declare ptr @get_terminated_string(ptr)
 
-@fresh_int_1 = global %mpz { i32 1, i32 1, ptr getelementptr inbounds ([1 x i64], ptr @fresh_int_1_limbs, i32 0, i32 0) }
-@fresh_int_1_limbs = global [1 x i64] [i64 1]
+@fresh_int_1 = constant %mpz { i32 1, i32 1, ptr getelementptr inbounds ([1 x i64], ptr @fresh_int_1_limbs, i32 0, i32 0) }
+@fresh_int_1_limbs = constant [1 x i64] [i64 1]
 
 define ptr @get_fresh_constant(ptr %sort, ptr %top) {
 entry:
