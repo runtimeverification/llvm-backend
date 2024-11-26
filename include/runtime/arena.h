@@ -74,8 +74,11 @@ public:
   // 3rd argument: the address of last allocated byte in the arena plus 1
   // Return value: the address allocated in the arena after size bytes from the
   //               starting pointer, or 0 if this is equal to the 3rd argument.
-  static char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr);
-  
+  static char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
+    char *next_ptr = ptr + size;
+    return (next_ptr == arena_end_ptr) ? 0 : next_ptr;
+  }
+
   // Returns the ID of the semispace where the given address was allocated.
   // The behavior is undefined if called with an address that has not been
   // allocated within an arena.

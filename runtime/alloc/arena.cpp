@@ -27,24 +27,6 @@ thread_local bool time_for_collection = false;
 thread_local bool gc_enabled = true;
 #endif
 
-char *arena::move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
-  return ptr + size;
-  /*
-  char *next_ptr = ptr + size;
-  if (next_ptr == arena_end_ptr) {
-    return nullptr;
-  }
-  if (next_ptr != MEM_BLOCK_START(ptr) + BLOCK_SIZE) {
-    return next_ptr;
-  }
-  char *next_block = *(char **)MEM_BLOCK_START(ptr);
-  if (!next_block) {
-    return nullptr;
-  }
-  return next_block + sizeof(arena::memory_block_header);
-  */
-}
-
 void arena::initialize_semispace() {
   //
   //	Current semispace is uninitialized so mmap() a big chuck of address space.
