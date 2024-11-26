@@ -85,7 +85,10 @@ struct kore_alloc_heap {
   template <typename... Tags>
   static void *allocate(size_t size, Tags...) {
     if (during_gc()) {
-      return ::operator new(size);
+      auto *result = (string *)::operator new(size + sizeof(blockheader));
+      init_with_len(result, size);
+      result->h.hdr |= NOT_YOUNG_OBJECT_BIT;
+      return result->data;
     }
     bool enabled = gc_enabled;
     gc_enabled = false;
@@ -97,7 +100,7 @@ struct kore_alloc_heap {
 
   static void deallocate(size_t size, void *data) {
     if (during_gc()) {
-      ::operator delete(data);
+      ::operator delete((char *)data - sizeof(blockheader));
     }
   }
 };
