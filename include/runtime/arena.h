@@ -154,7 +154,7 @@ inline void *arena::kore_arena_alloc(size_t requested) {
     //	depending on the requested size and tripwire setting. This triggers a garbage
     //	collect when allowed.
     //
-    time_for_collection = true;
+    //time_for_collection = true;
     tripwire = current_addr_ptr + HYPERBLOCK_SIZE;  // won't trigger again until arena swap
   }
   void *result = allocation_ptr;
