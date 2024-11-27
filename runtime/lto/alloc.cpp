@@ -16,47 +16,42 @@ REGISTER_ARENA(oldspace, OLDSPACE_ID);
 REGISTER_ARENA(alwaysgcspace, ALWAYSGCSPACE_ID);
 
 char *youngspace_ptr() {
-  return arena_start_ptr(&youngspace);
+  return youngspace.arena_start_ptr();
 }
 
 char *oldspace_ptr() {
-  return arena_start_ptr(&oldspace);
+  return oldspace.arena_start_ptr();
 }
 
 char **young_alloc_ptr() {
-  return arena_end_ptr(&youngspace);
+  return youngspace.arena_end_ptr();
 }
 
 char **old_alloc_ptr() {
-  return arena_end_ptr(&oldspace);
+  return oldspace.arena_end_ptr();
 }
 
 char youngspace_collection_id() {
-  return get_arena_collection_semispace_id(&youngspace);
+  return youngspace.get_arena_collection_semispace_id();
 }
 
 char oldspace_collection_id() {
-  return get_arena_collection_semispace_id(&oldspace);
+  return oldspace.get_arena_collection_semispace_id();
 }
 
 size_t youngspace_size(void) {
-  return arena_size(&youngspace);
-}
-
-bool youngspace_almost_full(size_t threshold) {
-  char *next_block = *(char **)youngspace.block_start;
-  return !next_block;
+  return youngspace.arena_size();
 }
 
 void kore_alloc_swap(bool swap_old) {
-  arena_swap_and_clear(&youngspace);
+  youngspace.arena_swap_and_clear();
   if (swap_old) {
-    arena_swap_and_clear(&oldspace);
+    oldspace.arena_swap_and_clear();
   }
 }
 
 void kore_clear() {
-  arena_clear(&alwaysgcspace);
+  alwaysgcspace.arena_clear();
 }
 
 void set_kore_memory_functions_for_gmp() {
@@ -64,25 +59,25 @@ void set_kore_memory_functions_for_gmp() {
 }
 
 __attribute__((always_inline)) void *kore_alloc(size_t requested) {
-  return kore_arena_alloc(&youngspace, requested);
+  return youngspace.kore_arena_alloc(requested);
 }
 
 __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return kore_arena_alloc(&youngspace, size < 16 ? 16 : size);
+  return youngspace.kore_arena_alloc(size < 16 ? 16 : size);
 }
 
 __attribute__((always_inline)) void *kore_alloc_old(size_t requested) {
-  return kore_arena_alloc(&oldspace, requested);
+  return oldspace.kore_arena_alloc(requested);
 }
 
 __attribute__((always_inline)) void *kore_alloc_token_old(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return kore_arena_alloc(&oldspace, size < 16 ? 16 : size);
+  return oldspace.kore_arena_alloc(size < 16 ? 16 : size);
 }
 
 __attribute__((always_inline)) void *kore_alloc_always_gc(size_t requested) {
-  return kore_arena_alloc(&alwaysgcspace, requested);
+  return alwaysgcspace.kore_arena_alloc(requested);
 }
 
 void *
@@ -90,7 +85,7 @@ kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
 
-  if (oldptr != *arena_end_ptr(&youngspace) - last_size) {
+  if (oldptr != *(youngspace.arena_end_ptr()) - last_size) {
     MEM_LOG(
         "May only reallocate last allocation. Tried to reallocate %p to %zd\n",
         oldptr, newrequest);
@@ -98,7 +93,7 @@ kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   }
 
   ssize_t increase = newrequest - last_size;
-  if (arena_resize_last_alloc(&youngspace, increase)) {
+  if (youngspace.arena_resize_last_alloc(increase)) {
     return oldptr;
   }
 
