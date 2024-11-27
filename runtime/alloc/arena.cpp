@@ -12,40 +12,20 @@
 
 extern size_t const VAR_BLOCK_SIZE = BLOCK_SIZE;
 
-__attribute__((always_inline)) memory_block_header *
-mem_block_header(void *ptr) {
+__attribute__((always_inline)) arena::memory_block_header *
+arena::mem_block_header(void *ptr) {
   // NOLINTNEXTLINE(*-reinterpret-cast)
-  return reinterpret_cast<memory_block_header *>(
+  return reinterpret_cast<arena::memory_block_header *>(
       ((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1));
 }
 
-__attribute__((always_inline)) void arena_reset(struct arena *arena) {
-  char id = arena->allocation_semispace_id;
-  if (id < 0) {
-    id = ~arena->allocation_semispace_id;
-  }
-  arena->first_block = nullptr;
-  arena->block = nullptr;
-  arena->block_start = nullptr;
-  arena->block_end = nullptr;
-  arena->first_collection_block = nullptr;
-  arena->num_blocks = 0;
-  arena->num_collection_blocks = 0;
-  arena->allocation_semispace_id = id;
+__attribute__((always_inline)) char
+arena::get_arena_collection_semispace_id() const {
+  return ~allocation_semispace_id;
 }
 
 __attribute__((always_inline)) char
-get_arena_allocation_semispace_id(const struct arena *arena) {
-  return arena->allocation_semispace_id;
-}
-
-__attribute__((always_inline)) char
-get_arena_collection_semispace_id(const struct arena *arena) {
-  return ~arena->allocation_semispace_id;
-}
-
-__attribute__((always_inline)) char
-get_arena_semispace_id_of_object(void *ptr) {
+arena::get_arena_semispace_id_of_object(void *ptr) {
   return mem_block_header(ptr)->semispace;
 }
 
@@ -53,7 +33,6 @@ get_arena_semispace_id_of_object(void *ptr) {
 //	We will reserve enough address space for 1 million 1MB blocks. Might want to increase this on a > 1TB server.
 //
 size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
-static thread_local void *hyperblock_ptr = nullptr; // only needed for munmap()
 
 static void *megabyte_malloc() {
   //
@@ -84,7 +63,6 @@ static void *megabyte_malloc() {
       perror("mmap()");
       abort();
     }
-    hyperblock_ptr = addr;
     //
     //	We ask for one block worth of address space less than we allocated so alignment will always succeed.
     //	We don't worry about unused address space either side of our aligned address space because there will be no
@@ -96,13 +74,6 @@ static void *megabyte_malloc() {
   return currentblock_ptr;
 }
 
-void free_all_memory() {
-  //
-  //	Frees all memory that was demand paged into this address range.
-  //
-  munmap(hyperblock_ptr, HYPERBLOCK_SIZE);
-}
-
 #ifdef __MACH__
 //
 //	thread_local disabled for Apple
@@ -112,48 +83,47 @@ bool time_for_collection;
 thread_local bool time_for_collection;
 #endif
 
-static void fresh_block(struct arena *arena) {
+void arena::fresh_block() {
   char *next_block = nullptr;
-  if (arena->block_start == nullptr) {
+  if (block_start == nullptr) {
     next_block = (char *)megabyte_malloc();
-    arena->first_block = next_block;
-    auto *next_header = (memory_block_header *)next_block;
+    first_block = next_block;
+    auto *next_header = (arena::memory_block_header *)next_block;
     next_header->next_block = nullptr;
-    next_header->semispace = arena->allocation_semispace_id;
-    arena->num_blocks++;
+    next_header->semispace = allocation_semispace_id;
+    num_blocks++;
   } else {
-    next_block = *(char **)arena->block_start;
-    if (arena->block != arena->block_end) {
-      if (arena->block_end - arena->block == 8) {
-        *(uint64_t *)arena->block
-            = NOT_YOUNG_OBJECT_BIT; // 8 bit sentinel value
+    next_block = *(char **)block_start;
+    if (block != block_end) {
+      if (block_end - block == 8) {
+        *(uint64_t *)block = NOT_YOUNG_OBJECT_BIT; // 8 bit sentinel value
       } else {
-        *(uint64_t *)arena->block = arena->block_end - arena->block
-                                    - 8; // 16-bit or more sentinel value
+        *(uint64_t *)block
+            = block_end - block - 8; // 16-bit or more sentinel value
       }
     }
     if (!next_block) {
       MEM_LOG(
           "Allocating new block for the first time in arena %d\n",
-          arena->allocation_semispace_id);
+          allocation_semispace_id);
       next_block = (char *)megabyte_malloc();
-      *(char **)arena->block_start = next_block;
-      auto *next_header = (memory_block_header *)next_block;
+      *(char **)block_start = next_block;
+      auto *next_header = (arena::memory_block_header *)next_block;
       next_header->next_block = nullptr;
-      next_header->semispace = arena->allocation_semispace_id;
-      arena->num_blocks++;
+      next_header->semispace = allocation_semispace_id;
+      num_blocks++;
       time_for_collection = true;
     }
   }
-  if (!*(char **)next_block && arena->num_blocks >= get_gc_threshold()) {
+  if (!*(char **)next_block && num_blocks >= get_gc_threshold()) {
     time_for_collection = true;
   }
-  arena->block = next_block + sizeof(memory_block_header);
-  arena->block_start = next_block;
-  arena->block_end = next_block + BLOCK_SIZE;
+  block = next_block + sizeof(arena::memory_block_header);
+  block_start = next_block;
+  block_end = next_block + BLOCK_SIZE;
   MEM_LOG(
-      "New block at %p (remaining %zd)\n", arena->block,
-      BLOCK_SIZE - sizeof(memory_block_header));
+      "New block at %p (remaining %zd)\n", block,
+      BLOCK_SIZE - sizeof(arena::memory_block_header));
 }
 
 #ifdef __MACH__
@@ -165,63 +135,59 @@ bool gc_enabled = true;
 thread_local bool gc_enabled = true;
 #endif
 
-__attribute__((noinline)) void *
-do_alloc_slow(size_t requested, struct arena *arena) {
+__attribute__((noinline)) void *arena::do_alloc_slow(size_t requested) {
   MEM_LOG(
-      "Block at %p too small, %zd remaining but %zd needed\n", arena->block,
-      arena->block_end - arena->block, requested);
-  if (requested > BLOCK_SIZE - sizeof(memory_block_header)) {
+      "Block at %p too small, %zd remaining but %zd needed\n", block,
+      block_end - block, requested);
+  if (requested > BLOCK_SIZE - sizeof(arena::memory_block_header)) {
     return malloc(requested);
   }
-  fresh_block(arena);
-  void *result = arena->block;
-  arena->block += requested;
+  fresh_block();
+  void *result = block;
+  block += requested;
   MEM_LOG(
       "Allocation at %p (size %zd), next alloc at %p (if it fits)\n", result,
-      requested, arena->block);
+      requested, block);
   return result;
 }
 
 __attribute__((always_inline)) void *
-arena_resize_last_alloc(struct arena *arena, ssize_t increase) {
-  if (arena->block + increase <= arena->block_end) {
-    arena->block += increase;
-    return arena->block;
+arena::arena_resize_last_alloc(ssize_t increase) {
+  if (block + increase <= block_end) {
+    block += increase;
+    return block;
   }
   return nullptr;
 }
 
-__attribute__((always_inline)) void arena_swap_and_clear(struct arena *arena) {
-  char *tmp = arena->first_block;
-  arena->first_block = arena->first_collection_block;
-  arena->first_collection_block = tmp;
-  size_t tmp2 = arena->num_blocks;
-  arena->num_blocks = arena->num_collection_blocks;
-  arena->num_collection_blocks = tmp2;
-  arena->allocation_semispace_id = ~arena->allocation_semispace_id;
-  arena_clear(arena);
+__attribute__((always_inline)) void arena::arena_swap_and_clear() {
+  char *tmp = first_block;
+  first_block = first_collection_block;
+  first_collection_block = tmp;
+  size_t tmp2 = num_blocks;
+  num_blocks = num_collection_blocks;
+  num_collection_blocks = tmp2;
+  allocation_semispace_id = ~allocation_semispace_id;
+  arena_clear();
 }
 
-__attribute__((always_inline)) void arena_clear(struct arena *arena) {
-  arena->block = arena->first_block
-                     ? arena->first_block + sizeof(memory_block_header)
+__attribute__((always_inline)) void arena::arena_clear() {
+  block = first_block ? first_block + sizeof(arena::memory_block_header)
+                      : nullptr;
+  block_start = first_block;
+  block_end = first_block ? first_block + BLOCK_SIZE : nullptr;
+}
+
+__attribute__((always_inline)) char *arena::arena_start_ptr() const {
+  return first_block ? first_block + sizeof(arena::memory_block_header)
                      : nullptr;
-  arena->block_start = arena->first_block;
-  arena->block_end
-      = arena->first_block ? arena->first_block + BLOCK_SIZE : nullptr;
 }
 
-__attribute__((always_inline)) char *
-arena_start_ptr(const struct arena *arena) {
-  return arena->first_block ? arena->first_block + sizeof(memory_block_header)
-                            : nullptr;
+__attribute__((always_inline)) char **arena::arena_end_ptr() {
+  return &block;
 }
 
-__attribute__((always_inline)) char **arena_end_ptr(struct arena *arena) {
-  return &arena->block;
-}
-
-char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
+char *arena::move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
   char *next_ptr = ptr + size;
   if (next_ptr == arena_end_ptr) {
     return nullptr;
@@ -233,23 +199,23 @@ char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
   if (!next_block) {
     return nullptr;
   }
-  return next_block + sizeof(memory_block_header);
+  return next_block + sizeof(arena::memory_block_header);
 }
 
-ssize_t ptr_diff(char *ptr1, char *ptr2) {
+ssize_t arena::ptr_diff(char *ptr1, char *ptr2) {
   if (MEM_BLOCK_START(ptr1) == MEM_BLOCK_START(ptr2)) {
     return ptr1 - ptr2;
   }
-  memory_block_header *hdr = mem_block_header(ptr2);
+  arena::memory_block_header *hdr = mem_block_header(ptr2);
   ssize_t result = 0;
   while (hdr != mem_block_header(ptr1) && hdr->next_block) {
     if (ptr2) {
       result += ((char *)hdr + BLOCK_SIZE) - ptr2;
       ptr2 = nullptr;
     } else {
-      result += (BLOCK_SIZE - sizeof(memory_block_header));
+      result += (BLOCK_SIZE - sizeof(arena::memory_block_header));
     }
-    hdr = (memory_block_header *)hdr->next_block;
+    hdr = (arena::memory_block_header *)hdr->next_block;
   }
   if (hdr == mem_block_header(ptr1)) {
     result += ptr1 - (char *)(hdr + 1);
@@ -264,9 +230,8 @@ ssize_t ptr_diff(char *ptr1, char *ptr2) {
   return -ptr_diff(ptr2, ptr1);
 }
 
-size_t arena_size(const struct arena *arena) {
-  return (arena->num_blocks > arena->num_collection_blocks
-              ? arena->num_blocks
-              : arena->num_collection_blocks)
-         * (BLOCK_SIZE - sizeof(memory_block_header));
+size_t arena::arena_size() const {
+  return (num_blocks > num_collection_blocks ? num_blocks
+                                             : num_collection_blocks)
+         * (BLOCK_SIZE - sizeof(arena::memory_block_header));
 }
