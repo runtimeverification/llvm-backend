@@ -33,13 +33,13 @@ void arena::initialize_semispace() {
   //
   size_t request = 2 * HYPERBLOCK_SIZE;
   void *addr = mmap(
-		    nullptr, // let OS choose the address
-		    request, // Linux and MacOS both allow up to 64TB
-		    PROT_READ | PROT_WRITE, // read, write but not execute
-		    MAP_ANONYMOUS | MAP_PRIVATE
-		    | MAP_NORESERVE, // allocate address space only
-		    -1, // no file backing
-		    0); // no offset
+      nullptr, // let OS choose the address
+      request, // Linux and MacOS both allow up to 64TB
+      PROT_READ | PROT_WRITE, // read, write but not execute
+      MAP_ANONYMOUS | MAP_PRIVATE
+          | MAP_NORESERVE, // allocate address space only
+      -1, // no file backing
+      0); // no offset
   if (addr == MAP_FAILED) {
     perror("mmap()");
     abort();
@@ -50,12 +50,14 @@ void arena::initialize_semispace() {
   //	We don't worry about unused address space either side of our aligned address space because there will be no
   //	memory mapped to it.
   //
-  current_addr_ptr = reinterpret_cast<char *>(std::align(HYPERBLOCK_SIZE, HYPERBLOCK_SIZE, addr, request));
+  current_addr_ptr = reinterpret_cast<char *>(
+      std::align(HYPERBLOCK_SIZE, HYPERBLOCK_SIZE, addr, request));
   //
   //	We put a memory_block_header at the beginning so we can identify the semispace a pointer belongs to
   //	id by masking off the low bits to access this memory_block_header.
   //
-  memory_block_header *header = reinterpret_cast<memory_block_header *>(current_addr_ptr);
+  memory_block_header *header
+      = reinterpret_cast<memory_block_header *>(current_addr_ptr);
   header->semispace = allocation_semispace_id;
   allocation_ptr = current_addr_ptr + sizeof(arena::memory_block_header);
   //
