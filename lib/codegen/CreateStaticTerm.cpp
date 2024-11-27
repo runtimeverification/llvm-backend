@@ -324,7 +324,6 @@ create_static_term::create_token(value_type sort, std::string contents) {
     llvm::Constant *global
         = module_->getOrInsertGlobal("token_" + escape(contents), string_type);
     auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(global);
-    global_var->setConstant(true);
     if (!global_var->hasInitializer()) {
       llvm::StructType *block_header_type = llvm::StructType::getTypeByName(
           module_->getContext(), blockheader_struct);
