@@ -150,9 +150,6 @@ private:
 // 127.
 #define REGISTER_ARENA(name, id) static thread_local arena name(id)
 
-#define MEM_BLOCK_START(ptr)                                                   \
-  ((char *)(((uintptr_t)(ptr)-1) & ~(BLOCK_SIZE - 1)))
-
 #ifdef __MACH__
 //
 //	thread_local disabled for Apple
