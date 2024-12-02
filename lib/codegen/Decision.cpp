@@ -5,6 +5,7 @@
 #include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/Util.h"
 
+#include "llvm/IR/IRBuilder.h"
 #include <llvm/ADT/APInt.h>
 #include <llvm/ADT/SmallString.h>
 #include <llvm/ADT/StringMap.h>
@@ -694,6 +695,7 @@ llvm::Constant *decision::string_literal(std::string const &str) {
   auto *global
       = module_->getOrInsertGlobal("str_lit_" + str, str_cst->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setConstant(true);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(str_cst);
   }
@@ -1005,9 +1007,25 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
 
   auto *collection = module->getOrInsertGlobal(
       "time_for_collection", llvm::Type::getInt1Ty(module->getContext()));
+
+#ifdef __MACH__
+  //
+  //	thread_local disabled for Apple
+  //
+  /*
+  llvm::cast<llvm::GlobalVariable>(collection)->setThreadLocal(true);
+  llvm::IRBuilder b(check_collect);
+  auto *collection_address = b.CreateThreadLocalAddress(collection);
+  */
+  auto *collection_address = collection;
+#else
+  llvm::cast<llvm::GlobalVariable>(collection)->setThreadLocal(true);
+  auto *collection_address = collection;
+#endif
+
   auto *is_collection = new llvm::LoadInst(
-      llvm::Type::getInt1Ty(module->getContext()), collection, "is_collection",
-      check_collect);
+      llvm::Type::getInt1Ty(module->getContext()), collection_address,
+      "is_collection", check_collect);
   set_debug_loc(is_collection);
   auto *collect = llvm::BasicBlock::Create(
       module->getContext(), "isCollect", block->getParent());
@@ -1091,6 +1109,7 @@ std::pair<std::vector<llvm::Value *>, llvm::BasicBlock *> step_function_header(
   auto *layout = module->getOrInsertGlobal(
       "layout_item_rule_" + std::to_string(ordinal), layout_arr->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(layout);
+  global_var->setConstant(true);
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(layout_arr);
   }

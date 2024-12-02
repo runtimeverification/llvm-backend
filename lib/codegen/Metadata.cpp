@@ -24,6 +24,7 @@ void add_boolean_flag(
 
   auto *global = mod.getOrInsertGlobal(name, i1_ty);
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setConstant(true);
 
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(enabled_cst);
@@ -44,6 +45,7 @@ void add_kompiled_dir_symbol(
 
   auto *global = mod.getOrInsertGlobal(kompiled_dir, str->getType());
   auto *global_var = llvm::cast<llvm::GlobalVariable>(global);
+  global_var->setConstant(true);
 
   if (!global_var->hasInitializer()) {
     global_var->setInitializer(str);
