@@ -72,7 +72,7 @@ std::unordered_set<block *, hash_block, k_eq> take_search_steps(
   while (!states.empty() && depth != 0) {
     state = states.front();
     states.pop_front();
-    if (states.size() == 0) {
+    if (states.empty()) {
       states_set.clear();
     } else {
       states_set.erase(state);
