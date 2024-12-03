@@ -204,7 +204,7 @@ inline void arena::arena_swap_and_clear() {
     //
     //	The other semispace hasn't be initialized yet.
     //
-    void initialize_semispace();
+    initialize_semispace();
   } else
     arena_clear();
 }
