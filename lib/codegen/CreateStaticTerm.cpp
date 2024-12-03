@@ -306,10 +306,15 @@ create_static_term::create_token(value_type sort, std::string contents) {
     assert(false && "not implemented yet: tokens");
   case sort_category::MInt: {
     size_t idx = contents.find_first_of("pP");
-    assert(idx != std::string::npos);
-    uint64_t bits = std::stoi(contents.substr(idx + 1));
+    uint64_t bits{};
+    if (idx == std::string::npos) {
+      bits = sort.bits;
+    } else {
+      bits = std::stoi(contents.substr(idx + 1));
+      contents = contents.substr(0, idx);
+    }
     return llvm::ConstantInt::get(
-        llvm::IntegerType::get(ctx_, bits), contents.substr(0, idx), 10);
+        llvm::IntegerType::get(ctx_, bits), contents, 10);
   }
   case sort_category::Bool:
     return llvm::ConstantInt::get(
