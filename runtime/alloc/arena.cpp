@@ -41,14 +41,15 @@ void arena::initialize_semispace() {
   }
   //
   //	We allocated 2 * HYPERBLOCK_SIZE worth of address space but we're only going to use 1, aligned on a
-  //	HYPERBLOCK_SIZE boundry. This is so we can get the start of the hyperblock by masking any address within it.
+  //	HYPERBLOCK_SIZE boundry. This is so we can get end of the hyperblock by setting the low bits of any
+  //	address within the space to 1.
   //	We don't worry about unused address space either side of our aligned address space because there will be no
   //	memory mapped to it.
   //
   current_addr_ptr = reinterpret_cast<char *>(
       std::align(HYPERBLOCK_SIZE, HYPERBLOCK_SIZE, addr, request));
   //
-  //	We put a semispace id in the last byte of the hyperblock so we can identify which semispace a pointer
+  //	We put a semispace id in the last byte of the hyperblock so we can identify which semispace an address
   //	belongs to by setting the low bits to 1 to access this id.
   //
   current_addr_ptr[HYPERBLOCK_SIZE - 1] = allocation_semispace_id;

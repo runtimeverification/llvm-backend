@@ -27,12 +27,12 @@ public:
   void *kore_arena_alloc(size_t requested);
 
   // Returns the address of the first byte that belongs in the given arena.
-  // Returns 0 if nothing has been allocated ever in that arena.
+  // Returns nullptr if nothing has been allocated ever in that arena.
   char *arena_start_ptr() const { return current_addr_ptr; }
 
   // Returns a pointer to a location holding the address of last allocated
   // byte in the given arena plus 1.
-  // This address is 0 if nothing has been allocated ever in that arena.
+  // This address is nullptr if nothing has been allocated ever in that arena.
   char **arena_end_ptr() { return &allocation_ptr; }
 
   // Clears the current allocation space by setting its start back to its first
@@ -40,9 +40,8 @@ public:
   // arena. Resets the tripwire.
   void arena_clear();
 
-  // Resizes the last allocation as long as the resize does not require a new
-  // block allocation.
-  // Returns the address of the byte following the last newlly allocated byte.
+  // Resizes the last allocation.
+  // Returns the address of the byte following the last newly allocated byte.
   void *arena_resize_last_alloc(ssize_t increase) {
     return (allocation_ptr += increase);
   }
@@ -61,10 +60,8 @@ public:
   void arena_swap_and_clear();
 
   // Given two pointers to objects allocated in the same arena, return the number
-  // of bytes they are separated by within the virtual block of memory represented
-  // by the blocks of that arena. This difference will include blocks containing
-  // sentinel bytes. Undefined behavior will result if the pointers belong to
-  // different arenas.
+  // of bytes they are apart. Undefined behavior will result if the pointers
+  // don't belong to the same arena
   static ssize_t ptr_diff(char *ptr1, char *ptr2) { return ptr1 - ptr2; }
 
   // Given a starting pointer to an address allocated in an arena and a size in
@@ -74,11 +71,11 @@ public:
   // 1st argument: the starting pointer
   // 2nd argument: the size in bytes to add to the starting pointer
   // 3rd argument: the address of last allocated byte in the arena plus 1
-  // Return value: the address allocated in the arena after size bytes from the
-  //               starting pointer, or 0 if this is equal to the 3rd argument.
+  // Return value: starting pointer + size unless this points to unallocated space
+  //               in which case nullptr is returned
   static char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
     char *next_ptr = ptr + size;
-    return (next_ptr == arena_end_ptr) ? 0 : next_ptr;
+    return (next_ptr == arena_end_ptr) ? nullptr : next_ptr;
   }
 
   // Returns the ID of the semispace where the given address was allocated.
@@ -128,7 +125,8 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
   //
   //	Set the low bits to 1 to get the address of the last byte in the hyperblock.
   //
-  uintptr_t end_address = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
+  uintptr_t end_address
+      = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
   return *reinterpret_cast<char *>(end_address);
 }
 
