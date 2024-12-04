@@ -11,11 +11,6 @@
 
 extern size_t const VAR_BLOCK_SIZE = BLOCK_SIZE;
 
-__attribute__((always_inline)) char
-arena::get_arena_semispace_id_of_object(void *ptr) {
-  return mem_block_header(ptr)->semispace;
-}
-
 #ifdef __MACH__
 //
 //	thread_local disabled for Apple
@@ -53,13 +48,11 @@ void arena::initialize_semispace() {
   current_addr_ptr = reinterpret_cast<char *>(
       std::align(HYPERBLOCK_SIZE, HYPERBLOCK_SIZE, addr, request));
   //
-  //	We put a memory_block_header at the beginning so we can identify the semispace a pointer belongs to
-  //	id by masking off the low bits to access this memory_block_header.
+  //	We put a semispace id in the last byte of the hyperblock so we can identify which semispace a pointer
+  //	belongs to by setting the low bits to 1 to access this id.
   //
-  memory_block_header *header
-      = reinterpret_cast<memory_block_header *>(current_addr_ptr);
-  header->semispace = allocation_semispace_id;
-  allocation_ptr = current_addr_ptr + sizeof(arena::memory_block_header);
+  current_addr_ptr[HYPERBLOCK_SIZE - 1] = allocation_semispace_id;
+  allocation_ptr = current_addr_ptr;
   //
   //	We set the tripwire for this space so we get trigger a garbage collection when we pass BLOCK_SIZE of memory
   //	allocated from this space.
