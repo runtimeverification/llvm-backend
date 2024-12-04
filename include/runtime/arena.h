@@ -38,13 +38,6 @@ public:
   // This address is 0 if nothing has been allocated ever in that arena.
   char **arena_end_ptr() { return &allocation_ptr; }
 
-  // return the total number of allocatable bytes currently in the arena in its
-  // active semispace.
-  size_t arena_size() const {
-    update_num_blocks();
-    return BLOCK_SIZE * std::max(num_blocks, num_collection_blocks);
-  }
-
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
   // arena.

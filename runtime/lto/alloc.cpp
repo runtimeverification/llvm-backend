@@ -39,10 +39,6 @@ char oldspace_collection_id() {
   return oldspace.get_arena_collection_semispace_id();
 }
 
-size_t youngspace_size(void) {
-  return youngspace.arena_size();
-}
-
 void kore_alloc_swap(bool swap_old) {
   youngspace.arena_swap_and_clear();
   if (swap_old) {
