@@ -28,10 +28,7 @@ public:
 
   // Returns the address of the first byte that belongs in the given arena.
   // Returns 0 if nothing has been allocated ever in that arena.
-  char *arena_start_ptr() const {
-    return current_addr_ptr ? current_addr_ptr + sizeof(memory_block_header)
-                            : nullptr;
-  }
+  char *arena_start_ptr() const { return current_addr_ptr; }
 
   // Returns a pointer to a location holding the address of last allocated
   // byte in the given arena plus 1.
@@ -40,7 +37,7 @@ public:
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
-  // arena.
+  // arena. Resets the tripwire.
   void arena_clear();
 
   // Resizes the last allocation as long as the resize does not require a new
@@ -90,15 +87,6 @@ public:
   static char get_arena_semispace_id_of_object(void *ptr);
 
 private:
-  union memory_block_header {
-    //
-    //	Currently the header just holds the semispace id. But we need it to be a
-    //	multiple of sizeof(char*) for alignment purposes so we add a dummy char*.
-    //
-    char semispace;
-    char *alignment_dummy;
-  };
-
   //
   //	We update the number of 1MB blocks actually written to, only when we need this value,
   //	or before a garbage collection rather than trying to determine when we write to a fresh block.
@@ -114,13 +102,6 @@ private:
   }
 
   void initialize_semispace();
-
-  static memory_block_header *mem_block_header(void *ptr) {
-    uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
-    return reinterpret_cast<arena::memory_block_header *>(
-        (address - 1) & ~(HYPERBLOCK_SIZE - 1));
-  }
-
   //
   //	Current semispace where allocations are being made.
   //
@@ -138,6 +119,18 @@ private:
   size_t num_collection_blocks
       = 0; // notional number of BLOCK_SIZE blocks in collection semispace
 };
+
+inline char arena::get_arena_semispace_id_of_object(void *ptr) {
+  //
+  //	We don't have to deal with the "1 past the end of block" case because
+  //	a valid pointer will always point into our hyperblock - we will never return
+  //	an allocation anywhere near the end of our hyperblock.
+  //
+  //	Set the low bits to 1 to get the address of the last byte in the hyperblock.
+  //
+  uintptr_t end_address = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
+  return *reinterpret_cast<char *>(end_address);
+}
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
@@ -162,8 +155,11 @@ inline void *arena::kore_arena_alloc(size_t requested) {
     //	collect when allowed.
     //
     time_for_collection = true;
-    tripwire = current_addr_ptr
-               + HYPERBLOCK_SIZE; // won't trigger again until arena swap
+    //
+    //	We move the tripwire to 1 past the end of our hyperblock so that we have
+    //	a well defined comparison that will always be false until the next arena swap.
+    //
+    tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
   }
   void *result = allocation_ptr;
   allocation_ptr += requested;
