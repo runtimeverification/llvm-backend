@@ -15,7 +15,7 @@ extern "C" {
 
 char youngspace_collection_id(void);
 char oldspace_collection_id(void);
-  //size_t youngspace_size(void);
+//size_t youngspace_size(void);
 
 // allocates exactly requested bytes into the young generation
 void *kore_alloc(size_t requested);
