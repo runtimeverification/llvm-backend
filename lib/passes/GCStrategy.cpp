@@ -27,7 +27,8 @@ LLVMBackendGCStrategy::LLVMBackendGCStrategy() {
 
 // Override
 #if LLVM_VERSION_MAJOR == 15
-llvm::Optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {
+llvm::Optional<bool>
+LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {
 #else
 std::optional<bool>
 LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {
