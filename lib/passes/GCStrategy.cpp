@@ -28,16 +28,17 @@ LLVMBackendGCStrategy::LLVMBackendGCStrategy() {
 
 // Override
 #if LLVM_VERSION_MAJOR == 15
-Optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(const Type *Ty) const {
+Optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {
 #else
-std::optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(const Type *Ty) const {
+std::optional<bool>
+LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {
 #endif
   // Return false for any non-pointer type
   if (!Ty->isPointerTy()) {
     return false;
   }
   // Any pointer with address space != 0 is to managed memory.
-  const PointerType *PTy = dyn_cast<PointerType>(Ty);
+  PointerType const *PTy = dyn_cast<PointerType>(Ty);
   if (PTy->getAddressSpace()) {
     return true;
   }
@@ -45,7 +46,7 @@ std::optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(const Type *Ty) co
 }
 
 // Add LLVMBackendGCStrategy to the global GCRegistry
-static GCRegistry::Add<LLVMBackendGCStrategy> X("gcs-llvm-backend",
-        "GC Strategy for the LLVM Backend");
+static GCRegistry::Add<LLVMBackendGCStrategy>
+    X("gcs-llvm-backend", "GC Strategy for the LLVM Backend");
 
 // NOLINTEND
