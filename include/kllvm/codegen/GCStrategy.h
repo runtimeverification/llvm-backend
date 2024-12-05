@@ -7,6 +7,8 @@
 // - pointers with address space != 0 are pointing to GC-managed memory.
 //===----------------------------------------------------------------------===//
 
+// NOLINTBEGIN
+
 #ifndef LLVM_BACKEND_GC_STRATEGY_H
 #define LLVM_BACKEND_GC_STRATEGY_H
 
@@ -27,3 +29,5 @@ public:
 } // end anonymous namespace
 
 #endif // LLVM_BACKEND_GC_STRATEGY_H
+
+// NOLINTEND

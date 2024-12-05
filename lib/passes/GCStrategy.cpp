@@ -7,6 +7,8 @@
 // - pointers with address space != 0 are pointing to GC-managed memory.
 //===----------------------------------------------------------------------===//
 
+// NOLINTBEGIN
+
 #include "kllvm/codegen/GCStrategy.h"
 
 #include "llvm/CodeGen/GCMetadata.h"
@@ -32,11 +34,12 @@ std::optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(const Type *Ty) co
   const PointerType *PTy = dyn_cast<PointerType>(Ty);
   if (PTy->getAddressSpace()) {
     return true;
-  } else {
-      return false;
   }
+  return false;
 }
 
 // Add LLVMBackendGCStrategy to the global GCRegistry
 static GCRegistry::Add<LLVMBackendGCStrategy> X("gcs-llvm-backend",
         "GC Strategy for the LLVM Backend");
+
+// NOLINTEND
