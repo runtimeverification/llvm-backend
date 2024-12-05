@@ -59,5 +59,5 @@ void arena::initialize_semispace() {
   //	allocated from this space.
   //
   tripwire = current_addr_ptr + BLOCK_SIZE;
-  num_blocks = 1;
+  nr_touched_bytes = 0;
 }

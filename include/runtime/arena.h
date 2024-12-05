@@ -12,6 +12,7 @@
 extern "C" {
 
 size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
+size_t const margin = 1024 * 1024;
 
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
@@ -84,20 +85,6 @@ public:
   static char get_arena_semispace_id_of_object(void *ptr);
 
 private:
-  //
-  //	We update the number of 1MB blocks actually written to, only when we need this value,
-  //	or before a garbage collection rather than trying to determine when we write to a fresh block.
-  //
-  void update_num_blocks() const {
-    //
-    //	Calculate how many 1M blocks of the current arena we used.
-    //
-    size_t num_used_blocks
-        = (allocation_ptr - current_addr_ptr - 1) / BLOCK_SIZE + 1;
-    if (num_used_blocks > num_blocks)
-      num_blocks = num_used_blocks;
-  }
-
   void initialize_semispace();
   //
   //	Current semispace where allocations are being made.
@@ -105,16 +92,15 @@ private:
   char *current_addr_ptr; // pointer to start of current address space
   char *allocation_ptr; // next available location in current semispace
   char *tripwire; // allocating past this triggers slow allocation
-  mutable size_t
-      num_blocks; // notional number of BLOCK_SIZE blocks in current semispace
+  size_t nr_touched_bytes; // number of bytes that are touched
   char allocation_semispace_id; // id of current semispace
   //
   //	Semispace where allocations will be made during and after garbage collect.
+  //	We only track the start of the address space and the number of bytes
+  //	that have been touched.
   //
-  char *collection_addr_ptr
-      = nullptr; // pointer to start of collection address space
-  size_t num_collection_blocks
-      = 0; // notional number of BLOCK_SIZE blocks in collection semispace
+  char *collection_addr_ptr = nullptr;
+  size_t nr_collection_touched_bytes = 0;
 };
 
 inline char arena::get_arena_semispace_id_of_object(void *ptr) {
@@ -172,27 +158,44 @@ inline void arena::arena_clear() {
   //	We set the allocation pointer to the first available address.
   //
   allocation_ptr = arena_start_ptr();
+  if (nr_touched_bytes >= get_gc_threshold() * BLOCK_SIZE)
+    tripwire = current_addr_ptr + nr_touched_bytes - margin;
+  else
+    tripwire = current_addr_ptr + nr_touched_bytes;
   //
   //	If the number of blocks we've touched is >= threshold, we want to trigger
   //	a garbage collection if we get within 1 block of the end of this area.
   //	Otherwise we only want to generate a garbage collect if we allocate off the
   //	end of this area.
   //
-  tripwire = current_addr_ptr
-             + (num_blocks - (num_blocks >= get_gc_threshold())) * BLOCK_SIZE;
+  //tripwire = current_addr_ptr
+  //           + (num_blocks - (num_blocks >= get_gc_threshold())) * BLOCK_SIZE;
 }
 
 inline void arena::arena_swap_and_clear() {
-  update_num_blocks(); // so we save the correct number of touched blocks
+  //
+  //	Calculate how many bytes we handled out from the current semispace
+  //	before the swap.
+  //
+  size_t nr_allocated_bytes = allocation_ptr - current_addr_ptr;
+  //
+  //	If this is greater than the number of bytes we touched on previous cycles,
+  //	update the number of touched bytes.
+  //
+  if (nr_allocated_bytes > nr_touched_bytes)
+    nr_touched_bytes = nr_allocated_bytes;
+  //
+  //	Swap the two key pieces of information with the other semispace and update the id.
+  //
   std::swap(current_addr_ptr, collection_addr_ptr);
-  std::swap(num_blocks, num_collection_blocks);
+  std::swap(nr_touched_bytes, nr_collection_touched_bytes);
   allocation_semispace_id = ~allocation_semispace_id;
-  if (current_addr_ptr == nullptr) {
-    //
-    //	The other semispace hasn't be initialized yet.
-    //
+  //
+  //	The semispace that is now current must either be initialized or cleared.
+  //
+  if (current_addr_ptr == nullptr)
     initialize_semispace();
-  } else
+  else
     arena_clear();
 }
 }
