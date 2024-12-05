@@ -23,7 +23,11 @@ public:
   LLVMBackendGCStrategy();
 
   // Override
+#if LLVM_VERSION_MAJOR == 15
+  Optional<bool> isGCManagedPointer(const llvm::Type *Ty) const override;
+#else
   std::optional<bool> isGCManagedPointer(const llvm::Type *Ty) const override;
+#endif
 };
 
 } // end anonymous namespace

@@ -21,11 +21,17 @@ using namespace kllvm;
 
 LLVMBackendGCStrategy::LLVMBackendGCStrategy() {
   UseStatepoints = true; // Use gc.statepoints
+#if LLVM_VERSION_MAJOR == 15
   UseRS4GC = true; // Rewrite the calls of a function that has this GCStrategy
+#endif
 }
 
 // Override
+#if LLVM_VERSION_MAJOR == 15
+Optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(const Type *Ty) const {
+#else
 std::optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(const Type *Ty) const {
+#endif
   // Return false for any non-pointer type
   if (!Ty->isPointerTy()) {
     return false;
