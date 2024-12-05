@@ -13,7 +13,6 @@
 
 #include "llvm/CodeGen/GCMetadata.h"
 #include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Type.h"
 #include "llvm/Support/Compiler.h"
 
 using namespace llvm;
@@ -21,14 +20,14 @@ using namespace kllvm;
 
 LLVMBackendGCStrategy::LLVMBackendGCStrategy() {
   UseStatepoints = true; // Use gc.statepoints
-#if LLVM_VERSION_MAJOR == 15
+#if LLVM_VERSION_MAJOR != 15
   UseRS4GC = true; // Rewrite the calls of a function that has this GCStrategy
 #endif
 }
 
 // Override
 #if LLVM_VERSION_MAJOR == 15
-Optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {
+llvm::Optional<bool> LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {
 #else
 std::optional<bool>
 LLVMBackendGCStrategy::isGCManagedPointer(Type const *Ty) const {

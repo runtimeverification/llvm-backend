@@ -24,7 +24,7 @@ public:
 
   // Override
 #if LLVM_VERSION_MAJOR == 15
-  Optional<bool> isGCManagedPointer(llvm::Type const *Ty) const override;
+  llvm::Optional<bool> isGCManagedPointer(llvm::Type const *Ty) const override;
 #else
   std::optional<bool> isGCManagedPointer(llvm::Type const *Ty) const override;
 #endif
