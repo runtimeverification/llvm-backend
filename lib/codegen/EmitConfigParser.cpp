@@ -491,15 +491,18 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
       = llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx), 0);
   for (auto const &entry : sorts) {
     std::string name = entry.first;
-    if (!entry.second->get_object_sort_variables().empty()) {
-      // TODO: MINT in initial configuration
-      continue;
-    }
     auto sort = kore_composite_sort::create(name);
-    value_type cat = sort->get_category(definition);
-    if (cat.cat == sort_category::Symbol
-        || cat.cat == sort_category::Variable) {
-      continue;
+    value_type cat{};
+    if (entry.second->attributes().contains(attribute_set::key::Hook)
+        && entry.second->attributes().get_string(attribute_set::key::Hook)
+               == "MINT.MInt") {
+      cat.cat = sort_category::MInt;
+    } else {
+      cat = sort->get_category(definition);
+      if (cat.cat == sort_category::Symbol
+          || cat.cat == sort_category::Variable) {
+        continue;
+      }
     }
     current_block->insertInto(func);
     current_block->setName("is_" + name);
@@ -527,10 +530,22 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
     case sort_category::List:
     case sort_category::Set:
     case sort_category::StringBuffer:
-    case sort_category::MInt:
       // TODO: tokens
       add_abort(case_block, module);
       break;
+    case sort_category::MInt: {
+      auto const &len = func->arg_begin() + 1;
+      auto const &contents = func->arg_begin() + 2;
+      auto *get_mint_token = get_or_insert_function(
+          module, "get_mint_token",
+          llvm::FunctionType::get(
+              ptr_ty, {llvm::Type::getInt64Ty(ctx), ptr_ty}, false));
+      auto *mint_token = llvm::CallInst::Create(
+          get_mint_token, {len, contents}, "", case_block);
+      phi->addIncoming(mint_token, case_block);
+      llvm::BranchInst::Create(merge_block, case_block);
+      break;
+    }
     case sort_category::Bool: {
       auto *str = llvm::ConstantDataArray::getString(ctx, "true", false);
       auto *global = module->getOrInsertGlobal("bool_true", str->getType());

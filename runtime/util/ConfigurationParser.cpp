@@ -20,6 +20,24 @@ static thread_local Cache cache;
 
 extern "C" {
 
+size_t *hook_MINT_export(mpz_t in, uint64_t bits);
+
+void *get_mint_token(size_t size, char const *c_str) {
+  std::string str = std::string(c_str, size);
+  size_t idx = str.find('p');
+  assert(idx != std::string::npos);
+  std::string precision_str = str.substr(idx + 1);
+  long long precision = std::stoll(precision_str);
+  long long precision_in_bytes = (precision + 7) / 8;
+  char *token = (char *)malloc(precision_in_bytes);
+  std::string val_str = str.substr(0, idx);
+  mpz_t z;
+  mpz_init_set_str(z, val_str.c_str(), 10);
+  size_t *mint = hook_MINT_export(z, precision);
+  memcpy(token, mint, precision_in_bytes);
+  return token;
+}
+
 uint32_t get_tag_for_symbol_name_internal(char const *);
 
 void init_float(floating *result, char const *c_str) {

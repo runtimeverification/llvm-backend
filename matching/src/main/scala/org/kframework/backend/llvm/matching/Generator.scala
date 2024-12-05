@@ -174,6 +174,8 @@ object Generator {
                 case "false" => "0"
                 case _       => str
               }
+            } else if (hookAtt.contains("MINT.MInt")) {
+              str.substring(0, str.indexOf('p'))
             } else str,
             SortCategory(hookAtt.orElse(Some("STRING.String")), sort, symlib)
           )
