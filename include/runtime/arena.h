@@ -158,12 +158,16 @@ inline void arena::arena_clear() {
   //	We set the allocation pointer to the first available address.
   //
   allocation_ptr = arena_start_ptr();
-
-  size_t nr_touched_blocks = (nr_touched_bytes - 1) / BLOCK_SIZE + 1;
-  if (nr_touched_blocks >= get_gc_threshold() * BLOCK_SIZE)
-    tripwire = current_addr_ptr + (nr_touched_blocks - 1) * BLOCK_SIZE;
-  else
-    tripwire = current_addr_ptr + nr_touched_bytes * BLOCK_SIZE;
+  //
+  //	Put the tripwire pass the end of the blocks we've touched.
+  size_t nr_touched_blocks = (nr_touched_bytes == 0) ? 0 : (nr_touched_bytes - 1) / BLOCK_SIZE + 1;
+  tripwire = current_addr_ptr + nr_touched_bytes * BLOCK_SIZE;
+  //
+  //	If we've touched enough blocks, pull back by margin, so we schedule a collection,
+  //	before we need to touch virgin address space.
+  //
+  if (nr_touched_blocks >= get_gc_threshold())
+    tripwire -= margin;
   //
   //	If the number of blocks we've touched is >= threshold, we want to trigger
   //	a garbage collection if we get within 1 block of the end of this area.
