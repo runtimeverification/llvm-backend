@@ -92,7 +92,7 @@ private:
   char *current_addr_ptr; // pointer to start of current address space
   char *allocation_ptr; // next available location in current semispace
   char *tripwire; // allocating past this triggers slow allocation
-  size_t nr_touched_bytes; // number of bytes that are touched
+  size_t nr_touched_bytes;  // number of bytes that are touched
   char allocation_semispace_id; // id of current semispace
   //
   //	Semispace where allocations will be made during and after garbage collect.
@@ -158,10 +158,12 @@ inline void arena::arena_clear() {
   //	We set the allocation pointer to the first available address.
   //
   allocation_ptr = arena_start_ptr();
-  if (nr_touched_bytes >= get_gc_threshold() * BLOCK_SIZE)
-    tripwire = current_addr_ptr + nr_touched_bytes - margin;
+
+  size_t nr_touched_blocks = (nr_touched_bytes - 1) / BLOCK_SIZE + 1;
+  if (nr_touched_blocks >= get_gc_threshold() * BLOCK_SIZE)
+    tripwire = current_addr_ptr + (nr_touched_blocks - 1) * BLOCK_SIZE;
   else
-    tripwire = current_addr_ptr + nr_touched_bytes;
+    tripwire = current_addr_ptr + nr_touched_bytes * BLOCK_SIZE;
   //
   //	If the number of blocks we've touched is >= threshold, we want to trigger
   //	a garbage collection if we get within 1 block of the end of this area.
@@ -198,5 +200,6 @@ inline void arena::arena_swap_and_clear() {
   else
     arena_clear();
 }
+
 }
 #endif // ARENA_H
