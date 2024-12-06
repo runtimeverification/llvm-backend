@@ -29,7 +29,7 @@ void *get_mint_token(size_t size, char const *c_str) {
   std::string precision_str = str.substr(idx + 1);
   long long precision = std::stoll(precision_str);
   long long precision_in_bytes = (precision + 7) / 8;
-  char *token = (char *)malloc(precision_in_bytes);
+  char *token = (char *)kore_alloc_always_gc(precision_in_bytes);
   std::string val_str = str.substr(0, idx);
   mpz_t z;
   mpz_init_set_str(z, val_str.c_str(), 10);

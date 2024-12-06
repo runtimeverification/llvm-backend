@@ -389,7 +389,7 @@ static std::pair<llvm::Value *, llvm::BasicBlock *> get_eval(
     auto *malloc = create_malloc(
         creator.get_current_block(),
         llvm::ConstantExpr::getSizeOf(result->getType()),
-        get_or_insert_function(mod, "malloc", ptr_ty, ptr_ty));
+        get_or_insert_function(mod, "kore_alloc_always_gc", ptr_ty, ptr_ty));
     new llvm::StoreInst(result, malloc, creator.get_current_block());
     retval = malloc;
     break;
@@ -563,7 +563,8 @@ static void emit_get_token(kore_definition *definition, llvm::Module *module) {
           case_block);
       auto *malloc = create_malloc(
           case_block, llvm::ConstantExpr::getSizeOf(compare->getType()),
-          get_or_insert_function(module, "malloc", ptr_ty, ptr_ty));
+          get_or_insert_function(
+              module, "kore_alloc_always_gc", ptr_ty, ptr_ty));
       new llvm::StoreInst(compare, malloc, case_block);
       phi->addIncoming(malloc, case_block);
       llvm::BranchInst::Create(merge_block, case_block);
