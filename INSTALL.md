@@ -30,7 +30,7 @@ python3 -m pip install pybind11 lit
 ```
 
 ## macOS / Homebrew
-
+In order to install the dependencies on macOS, you must have Homebrew installed and on your `PATH`.
 ```shell
 brew update
 brew install  \
@@ -42,6 +42,7 @@ brew install  \
   gmp         \
   grep        \
   jemalloc    \
+  libffi
   libyaml     \
   llvm@15     \
   maven       \
@@ -57,6 +58,11 @@ environment and install the `pybind11` package:
 python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install pybind11 lit
+```
+
+Guarantee that you have the JDK installed and on your `PATH`:
+```shell
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 ```
 
 Some tests rely on GNU Grep options, which are not available on macOS by
@@ -130,7 +136,7 @@ To run the integration tests, run:
 ```shell
 lit test
 ```
-from the root source directory. You can use `-v` which test is being executed
+from the root source directory. You can use `-v` to see which test is being executed
 and the output of failling tests.
 
 There is also a unit test suite for backend internals;
