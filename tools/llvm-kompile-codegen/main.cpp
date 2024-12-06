@@ -148,6 +148,7 @@ void emit_metadata(llvm::Module &mod) {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
+  // NOLINTNEXTLINE(*-identifier-naming)
   LLVMBackendGCStrategy _gcs; // Unused. This is needed to ensure linking.
   initialize_llvm();
 
