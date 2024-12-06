@@ -1,3 +1,4 @@
+#include "kllvm/codegen/GCStrategy.h"
 #include <kllvm/ast/AST.h>
 #include <kllvm/codegen/ApplyPasses.h>
 #include <kllvm/codegen/CreateTerm.h>
@@ -147,6 +148,7 @@ void emit_metadata(llvm::Module &mod) {
 
 // NOLINTNEXTLINE(*-cognitive-complexity)
 int main(int argc, char **argv) {
+  LLVMBackendGCStrategy _gcs; // Unused. This is needed to ensure linking.
   initialize_llvm();
 
   cl::HideUnrelatedOptions({&codegen_tool_cat, &codegen_lib_cat});
