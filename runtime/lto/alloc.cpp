@@ -23,6 +23,7 @@ char *oldspace_ptr() {
   return oldspace.arena_start_ptr();
 }
 
+  /*
 char *young_alloc_ptr() {
   return youngspace.arena_end_ptr();
 }
@@ -30,6 +31,7 @@ char *young_alloc_ptr() {
 char *old_alloc_ptr() {
   return oldspace.arena_end_ptr();
 }
+  */
 
 char youngspace_collection_id() {
   return youngspace.get_arena_collection_semispace_id();
