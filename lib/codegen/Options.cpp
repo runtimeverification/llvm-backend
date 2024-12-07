@@ -48,6 +48,10 @@ cl::opt<bool> force_binary(
     "f", cl::desc("Force binary bitcode output to stdout"), cl::Hidden,
     cl::cat(codegen_lib_cat));
 
+cl::opt<bool> use_gcstrategy(
+    "use-gcstrategy", cl::desc("Use GC strategy defined for the LLVM backend."),
+    cl::Hidden, cl::init(false), cl::cat(codegen_lib_cat));
+
 namespace kllvm {
 
 void validate_codegen_args(bool is_tty) {

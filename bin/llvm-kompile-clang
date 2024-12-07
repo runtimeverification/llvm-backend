@@ -15,6 +15,7 @@ flags=()
 llc_flags=()
 llc_opt_flags="-O0"
 visibility_hidden=false
+use_gcstrategy=false
 link=true
 export verbose=false
 export profile=false
@@ -99,6 +100,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --hidden-visibility)
       visibility_hidden=true
+      shift
+      ;;
+    --use-gcstrategy)
+      use_gcstrategy=true
       shift
       ;;
     *)
@@ -187,6 +192,9 @@ if [ "$main" != "python_ast" ]; then
         modhidden="$tmpdir/hidden.bc"
         run @OPT@ "$modopt" -load-pass-plugin "$passes" -set-visibility-hidden -o "$modhidden"
         modopt="$modhidden"
+      fi
+      if $use_gcstrategy; then
+        llc_flags+=("-load="$passes"")
       fi
       run @LLC@ \
         "$modopt" -mtriple=@BACKEND_TARGET_TRIPLE@ \

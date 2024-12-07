@@ -42,6 +42,7 @@ Options:
                                     (immutable) that are enabled by default.
   --hidden-visibility               Set the visibility of all global symbols in generated code to
                                     "hidden"
+  --use-gcstrategy                  Use GC strategy defined for the LLVM backend.
   --profile-matching                Instrument interpeter to emit a profile of time spent in
                                     top-level rule matching on stderr.
   --verify-ir                       Verify result of IR generation.
@@ -195,6 +196,11 @@ while [[ $# -gt 0 ]]; do
       codegen_flags+=("--hidden-visibility")
       codegen_verify_flags+=("--hidden-visibility")
       kompile_clang_flags+=("--hidden-visibility")
+      shift
+      ;;
+    --use-gcstrategy)
+      codegen_flags+=("--use-gcstrategy")
+      kompile_clang_flags+=("--use-gcstrategy")
       shift
       ;;
     --profile-matching)
