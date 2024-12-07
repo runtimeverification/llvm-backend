@@ -22,6 +22,8 @@ public:
     initialize_semispace();
   }
 
+  char *evacuate(char *scan_ptr);
+
   // Allocates the requested number of bytes as a contiguous region and returns a
   // pointer to the first allocated byte.
   void *kore_arena_alloc(size_t requested);
