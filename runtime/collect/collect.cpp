@@ -316,22 +316,7 @@ void kore_collect(
   if (collect_old || !previous_oldspace_alloc_ptr) {
     scan_ptr = oldspace_ptr();
   } else {
-    if (MEM_BLOCK_START(previous_oldspace_alloc_ptr + 1)
-        == previous_oldspace_alloc_ptr) {
-      // this means that the previous oldspace allocation pointer points to an
-      // address that is megabyte-aligned. This can only happen if we have just
-      // filled up a block but have not yet allocated the next block in the
-      // sequence at the start of the collection cycle. This means that the
-      // allocation pointer is invalid and does not actually point to the next
-      // address that would have been allocated at, according to the logic of
-      // kore_arena_alloc, which will have allocated a fresh memory block and put
-      // the allocation at the start of it. Thus, we use arena::move_ptr with a size
-      // of zero to adjust and get the true address of the allocation.
-      scan_ptr
-          = arena::move_ptr(previous_oldspace_alloc_ptr, 0, *old_alloc_ptr());
-    } else {
-      scan_ptr = previous_oldspace_alloc_ptr;
-    }
+    scan_ptr = previous_oldspace_alloc_ptr;
   }
   if (scan_ptr != *old_alloc_ptr()) {
     MEM_LOG("Evacuating old generation\n");
