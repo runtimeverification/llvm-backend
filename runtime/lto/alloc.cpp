@@ -23,24 +23,12 @@ char *oldspace_ptr() {
   return oldspace.arena_start_ptr();
 }
 
-char **young_alloc_ptr() {
-  return youngspace.arena_end_ptr();
-}
-
-char **old_alloc_ptr() {
-  return oldspace.arena_end_ptr();
-}
-
 char youngspace_collection_id() {
   return youngspace.get_arena_collection_semispace_id();
 }
 
 char oldspace_collection_id() {
   return oldspace.get_arena_collection_semispace_id();
-}
-
-size_t youngspace_size(void) {
-  return youngspace.arena_size();
 }
 
 void kore_alloc_swap(bool swap_old) {
@@ -85,7 +73,7 @@ kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
 
-  if (oldptr != *(youngspace.arena_end_ptr()) - last_size) {
+  if (oldptr != youngspace.arena_end_ptr() - last_size) {
     MEM_LOG(
         "May only reallocate last allocation. Tried to reallocate %p to %zd\n",
         oldptr, newrequest);
