@@ -134,7 +134,7 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
-#define REGISTER_ARENA(name, id) static thread_local arena name(id)
+#define REGISTER_ARENA(name, id) thread_local arena name(id)
 
 #ifdef __MACH__
 //
