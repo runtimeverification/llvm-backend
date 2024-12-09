@@ -1273,6 +1273,9 @@ bool make_function(
     retval = call;
   } else {
     if (auto *call = llvm::dyn_cast<llvm::CallInst>(retval)) {
+      const llvm::Function *callee = call->getCalledFunction();
+      assert(callee);
+      std::string callee_name(std::string_view(callee->getName()));
       // check that musttail requirements are met:
       // 1. Call is in tail position (guaranteed)
       // 2. Return returns return value of call (guaranteed)
@@ -1282,6 +1285,13 @@ bool make_function(
       if (call->getCallingConv() == llvm::CallingConv::Tail
           && can_tail_call(call->getType())) {
         call->setTailCallKind(llvm::CallInst::TCK_MustTail);
+        current_block =
+            proof_event(definition, module)
+                .tail_call_info(name, callee_name, true, call, current_block);
+      } else {
+        current_block =
+            proof_event(definition, module)
+                .tail_call_info(name, callee_name, false, nullptr, current_block);
       }
     }
   }
