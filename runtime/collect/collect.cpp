@@ -12,7 +12,7 @@
 extern "C" {
 extern thread_local arena youngspace;
 extern thread_local arena oldspace;
- 
+
 char *youngspace_ptr(void);
 char *oldspace_ptr(void);
 

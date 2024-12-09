@@ -7,8 +7,8 @@
 
 #include "runtime/alloc.h"
 #include "runtime/arena.h"
-#include "runtime/header.h"
 #include "runtime/collect.h"
+#include "runtime/header.h"
 
 extern size_t const VAR_BLOCK_SIZE = BLOCK_SIZE;
 
