@@ -1286,7 +1286,18 @@ bool make_function(
       if (call->getCallingConv() == llvm::CallingConv::Tail
           && can_tail_call(call->getType())) {
         call->setTailCallKind(llvm::CallInst::TCK_MustTail);
+        current_block =
+            proof_event(definition, module)
+                .tail_call_info(name, true, call, current_block);
+      } else {
+        current_block =
+            proof_event(definition, module)
+                .tail_call_info(name, false, nullptr, current_block);
       }
+    } else {
+      current_block =
+          proof_event(definition, module)
+              .tail_call_info(name, false, nullptr, current_block);
     }
   }
   auto *ret

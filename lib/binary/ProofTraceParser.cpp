@@ -84,6 +84,14 @@ void llvm_pattern_matching_failure_event::print(
       "{}pattern matching failure: {}\n", indent, function_name_);
 }
 
+void llvm_tail_call_info_event::print(
+    std::ostream &out, bool expand_terms, unsigned ind) const {
+  std::string indent(ind * indent_size, ' ');
+  out << fmt::format(
+      "{}tail_call_info: {} {}\n", indent, caller_name_,
+      (is_tail_ ? "tail" : "notail"));
+}
+
 void llvm_function_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');

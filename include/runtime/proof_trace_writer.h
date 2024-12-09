@@ -33,6 +33,7 @@ public:
   side_condition_event_post(uint64_t ordinal, bool side_cond_result)
       = 0;
   virtual void pattern_matching_failure(char const *function_name) = 0;
+  virtual void tail_call_info(char const *caller_name, bool is_tail) = 0;
   virtual void configuration(block *config, bool is_initial) = 0;
   virtual void start_new_chunk() = 0;
   virtual void end_of_trace() = 0;
@@ -161,6 +162,12 @@ public:
   void pattern_matching_failure(char const *function_name) override {
     write_uint64(kllvm::pattern_matching_failure_sentinel);
     write_null_terminated_string(function_name);
+  }
+
+  void tail_call_info(char const *caller_name, bool is_tail) override {
+    write_uint64(kllvm::tail_call_info_sentinel);
+    write_null_terminated_string(caller_name);
+    write_bool(is_tail);
   }
 
   void configuration(block *config, bool is_initial) override {

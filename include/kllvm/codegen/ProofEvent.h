@@ -31,6 +31,8 @@ private:
    */
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
   proof_branch(std::string const &label, llvm::BasicBlock *insert_at_end);
+  std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
+  proof_branch(std::string const &label, llvm::Instruction *insert_before);
 
   /*
    * Set up a standard event prelude by creating a pair of basic blocks for the
@@ -42,6 +44,8 @@ private:
    */
   std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
   event_prelude(std::string const &label, llvm::BasicBlock *insert_at_end);
+  std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
+  event_prelude(std::string const &label, llvm::Instruction *insert_before);
 
   /*
    * Set up a check of whether a new proof hint chunk should be started. The
@@ -173,6 +177,13 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
+   * Emit a call to the `tail_call_info` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_tail_call_info(
+      llvm::Value *proof_writer, std::string const &caller_name,
+      bool is_tail, llvm::BasicBlock *insert_at_end);
+
+  /*
    * Emit a call to the `start_new_chunk` API of the specified `proof_writer`.
    */
   llvm::CallInst *emit_start_new_chunk(
@@ -227,6 +238,10 @@ public:
 
   [[nodiscard]] llvm::BasicBlock *pattern_matching_failure(
       kore_composite_pattern const &pattern, llvm::BasicBlock *current_block);
+
+  [[nodiscard]] llvm::BasicBlock *tail_call_info(
+      std::string const &caller_name, bool is_tail,
+      llvm::Instruction *insert_before, llvm::BasicBlock *current_block);
 
   proof_event(kore_definition *definition, llvm::Module *module)
       : definition_(definition)

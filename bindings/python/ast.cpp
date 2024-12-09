@@ -426,6 +426,16 @@ void bind_proof_trace(py::module_ &m) {
           "function_name",
           &llvm_pattern_matching_failure_event::get_function_name);
 
+  py::class_<
+      llvm_tail_call_info_event,
+      std::shared_ptr<llvm_tail_call_info_event>>(
+      proof_trace, "llvm_tail_call_info_event", step_event)
+      .def_property_readonly(
+          "callern_name",
+          &llvm_tail_call_info_event::get_caller_name)
+      .def_property_readonly(
+          "is_tail", &llvm_tail_call_info_event::is_tail);
+
   py::class_<llvm_function_event, std::shared_ptr<llvm_function_event>>(
       proof_trace, "llvm_function_event", step_event)
       .def_property_readonly("name", &llvm_function_event::get_name)
