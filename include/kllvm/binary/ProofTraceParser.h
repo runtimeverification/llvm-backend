@@ -35,6 +35,7 @@ constexpr uint64_t rule_event_sentinel = detail::word(0x22);
 constexpr uint64_t side_condition_event_sentinel = detail::word(0xEE);
 constexpr uint64_t side_condition_end_sentinel = detail::word(0x33);
 constexpr uint64_t pattern_matching_failure_sentinel = detail::word(0x44);
+constexpr uint64_t tail_call_info_sentinel = detail::word(0x55);
 
 class llvm_step_event : public std::enable_shared_from_this<llvm_step_event> {
 public:
@@ -167,6 +168,36 @@ public:
   [[nodiscard]] std::string const &get_function_name() const {
     return function_name_;
   }
+
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
+};
+
+class llvm_tail_call_info_event : public llvm_step_event {
+private:
+  std::string caller_name_;
+  std::string callee_name_;
+  bool is_tail_;
+
+  llvm_tail_call_info_event(std::string caller_name, std::string callee_name, bool is_tail)
+      : caller_name_(std::move(caller_name))
+      , callee_name_(std::move(callee_name))
+      , is_tail_(is_tail) { }
+
+public:
+  static sptr<llvm_tail_call_info_event>
+  create(std::string caller_name, std::string callee_name, bool is_tail) {
+    return sptr<llvm_tail_call_info_event>(
+        new llvm_tail_call_info_event(std::move(caller_name), std::move(callee_name), is_tail));
+  }
+
+  [[nodiscard]] std::string const &get_caller_name() const {
+    return caller_name_;
+  }
+  [[nodiscard]] std::string const &get_callee_name() const {
+    return callee_name_;
+  }
+  [[nodiscard]] bool get_is_tail() const { return is_tail_; }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
       const override;
@@ -599,6 +630,32 @@ private:
     return event;
   }
 
+  sptr<llvm_tail_call_info_event> static parse_tail_call_info(
+      proof_trace_buffer &buffer) {
+    if (!buffer.check_word(tail_call_info_sentinel)) {
+      return nullptr;
+    }
+
+    std::string caller_name;
+    if (!buffer.read_string(caller_name)) {
+      return nullptr;
+    }
+
+    std::string callee_name;
+    if (!buffer.read_string(callee_name)) {
+      return nullptr;
+    }
+
+    bool is_tail = false;
+    if (!buffer.read_bool(is_tail)) {
+      return nullptr;
+    }
+
+    auto event = llvm_tail_call_info_event::create(caller_name, callee_name, is_tail);
+
+    return event;
+  }
+
   bool parse_argument(proof_trace_buffer &buffer, llvm_event &event) {
     if (buffer.eof() || buffer.peek() != '\x7F') {
       return false;
@@ -633,6 +690,9 @@ private:
 
     case pattern_matching_failure_sentinel:
       return parse_pattern_matching_failure(buffer);
+
+    case tail_call_info_sentinel:
+      return parse_tail_call_info(buffer);
 
     default: return nullptr;
     }
