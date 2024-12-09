@@ -87,7 +87,7 @@ jobs:
           - runner: [self-hosted, linux, normal]
             os: ubuntu-24.04
           - runner: [MacM1, self-macos-14]
-            os: macos-14
+            os: self-macos-14
 
     runs-on: ${{ matrix.runner }}
     steps:
