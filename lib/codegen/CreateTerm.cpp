@@ -1,6 +1,7 @@
 #include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/CreateStaticTerm.h"
 #include "kllvm/codegen/Debug.h"
+#include "kllvm/codegen/Options.h"
 #include "kllvm/codegen/ProofEvent.h"
 #include "kllvm/codegen/Util.h"
 
@@ -1224,6 +1225,9 @@ bool make_function(
       = llvm::FunctionType::get(return_type, param_types, false);
   llvm::Function *apply_rule = get_or_insert_function(module, name, func_type);
   apply_rule->setLinkage(llvm::GlobalValue::InternalLinkage);
+  if (use_gcstrategy) {
+    apply_rule->setGC("gcs-llvm-backend");
+  }
   init_debug_axiom(axiom->attributes());
   std::string debug_name = name;
   if (axiom->attributes().contains(attribute_set::key::Label)) {
