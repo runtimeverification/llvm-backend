@@ -1174,6 +1174,7 @@ bool can_tail_call(llvm::Type *type) {
   return int_type->getBitWidth() <= 192;
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 bool make_function(
     std::string const &name, kore_pattern *pattern, kore_definition *definition,
     llvm::Module *module, bool tailcc, bool big_step, bool apply,
