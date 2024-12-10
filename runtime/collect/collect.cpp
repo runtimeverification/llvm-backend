@@ -10,9 +10,9 @@
 #include <cstring>
 
 extern "C" {
+extern thread_local arena youngspace;
+extern thread_local arena oldspace;
 
-char **young_alloc_ptr(void);
-char **old_alloc_ptr(void);
 char *youngspace_ptr(void);
 char *oldspace_ptr(void);
 
@@ -245,7 +245,7 @@ static void migrate_root(void *curr_block, layoutitem *args, unsigned i) {
   }
 }
 
-static char *evacuate(char *scan_ptr, char **alloc_ptr) {
+char *arena::evacuate(char *scan_ptr) {
   auto *curr_block = (block *)scan_ptr;
   uint64_t const hdr = curr_block->h.hdr;
   uint16_t layout_int = layout_hdr(hdr);
@@ -255,7 +255,7 @@ static char *evacuate(char *scan_ptr, char **alloc_ptr) {
       migrate_child(curr_block, layout_data->args, i, false);
     }
   }
-  return arena::move_ptr(scan_ptr, get_size(hdr, layout_int), *alloc_ptr);
+  return move_ptr(scan_ptr, get_size(hdr, layout_int), arena_end_ptr());
 }
 
 // Contains the decision logic for collecting the old generation.
@@ -295,7 +295,7 @@ void kore_collect(
   if (!last_alloc_ptr) {
     last_alloc_ptr = youngspace_ptr();
   }
-  char *current_alloc_ptr = *young_alloc_ptr();
+  char *current_alloc_ptr = youngspace.arena_end_ptr();
 #endif
   kore_alloc_swap(collect_old);
 #ifdef GC_DBG
@@ -303,16 +303,16 @@ void kore_collect(
     numBytesLiveAtCollection[i] = 0;
   }
 #endif
-  char *previous_oldspace_alloc_ptr = *old_alloc_ptr();
+  char *previous_oldspace_alloc_ptr = oldspace.arena_end_ptr();
   for (int i = 0; i < nroots; i++) {
     migrate_root(roots, type_info, i);
   }
   migrate_static_roots();
   char *scan_ptr = youngspace_ptr();
-  if (scan_ptr != *young_alloc_ptr()) {
+  if (scan_ptr != youngspace.arena_end_ptr()) {
     MEM_LOG("Evacuating young generation\n");
     while (scan_ptr) {
-      scan_ptr = evacuate(scan_ptr, young_alloc_ptr());
+      scan_ptr = youngspace.evacuate(scan_ptr);
     }
   }
   if (collect_old || !previous_oldspace_alloc_ptr) {
@@ -320,10 +320,10 @@ void kore_collect(
   } else {
     scan_ptr = previous_oldspace_alloc_ptr;
   }
-  if (scan_ptr != *old_alloc_ptr()) {
+  if (scan_ptr != oldspace.arena_end_ptr()) {
     MEM_LOG("Evacuating old generation\n");
     while (scan_ptr) {
-      scan_ptr = evacuate(scan_ptr, old_alloc_ptr());
+      scan_ptr = oldspace.evacuate(scan_ptr);
     }
   }
 #ifdef GC_DBG
@@ -331,7 +331,7 @@ void kore_collect(
       = arena::ptr_diff(current_alloc_ptr, last_alloc_ptr);
   assert(numBytesAllocedSinceLastCollection >= 0);
   fwrite(&numBytesAllocedSinceLastCollection, sizeof(ssize_t), 1, stderr);
-  last_alloc_ptr = *young_alloc_ptr();
+  last_alloc_ptr = youngspace.arena_end_ptr();
   fwrite(
       numBytesLiveAtCollection, sizeof(numBytesLiveAtCollection[0]),
       sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),

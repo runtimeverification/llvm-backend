@@ -22,6 +22,8 @@ public:
     initialize_semispace();
   }
 
+  char *evacuate(char *scan_ptr);
+
   // Allocates the requested number of bytes as a contiguous region and returns a
   // pointer to the first allocated byte.
   void *kore_arena_alloc(size_t requested);
@@ -33,7 +35,7 @@ public:
   // Returns a pointer to a location holding the address of last allocated
   // byte in the given arena plus 1.
   // This address is nullptr if nothing has been allocated ever in that arena.
-  char **arena_end_ptr() { return &allocation_ptr; }
+  char *arena_end_ptr() { return allocation_ptr; }
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
@@ -73,9 +75,9 @@ public:
   // 3rd argument: the address of last allocated byte in the arena plus 1
   // Return value: starting pointer + size unless this points to unallocated space
   //               in which case nullptr is returned
-  static char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
+  static char *move_ptr(char *ptr, size_t size, char const *end_ptr) {
     char *next_ptr = ptr + size;
-    return (next_ptr == arena_end_ptr) ? nullptr : next_ptr;
+    return (next_ptr == end_ptr) ? nullptr : next_ptr;
   }
 
   // Returns the ID of the semispace where the given address was allocated.
@@ -132,7 +134,7 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
 
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
-#define REGISTER_ARENA(name, id) static thread_local arena name(id)
+#define REGISTER_ARENA(name, id) thread_local arena name(id)
 
 #ifdef __MACH__
 //
