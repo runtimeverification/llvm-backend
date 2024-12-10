@@ -7,6 +7,7 @@ hook: STRING.substr LblsubstrString'LParUndsCommUndsCommUndsRParUnds'STRING-COMM
   arg: kore[\dv{SortInt{}}("0")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortString{}}("s")]
+tail_call_info: apply_rule_220 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortString{}}("s"))]
@@ -24,7 +25,11 @@ hook result: kore[\dv{SortString{}}("s")]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 280 1
   VarK = kore[\dv{SortString{}}("s")]
+tail_call_info: apply_rule_280 notail
+tail_call_info: apply_rule_223 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 221 0
+tail_call_info: apply_rule_221 notail
+tail_call_info: apply_rule_222 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortString{}}("s"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortString{}}("s"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

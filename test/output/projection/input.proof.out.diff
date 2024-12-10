@@ -16,8 +16,12 @@ hook result: kore[Lblproj'LParUndsCommUndsRParUnds'PROJECTION-SYNTAX'Unds'Foo'Un
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 142 1
   VarK = kore[Lblproj'LParUndsCommUndsRParUnds'PROJECTION-SYNTAX'Unds'Foo'Unds'Foo'Unds'Foo{}(Lbla'Unds'PROJECTION-SYNTAX'Unds'Foo{}(),Lblb'Unds'PROJECTION-SYNTAX'Unds'Foo{}())]
+tail_call_info: apply_rule_142 notail
+tail_call_info: apply_rule_102 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 100 0
+tail_call_info: apply_rule_100 notail
+tail_call_info: apply_rule_101 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblproj'LParUndsCommUndsRParUnds'PROJECTION-SYNTAX'Unds'Foo'Unds'Foo'Unds'Foo{}(Lbla'Unds'PROJECTION-SYNTAX'Unds'Foo{}(),Lblb'Unds'PROJECTION-SYNTAX'Unds'Foo{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 97 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]

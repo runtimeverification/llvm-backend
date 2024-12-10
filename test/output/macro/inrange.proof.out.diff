@@ -14,6 +14,7 @@ hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: apply_rule_151 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("true"))]
@@ -31,7 +32,11 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 197 1
   VarK = kore[\dv{SortBool{}}("true")]
+tail_call_info: apply_rule_197 notail
+tail_call_info: apply_rule_154 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 152 0
+tail_call_info: apply_rule_152 notail
+tail_call_info: apply_rule_153 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortBool{}}("true"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortBool{}}("true"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

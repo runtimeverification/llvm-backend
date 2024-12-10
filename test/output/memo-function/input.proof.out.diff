@@ -1,10 +1,13 @@
 version: 13
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 127 0
+tail_call_info: apply_rule_127 notail
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 128 0
+tail_call_info: apply_rule_128 notail
 function: Lblnext'LParUndsRParUnds'MEMO-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{} ()
 rule: 127 0
+tail_call_info: apply_rule_127 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}())]
@@ -22,7 +25,11 @@ hook result: kore[Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}()]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 139 1
   VarK = kore[Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}()]
+tail_call_info: apply_rule_139 notail
+tail_call_info: apply_rule_97 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 95 0
+tail_call_info: apply_rule_95 notail
+tail_call_info: apply_rule_96 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblb'Unds'MEMO-FUNCTION-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

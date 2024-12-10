@@ -16,8 +16,12 @@ hook result: kore[Lblstate'LParUndsCommUndsRParUnds'TWO-COUNTERS-SYNTAX'Unds'Sta
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 202 1
   VarK = kore[Lblstate'LParUndsCommUndsRParUnds'TWO-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\dv{SortInt{}}("10"),\dv{SortInt{}}("0"))]
+tail_call_info: apply_rule_202 notail
+tail_call_info: apply_rule_157 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 155 0
+tail_call_info: apply_rule_155 notail
+tail_call_info: apply_rule_156 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblstate'LParUndsCommUndsRParUnds'TWO-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\dv{SortInt{}}("10"),\dv{SortInt{}}("0")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 121 1
   VarM = kore[\dv{SortInt{}}("10")]
@@ -25,6 +29,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("10")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -45,6 +50,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("9")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -65,6 +71,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("8")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -85,6 +92,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("7")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -105,6 +113,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("6")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -125,6 +134,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("5")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -145,6 +155,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("4")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -165,6 +176,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("3")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -185,6 +197,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("2")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -205,6 +218,7 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("1")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 true
 rule: 121 4
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -225,5 +239,6 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("0")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("false")]
+tail_call_info: side_condition_121 notail
 side condition exit: 121 false
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblstate'LParUndsCommUndsRParUnds'TWO-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\dv{SortInt{}}("0"),\dv{SortInt{}}("55")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

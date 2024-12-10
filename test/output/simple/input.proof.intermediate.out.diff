@@ -3,6 +3,7 @@ function: Lblf'LParUndsRParUnds'SIMPLE'Unds'Expr'Unds'Int{} ()
   arg: kore[\dv{SortInt{}}("0")]
 rule: 2725 1
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("0")]
+tail_call_info: apply_rule_2725 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("0"))]
@@ -23,8 +24,12 @@ function: Lblproject'Coln'Expr{} (0)
   arg: kore[kseq{}(\dv{SortInt{}}("0"),dotk{}())]
 rule: 2790 1
   VarK = kore[\dv{SortInt{}}("0")]
+tail_call_info: apply_rule_2790 notail
+tail_call_info: apply_rule_2734 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 2732 0
+tail_call_info: apply_rule_2732 notail
+tail_call_info: apply_rule_2733 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'p'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 2683 2
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -37,4 +42,5 @@ hook: INT.add Lbl'UndsPlus'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("0")]
   arg: kore[\dv{SortInt{}}("2")]
 hook result: kore[\dv{SortInt{}}("2")]
+tail_call_info: apply_rule_2730 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'p'-GT-'{}(\dv{SortInt{}}("2")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

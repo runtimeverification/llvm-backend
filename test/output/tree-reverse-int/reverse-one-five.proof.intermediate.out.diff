@@ -19,8 +19,12 @@ function: Lblproject'Coln'KItem{} (0:0)
   arg: kore[kseq{}(Lbl'Hash'reverse-one-five'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}(),dotk{}())]
 rule: 211 1
   VarK = kore[Lbl'Hash'reverse-one-five'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}()]
+tail_call_info: apply_rule_211 notail
+tail_call_info: apply_rule_166 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 164 0
+tail_call_info: apply_rule_164 notail
+tail_call_info: apply_rule_165 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'reverse-one-five'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 129 1
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -35,10 +39,13 @@ config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblreverse'LParUndsRParUnds'TREE-REVE
 rule: 217 2
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("5")]
   VarX = kore[\dv{SortInt{}}("5")]
+tail_call_info: apply_rule_217 notail
 function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree{} (1)
   arg: kore[\dv{SortInt{}}("1")]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree{}(\dv{SortInt{}}("5")),Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree{}(\dv{SortInt{}}("1")))]
 rule: 217 2
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("1")]
   VarX = kore[\dv{SortInt{}}("1")]
+tail_call_info: apply_rule_217 notail
+tail_call_info: apply_rule_218 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblnode'LParUndsCommUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tree'Unds'Tree{}(\dv{SortInt{}}("5"),\dv{SortInt{}}("1")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

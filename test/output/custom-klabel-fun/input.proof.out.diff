@@ -3,14 +3,18 @@ function: Lblbar1'LParUndsRParUnds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo'Unds'Foo{} 
 rule: 92 1
   VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
 function: Lblbar2'Unds'fun{} ()
+tail_call_info: apply_rule_92 tail
 rule: 93 1
   VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
 function: Lblbaz1'LParUndsRParUnds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo'Unds'Foo{} ()
+tail_call_info: apply_rule_93 tail
 rule: 94 1
   VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
 function: Lblbaz2'LParUndsRParUnds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo'Unds'Foo{} ()
+tail_call_info: apply_rule_94 tail
 rule: 95 1
   VarX = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+tail_call_info: apply_rule_95 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}())]
@@ -28,7 +32,11 @@ hook result: kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 139 1
   VarK = kore[Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}()]
+tail_call_info: apply_rule_139 notail
+tail_call_info: apply_rule_99 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 97 0
+tail_call_info: apply_rule_97 notail
+tail_call_info: apply_rule_98 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbla'Unds'CUSTOM-KLABEL-FUN-SYNTAX'Unds'Foo{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

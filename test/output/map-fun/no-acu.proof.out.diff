@@ -20,8 +20,12 @@ hook result: kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'U
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 199 1
   VarK = kore[Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("1"))]
+tail_call_info: apply_rule_199 notail
+tail_call_info: apply_rule_155 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 153 0
+tail_call_info: apply_rule_153 notail
+tail_call_info: apply_rule_154 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblselect'LParUndsCommUndsRParUnds'MAP-FUN-SYNTAX'Unds'KItem'Unds'Map'Unds'KItem{}(Lbl'Unds'Map'Unds'{}(Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("2"),\dv{SortInt{}}("3")),Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),\dv{SortInt{}}("1")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 119 5
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]

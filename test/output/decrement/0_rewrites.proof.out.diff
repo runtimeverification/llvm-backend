@@ -16,7 +16,11 @@ hook result: kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 138 1
   VarK = kore[Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}()]
+tail_call_info: apply_rule_138 notail
+tail_call_info: apply_rule_99 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 97 0
+tail_call_info: apply_rule_97 notail
+tail_call_info: apply_rule_98 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl0'Unds'DECREMENT-SYNTAX'Unds'Nat{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

@@ -3,18 +3,22 @@ function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'Op
 rule: 103 1
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+tail_call_info: apply_rule_103 tail
 rule: 105 3
   VarOP = kore[Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())]
   VarOPS'Apos' = kore[Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+tail_call_info: apply_rule_105 tail
 rule: 105 3
   VarOP = kore[Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()]
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+tail_call_info: apply_rule_105 tail
 rule: 104 1
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
+tail_call_info: apply_rule_104 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())))]
@@ -32,7 +36,11 @@ hook result: kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 151 1
   VarK = kore[Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}()))]
+tail_call_info: apply_rule_151 notail
+tail_call_info: apply_rule_110 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 108 0
+tail_call_info: apply_rule_108 notail
+tail_call_info: apply_rule_109 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-CONS-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-CONS-SYNTAX'Unds'OpCode{}(),Lbl'Stop'OpCodes'Unds'LIST-CONS-SYNTAX'Unds'OpCodes{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
