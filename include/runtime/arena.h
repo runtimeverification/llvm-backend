@@ -30,12 +30,12 @@ public:
 
   // Returns the address of the first byte that belongs in the given arena.
   // Returns nullptr if nothing has been allocated ever in that arena.
-  char *arena_start_ptr() const { return current_addr_ptr; }
+  char *start_ptr() const { return current_addr_ptr; }
 
   // Returns a pointer to a location holding the address of last allocated
   // byte in the given arena plus 1.
   // This address is nullptr if nothing has been allocated ever in that arena.
-  char *arena_end_ptr() { return allocation_ptr; }
+  char *end_ptr() { return allocation_ptr; }
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
@@ -173,7 +173,7 @@ inline void arena::arena_clear() {
   //
   //	We set the allocation pointer to the first available address.
   //
-  allocation_ptr = arena_start_ptr();
+  allocation_ptr = current_addr_ptr;
   //
   //	If the number of blocks we've touched is >= threshold, we want to trigger
   //	a garbage collection if we get within 1 block of the end of this area.
