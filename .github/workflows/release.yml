@@ -86,8 +86,8 @@ jobs:
         include:
           - runner: [self-hosted, linux, normal]
             os: ubuntu-24.04
-          - runner: MacM1
-            os: self-macos-12
+          - runner: [self-hosted, self-macos-latest]
+            os: self-macos-latest
 
     runs-on: ${{ matrix.runner }}
     steps:
