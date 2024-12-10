@@ -681,8 +681,7 @@ private:
     case pattern_matching_failure_sentinel:
       return parse_pattern_matching_failure(buffer);
 
-    case tail_call_info_sentinel:
-      return parse_tail_call_info(buffer);
+    case tail_call_info_sentinel: return parse_tail_call_info(buffer);
 
     default: return nullptr;
     }

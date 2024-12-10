@@ -180,8 +180,8 @@ private:
    * Emit a call to the `tail_call_info` API of the specified `proof_writer`.
    */
   llvm::CallInst *emit_write_tail_call_info(
-      llvm::Value *proof_writer, std::string const &caller_name,
-      bool is_tail, llvm::BasicBlock *insert_at_end);
+      llvm::Value *proof_writer, std::string const &caller_name, bool is_tail,
+      llvm::BasicBlock *insert_at_end);
 
   /*
    * Emit a call to the `start_new_chunk` API of the specified `proof_writer`.

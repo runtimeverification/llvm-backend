@@ -305,8 +305,8 @@ llvm::CallInst *proof_event::emit_write_pattern_matching_failure(
 }
 
 llvm::CallInst *proof_event::emit_write_tail_call_info(
-    llvm::Value *proof_writer, std::string const &caller_name,
-    bool is_tail, llvm::BasicBlock *insert_at_end) {
+    llvm::Value *proof_writer, std::string const &caller_name, bool is_tail,
+    llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
 
   auto *void_ty = llvm::Type::getVoidTy(ctx_);
@@ -319,8 +319,7 @@ llvm::CallInst *proof_event::emit_write_tail_call_info(
   auto *func = get_or_insert_function(
       module_, "write_tail_call_info_to_proof_trace", func_ty);
 
-  auto *var_caller_name
-      = b.CreateGlobalStringPtr(caller_name, "", 0, module_);
+  auto *var_caller_name = b.CreateGlobalStringPtr(caller_name, "", 0, module_);
   auto *var_is_tail = llvm::ConstantInt::get(i8_ty, is_tail);
   return b.CreateCall(func, {proof_writer, var_caller_name, var_is_tail});
 }
@@ -753,7 +752,7 @@ llvm::BasicBlock *proof_event::tail_call_info(
     return current_block;
   }
 
-  std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>  prelude;
+  std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *> prelude;
   if (is_tail) {
     assert(insert_before);
     prelude = event_prelude("tail_call_info", insert_before);
