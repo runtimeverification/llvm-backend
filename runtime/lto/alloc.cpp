@@ -16,7 +16,7 @@ extern "C" {
 // New data in allocated in the youngspace, which requests a
 // collection when is gets too full.
 thread_local arena youngspace(YOUNGSPACE_ID, true);
-  
+
 // Data that is old enough is migrated to the oldspace. The
 // migrated data is always live at this point so it never
 // requests a collection.

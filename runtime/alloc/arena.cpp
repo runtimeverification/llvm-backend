@@ -75,5 +75,6 @@ void arena::initialize_semispace() {
   //	If we're set to trigger garbage collections, set the tripwire for MIN_SPACE of allocations otherwise
   //	set it out-of-bounds (but still legal for comparison).
   //
-  tripwire = current_addr_ptr + (trigger_collection ? MIN_SPACE : HYPERBLOCK_SIZE);
+  tripwire
+      = current_addr_ptr + (trigger_collection ? MIN_SPACE : HYPERBLOCK_SIZE);
 }

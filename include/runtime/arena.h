@@ -23,7 +23,6 @@ size_t const EXPAND_FACTOR = 2;
 // been allocated, to avoid collections near startup when there is little garbage.
 size_t const MIN_SPACE = 1024 * 1024;
 
-  
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
 class arena {
@@ -120,7 +119,7 @@ private:
       = nullptr; // next available location in current semispace
   char *tripwire = nullptr; // allocating past this triggers slow allocation
   char allocation_semispace_id; // id of current semispace
-  const bool trigger_collection; // request collections?
+  bool const trigger_collection; // request collections?
   //
   //	Semispace where allocations will be made during and after garbage collect.
   //
@@ -185,7 +184,7 @@ inline void arena::arena_swap_and_clear() {
   std::swap(current_addr_ptr, collection_addr_ptr);
   allocation_semispace_id = ~allocation_semispace_id;
   if (current_addr_ptr == nullptr)
-    initialize_semispace();  // not yet initialized
+    initialize_semispace(); // not yet initialized
   else
     arena_clear();
 }
