@@ -35,7 +35,7 @@ constexpr uint64_t rule_event_sentinel = detail::word(0x22);
 constexpr uint64_t side_condition_event_sentinel = detail::word(0xEE);
 constexpr uint64_t side_condition_end_sentinel = detail::word(0x33);
 constexpr uint64_t pattern_matching_failure_sentinel = detail::word(0x44);
-constexpr uint64_t tail_call_info_sentinel = detail::word(0x55);
+constexpr uint64_t function_exit_sentinel = detail::word(0x55);
 
 class llvm_step_event : public std::enable_shared_from_this<llvm_step_event> {
 public:
@@ -173,20 +173,20 @@ public:
       const override;
 };
 
-class llvm_tail_call_info_event : public llvm_step_event {
+class llvm_function_exit_event : public llvm_step_event {
 private:
   uint64_t rule_ordinal_;
   bool is_tail_;
 
-  llvm_tail_call_info_event(uint64_t rule_ordinal, bool is_tail)
+  llvm_function_exit_event(uint64_t rule_ordinal, bool is_tail)
       : rule_ordinal_(rule_ordinal)
       , is_tail_(is_tail) { }
 
 public:
-  static sptr<llvm_tail_call_info_event>
+  static sptr<llvm_function_exit_event>
   create(uint64_t rule_ordinal, bool is_tail) {
-    return sptr<llvm_tail_call_info_event>(
-        new llvm_tail_call_info_event(rule_ordinal, is_tail));
+    return sptr<llvm_function_exit_event>(
+        new llvm_function_exit_event(rule_ordinal, is_tail));
   }
 
   [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
@@ -623,9 +623,9 @@ private:
     return event;
   }
 
-  sptr<llvm_tail_call_info_event> static parse_tail_call_info(
+  sptr<llvm_function_exit_event> static parse_function_exit(
       proof_trace_buffer &buffer) {
-    if (!buffer.check_word(tail_call_info_sentinel)) {
+    if (!buffer.check_word(function_exit_sentinel)) {
       return nullptr;
     }
 
@@ -639,7 +639,7 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_tail_call_info_event::create(ordinal, is_tail);
+    auto event = llvm_function_exit_event::create(ordinal, is_tail);
 
     return event;
   }
@@ -679,7 +679,7 @@ private:
     case pattern_matching_failure_sentinel:
       return parse_pattern_matching_failure(buffer);
 
-    case tail_call_info_sentinel: return parse_tail_call_info(buffer);
+    case function_exit_sentinel: return parse_function_exit(buffer);
 
     default: return nullptr;
     }

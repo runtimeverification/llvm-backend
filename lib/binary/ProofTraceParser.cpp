@@ -84,11 +84,11 @@ void llvm_pattern_matching_failure_event::print(
       "{}pattern matching failure: {}\n", indent, function_name_);
 }
 
-void llvm_tail_call_info_event::print(
+void llvm_function_exit_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
   out << fmt::format(
-      "{}tail_call_info: {} {}\n", indent, rule_ordinal_,
+      "{}function exit: {} {}\n", indent, rule_ordinal_,
       (is_tail_ ? "tail" : "notail"));
 }
 

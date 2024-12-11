@@ -231,7 +231,7 @@ void write_side_condition_event_post_to_proof_trace(
     void *proof_writer, uint64_t ordinal, bool side_cond_result);
 void write_pattern_matching_failure_to_proof_trace(
     void *proof_writer, char const *function_name);
-void write_tail_call_info_to_proof_trace(
+void write_function_exit_to_proof_trace(
     void *proof_writer, uint64_t ordinal, bool is_tail);
 void write_configuration_to_proof_trace(
     void *proof_writer, block *config, bool is_initial);

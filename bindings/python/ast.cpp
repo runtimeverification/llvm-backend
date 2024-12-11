@@ -427,11 +427,11 @@ void bind_proof_trace(py::module_ &m) {
           &llvm_pattern_matching_failure_event::get_function_name);
 
   py::class_<
-      llvm_tail_call_info_event, std::shared_ptr<llvm_tail_call_info_event>>(
-      proof_trace, "llvm_tail_call_info_event", step_event)
+      llvm_function_exit_event, std::shared_ptr<llvm_function_exit_event>>(
+      proof_trace, "llvm_function_exit_event", step_event)
       .def_property_readonly(
-          "rule_ordinal", &llvm_tail_call_info_event::get_rule_ordinal)
-      .def_property_readonly("is_tail", &llvm_tail_call_info_event::is_tail);
+          "rule_ordinal", &llvm_function_exit_event::get_rule_ordinal)
+      .def_property_readonly("is_tail", &llvm_function_exit_event::is_tail);
 
   py::class_<llvm_function_event, std::shared_ptr<llvm_function_event>>(
       proof_trace, "llvm_function_event", step_event)

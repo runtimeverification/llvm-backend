@@ -177,9 +177,9 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
-   * Emit a call to the `tail_call_info` API of the specified `proof_writer`.
+   * Emit a call to the `function_exit` API of the specified `proof_writer`.
    */
-  llvm::CallInst *emit_write_tail_call_info(
+  llvm::CallInst *emit_write_function_exit(
       llvm::Value *proof_writer, uint64_t ordinal, bool is_tail,
       llvm::BasicBlock *insert_at_end);
 
@@ -239,7 +239,7 @@ public:
   [[nodiscard]] llvm::BasicBlock *pattern_matching_failure(
       kore_composite_pattern const &pattern, llvm::BasicBlock *current_block);
 
-  [[nodiscard]] llvm::BasicBlock *tail_call_info(
+  [[nodiscard]] llvm::BasicBlock *function_exit(
       uint64_t ordinal, bool is_tail, llvm::Instruction *insert_before,
       llvm::BasicBlock *current_block);
 

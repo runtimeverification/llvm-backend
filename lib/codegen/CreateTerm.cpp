@@ -1295,20 +1295,20 @@ bool make_function(
         if (is_apply_rule) {
           current_block
               = proof_event(definition, module)
-                    .tail_call_info(ordinal, true, call, current_block);
+                    .function_exit(ordinal, true, call, current_block);
         }
       } else {
         if (is_apply_rule) {
           current_block
               = proof_event(definition, module)
-                    .tail_call_info(ordinal, false, nullptr, current_block);
+                    .function_exit(ordinal, false, nullptr, current_block);
         }
       }
     } else {
       if (is_apply_rule) {
         current_block
             = proof_event(definition, module)
-                  .tail_call_info(ordinal, false, nullptr, current_block);
+                  .function_exit(ordinal, false, nullptr, current_block);
       }
     }
   }

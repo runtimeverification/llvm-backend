@@ -304,7 +304,7 @@ llvm::CallInst *proof_event::emit_write_pattern_matching_failure(
   return b.CreateCall(func, {proof_writer, var_function_name});
 }
 
-llvm::CallInst *proof_event::emit_write_tail_call_info(
+llvm::CallInst *proof_event::emit_write_function_exit(
     llvm::Value *proof_writer, uint64_t ordinal, bool is_tail,
     llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
@@ -318,7 +318,7 @@ llvm::CallInst *proof_event::emit_write_tail_call_info(
       = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ty, i8_ty}, false);
 
   auto *func = get_or_insert_function(
-      module_, "write_tail_call_info_to_proof_trace", func_ty);
+      module_, "write_function_exit_to_proof_trace", func_ty);
 
   auto *var_ordinal = llvm::ConstantInt::get(i64_ty, ordinal);
   auto *var_is_tail = llvm::ConstantInt::get(i8_ty, is_tail);
@@ -745,7 +745,7 @@ llvm::BasicBlock *proof_event::pattern_matching_failure(
   return merge_block;
 }
 
-llvm::BasicBlock *proof_event::tail_call_info(
+llvm::BasicBlock *proof_event::function_exit(
     uint64_t ordinal, bool is_tail, llvm::Instruction *insert_before,
     llvm::BasicBlock *current_block) {
 
@@ -756,14 +756,14 @@ llvm::BasicBlock *proof_event::tail_call_info(
   std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *> prelude;
   if (is_tail) {
     assert(insert_before);
-    prelude = event_prelude("tail_call_info", insert_before);
+    prelude = event_prelude("function_exit", insert_before);
   } else {
-    prelude = event_prelude("tail_call_info", current_block);
+    prelude = event_prelude("function_exit", current_block);
   }
 
   auto [true_block, merge_block, proof_writer] = prelude;
 
-  emit_write_tail_call_info(proof_writer, ordinal, is_tail, true_block);
+  emit_write_function_exit(proof_writer, ordinal, is_tail, true_block);
 
   llvm::BranchInst::Create(merge_block, true_block);
 

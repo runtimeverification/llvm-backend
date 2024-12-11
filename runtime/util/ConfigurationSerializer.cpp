@@ -717,10 +717,10 @@ void write_pattern_matching_failure_to_proof_trace(
       ->pattern_matching_failure(function_name);
 }
 
-void write_tail_call_info_to_proof_trace(
+void write_function_exit_to_proof_trace(
     void *proof_writer, uint64_t ordinal, bool is_tail) {
   static_cast<proof_trace_writer *>(proof_writer)
-      ->tail_call_info(ordinal, is_tail);
+      ->function_exit(ordinal, is_tail);
 }
 
 void write_configuration_to_proof_trace(
