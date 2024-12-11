@@ -27,9 +27,11 @@ size_t const MIN_SPACE = 1024 * 1024;
 // once.
 class arena {
 public:
-  arena(char id)
+  arena(char id, bool trigger_collection)
       : allocation_semispace_id(id) {
     initialize_semispace();
+    if (!trigger_collection)
+      tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
   }
 
   char *evacuate(char *scan_ptr);
@@ -131,10 +133,6 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
       = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
   return *reinterpret_cast<char *>(end_address);
 }
-
-// Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
-// 127.
-#define REGISTER_ARENA(name, id) thread_local arena name(id)
 
 #ifdef __MACH__
 //
