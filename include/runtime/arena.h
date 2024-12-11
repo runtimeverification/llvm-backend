@@ -28,10 +28,8 @@ size_t const MIN_SPACE = 1024 * 1024;
 class arena {
 public:
   arena(char id, bool trigger_collection)
-      : allocation_semispace_id(id) {
+    : allocation_semispace_id(id), trigger_collection(trigger_collection) {
     initialize_semispace();
-    if (!trigger_collection)
-      tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
   }
 
   char *evacuate(char *scan_ptr);
@@ -74,11 +72,11 @@ public:
   void arena_swap_and_clear();
 
   // Decide how much space to use in arena before setting the flag for a collection.
+  // If an arena is going to request collections, updating this at the end of a
+  // collection is mandatory.
   void update_tripwire() {
     size_t space = EXPAND_FACTOR * (allocation_ptr - current_addr_ptr);
-    if (space < MIN_SPACE)
-      space = MIN_SPACE;
-    tripwire = current_addr_ptr + space;
+    tripwire = current_addr_ptr + ((space < MIN_SPACE) ? MIN_SPACE : space);
   }
 
   // Given two pointers to objects allocated in the same arena, return the number
@@ -114,6 +112,7 @@ private:
   char *allocation_ptr; // next available location in current semispace
   char *tripwire; // allocating past this sets flag for collection
   char allocation_semispace_id; // id of current semispace
+  const bool trigger_collection; // request collections?
   //
   //	Semispace where allocations will be made during and after garbage collect.
   //
