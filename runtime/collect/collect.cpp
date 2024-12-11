@@ -337,6 +337,7 @@ void kore_collect(
       sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),
       stderr);
 #endif
+  youngspace.update_tripwire();
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
 }
