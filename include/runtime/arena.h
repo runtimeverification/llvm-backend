@@ -110,20 +110,6 @@ public:
   static char get_arena_semispace_id_of_object(void *ptr);
 
 private:
-  //
-  //	We update the number of 1MB blocks actually written to, only when we need this value,
-  //	or before a garbage collection rather than trying to determine when we write to a fresh block.
-  //
-  void update_num_blocks() const {
-    //
-    //	Calculate how many 1M blocks of the current arena we used.
-    //
-    size_t num_used_blocks
-        = (allocation_ptr - current_addr_ptr - 1) / BLOCK_SIZE + 1;
-    if (num_used_blocks > num_blocks)
-      num_blocks = num_used_blocks;
-  }
-
   void initialize_semispace();
   //
   //	Current semispace where allocations are being made.
@@ -132,16 +118,12 @@ private:
   char *allocation_ptr
       = nullptr; // next available location in current semispace
   char *tripwire = nullptr; // allocating past this triggers slow allocation
-  mutable size_t num_blocks
-      = 0; // notional number of BLOCK_SIZE blocks in current semispace
   char allocation_semispace_id; // id of current semispace
   //
   //	Semispace where allocations will be made during and after garbage collect.
   //
   char *collection_addr_ptr
       = nullptr; // pointer to start of collection address space
-  size_t num_collection_blocks
-      = 0; // notional number of BLOCK_SIZE blocks in collection semispace
 };
 
 inline char arena::get_arena_semispace_id_of_object(void *ptr) {
@@ -202,16 +184,11 @@ inline void *arena::kore_arena_alloc(size_t requested) {
 }
 
 inline void arena::arena_swap_and_clear() {
-  update_num_blocks(); // so we save the correct number of touched blocks
   std::swap(current_addr_ptr, collection_addr_ptr);
-  std::swap(num_blocks, num_collection_blocks);
   allocation_semispace_id = ~allocation_semispace_id;
-  if (current_addr_ptr == nullptr) {
-    //
-    //	The other semispace hasn't be initialized yet.
-    //
-    initialize_semispace();
-  } else
+  if (current_addr_ptr == nullptr)
+    initialize_semispace();  // not yet initialized
+  else
     arena_clear();
 }
 }
