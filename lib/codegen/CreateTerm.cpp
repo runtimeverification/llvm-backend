@@ -1295,20 +1295,19 @@ bool make_function(
         if (is_apply_rule) {
           current_block
               = proof_event(definition, module)
-                    .function_exit(ordinal, true, call, current_block);
+                    .function_exit(
+                        ordinal, true, llvm::dyn_cast<llvm::Instruction>(call));
         }
       } else {
         if (is_apply_rule) {
-          current_block
-              = proof_event(definition, module)
-                    .function_exit(ordinal, false, nullptr, current_block);
+          current_block = proof_event(definition, module)
+                              .function_exit(ordinal, false, current_block);
         }
       }
     } else {
       if (is_apply_rule) {
-        current_block
-            = proof_event(definition, module)
-                  .function_exit(ordinal, false, nullptr, current_block);
+        current_block = proof_event(definition, module)
+                            .function_exit(ordinal, false, current_block);
       }
     }
   }
