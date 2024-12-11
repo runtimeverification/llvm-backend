@@ -28,8 +28,9 @@ size_t const MIN_SPACE = 1024 * 1024;
 // once.
 class arena {
 public:
-  arena(char id)
-      : allocation_semispace_id(id) { }
+<<<<<<< HEAD
+  arena(char id, bool trigger_collection)
+      : allocation_semispace_id(id), can_trigger_collection(trigger_collection) { }
 
   ~arena() {
     if (current_addr_ptr)
@@ -118,6 +119,7 @@ private:
   char *allocation_ptr
       = nullptr; // next available location in current semispace
   char *tripwire = nullptr; // allocating past this triggers slow allocation
+  bool can_trigger_collection;  // do we trigger collections
   char allocation_semispace_id; // id of current semispace
   //
   //	Semispace where allocations will be made during and after garbage collect.
@@ -138,10 +140,6 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
       = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
   return *reinterpret_cast<char *>(end_address);
 }
-
-// Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
-// 127.
-#define REGISTER_ARENA(name, id) thread_local arena name(id)
 
 #ifdef __MACH__
 //
