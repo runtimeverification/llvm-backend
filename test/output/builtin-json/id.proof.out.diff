@@ -8,6 +8,7 @@ hook result: kore[\dv{SortString{}}("{\x22key\x22:2}")]
 hook: JSON.string2json LblString2JSON{} ()
   arg: kore[\dv{SortString{}}("{\x22key\x22:2}")]
 hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+function exit: 216 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())))]
@@ -25,7 +26,11 @@ hook result: kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("k
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 276 1
   VarK = kore[LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}()))]
+function exit: 276 notail
+function exit: 219 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 217 0
+function exit: 217 notail
+function exit: 218 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(LblJSONObject{}(LblJSONs{}(LblJSONEntry{}(\dv{SortString{}}("key"),\dv{SortInt{}}("2")),Lbl'Stop'List'LBraQuot'JSONs'QuotRBra'{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

@@ -16,10 +16,15 @@ hook result: kore[Lbl'Hash'exec'LParUndsRParUnds'EXIT-CELL-SYNTAX'Unds'KItem'Und
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 243 1
   VarK = kore[Lbl'Hash'exec'LParUndsRParUnds'EXIT-CELL-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("0"))]
+function exit: 243 notail
+function exit: 193 notail
 function: LblinitStatusCodeCell{} (1)
 rule: 194 0
+function exit: 194 notail
 function: LblinitGeneratedCounterCell{} (2)
 rule: 191 0
+function exit: 191 notail
+function exit: 192 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'exec'LParUndsRParUnds'EXIT-CELL-SYNTAX'Unds'KItem'Unds'Int{}(\dv{SortInt{}}("0")),dotk{}())),Lbl'-LT-'status-code'-GT-'{}(\dv{SortInt{}}("1")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 144 3
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]

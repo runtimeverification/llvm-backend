@@ -16,14 +16,19 @@ hook result: kore[Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 228 1
   VarK = kore[Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
+function exit: 228 notail
+function exit: 182 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 180 0
+function exit: 180 notail
+function exit: 181 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 149 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -38,6 +43,7 @@ side condition entry: 150 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -45,6 +51,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -64,6 +71,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -78,6 +86,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -85,6 +94,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -103,6 +113,7 @@ side condition entry: 149 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -117,6 +128,7 @@ side condition entry: 150 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -124,6 +136,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -143,6 +156,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -157,6 +171,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -164,6 +179,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -182,6 +198,7 @@ side condition entry: 149 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -196,6 +213,7 @@ side condition entry: 150 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -203,6 +221,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -222,6 +241,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -236,6 +256,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -243,6 +264,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lblmul'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}(),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -261,6 +283,7 @@ side condition entry: 149 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -275,6 +298,7 @@ side condition entry: 150 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -282,6 +306,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -300,6 +325,7 @@ side condition entry: 141 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -316,6 +342,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -330,6 +357,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -337,6 +365,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -358,6 +387,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -375,6 +405,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -389,6 +420,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -396,6 +428,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -417,6 +450,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -434,6 +468,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -448,6 +483,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -455,6 +491,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -476,6 +513,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -493,6 +531,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -507,6 +546,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -514,6 +554,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -535,6 +576,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -552,6 +594,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -566,6 +609,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -573,6 +617,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -594,6 +639,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}(),Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -611,6 +657,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -625,6 +672,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -632,6 +680,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -649,6 +698,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -662,11 +712,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -680,6 +732,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -693,11 +746,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -711,6 +766,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -724,11 +780,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -742,6 +800,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -755,11 +814,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -773,6 +834,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -786,11 +848,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -804,6 +868,7 @@ side condition entry: 141 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -820,6 +885,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -834,6 +900,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -841,6 +908,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -862,6 +930,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -879,6 +948,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -893,6 +963,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -900,6 +971,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -921,6 +993,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -938,6 +1011,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -952,6 +1026,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -959,6 +1034,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -980,6 +1056,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -997,6 +1074,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1011,6 +1089,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1018,6 +1097,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1039,6 +1119,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -1056,6 +1137,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1070,6 +1152,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1077,6 +1160,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1098,6 +1182,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}(),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -1115,6 +1200,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1129,6 +1215,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1136,6 +1223,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1153,6 +1241,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1166,6 +1255,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1179,11 +1269,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1197,6 +1289,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1210,11 +1303,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1228,6 +1323,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1241,11 +1337,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1259,6 +1357,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1272,11 +1371,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1290,6 +1391,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1303,11 +1405,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1321,6 +1425,7 @@ side condition entry: 141 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1337,6 +1442,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1351,6 +1457,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1358,6 +1465,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1379,6 +1487,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -1396,6 +1505,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1410,6 +1520,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1417,6 +1528,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1438,6 +1550,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -1455,6 +1568,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1469,6 +1583,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1476,6 +1591,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1497,6 +1613,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -1514,6 +1631,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1528,6 +1646,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1535,6 +1654,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1556,6 +1676,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -1573,6 +1694,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1587,6 +1709,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1594,6 +1717,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1615,6 +1739,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 206 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}(),Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))),dotk{}())]
+function exit: 206 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -1632,6 +1757,7 @@ side condition entry: 145 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1646,6 +1772,7 @@ side condition entry: 146 2
 function: LblisKResult{} (0:0)
 rule: 207 1
   VarKResult = kore[Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} (0)
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1653,6 +1780,7 @@ hook result: kore[\dv{SortBool{}}("true")]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1670,6 +1798,7 @@ side condition entry: 153 1
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1683,6 +1812,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1696,11 +1826,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1714,6 +1846,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1727,11 +1860,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1745,6 +1880,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1758,11 +1894,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1776,6 +1914,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1789,11 +1928,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}())))))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -1807,6 +1948,7 @@ side condition entry: 144 1
 function: LblisKResult{} (1)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))))]
+function exit: 207 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -1820,11 +1962,13 @@ rule: 144 4
 function: Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Exp'Unds'Exp{} (0:0:0)
 rule: 139 1
   K0 = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))))]
+function exit: 139 notail
 side condition entry: 153 1
   VarHOLE = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))))]
 function: LblisKResult{} (1:0)
 rule: 207 1
   VarKResult = kore[Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'PEANO-SYNTAX'Unds'Nat'Unds'Nat{}(Lbl0'Unds'PEANO-SYNTAX'Unds'Nat{}()))))))))))))))]
+function exit: 207 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]

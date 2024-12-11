@@ -3,23 +3,28 @@ function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds
 rule: 2692 1
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())))]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+function exit: 2692 tail
 rule: 2694 3
   VarOP = kore[Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))]
   VarOPS'Apos' = kore[Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+function exit: 2694 tail
 rule: 2694 3
   VarOP = kore[Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())]
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+function exit: 2694 tail
 rule: 2694 3
   VarOP = kore[LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()]
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
+function exit: 2694 tail
 rule: 2693 1
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())))]
+function exit: 2693 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))))]
@@ -37,7 +42,11 @@ hook result: kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpC
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 2818 1
   VarK = kore[Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}())))]
+function exit: 2818 notail
+function exit: 2746 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 2744 0
+function exit: 2744 notail
+function exit: 2745 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(LblnoOp'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblstore'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes{}(Lblload'Unds'LIST-FACTORY-SYNTAX'Unds'OpCode{}(),Lbl'Stop'List'LBraQuotUndsSClnUndsUnds'LIST-FACTORY-SYNTAX'Unds'OpCodes'Unds'OpCode'Unds'OpCodes'QuotRBraUnds'OpCodes{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

@@ -15,6 +15,7 @@ hook: SET.in LblSet'Coln'in{} ()
   arg: kore[LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())]
   arg: kore[Lbl'Unds'Set'Unds'{}(Lbl'Unds'Set'Unds'{}(LblSetItem{}(Lblc'Unds'SET-FUN-SYNTAX'Unds'Key{}()),LblSetItem{}(Lbla'Unds'SET-FUN-SYNTAX'Unds'Key{}())),LblSetItem{}(Lblb'Unds'SET-FUN-SYNTAX'Unds'Key{}()))]
 hook result: kore[\dv{SortBool{}}("false")]
+function exit: 98 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortBool{}}("false"))]
@@ -32,7 +33,11 @@ hook result: kore[\dv{SortBool{}}("false")]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 142 1
   VarK = kore[\dv{SortBool{}}("false")]
+function exit: 142 notail
+function exit: 103 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 101 0
+function exit: 101 notail
+function exit: 102 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortBool{}}("false"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortBool{}}("false"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

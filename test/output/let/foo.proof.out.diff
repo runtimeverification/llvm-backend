@@ -7,6 +7,7 @@ hook: INT.mul Lbl'UndsStar'Int'Unds'{} (0)
   arg: kore[\dv{SortInt{}}("10")]
 hook result: kore[\dv{SortInt{}}("100")]
 function: Lbl'Hash'lambda'UndsUnds'{} ()
+function exit: 151 tail
 rule: 118 2
   VarS = kore[\dv{SortInt{}}("100")]
   VarX = kore[\dv{SortInt{}}("10")]
@@ -15,6 +16,7 @@ hook: INT.mul Lbl'UndsStar'Int'Unds'{} (0)
   arg: kore[\dv{SortInt{}}("100")]
 hook result: kore[\dv{SortInt{}}("200")]
 function: Lbl'Hash'lambda'UndsUnds'2{} ()
+function exit: 118 tail
 rule: 119 2
   VarD = kore[\dv{SortInt{}}("200")]
   VarX = kore[\dv{SortInt{}}("10")]
@@ -22,6 +24,7 @@ hook: INT.sub Lbl'Unds'-Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("200")]
   arg: kore[\dv{SortInt{}}("10")]
 hook result: kore[\dv{SortInt{}}("190")]
+function exit: 119 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("190"))]
@@ -39,7 +42,11 @@ hook result: kore[\dv{SortInt{}}("190")]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 199 1
   VarK = kore[\dv{SortInt{}}("190")]
+function exit: 199 notail
+function exit: 156 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 154 0
+function exit: 154 notail
+function exit: 155 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("190"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("190"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

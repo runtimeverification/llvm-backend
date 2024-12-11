@@ -16,14 +16,19 @@ hook result: kore[Lbladd'LParUndsCommUndsRParUnds'ARITH-SYNTAX'Unds'Exp'Unds'Exp
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 2877 1
   VarK = kore[Lbladd'LParUndsCommUndsRParUnds'ARITH-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(\dv{SortInt{}}("1"),Lbladd'LParUndsCommUndsRParUnds'ARITH-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2")))]
+function exit: 2877 notail
+function exit: 2804 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 2802 0
+function exit: 2802 notail
+function exit: 2803 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbladd'LParUndsCommUndsRParUnds'ARITH-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(\dv{SortInt{}}("1"),Lbladd'LParUndsCommUndsRParUnds'ARITH-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 2746 1
   VarHOLE = kore[\dv{SortInt{}}("1")]
 function: LblisKResult{} (1:0)
 rule: 2841 1
   VarKResult = kore[\dv{SortInt{}}("1")]
+function exit: 2841 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -37,6 +42,7 @@ side condition entry: 2747 1
 function: LblisKResult{} (1:0)
 rule: 2840 1
   VarK = kore[kseq{}(Lbladd'LParUndsCommUndsRParUnds'ARITH-SYNTAX'Unds'Exp'Unds'Exp'Unds'Exp{}(\dv{SortInt{}}("1"),\dv{SortInt{}}("2")),dotk{}())]
+function exit: 2840 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("false")]
 hook result: kore[\dv{SortBool{}}("true")]
@@ -55,6 +61,7 @@ side condition entry: 2746 1
 function: LblisKResult{} (1:0)
 rule: 2841 1
   VarKResult = kore[\dv{SortInt{}}("1")]
+function exit: 2841 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -68,6 +75,7 @@ side condition entry: 2747 1
 function: LblisKResult{} (1:0)
 rule: 2841 1
   VarKResult = kore[\dv{SortInt{}}("2")]
+function exit: 2841 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -90,6 +98,7 @@ side condition entry: 2740 1
 function: LblisKResult{} (1)
 rule: 2841 1
   VarKResult = kore[\dv{SortInt{}}("3")]
+function exit: 2841 notail
 hook: BOOL.and Lbl'Unds'andBool'Unds'{} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortBool{}}("true")]
@@ -106,6 +115,7 @@ side condition entry: 2746 1
 function: LblisKResult{} (1:0)
 rule: 2841 1
   VarKResult = kore[\dv{SortInt{}}("1")]
+function exit: 2841 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]
@@ -119,6 +129,7 @@ side condition entry: 2747 1
 function: LblisKResult{} (1:0)
 rule: 2841 1
   VarKResult = kore[\dv{SortInt{}}("3")]
+function exit: 2841 notail
 hook: BOOL.not LblnotBool'Unds'{} (1)
   arg: kore[\dv{SortBool{}}("true")]
 hook result: kore[\dv{SortBool{}}("false")]

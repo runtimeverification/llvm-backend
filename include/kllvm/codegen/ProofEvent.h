@@ -4,9 +4,12 @@
 #include "kllvm/ast/AST.h"
 #include "kllvm/codegen/Decision.h"
 #include "kllvm/codegen/DecisionParser.h"
+#include "kllvm/codegen/Options.h"
 #include "kllvm/codegen/Util.h"
 
 #include "llvm/IR/Instructions.h"
+
+#include <fmt/format.h>
 
 #include <map>
 #include <tuple>
@@ -21,27 +24,58 @@ private:
 
   /*
    * Load the boolean flag that controls whether proof hint output is enabled or
-   * not, then create a branch at the end of this basic block depending on the
-   * result.
+   * not, then create a branch at the specified location depending on the
+   * result. The location can be before a given instruction or at the end of a
+   * given basic block.
    *
    * Returns a pair of blocks [proof enabled, merge]; the first of these is
    * intended for self-contained behaviour only relevant in proof output mode,
    * while the second is for the continuation of the interpreter's previous
    * behaviour.
    */
+  template <typename Location>
   std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
-  proof_branch(std::string const &label, llvm::BasicBlock *insert_at_end);
+  proof_branch(std::string const &label, Location *insert_loc);
+
+  /*
+   * Return the parent function of the given location.
+
+   * Template specializations for llvm::Instruction and llvm::BasicBlock.
+   */
+  template <typename Location>
+  llvm::Function *get_parent_function(Location *loc);
+
+  /*
+   * Return the parent basic block of the given location.
+
+   * Template specializations for llvm::Instruction and llvm::BasicBlock.
+   */
+  template <typename Location>
+  llvm::BasicBlock *get_parent_block(Location *loc);
+
+  /*
+   * If the given location is an Instruction, this method moves the instruction
+   * to the merge block.
+   * If the given location is a BasicBlock, this method simply emits a no-op
+   * instruction to the merge block.
+
+   * Template specializations for llvm::Instruction and llvm::BasicBlock.
+   */
+  template <typename Location>
+  void fix_insert_loc(Location *loc, llvm::BasicBlock *merge_block);
 
   /*
    * Set up a standard event prelude by creating a pair of basic blocks for the
    * proof output and continuation, then loading the output filename from its
-   * global.
+   * global. The location for the prelude  can be before a given instruction or
+   * at the end of a given basic block.
    *
    * Returns a triple [proof enabled, merge, proof_writer]; see `proofBranch`
    * and `emitGetOutputFileName`.
    */
+  template <typename Location>
   std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
-  event_prelude(std::string const &label, llvm::BasicBlock *insert_at_end);
+  event_prelude(std::string const &label, Location *insert_loc);
 
   /*
    * Set up a check of whether a new proof hint chunk should be started. The
@@ -173,6 +207,13 @@ private:
       llvm::BasicBlock *insert_at_end);
 
   /*
+   * Emit a call to the `function_exit` API of the specified `proof_writer`.
+   */
+  llvm::CallInst *emit_write_function_exit(
+      llvm::Value *proof_writer, uint64_t ordinal, bool is_tail,
+      llvm::BasicBlock *insert_at_end);
+
+  /*
    * Emit a call to the `start_new_chunk` API of the specified `proof_writer`.
    */
   llvm::CallInst *emit_start_new_chunk(
@@ -228,6 +269,10 @@ public:
   [[nodiscard]] llvm::BasicBlock *pattern_matching_failure(
       kore_composite_pattern const &pattern, llvm::BasicBlock *current_block);
 
+  template <typename Location>
+  [[nodiscard]] llvm::BasicBlock *
+  function_exit(uint64_t ordinal, bool is_tail, Location *insert_loc);
+
   proof_event(kore_definition *definition, llvm::Module *module)
       : definition_(definition)
       , module_(module)
@@ -235,5 +280,58 @@ public:
 };
 
 } // namespace kllvm
+
+//===----------------------------------------------------------------------===//
+// Implementation for method templates
+//===----------------------------------------------------------------------===//
+
+template <typename Location>
+std::pair<llvm::BasicBlock *, llvm::BasicBlock *>
+kllvm::proof_event::proof_branch(
+    std::string const &label, Location *insert_loc) {
+  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
+
+  auto *proof_output_flag = module_->getOrInsertGlobal("proof_output", i1_ty);
+  auto *proof_output = new llvm::LoadInst(
+      i1_ty, proof_output_flag, "proof_output", insert_loc);
+
+  auto *f = get_parent_function(insert_loc);
+  auto *true_block
+      = llvm::BasicBlock::Create(ctx_, fmt::format("if_{}", label), f);
+  auto *merge_block
+      = llvm::BasicBlock::Create(ctx_, fmt::format("tail_{}", label), f);
+
+  llvm::BranchInst::Create(true_block, merge_block, proof_output, insert_loc);
+
+  fix_insert_loc(insert_loc, merge_block);
+
+  return {true_block, merge_block};
+}
+
+template <typename Location>
+std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
+kllvm::proof_event::event_prelude(
+    std::string const &label, Location *insert_loc) {
+  auto [true_block, merge_block] = proof_branch(label, insert_loc);
+  return {true_block, merge_block, emit_get_proof_trace_writer(true_block)};
+}
+
+template <typename Location>
+llvm::BasicBlock *kllvm::proof_event::function_exit(
+    uint64_t ordinal, bool is_tail, Location *insert_loc) {
+
+  if (!proof_hint_instrumentation) {
+    return get_parent_block(insert_loc);
+  }
+
+  auto [true_block, merge_block, proof_writer]
+      = event_prelude("function_exit", insert_loc);
+
+  emit_write_function_exit(proof_writer, ordinal, is_tail, true_block);
+
+  llvm::BranchInst::Create(merge_block, true_block);
+
+  return merge_block;
+}
 
 #endif // PROOF_EVENT_H

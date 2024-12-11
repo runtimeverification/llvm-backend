@@ -19,8 +19,12 @@ function: Lblproject'Coln'KItem{} (0:0)
   arg: kore[kseq{}(Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}(),dotk{}())]
 rule: 150 1
   VarK = kore[Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}()]
+function exit: 150 notail
+function exit: 111 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 109 0
+function exit: 109 notail
+function exit: 110 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'Init'Unds'TREE-REVERSE-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 105 1
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -37,9 +41,12 @@ function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} 
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}(Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 157 1
   Var'Unds'Gen0 = kore[Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
+function exit: 157 notail
 function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{} (1)
   arg: kore[Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}(Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()),Lblreverse'LParUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree{}(Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()))]
 rule: 156 1
   Var'Unds'Gen0 = kore[Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()]
+function exit: 156 notail
+function exit: 159 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblnode'LParUndsCommUndsRParUnds'TREE-REVERSE-SYNTAX'Unds'Tree'Unds'Tree'Unds'Tree{}(Lblb'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}(),Lbla'Unds'TREE-REVERSE-SYNTAX'Unds'Tree{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

@@ -16,8 +16,12 @@ hook result: kore[Lblstate'LParUndsCommUndsRParUnds'CONCURRENT-COUNTERS-SYNTAX'U
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 203 1
   VarK = kore[Lblstate'LParUndsCommUndsRParUnds'CONCURRENT-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("0"))]
+function exit: 203 notail
+function exit: 158 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 156 0
+function exit: 156 notail
+function exit: 157 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblstate'LParUndsCommUndsRParUnds'CONCURRENT-COUNTERS-SYNTAX'Unds'State'Unds'Int'Unds'Int{}(\dv{SortInt{}}("4"),\dv{SortInt{}}("0")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 121 1
   VarM = kore[\dv{SortInt{}}("4")]
