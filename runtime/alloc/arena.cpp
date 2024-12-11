@@ -56,9 +56,7 @@ void arena::initialize_semispace() {
   current_addr_ptr[HYPERBLOCK_SIZE - 1] = allocation_semispace_id;
   allocation_ptr = current_addr_ptr;
   //
-  //	We set the tripwire for this space so we get trigger a garbage collection when we pass MIN_SPACE of memory
-  //	allocated from this space.
+  //	Trigger a garbage collection for the first time when we pass MIN_SPACE of allocations
   //
   tripwire = current_addr_ptr + MIN_SPACE;
-  num_blocks = 1;
 }
