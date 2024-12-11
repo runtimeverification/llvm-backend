@@ -88,7 +88,7 @@ void llvm_tail_call_info_event::print(
     std::ostream &out, bool expand_terms, unsigned ind) const {
   std::string indent(ind * indent_size, ' ');
   out << fmt::format(
-      "{}tail_call_info: {} {}\n", indent, caller_name_,
+      "{}tail_call_info: {} {}\n", indent, rule_ordinal_,
       (is_tail_ ? "tail" : "notail"));
 }
 

@@ -175,23 +175,21 @@ public:
 
 class llvm_tail_call_info_event : public llvm_step_event {
 private:
-  std::string caller_name_;
+  uint64_t rule_ordinal_;
   bool is_tail_;
 
-  llvm_tail_call_info_event(std::string caller_name, bool is_tail)
-      : caller_name_(std::move(caller_name))
+  llvm_tail_call_info_event(uint64_t rule_ordinal, bool is_tail)
+      : rule_ordinal_(rule_ordinal)
       , is_tail_(is_tail) { }
 
 public:
   static sptr<llvm_tail_call_info_event>
-  create(std::string caller_name, bool is_tail) {
+  create(uint64_t rule_ordinal, bool is_tail) {
     return sptr<llvm_tail_call_info_event>(
-        new llvm_tail_call_info_event(std::move(caller_name), is_tail));
+        new llvm_tail_call_info_event(rule_ordinal, is_tail));
   }
 
-  [[nodiscard]] std::string const &get_caller_name() const {
-    return caller_name_;
-  }
+  [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
   [[nodiscard]] bool is_tail() const { return is_tail_; }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
@@ -631,8 +629,8 @@ private:
       return nullptr;
     }
 
-    std::string caller_name;
-    if (!buffer.read_string(caller_name)) {
+    uint64_t ordinal = 0;
+    if (!buffer.read_uint64(ordinal)) {
       return nullptr;
     }
 
@@ -641,7 +639,7 @@ private:
       return nullptr;
     }
 
-    auto event = llvm_tail_call_info_event::create(caller_name, is_tail);
+    auto event = llvm_tail_call_info_event::create(ordinal, is_tail);
 
     return event;
   }

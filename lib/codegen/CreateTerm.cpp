@@ -1277,6 +1277,11 @@ bool make_function(
     call->setTailCallKind(llvm::CallInst::TCK_MustTail);
     retval = call;
   } else {
+    bool is_apply_rule = name.substr(0, 11) == "apply_rule_";
+    size_t ordinal = 0;
+    if (is_apply_rule) {
+      ordinal = std::stoll(name.substr(11));
+    }
     if (auto *call = llvm::dyn_cast<llvm::CallInst>(retval)) {
       // check that musttail requirements are met:
       // 1. Call is in tail position (guaranteed)
@@ -1287,16 +1292,24 @@ bool make_function(
       if (call->getCallingConv() == llvm::CallingConv::Tail
           && can_tail_call(call->getType())) {
         call->setTailCallKind(llvm::CallInst::TCK_MustTail);
-        current_block = proof_event(definition, module)
-                            .tail_call_info(name, true, call, current_block);
+        if (is_apply_rule) {
+          current_block
+              = proof_event(definition, module)
+                    .tail_call_info(ordinal, true, call, current_block);
+        }
       } else {
-        current_block
-            = proof_event(definition, module)
-                  .tail_call_info(name, false, nullptr, current_block);
+        if (is_apply_rule) {
+          current_block
+              = proof_event(definition, module)
+                    .tail_call_info(ordinal, false, nullptr, current_block);
+        }
       }
     } else {
-      current_block = proof_event(definition, module)
-                          .tail_call_info(name, false, nullptr, current_block);
+      if (is_apply_rule) {
+        current_block
+            = proof_event(definition, module)
+                  .tail_call_info(ordinal, false, nullptr, current_block);
+      }
     }
   }
   auto *ret

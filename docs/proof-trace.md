@@ -61,7 +61,7 @@ rule              ::= WORD(0x22) ordinal arity variable*
 side_cond_entry   ::= WORD(0xEE) ordinal arity variable*
 side_cond_exit    ::= WORD(0x33) ordinal boolean_result
 
-tail_call_info    ::= WORD(0x55) function_name boolean_result
+tail_call_info    ::= WORD(0x55) ordinal boolean_result
 
 config            ::= WORD(0xFF) kore_term
 

@@ -180,7 +180,7 @@ private:
    * Emit a call to the `tail_call_info` API of the specified `proof_writer`.
    */
   llvm::CallInst *emit_write_tail_call_info(
-      llvm::Value *proof_writer, std::string const &caller_name, bool is_tail,
+      llvm::Value *proof_writer, uint64_t ordinal, bool is_tail,
       llvm::BasicBlock *insert_at_end);
 
   /*
@@ -240,8 +240,8 @@ public:
       kore_composite_pattern const &pattern, llvm::BasicBlock *current_block);
 
   [[nodiscard]] llvm::BasicBlock *tail_call_info(
-      std::string const &caller_name, bool is_tail,
-      llvm::Instruction *insert_before, llvm::BasicBlock *current_block);
+      uint64_t ordinal, bool is_tail, llvm::Instruction *insert_before,
+      llvm::BasicBlock *current_block);
 
   proof_event(kore_definition *definition, llvm::Module *module)
       : definition_(definition)

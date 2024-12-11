@@ -33,7 +33,7 @@ public:
   side_condition_event_post(uint64_t ordinal, bool side_cond_result)
       = 0;
   virtual void pattern_matching_failure(char const *function_name) = 0;
-  virtual void tail_call_info(char const *caller_name, bool is_tail) = 0;
+  virtual void tail_call_info(uint64_t ordinal, bool is_tail) = 0;
   virtual void configuration(block *config, bool is_initial) = 0;
   virtual void start_new_chunk() = 0;
   virtual void end_of_trace() = 0;
@@ -164,9 +164,9 @@ public:
     write_null_terminated_string(function_name);
   }
 
-  void tail_call_info(char const *caller_name, bool is_tail) override {
+  void tail_call_info(uint64_t ordinal, bool is_tail) override {
     write_uint64(kllvm::tail_call_info_sentinel);
-    write_null_terminated_string(caller_name);
+    write_uint64(ordinal);
     write_bool(is_tail);
   }
 
@@ -234,6 +234,15 @@ private:
         , result(result) { }
   };
 
+  struct tail_call_info_construction {
+    uint64_t ordinal;
+    bool is_tail;
+
+    tail_call_info_construction(uint64_t ordinal, bool is_tail)
+        : ordinal(ordinal)
+        , is_tail(is_tail) { }
+  };
+
   struct call_event_construction {
     char const *hook_name;
     char const *symbol_name;
@@ -290,6 +299,8 @@ private:
       side_condition_result_construction const &event) { }
   [[clang::optnone]] void pattern_matching_failure_callback(
       pattern_matching_failure_construction const &event) { }
+  [[clang::optnone]] void
+  tail_call_info_callback(tail_call_info_construction const &event) { }
   [[clang::optnone]] void configuration_event_callback(
       kore_configuration_construction const &config, bool is_initial) { }
 
@@ -373,6 +384,11 @@ public:
   void pattern_matching_failure(char const *function_name) override {
     pattern_matching_failure_construction pm_failure(function_name);
     pattern_matching_failure_callback(pm_failure);
+  }
+
+  void tail_call_info(uint64_t ordinal, bool is_tail) override {
+    tail_call_info_construction tail_call_info(ordinal, is_tail);
+    tail_call_info_callback(tail_call_info);
   }
 
   void configuration(block *config, bool is_initial) override {
