@@ -14,6 +14,16 @@ extern "C" {
 
 size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
 
+// After a garbage collect we change the tripwire to the amount of non-garbage times
+// this factor, so we do a decent amount of allocations between collections even
+// when there is very little garbage
+size_t const EXPAND_FACTOR = 2;
+
+// We don't consider collecting garbage until at least this amount of space has
+// been allocated, to avoid collections near startup when there is little garbage.
+size_t const MIN_SPACE = 1024 * 1024;
+
+  
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
 class arena {
@@ -45,8 +55,8 @@ public:
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
-  // arena. Resets the tripwire.
-  void arena_clear();
+  // arena.
+  void arena_clear() { allocation_ptr = current_addr_ptr; }
 
   // Resizes the last allocation.
   // Returns the address of the byte following the last newly allocated byte.
@@ -66,6 +76,14 @@ public:
   // current allocation semispace by setting its start back to its first block.
   // It is used before garbage collection.
   void arena_swap_and_clear();
+
+  // Decide how much space to use in arena before setting the flag for a collection.
+  void update_tripwire() {
+    size_t space = EXPAND_FACTOR * (allocation_ptr - current_addr_ptr);
+    if (space < MIN_SPACE)
+      space = MIN_SPACE;
+    tripwire = current_addr_ptr + space;
+  }
 
   // Given two pointers to objects allocated in the same arena, return the number
   // of bytes they are apart. Undefined behavior will result if the pointers
@@ -181,21 +199,6 @@ inline void *arena::kore_arena_alloc(size_t requested) {
       "Allocation at %p (size %zd), next alloc at %p\n", result, requested,
       block);
   return result;
-}
-
-inline void arena::arena_clear() {
-  //
-  //	We set the allocation pointer to the first available address.
-  //
-  allocation_ptr = current_addr_ptr;
-  //
-  //	If the number of blocks we've touched is >= threshold, we want to trigger
-  //	a garbage collection if we get within 1 block of the end of this area.
-  //	Otherwise we only want to generate a garbage collect if we allocate off the
-  //	end of this area.
-  //
-  tripwire = current_addr_ptr
-             + (num_blocks - (num_blocks >= get_gc_threshold())) * BLOCK_SIZE;
 }
 
 inline void arena::arena_swap_and_clear() {
