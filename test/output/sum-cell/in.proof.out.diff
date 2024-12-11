@@ -16,15 +16,15 @@ hook result: kore[\dv{SortInt{}}("42")]
 function: Lblproject'Coln'Int{} (0:0)
 rule: 198 1
   VarK = kore[\dv{SortInt{}}("42")]
-tail_call_info: apply_rule_198 notail
-tail_call_info: apply_rule_157 notail
+function exit: 198 notail
+function exit: 157 notail
 function: LblinitSumCell{} (1)
 rule: 158 0
-tail_call_info: apply_rule_158 notail
+function exit: 158 notail
 function: LblinitGeneratedCounterCell{} (2)
 rule: 155 0
-tail_call_info: apply_rule_155 notail
-tail_call_info: apply_rule_156 notail
+function exit: 155 notail
+function exit: 156 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("42"),dotk{}())),Lbl'-LT-'sum'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 121 3
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]

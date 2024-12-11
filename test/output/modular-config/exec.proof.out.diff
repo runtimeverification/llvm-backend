@@ -16,36 +16,36 @@ hook result: kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 378 1
   VarK = kore[Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}()]
-tail_call_info: apply_rule_378 notail
-tail_call_info: apply_rule_279 notail
+function exit: 378 notail
+function exit: 279 notail
 function: LblinitFooCell{} (1)
 rule: 273 0
 function: LblinitFooP1Cell{} (0)
 rule: 274 0
-tail_call_info: apply_rule_274 notail
+function exit: 274 notail
 function: LblinitFooP2Cell{} (1)
 rule: 275 0
-tail_call_info: apply_rule_275 notail
+function exit: 275 notail
 function: LblinitFooP3Cell{} (2)
 rule: 276 0
-tail_call_info: apply_rule_276 notail
-tail_call_info: apply_rule_273 notail
+function exit: 276 notail
+function exit: 273 notail
 function: LblinitBarCell{} (2)
 rule: 269 0
 function: LblinitBarP1Cell{} (0)
 rule: 270 0
-tail_call_info: apply_rule_270 notail
+function exit: 270 notail
 function: LblinitBarP2Cell{} (1)
 rule: 271 0
-tail_call_info: apply_rule_271 notail
+function exit: 271 notail
 function: LblinitBarP3Cell{} (2)
 rule: 272 0
-tail_call_info: apply_rule_272 notail
-tail_call_info: apply_rule_269 notail
+function exit: 272 notail
+function exit: 269 notail
 function: LblinitGeneratedCounterCell{} (3)
 rule: 277 0
-tail_call_info: apply_rule_277 notail
-tail_call_info: apply_rule_278 notail
+function exit: 277 notail
+function exit: 278 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'exec'Unds'MODULAR-CONFIG-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'foo'-GT-'{}(Lbl'-LT-'foo-p1'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'foo-p2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'foo-p3'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'bar'-GT-'{}(Lbl'-LT-'bar-p1'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'bar-p2'-GT-'{}(\dv{SortInt{}}("0")),Lbl'-LT-'bar-p3'-GT-'{}(\dv{SortInt{}}("0"))),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 223 7
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]

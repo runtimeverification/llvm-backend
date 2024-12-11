@@ -11,7 +11,7 @@ function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'L
 rule: 96 1
   VarOPS = kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'List'Unds'List{} ()
-tail_call_info: apply_rule_96 tail
+function exit: 96 tail
 rule: 98 3
   VarOP = kore[Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'Unds'List'Unds'{}(LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
@@ -21,7 +21,7 @@ hook: LIST.concat Lbl'Unds'List'Unds'{} (1)
   arg: kore[Lbl'Stop'List{}()]
 hook result: kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'List'Unds'List{} ()
-tail_call_info: apply_rule_98 tail
+function exit: 98 tail
 rule: 98 3
   VarOP = kore[Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
@@ -31,7 +31,7 @@ hook: LIST.concat Lbl'Unds'List'Unds'{} (1)
   arg: kore[LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())]
 hook result: kore[Lbl'Unds'List'Unds'{}(LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'List'Unds'List{} ()
-tail_call_info: apply_rule_98 tail
+function exit: 98 tail
 rule: 98 3
   VarOP = kore[LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'Stop'List{}()]
@@ -41,10 +41,10 @@ hook: LIST.concat Lbl'Unds'List'Unds'{} (1)
   arg: kore[Lbl'Unds'List'Unds'{}(LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
 hook result: kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-SEMANTIC-SYNTAX'Unds'List'Unds'List'Unds'List{} ()
-tail_call_info: apply_rule_98 tail
+function exit: 98 tail
 rule: 97 1
   VarOPS'Apos' = kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
-tail_call_info: apply_rule_97 notail
+function exit: 97 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())))]
@@ -62,11 +62,11 @@ hook result: kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(Lbln
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 142 1
   VarK = kore[Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()))]
-tail_call_info: apply_rule_142 notail
-tail_call_info: apply_rule_103 notail
+function exit: 142 notail
+function exit: 103 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 101 0
-tail_call_info: apply_rule_101 notail
-tail_call_info: apply_rule_102 notail
+function exit: 101 notail
+function exit: 102 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Unds'List'Unds'{}(Lbl'Unds'List'Unds'{}(LblListItem{}(LblnoOp'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}()),LblListItem{}(Lblstore'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),LblListItem{}(Lblload'Unds'LIST-SEMANTIC-SYNTAX'Unds'OpCode{}())),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

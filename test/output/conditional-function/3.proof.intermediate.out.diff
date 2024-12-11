@@ -19,12 +19,12 @@ function: Lblproject'Coln'KItem{} (0:0)
   arg: kore[kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())]
 rule: 208 1
   VarK = kore[Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3")))]
-tail_call_info: apply_rule_208 notail
-tail_call_info: apply_rule_162 notail
+function exit: 208 notail
+function exit: 162 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 160 0
-tail_call_info: apply_rule_160 notail
-tail_call_info: apply_rule_161 notail
+function exit: 160 notail
+function exit: 161 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblbar'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Foo{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("3"))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 124 3
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -38,7 +38,6 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("3")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
-tail_call_info: side_condition_156 notail
 side condition exit: 156 true
 rule: 156 1
   VarX = kore[\dv{SortInt{}}("3")]
@@ -55,7 +54,6 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("2")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
-tail_call_info: side_condition_156 notail
 side condition exit: 156 true
 rule: 156 1
   VarX = kore[\dv{SortInt{}}("2")]
@@ -72,7 +70,6 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("1")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("true")]
-tail_call_info: side_condition_156 notail
 side condition exit: 156 true
 rule: 156 1
   VarX = kore[\dv{SortInt{}}("1")]
@@ -89,23 +86,22 @@ hook: INT.ge Lbl'Unds-GT-Eqls'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("0")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortBool{}}("false")]
-tail_call_info: side_condition_156 notail
 side condition exit: 156 false
 rule: 157 0
-tail_call_info: apply_rule_157 notail
+function exit: 157 notail
 hook: INT.mul Lbl'UndsStar'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("1")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortInt{}}("1")]
-tail_call_info: apply_rule_156 notail
+function exit: 156 notail
 hook: INT.mul Lbl'UndsStar'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("2")]
   arg: kore[\dv{SortInt{}}("1")]
 hook result: kore[\dv{SortInt{}}("2")]
-tail_call_info: apply_rule_156 notail
+function exit: 156 notail
 hook: INT.mul Lbl'UndsStar'Int'Unds'{} ()
   arg: kore[\dv{SortInt{}}("3")]
   arg: kore[\dv{SortInt{}}("2")]
 hook result: kore[\dv{SortInt{}}("6")]
-tail_call_info: apply_rule_156 notail
+function exit: 156 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblfoo'LParUndsRParUnds'CONDITIONAL-FUNCTION-SYNTAX'Unds'Foo'Unds'Int{}(\dv{SortInt{}}("6")),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

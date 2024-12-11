@@ -14,7 +14,7 @@ hook: KEQUAL.ite Lblite{SortInt{}} ()
   arg: kore[\dv{SortBool{}}("true")]
   arg: kore[\dv{SortInt{}}("5")]
 hook result: kore[\dv{SortInt{}}("5")]
-tail_call_info: apply_rule_210 notail
+function exit: 210 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),\dv{SortInt{}}("5"))]
@@ -32,11 +32,11 @@ hook result: kore[\dv{SortInt{}}("5")]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 280 1
   VarK = kore[\dv{SortInt{}}("5")]
-tail_call_info: apply_rule_280 notail
-tail_call_info: apply_rule_223 notail
+function exit: 280 notail
+function exit: 223 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 221 0
-tail_call_info: apply_rule_221 notail
-tail_call_info: apply_rule_222 notail
+function exit: 221 notail
+function exit: 222 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("5"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("5"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

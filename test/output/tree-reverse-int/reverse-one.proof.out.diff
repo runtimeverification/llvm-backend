@@ -16,12 +16,12 @@ hook result: kore[Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 211 1
   VarK = kore[Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}()]
-tail_call_info: apply_rule_211 notail
-tail_call_info: apply_rule_166 notail
+function exit: 211 notail
+function exit: 166 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 164 0
-tail_call_info: apply_rule_164 notail
-tail_call_info: apply_rule_165 notail
+function exit: 164 notail
+function exit: 165 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'reverse-one'Unds'TREE-REVERSE-INT-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 130 1
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
@@ -29,5 +29,5 @@ function: Lblreverse'LParUndsRParUnds'TREE-REVERSE-INT-SYNTAX'Unds'Tree'Unds'Tre
 rule: 217 2
   Var'Unds'Gen0 = kore[\dv{SortInt{}}("1")]
   VarX = kore[\dv{SortInt{}}("1")]
-tail_call_info: apply_rule_217 notail
+function exit: 217 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("1"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

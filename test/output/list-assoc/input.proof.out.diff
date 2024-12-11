@@ -3,24 +3,24 @@ function: Lbl'Hash'revOps'LParUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'O
 rule: 102 1
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
-tail_call_info: apply_rule_102 tail
+function exit: 102 tail
 rule: 104 3
   VarOP = kore[Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())]
   VarOPS'Apos' = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
-tail_call_info: apply_rule_104 tail
+function exit: 104 tail
 rule: 104 3
   VarOP = kore[Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
   VarOPS = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())]
 function: Lbl'Hash'revOpsAux'LParUndsCommUndsRParUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{} ()
-tail_call_info: apply_rule_104 tail
+function exit: 104 tail
 rule: 103 3
   Var'Unds'Gen0 = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
   VarOP = kore[LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()]
   VarOPS'Apos' = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))]
-tail_call_info: apply_rule_103 notail
+function exit: 103 notail
 hook: MAP.concat Lbl'Unds'Map'Unds'{} ()
   arg: kore[Lbl'Stop'Map{}()]
   arg: kore[Lbl'UndsPipe'-'-GT-Unds'{}(\dv{SortKConfigVar{}}("$PGM"),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))))]
@@ -38,11 +38,11 @@ hook result: kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCod
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 150 1
   VarK = kore[Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}())))]
-tail_call_info: apply_rule_150 notail
-tail_call_info: apply_rule_109 notail
+function exit: 150 notail
+function exit: 109 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 107 0
-tail_call_info: apply_rule_107 notail
-tail_call_info: apply_rule_108 notail
+function exit: 107 notail
+function exit: 108 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblstore'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),Lbl'UndsSClnUndsUnds'LIST-ASSOC-SYNTAX'Unds'OpCodes'Unds'OpCodes'Unds'OpCodes{}(Lblload'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}(),LblnoOp'Unds'LIST-ASSOC-SYNTAX'Unds'OpCode{}()))),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]

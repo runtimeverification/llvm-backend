@@ -19,16 +19,16 @@ hook result: kore[Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt
 function: Lblproject'Coln'Pgm{} (0:0)
 rule: 3386 1
   VarK = kore[Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("a"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}()),Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'Block{}())]
-tail_call_info: apply_rule_3386 notail
-tail_call_info: apply_rule_3284 notail
+function exit: 3386 notail
+function exit: 3284 notail
 function: LblinitStateCell{} (1)
 rule: 3285 0
-tail_call_info: apply_rule_3285 notail
-tail_call_info: apply_rule_3286 notail
+function exit: 3285 notail
+function exit: 3286 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 3282 0
-tail_call_info: apply_rule_3282 notail
-tail_call_info: apply_rule_3283 notail
+function exit: 3282 notail
+function exit: 3283 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'T'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblint'UndsSClnUndsUnds'IMP-SYNTAX'Unds'Pgm'Unds'Ids'Unds'Stmt{}(Lbl'UndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids{}(\dv{SortId{}}("a"),Lbl'Stop'List'LBraQuotUndsCommUndsUnds'IMP-SYNTAX'Unds'Ids'Unds'Id'Unds'Ids'QuotRBraUnds'Ids{}()),Lbl'LBraRBraUnds'IMP-SYNTAX'Unds'Block{}()),dotk{}())),Lbl'-LT-'state'-GT-'{}(Lbl'Stop'Map{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 3228 5
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]
