@@ -22,37 +22,28 @@ public:
     initialize_semispace();
   }
 
+  char *evacuate(char *scan_ptr);
+
   // Allocates the requested number of bytes as a contiguous region and returns a
   // pointer to the first allocated byte.
   void *kore_arena_alloc(size_t requested);
 
   // Returns the address of the first byte that belongs in the given arena.
-  // Returns 0 if nothing has been allocated ever in that arena.
-  char *arena_start_ptr() const {
-    return current_addr_ptr ? current_addr_ptr + sizeof(memory_block_header)
-                            : nullptr;
-  }
+  // Returns nullptr if nothing has been allocated ever in that arena.
+  char *arena_start_ptr() const { return current_addr_ptr; }
 
   // Returns a pointer to a location holding the address of last allocated
   // byte in the given arena plus 1.
-  // This address is 0 if nothing has been allocated ever in that arena.
-  char **arena_end_ptr() { return &allocation_ptr; }
-
-  // return the total number of allocatable bytes currently in the arena in its
-  // active semispace.
-  size_t arena_size() const {
-    update_num_blocks();
-    return BLOCK_SIZE * std::max(num_blocks, num_collection_blocks);
-  }
+  // This address is nullptr if nothing has been allocated ever in that arena.
+  char *arena_end_ptr() { return allocation_ptr; }
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
-  // arena.
+  // arena. Resets the tripwire.
   void arena_clear();
 
-  // Resizes the last allocation as long as the resize does not require a new
-  // block allocation.
-  // Returns the address of the byte following the last newlly allocated byte.
+  // Resizes the last allocation.
+  // Returns the address of the byte following the last newly allocated byte.
   void *arena_resize_last_alloc(ssize_t increase) {
     return (allocation_ptr += increase);
   }
@@ -71,10 +62,8 @@ public:
   void arena_swap_and_clear();
 
   // Given two pointers to objects allocated in the same arena, return the number
-  // of bytes they are separated by within the virtual block of memory represented
-  // by the blocks of that arena. This difference will include blocks containing
-  // sentinel bytes. Undefined behavior will result if the pointers belong to
-  // different arenas.
+  // of bytes they are apart. Undefined behavior will result if the pointers
+  // don't belong to the same arena
   static ssize_t ptr_diff(char *ptr1, char *ptr2) { return ptr1 - ptr2; }
 
   // Given a starting pointer to an address allocated in an arena and a size in
@@ -84,11 +73,11 @@ public:
   // 1st argument: the starting pointer
   // 2nd argument: the size in bytes to add to the starting pointer
   // 3rd argument: the address of last allocated byte in the arena plus 1
-  // Return value: the address allocated in the arena after size bytes from the
-  //               starting pointer, or 0 if this is equal to the 3rd argument.
-  static char *move_ptr(char *ptr, size_t size, char const *arena_end_ptr) {
+  // Return value: starting pointer + size unless this points to unallocated space
+  //               in which case nullptr is returned
+  static char *move_ptr(char *ptr, size_t size, char const *end_ptr) {
     char *next_ptr = ptr + size;
-    return (next_ptr == arena_end_ptr) ? 0 : next_ptr;
+    return (next_ptr == end_ptr) ? nullptr : next_ptr;
   }
 
   // Returns the ID of the semispace where the given address was allocated.
@@ -97,15 +86,6 @@ public:
   static char get_arena_semispace_id_of_object(void *ptr);
 
 private:
-  union memory_block_header {
-    //
-    //	Currently the header just holds the semispace id. But we need it to be a
-    //	multiple of sizeof(char*) for alignment purposes so we add a dummy char*.
-    //
-    char semispace;
-    char *alignment_dummy;
-  };
-
   //
   //	We update the number of 1MB blocks actually written to, only when we need this value,
   //	or before a garbage collection rather than trying to determine when we write to a fresh block.
@@ -121,13 +101,6 @@ private:
   }
 
   void initialize_semispace();
-
-  static memory_block_header *mem_block_header(void *ptr) {
-    uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
-    return reinterpret_cast<arena::memory_block_header *>(
-        (address - 1) & ~(HYPERBLOCK_SIZE - 1));
-  }
-
   //
   //	Current semispace where allocations are being made.
   //
@@ -146,9 +119,22 @@ private:
       = 0; // notional number of BLOCK_SIZE blocks in collection semispace
 };
 
+inline char arena::get_arena_semispace_id_of_object(void *ptr) {
+  //
+  //	We don't have to deal with the "1 past the end of block" case because
+  //	a valid pointer will always point into our hyperblock - we will never return
+  //	an allocation anywhere near the end of our hyperblock.
+  //
+  //	Set the low bits to 1 to get the address of the last byte in the hyperblock.
+  //
+  uintptr_t end_address
+      = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
+  return *reinterpret_cast<char *>(end_address);
+}
+
 // Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
 // 127.
-#define REGISTER_ARENA(name, id) static thread_local arena name(id)
+#define REGISTER_ARENA(name, id) thread_local arena name(id)
 
 #ifdef __MACH__
 //
@@ -169,8 +155,11 @@ inline void *arena::kore_arena_alloc(size_t requested) {
     //	collect when allowed.
     //
     time_for_collection = true;
-    tripwire = current_addr_ptr
-               + HYPERBLOCK_SIZE; // won't trigger again until arena swap
+    //
+    //	We move the tripwire to 1 past the end of our hyperblock so that we have
+    //	a well defined comparison that will always be false until the next arena swap.
+    //
+    tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
   }
   void *result = allocation_ptr;
   allocation_ptr += requested;
