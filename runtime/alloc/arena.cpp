@@ -62,7 +62,7 @@ void arena::initialize_semispace() {
   //
   auto end_aligned = current_addr_ptr + HYPERBLOCK_SIZE;
   if (size_t back_slop = end_block - end_aligned)
-      munmap(end_aligned, back_slop);
+    munmap(end_aligned, back_slop);
   //
   //	We put a semispace id in the last byte of the hyperblock so we can identify which semispace an address
   //	belongs to by setting the low bits to 1 to access this id.
