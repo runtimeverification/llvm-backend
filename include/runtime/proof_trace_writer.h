@@ -269,14 +269,12 @@ private:
       std::nullopt};
 
   virtual void proof_trace_header_callback(uint32_t version) { }
-  virtual void
-  hook_event_callback(call_event_construction const &event) { }
-  virtual void
-  rewrite_event_callback(rewrite_event_construction const &event) { }
+  virtual void hook_event_callback(call_event_construction const &event) { }
+  virtual void rewrite_event_callback(rewrite_event_construction const &event) {
+  }
   virtual void
   configuration_term_event_callback(kore_term_construction const &config) { }
-  virtual void
-  function_event_callback(call_event_construction const &event) { }
+  virtual void function_event_callback(call_event_construction const &event) { }
   virtual void
   side_condition_event_callback(rewrite_event_construction const &event) { }
   virtual void side_condition_result_callback(
