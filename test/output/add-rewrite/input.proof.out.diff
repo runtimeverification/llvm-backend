@@ -16,8 +16,12 @@ hook result: kore[Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Stat
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 153 1
   VarK = kore[Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())]
+function exit: 153 notail
+function exit: 112 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 110 0
+function exit: 110 notail
+function exit: 111 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lblstate'LParUndsCommUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'State'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lbls'LParUndsRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat'Unds'Nat{}(Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}())),Lblz'LParRParUnds'ADD-REWRITE-SYNTAX'Unds'Nat{}()),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 107 5
   Var'Unds'DotVar0 = kore[Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0"))]

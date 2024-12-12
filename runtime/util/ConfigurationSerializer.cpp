@@ -717,6 +717,12 @@ void write_pattern_matching_failure_to_proof_trace(
       ->pattern_matching_failure(function_name);
 }
 
+void write_function_exit_to_proof_trace(
+    void *proof_writer, uint64_t ordinal, bool is_tail) {
+  static_cast<proof_trace_writer *>(proof_writer)
+      ->function_exit(ordinal, is_tail);
+}
+
 void write_configuration_to_proof_trace(
     void *proof_writer, block *config, bool is_initial) {
   static_cast<proof_trace_writer *>(proof_writer)
