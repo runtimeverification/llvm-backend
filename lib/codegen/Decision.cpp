@@ -603,6 +603,7 @@ void leaf_node::codegen(decision *d) {
   d->current_block_
       = proof_event(d->definition_, d->module_)
             .rewrite_event_pre(axiom, arity, vars, subst, d->current_block_);
+  // maybe report here as part of the rule event whether a tail call happened
 
   if (d->profile_matching_) {
     llvm::CallInst::Create(

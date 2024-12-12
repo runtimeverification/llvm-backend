@@ -16,10 +16,15 @@ hook result: kore[Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}()]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 248 1
   VarK = kore[Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}()]
+function exit: 248 notail
+function exit: 197 notail
 function: LblinitGCell{} (1)
 rule: 194 0
+function exit: 194 notail
 function: LblinitGeneratedCounterCell{} (2)
 rule: 195 0
+function exit: 195 notail
+function exit: 196 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(Lbl'Hash'init'Unds'FRESH-GEN-SYNTAX'Unds'KItem{}(),dotk{}())),Lbl'-LT-'g'-GT-'{}(Lbl'Stop'List{}()),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 rule: 148 2
   Var'Unds'Gen0 = kore[Lbl'-LT-'g'-GT-'{}(Lbl'Stop'List{}())]
@@ -35,6 +40,7 @@ hook result: kore[\dv{SortInt{}}("0")]
 function: LblfreshInt'LParUndsRParUnds'INT'Unds'Int'Unds'Int{} (1:0:1:0)
 rule: 192 1
   VarI = kore[\dv{SortInt{}}("0")]
+function exit: 192 notail
 hook: LIST.concat Lbl'Unds'List'Unds'{} (1:0)
   arg: kore[Lbl'Stop'List{}()]
   arg: kore[LblListItem{}(\dv{SortInt{}}("0"))]
@@ -54,6 +60,7 @@ hook result: kore[\dv{SortInt{}}("1")]
 function: LblfreshInt'LParUndsRParUnds'INT'Unds'Int'Unds'Int{} (1:0:1:0)
 rule: 192 1
   VarI = kore[\dv{SortInt{}}("1")]
+function exit: 192 notail
 hook: LIST.concat Lbl'Unds'List'Unds'{} (1:0)
   arg: kore[LblListItem{}(\dv{SortInt{}}("0"))]
   arg: kore[LblListItem{}(\dv{SortInt{}}("1"))]
@@ -73,6 +80,7 @@ hook result: kore[\dv{SortInt{}}("2")]
 function: LblfreshInt'LParUndsRParUnds'INT'Unds'Int'Unds'Int{} (1:0:1:0)
 rule: 192 1
   VarI = kore[\dv{SortInt{}}("2")]
+function exit: 192 notail
 hook: LIST.concat Lbl'Unds'List'Unds'{} (1:0)
   arg: kore[Lbl'Unds'List'Unds'{}(LblListItem{}(\dv{SortInt{}}("0")),LblListItem{}(\dv{SortInt{}}("1")))]
   arg: kore[LblListItem{}(\dv{SortInt{}}("2"))]
