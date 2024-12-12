@@ -43,8 +43,8 @@ void arena::initialize_semispace() {
   //
   //	std::align() may modify addr and request.
   //
-  auto start_block = reinterpret_cast<char *>(addr);
-  auto end_block = start_block + request;
+  auto *start_block = reinterpret_cast<char *>(addr);
+  auto *end_block = start_block + request;
   //
   //	We allocated 2 * HYPERBLOCK_SIZE worth of address space but we're only going to use 1, aligned on a
   //	HYPERBLOCK_SIZE boundry. This is so we can get end of the hyperblock by setting the low bits of any
@@ -55,14 +55,16 @@ void arena::initialize_semispace() {
   //
   //	Release any unused address space at the start of the mmap()ed block.
   //
-  if (size_t front_slop = current_addr_ptr - start_block)
+  if (size_t front_slop = current_addr_ptr - start_block) {
     munmap(start_block, front_slop);
+  }
   //
   //	Release any unused address space at the end of the mmap()ed block.
   //
-  auto end_aligned = current_addr_ptr + HYPERBLOCK_SIZE;
-  if (size_t back_slop = end_block - end_aligned)
+  auto *end_aligned = current_addr_ptr + HYPERBLOCK_SIZE;
+  if (size_t back_slop = end_block - end_aligned) {
     munmap(end_aligned, back_slop);
+  }
   //
   //	We put a semispace id in the last byte of the hyperblock so we can identify which semispace an address
   //	belongs to by setting the low bits to 1 to access this id.
