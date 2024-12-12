@@ -268,22 +268,20 @@ private:
   std::optional<rewrite_event_construction> current_rewrite_event_{
       std::nullopt};
 
-  [[clang::optnone]] void proof_trace_header_callback(uint32_t version) { }
-  [[clang::optnone]] void
-  hook_event_callback(call_event_construction const &event) { }
-  [[clang::optnone]] void
-  rewrite_event_callback(rewrite_event_construction const &event) { }
-  [[clang::optnone]] void
+  virtual void proof_trace_header_callback(uint32_t version) { }
+  virtual void hook_event_callback(call_event_construction const &event) { }
+  virtual void rewrite_event_callback(rewrite_event_construction const &event) {
+  }
+  virtual void
   configuration_term_event_callback(kore_term_construction const &config) { }
-  [[clang::optnone]] void
-  function_event_callback(call_event_construction const &event) { }
-  [[clang::optnone]] void
+  virtual void function_event_callback(call_event_construction const &event) { }
+  virtual void
   side_condition_event_callback(rewrite_event_construction const &event) { }
-  [[clang::optnone]] void side_condition_result_callback(
+  virtual void side_condition_result_callback(
       side_condition_result_construction const &event) { }
-  [[clang::optnone]] void pattern_matching_failure_callback(
+  virtual void pattern_matching_failure_callback(
       pattern_matching_failure_construction const &event) { }
-  [[clang::optnone]] void configuration_event_callback(
+  virtual void configuration_event_callback(
       kore_configuration_construction const &config, bool is_initial) { }
 
 public:
