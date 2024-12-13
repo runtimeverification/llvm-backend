@@ -194,7 +194,7 @@ public:
 };
 
 class proof_trace_callback_writer : public proof_trace_writer {
-private:
+protected:
   struct kore_term_construction {
     void *subject;
     uint64_t block_header;
@@ -212,9 +212,9 @@ private:
   };
 
   struct kore_configuration_construction {
-    void *subject;
+    block *subject;
 
-    kore_configuration_construction(void *subject)
+    kore_configuration_construction(block *subject)
         : subject(subject) { }
   };
 
@@ -279,6 +279,7 @@ private:
     }
   };
 
+private:
   std::optional<call_event_construction> current_call_event_;
 
   std::optional<rewrite_event_construction> current_rewrite_event_{
