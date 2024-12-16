@@ -26,32 +26,31 @@ thread_local bool gc_enabled = true;
 size_t arena::hyperblock_size = 0;
 
 void arena::initialize_semispace() {
-  if (hyperblock_size == 0)
-    {
-      //
-      //	No thread has initialized hyperblock_size at this moment so we will.
-      //	We get the size of the memory from the OS as number of physical pages * page size.
-      //
-      size_t pages = sysconf(_SC_PHYS_PAGES);
-      size_t page_size = sysconf(_SC_PAGE_SIZE);
-      size_t v = pages * page_size;
-      //
-      //	We require hyperblock_size to be a power of 2 for bit twiddling, so we
-      //	round up to the next power of 2.
-      //
-      --v;
-      v |= v >> 1;
-      v |= v >> 2;
-      v |= v >> 4;
-      v |= v >> 8;
-      v |= v >> 16;
-      v |= v >> 32;
-      v++;
-      //
-      //	Writing to a class static variable might be a race with another thread.
-      //
-      hyperblock_size = v;
-    }
+  if (hyperblock_size == 0) {
+    //
+    //	No thread has initialized hyperblock_size at this moment so we will.
+    //	We get the size of the memory from the OS as number of physical pages * page size.
+    //
+    size_t pages = sysconf(_SC_PHYS_PAGES);
+    size_t page_size = sysconf(_SC_PAGE_SIZE);
+    size_t v = pages * page_size;
+    //
+    //	We require hyperblock_size to be a power of 2 for bit twiddling, so we
+    //	round up to the next power of 2.
+    //
+    --v;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v |= v >> 32;
+    v++;
+    //
+    //	Writing to a class static variable might be a race with another thread.
+    //
+    hyperblock_size = v;
+  }
   //
   //	Current semispace is uninitialized so mmap() a big chuck of address space.
   //
