@@ -12,7 +12,7 @@
 
 extern "C" {
 
-size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
+size_t const hyperblock_size = (size_t)BLOCK_SIZE * 1024 * 1024;
 
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
@@ -24,9 +24,9 @@ public:
   }
 
   ~arena() {
-    munmap(current_addr_ptr, HYPERBLOCK_SIZE);
+    munmap(current_addr_ptr, hyperblock_size);
     if (collection_addr_ptr)
-      munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
+      munmap(collection_addr_ptr, hyperblock_size);
   }
 
   char *evacuate(char *scan_ptr);
@@ -124,6 +124,10 @@ private:
       = nullptr; // pointer to start of collection address space
   size_t num_collection_blocks
       = 0; // notional number of BLOCK_SIZE blocks in collection semispace
+  //
+  //	hyperblock_size is set to non-zero value just once, at runtime, by any thread.
+  //
+  static size_t hyperblock_size;
 };
 
 inline char arena::get_arena_semispace_id_of_object(void *ptr) {
@@ -135,7 +139,7 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
   //	Set the low bits to 1 to get the address of the last byte in the hyperblock.
   //
   uintptr_t end_address
-      = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
+      = reinterpret_cast<uintptr_t>(ptr) | (hyperblock_size - 1);
   return *reinterpret_cast<char *>(end_address);
 }
 
@@ -166,7 +170,7 @@ inline void *arena::kore_arena_alloc(size_t requested) {
     //	We move the tripwire to 1 past the end of our hyperblock so that we have
     //	a well defined comparison that will always be false until the next arena swap.
     //
-    tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
+    tripwire = current_addr_ptr + hyperblock_size;
   }
   void *result = allocation_ptr;
   allocation_ptr += requested;
