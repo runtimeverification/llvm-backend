@@ -24,9 +24,9 @@ public:
   }
 
   ~arena() {
-    munmap(current_addr_ptr, HYPERBLOCK_SIZE);
+    munmap(current_addr_ptr, hyperblock_size);
     if (collection_addr_ptr)
-      munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
+      munmap(collection_addr_ptr, hyperblock_size);
   }
 
   char *evacuate(char *scan_ptr);
