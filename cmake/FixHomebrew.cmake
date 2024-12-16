@@ -21,14 +21,19 @@ if(APPLE)
     link_directories(AFTER "${BREW_PREFIX}/lib")
     set(ENV{PKG_CONFIG_PATH} "${BREW_PREFIX}/opt/libffi/lib/pkgconfig")
 
-    # Use LLD as the linker
-    # This is necessary as the default linker used by CMake on macOS is
-    # ld64, which currently has some incompatibilities with Homebrew and XCode15.
-    # See: https://github.com/orgs/Homebrew/discussions/4794#discussioncomment-7044468
-    # Adding this flag avoid the following errors:
-    # ld: warning: duplicate -rpath ... ignored
-    # ld: warning: ignoring duplicate libraries ...
-    add_link_options("-fuse-ld=lld")
+    if(DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
+      message(STATUS "Building for macOS deployment target ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+      if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL "15")
+        # Use LLD as the linker
+        # This is necessary as the default linker used by CMake on macOS is
+        # ld64, which currently has some incompatibilities with Homebrew and XCode15.
+        # See: https://github.com/orgs/Homebrew/discussions/4794#discussioncomment-7044468
+        # Adding this flag avoid the following errors:
+        # ld: warning: duplicate -rpath ... ignored
+        # ld: warning: ignoring duplicate libraries ...
+        add_link_options("-fuse-ld=lld")
+      endif()
+    endif()
 
   endif() # USE_NIX
 endif() # APPLE
