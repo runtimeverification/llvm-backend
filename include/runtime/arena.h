@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <utility>
 
@@ -20,6 +21,12 @@ public:
   arena(char id)
       : allocation_semispace_id(id) {
     initialize_semispace();
+  }
+
+  ~arena() {
+    munmap(current_addr_ptr, HYPERBLOCK_SIZE);
+    if (collection_addr_ptr)
+      munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
   }
 
   char *evacuate(char *scan_ptr);
