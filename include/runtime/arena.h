@@ -19,11 +19,11 @@ size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
 class arena {
 public:
   arena(char id)
-      : allocation_semispace_id(id) {
-  }
+      : allocation_semispace_id(id) { }
 
   ~arena() {
-    munmap(current_addr_ptr, HYPERBLOCK_SIZE);
+    if (current_addr_ptr)
+      munmap(current_addr_ptr, HYPERBLOCK_SIZE);
     if (collection_addr_ptr)
       munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
   }
@@ -111,10 +111,11 @@ private:
   //	Current semispace where allocations are being made.
   //
   char *current_addr_ptr = nullptr; // pointer to start of current address space
-  char *allocation_ptr = nullptr; // next available location in current semispace
+  char *allocation_ptr
+      = nullptr; // next available location in current semispace
   char *tripwire = nullptr; // allocating past this triggers slow allocation
-  mutable size_t
-      num_blocks; // notional number of BLOCK_SIZE blocks in current semispace
+  mutable size_t num_blocks
+      = 0; // notional number of BLOCK_SIZE blocks in current semispace
   char allocation_semispace_id; // id of current semispace
   //
   //	Semispace where allocations will be made during and after garbage collect.
@@ -159,8 +160,7 @@ inline void *arena::kore_arena_alloc(size_t requested) {
     //	Semispace not yet initialized.
     //
     initialize_semispace();
-  }
-  else if (allocation_ptr + requested >= tripwire) {
+  } else if (allocation_ptr + requested >= tripwire) {
     {
       //
       //	We got close to or past the last location accessed in this address range so far,
