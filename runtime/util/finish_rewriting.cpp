@@ -9,6 +9,7 @@
 
 extern "C" {
 
+char *input_filename;
 FILE *output_file = nullptr;
 void *proof_writer = nullptr;
 bool statistics = false;
