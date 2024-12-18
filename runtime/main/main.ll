@@ -21,6 +21,7 @@ declare void @print_proof_hint_header(ptr)
 @proof_out.flag = private constant [15 x i8] c"--proof-output\00"
 @proof_chunk.flag = private constant [19 x i8] c"--proof-chunk-size\00"
 
+@input_filename = external global ptr
 @proof_writer = external global ptr
 @statistics = external global i1
 @binary_output = external global i1
@@ -119,6 +120,7 @@ if:
   call void @print_proof_hint_header(ptr %proof_writer)
   br label %else
 else:
+  store ptr %filename, ptr @input_filename
   %ret = call ptr @parse_configuration(ptr %filename)
   %result = call ptr @take_steps(i64 %depth, ptr %ret)
   call void @finish_rewriting(ptr %result, i1 0)
