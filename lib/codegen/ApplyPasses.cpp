@@ -4,7 +4,6 @@
 #include <kllvm/codegen/RemoveDeadKFunctions.h>
 #include <kllvm/codegen/SetVisibilityHidden.h>
 
-#include "runtime/alloc_cpp.h"
 #include "runtime/header.h"
 
 #if LLVM_VERSION_MAJOR >= 17
@@ -16,6 +15,7 @@
 #endif
 
 #include "llvm/IRReader/IRReader.h"
+#include "llvm/Transforms/IPO/AlwaysInliner.h"
 #include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Linker/Linker.h>
@@ -114,6 +114,38 @@ void apply_kllvm_opt_passes(llvm::Module &mod, bool hidden_visibility) {
   mpm.run(mod, mam);
 }
 
+void apply_inline_pass(llvm::Module &mod) {
+  // Create the analysis managers.
+  // These must be declared in this order so that they are destroyed in the
+  // correct order due to inter-analysis-manager references.
+  LoopAnalysisManager lam;
+  FunctionAnalysisManager fam;
+  CGSCCAnalysisManager cgam;
+  ModuleAnalysisManager mam;
+
+  // Create the new pass manager builder.
+  // Take a look at the PassBuilder constructor parameters for more
+  // customization, e.g. specifying a TargetMachine or various debugging
+  // options.
+  PassBuilder pb;
+
+  // Register all the basic analyses with the managers.
+  pb.registerModuleAnalyses(mam);
+  pb.registerCGSCCAnalyses(cgam);
+  pb.registerFunctionAnalyses(fam);
+  pb.registerLoopAnalyses(lam);
+  pb.crossRegisterProxies(lam, fam, cgam, mam);
+
+  // Create the pass manager.
+  ModulePassManager mpm;
+
+  // Add always inline pass
+  mpm.addPass(AlwaysInlinerPass());
+
+  // Run always inline pass
+  mpm.run(mod, mam);
+}
+
 void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
   if (keep_frame_pointer) {
     mod.setFramePointer(FramePointerKind::All);
@@ -167,14 +199,13 @@ void generate_object_file(llvm::Module &mod, llvm::raw_ostream &os) {
  * is done currently with only a single file: runtime/lto/alloc.cpp. We do this
  * so that inlining can occur across the functions in each file.
  */
-void do_bitcode_linking(llvm::Module &mod) {
+void do_bitcode_linking(llvm::Module &mod, char *bc, unsigned bc_len) {
   Linker linker(mod);
   llvm::SMDiagnostic err;
-  auto alloc_cpp_mod = llvm::parseIR(
-      *llvm::MemoryBuffer::getMemBuffer(
-          std::string((char *)alloc_cpp_o_ll, alloc_cpp_o_ll_len)),
-      err, mod.getContext());
-  bool error = linker.linkInModule(std::move(alloc_cpp_mod));
+  auto cpp_mod = llvm::parseIR(
+      *llvm::MemoryBuffer::getMemBuffer(std::string(bc, bc_len)), err,
+      mod.getContext());
+  bool error = linker.linkInModule(std::move(cpp_mod));
   if (error) {
     throw std::runtime_error(
         "Bitcode linking failed. Please report this as a bug.");

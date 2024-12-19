@@ -13,5 +13,5 @@ add_library(Codegen
 )
 
 target_link_libraries(Codegen
-  PUBLIC  AST fmt::fmt-header-only alloc-cpp
+  PUBLIC  AST fmt::fmt-header-only alloc-cpp opaque-cpp
   PRIVATE base64)
