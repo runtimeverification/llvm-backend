@@ -1,8 +1,3 @@
-configure_file(opaque.ll
-  ${CMAKE_BINARY_DIR}/runtime/opaque/opaque.ll
-  COPYONLY
-)
-
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/runtime/opaque/opaque_cpp.cpp
 	COMMAND xxd -i opaque.ll opaque_cpp.cpp
 	DEPENDS opaque.ll
