@@ -6,8 +6,28 @@
 #include <iostream>
 #include <memory>
 #include <sys/mman.h>
+#include <fstream>
+#include <sys/time.h>
+#include <filesystem>
+
+//
+//	We can't set the CLOCK_PROCESS_CPUTIME_ID timer so we will
+//	read it before and after and compute the difference.
+//
+timespec before_time;
+
+void
+start_timing()
+{
+  int r = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &before_time);
+  if (r) {
+    perror("clock_gettime() failed");
+    abort();
+  }
+}
 
 extern "C" {
+
 
 char *input_filename;
 FILE *output_file = nullptr;
@@ -32,6 +52,48 @@ void init_outputs(char const *output_filename) {
   output_file = fopen(output_filename, "a");
 }
 
+void
+finish_timing()
+{
+  timespec after_time;
+  int r = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &after_time);
+  if (r) {
+    perror("clock_gettime() failed");
+    abort();
+  }
+  //
+  //	Convert everything to nanoseconds.
+  //
+  const int64_t before_nsec = before_time.tv_nsec +
+    1'000'000'000LL * before_time.tv_sec;
+  const int64_t after_nsec = after_time.tv_nsec +
+    1'000'000'000LL * after_time.tv_sec;
+  //
+  //	Compute the number of rewrites per second as a double.
+  //
+  const int64_t elapsed_nsec = after_nsec - before_nsec;
+  const int64_t steps = get_steps();
+  const double stepsPerSecond = (1'000'000'000.0 * steps) / elapsed_nsec;
+  //
+  //	Specific to my home directory.
+  //
+  std::filesystem::path timing_path("/home/steven/tmp");
+  //
+  //	Construct name for timing file.
+  //
+  extern char *input_filename;
+  std::filesystem::path input_path(input_filename);
+  timing_path /= input_path.filename().replace_extension("timing");
+  std::fstream fs(timing_path, std::fstream::out);
+  //
+  //	Print information.
+  //
+  fs << stepsPerSecond <<
+    " elapsed_nsec=" << elapsed_nsec <<
+    " steps=" << steps <<
+    std::endl;
+}
+
 [[noreturn]] void finish_rewriting(block *subject, bool error) {
   // This function is responsible for closing output_file when rewriting
   // finishes; because it can exit in a few different ways (exceptions,
@@ -53,7 +115,8 @@ void init_outputs(char const *output_filename) {
     throw std::runtime_error(
         "Called finish_rewriting with no output file specified");
   }
-
+  finish_timing();
+  
   if (statistics) {
     uint64_t steps = get_steps();
     print_statistics(output_file, steps);
