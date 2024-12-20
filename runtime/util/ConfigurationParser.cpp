@@ -9,6 +9,7 @@
 #include <gmp.h>
 #include <map>
 #include <variant>
+#include <sys/time.h>
 
 #include "runtime/header.h"
 
@@ -276,6 +277,9 @@ block *parse_configuration(char const *filename) {
   auto *b
       = (block *)construct_initial_configuration(initial_configuration.get());
   deallocate_s_ptr_kore_pattern(std::move(initial_configuration));
+
+  extern void start_timing();
+  start_timing();
   return b;
 }
 
