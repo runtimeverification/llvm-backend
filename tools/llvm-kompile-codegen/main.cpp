@@ -11,6 +11,9 @@
 #include <kllvm/parser/KOREParser.h>
 #include <kllvm/parser/location.h>
 
+#include "runtime/alloc_cpp.h"
+#include "runtime/opaque_cpp.h"
+
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -239,11 +242,15 @@ int main(int argc, char **argv) {
     finalize_debug_info();
   }
 
-  do_bitcode_linking(*mod);
+  do_bitcode_linking(*mod, (char *)alloc_cpp_o_ll, alloc_cpp_o_ll_len);
 
   if (!no_optimize) {
     apply_kllvm_opt_passes(*mod, hidden_visibility);
   }
+
+  do_bitcode_linking(*mod, (char *)opaque_ll, opaque_ll_len);
+
+  apply_inline_pass(*mod);
 
   perform_output([&](auto &os) {
     if (emit_object) {
