@@ -250,6 +250,8 @@ int main(int argc, char **argv) {
 
   do_bitcode_linking(*mod, (char *)opaque_ll, opaque_ll_len);
 
+  apply_inline_pass(*mod);
+
   perform_output([&](auto &os) {
     if (emit_object) {
       generate_object_file(*mod, os);
