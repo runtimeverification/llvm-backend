@@ -285,6 +285,8 @@ private:
   std::optional<rewrite_event_construction> current_rewrite_event_{
       std::nullopt};
 
+  bool rewrite_callback_pending_;
+
   virtual void proof_trace_header_callback(uint32_t version) { }
   virtual void hook_event_callback(call_event_construction const &event) { }
   virtual void rewrite_event_callback(rewrite_event_construction const &event) {
@@ -333,6 +335,9 @@ public:
     if (arity == 0) {
       rewrite_event_callback(current_rewrite_event_.value());
     }
+    else {
+      rewrite_callback_pending_ = true;
+    }
   }
 
   void variable(
@@ -345,7 +350,13 @@ public:
     p.second.bits = bits;
     size_t new_pos = ++current_rewrite_event_->pos;
     if (new_pos == current_rewrite_event_->arity) {
-      rewrite_event_callback(current_rewrite_event_.value());
+      if (rewrite_callback_pending_) {
+        rewrite_event_callback(current_rewrite_event_.value());
+        rewrite_callback_pending_ = false;
+      }
+      else {
+        side_condition_event_callback(current_rewrite_event_.value());
+      }
     }
   }
 
