@@ -334,8 +334,7 @@ public:
     current_rewrite_event_.emplace(ordinal, arity);
     if (arity == 0) {
       rewrite_event_callback(current_rewrite_event_.value());
-    }
-    else {
+    } else {
       rewrite_callback_pending_ = true;
     }
   }
@@ -353,8 +352,7 @@ public:
       if (rewrite_callback_pending_) {
         rewrite_event_callback(current_rewrite_event_.value());
         rewrite_callback_pending_ = false;
-      }
-      else {
+      } else {
         side_condition_event_callback(current_rewrite_event_.value());
       }
     }
