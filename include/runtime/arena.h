@@ -76,7 +76,8 @@ public:
   // collection is mandatory.
   void update_tripwire() {
     size_t space = EXPAND_FACTOR * (allocation_ptr - current_addr_ptr);
-    tripwire = current_addr_ptr + ((space < MIN_SPACE) ? MIN_SPACE : space);
+    size_t min_space = old_tripwire - current_addr_ptr;
+    tripwire = current_addr_ptr + ((space < min_space) ? min_space : space);
   }
 
   // Given two pointers to objects allocated in the same arena, return the number
@@ -111,6 +112,7 @@ private:
   char *current_addr_ptr; // pointer to start of current address space
   char *allocation_ptr; // next available location in current semispace
   char *tripwire; // allocating past this sets flag for collection
+  char *old_tripwire; // for monotonic expansion
   char allocation_semispace_id; // id of current semispace
   bool const trigger_collection; // request collections?
   //
@@ -156,6 +158,7 @@ inline void *arena::kore_arena_alloc(size_t requested) {
     //	We move the tripwire to 1 past the end of our hyperblock so that we have
     //	a well defined comparison that will always be false update_tripwire() is called.
     //
+    old_tripwire = tripwire;
     tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
   }
   void *result = allocation_ptr;

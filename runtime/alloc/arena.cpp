@@ -61,4 +61,5 @@ void arena::initialize_semispace() {
   //
   tripwire
       = current_addr_ptr + (trigger_collection ? MIN_SPACE : HYPERBLOCK_SIZE);
+  old_tripwire = tripwire; // defensive
 }
