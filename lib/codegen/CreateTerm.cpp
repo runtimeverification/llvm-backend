@@ -1430,10 +1430,9 @@ std::string make_apply_rule_function(
         auto *ptr = allocate_term(
             arg->getType(), creator.get_current_block(),
             get_collection_alloc_fn(cat.cat), true);
-        auto *ptr_cast
-            = use_gcstrategy
-                  ? addrspace_cast0_to0(module, ptr, creator.get_current_block())
-                  : ptr;
+        auto *ptr_cast = use_gcstrategy ? addrspace_cast0_to0(
+                             module, ptr, creator.get_current_block())
+                                        : ptr;
         new llvm::StoreInst(arg, ptr_cast, creator.get_current_block());
         arg = ptr_cast;
       }
