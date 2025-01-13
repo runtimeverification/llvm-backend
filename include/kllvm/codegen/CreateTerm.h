@@ -164,7 +164,7 @@ llvm::Value *allocate_term(
 llvm::Value *allocate_term(
     llvm::Type *alloc_type, llvm::BasicBlock *block,
     char const *alloc_fn = "kore_alloc", bool mergeable = false);
-llvm::Value *addrspaceCast0To0(
+llvm::Value *addrspace_cast0_to0(
     llvm::Module *module, llvm::Value *val, llvm::BasicBlock *block);
 } // namespace kllvm
 

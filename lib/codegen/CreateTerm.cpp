@@ -186,7 +186,7 @@ static llvm::Value *addrspaceCast(
   return addrspace;
 }
 
-llvm::Value *addrspaceCast0to0(
+llvm::Value *addrspace_cast0_to0(
     llvm::Module *module, llvm::Value *val, llvm::BasicBlock *block) {
   return addrspaceCast(module, val, block, 0, 0);
 }
@@ -934,7 +934,7 @@ llvm::Value *create_term::create_function_call(
         true);
     auto *alloc_sret_cast
         = use_gcstrategy
-              ? addrspaceCast0to0(module_, alloc_sret, current_block_)
+              ? addrspace_cast0_to0(module_, alloc_sret, current_block_)
               : alloc_sret;
     sret_type = return_type;
     real_args.insert(real_args.begin(), alloc_sret_cast);
@@ -1034,7 +1034,7 @@ llvm::Value *create_term::not_injection_case(
                         ? llvm::PointerType::get(module_->getContext(), 0)
                         : llvm::PointerType::getUnqual(module_->getContext());
   auto *block_cast = use_gcstrategy
-                         ? addrspaceCast0to0(module_, block, current_block_)
+                         ? addrspace_cast0_to0(module_, block, current_block_)
                          : block;
   if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
     auto *call = llvm::CallInst::Create(
@@ -1432,7 +1432,7 @@ std::string make_apply_rule_function(
             get_collection_alloc_fn(cat.cat), true);
         auto *ptr_cast
             = use_gcstrategy
-                  ? addrspaceCast0to0(module, ptr, creator.get_current_block())
+                  ? addrspace_cast0_to0(module, ptr, creator.get_current_block())
                   : ptr;
         new llvm::StoreInst(arg, ptr_cast, creator.get_current_block());
         arg = ptr_cast;
