@@ -35,6 +35,7 @@ constexpr uint64_t rule_event_sentinel = detail::word(0x22);
 constexpr uint64_t side_condition_event_sentinel = detail::word(0xEE);
 constexpr uint64_t side_condition_end_sentinel = detail::word(0x33);
 constexpr uint64_t pattern_matching_failure_sentinel = detail::word(0x44);
+constexpr uint64_t function_exit_sentinel = detail::word(0x55);
 
 class llvm_step_event : public std::enable_shared_from_this<llvm_step_event> {
 public:
@@ -167,6 +168,29 @@ public:
   [[nodiscard]] std::string const &get_function_name() const {
     return function_name_;
   }
+
+  void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
+      const override;
+};
+
+class llvm_function_exit_event : public llvm_step_event {
+private:
+  uint64_t rule_ordinal_;
+  bool is_tail_;
+
+  llvm_function_exit_event(uint64_t rule_ordinal, bool is_tail)
+      : rule_ordinal_(rule_ordinal)
+      , is_tail_(is_tail) { }
+
+public:
+  static sptr<llvm_function_exit_event>
+  create(uint64_t rule_ordinal, bool is_tail) {
+    return sptr<llvm_function_exit_event>(
+        new llvm_function_exit_event(rule_ordinal, is_tail));
+  }
+
+  [[nodiscard]] uint64_t get_rule_ordinal() const { return rule_ordinal_; }
+  [[nodiscard]] bool is_tail() const { return is_tail_; }
 
   void print(std::ostream &out, bool expand_terms, unsigned indent = 0U)
       const override;
@@ -599,6 +623,27 @@ private:
     return event;
   }
 
+  sptr<llvm_function_exit_event> static parse_function_exit(
+      proof_trace_buffer &buffer) {
+    if (!buffer.check_word(function_exit_sentinel)) {
+      return nullptr;
+    }
+
+    uint64_t ordinal = 0;
+    if (!buffer.read_uint64(ordinal)) {
+      return nullptr;
+    }
+
+    bool is_tail = false;
+    if (!buffer.read_bool(is_tail)) {
+      return nullptr;
+    }
+
+    auto event = llvm_function_exit_event::create(ordinal, is_tail);
+
+    return event;
+  }
+
   bool parse_argument(proof_trace_buffer &buffer, llvm_event &event) {
     if (buffer.eof() || buffer.peek() != '\x7F') {
       return false;
@@ -633,6 +678,8 @@ private:
 
     case pattern_matching_failure_sentinel:
       return parse_pattern_matching_failure(buffer);
+
+    case function_exit_sentinel: return parse_function_exit(buffer);
 
     default: return nullptr;
     }

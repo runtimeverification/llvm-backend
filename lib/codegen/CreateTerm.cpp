@@ -1206,6 +1206,7 @@ bool can_tail_call(llvm::Type *type) {
   return int_type->getBitWidth() <= 192;
 }
 
+// NOLINTNEXTLINE(*-cognitive-complexity)
 bool make_function(
     std::string const &name, kore_pattern *pattern, kore_definition *definition,
     llvm::Module *module, bool tailcc, bool big_step, bool apply,
@@ -1310,6 +1311,10 @@ bool make_function(
     call->setTailCallKind(llvm::CallInst::TCK_MustTail);
     retval = call;
   } else {
+    size_t ordinal = 0;
+    if (apply) {
+      ordinal = std::stoll(name.substr(11));
+    }
     if (auto *call = llvm::dyn_cast<llvm::CallInst>(retval)) {
       // check that musttail requirements are met:
       // 1. Call is in tail position (guaranteed)
@@ -1320,6 +1325,22 @@ bool make_function(
       if (call->getCallingConv() == llvm::CallingConv::Tail
           && can_tail_call(call->getType())) {
         call->setTailCallKind(llvm::CallInst::TCK_MustTail);
+        if (apply) {
+          current_block
+              = proof_event(definition, module)
+                    .function_exit(
+                        ordinal, true, llvm::dyn_cast<llvm::Instruction>(call));
+        }
+      } else {
+        if (apply) {
+          current_block = proof_event(definition, module)
+                              .function_exit(ordinal, false, current_block);
+        }
+      }
+    } else {
+      if (apply) {
+        current_block = proof_event(definition, module)
+                            .function_exit(ordinal, false, current_block);
       }
     }
   }

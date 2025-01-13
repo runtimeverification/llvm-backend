@@ -33,6 +33,7 @@ public:
   side_condition_event_post(uint64_t ordinal, bool side_cond_result)
       = 0;
   virtual void pattern_matching_failure(char const *function_name) = 0;
+  virtual void function_exit(uint64_t ordinal, bool is_tail) = 0;
   virtual void configuration(block *config, bool is_initial) = 0;
   virtual void start_new_chunk() = 0;
   virtual void end_of_trace() = 0;
@@ -163,6 +164,12 @@ public:
     write_null_terminated_string(function_name);
   }
 
+  void function_exit(uint64_t ordinal, bool is_tail) override {
+    write_uint64(kllvm::function_exit_sentinel);
+    write_uint64(ordinal);
+    write_bool(is_tail);
+  }
+
   void configuration(block *config, bool is_initial) override {
     write_uint64(kllvm::config_sentinel);
     serialize_configuration_to_proof_trace(file_, config, 0);
@@ -187,7 +194,7 @@ public:
 };
 
 class proof_trace_callback_writer : public proof_trace_writer {
-private:
+protected:
   struct kore_term_construction {
     void *subject;
     uint64_t block_header;
@@ -205,9 +212,9 @@ private:
   };
 
   struct kore_configuration_construction {
-    void *subject;
+    block *subject;
 
-    kore_configuration_construction(void *subject)
+    kore_configuration_construction(block *subject)
         : subject(subject) { }
   };
 
@@ -225,6 +232,15 @@ private:
     side_condition_result_construction(uint64_t ordinal, bool result)
         : ordinal(ordinal)
         , result(result) { }
+  };
+
+  struct function_exit_construction {
+    uint64_t ordinal;
+    bool is_tail;
+
+    function_exit_construction(uint64_t ordinal, bool is_tail)
+        : ordinal(ordinal)
+        , is_tail(is_tail) { }
   };
 
   struct call_event_construction {
@@ -263,27 +279,30 @@ private:
     }
   };
 
+private:
   std::optional<call_event_construction> current_call_event_;
 
   std::optional<rewrite_event_construction> current_rewrite_event_{
       std::nullopt};
 
-  [[clang::optnone]] void proof_trace_header_callback(uint32_t version) { }
-  [[clang::optnone]] void
-  hook_event_callback(call_event_construction const &event) { }
-  [[clang::optnone]] void
-  rewrite_event_callback(rewrite_event_construction const &event) { }
-  [[clang::optnone]] void
+  bool rewrite_callback_pending_;
+
+  virtual void proof_trace_header_callback(uint32_t version) { }
+  virtual void hook_event_callback(call_event_construction const &event) { }
+  virtual void rewrite_event_callback(rewrite_event_construction const &event) {
+  }
+  virtual void
   configuration_term_event_callback(kore_term_construction const &config) { }
-  [[clang::optnone]] void
-  function_event_callback(call_event_construction const &event) { }
-  [[clang::optnone]] void
+  virtual void function_event_callback(call_event_construction const &event) { }
+  virtual void
   side_condition_event_callback(rewrite_event_construction const &event) { }
-  [[clang::optnone]] void side_condition_result_callback(
+  virtual void side_condition_result_callback(
       side_condition_result_construction const &event) { }
-  [[clang::optnone]] void pattern_matching_failure_callback(
+  virtual void pattern_matching_failure_callback(
       pattern_matching_failure_construction const &event) { }
-  [[clang::optnone]] void configuration_event_callback(
+  virtual void function_exit_callback(function_exit_construction const &event) {
+  }
+  virtual void configuration_event_callback(
       kore_configuration_construction const &config, bool is_initial) { }
 
 public:
@@ -315,6 +334,8 @@ public:
     current_rewrite_event_.emplace(ordinal, arity);
     if (arity == 0) {
       rewrite_event_callback(current_rewrite_event_.value());
+    } else {
+      rewrite_callback_pending_ = true;
     }
   }
 
@@ -328,7 +349,12 @@ public:
     p.second.bits = bits;
     size_t new_pos = ++current_rewrite_event_->pos;
     if (new_pos == current_rewrite_event_->arity) {
-      rewrite_event_callback(current_rewrite_event_.value());
+      if (rewrite_callback_pending_) {
+        rewrite_event_callback(current_rewrite_event_.value());
+        rewrite_callback_pending_ = false;
+      } else {
+        side_condition_event_callback(current_rewrite_event_.value());
+      }
     }
   }
 
@@ -366,6 +392,11 @@ public:
   void pattern_matching_failure(char const *function_name) override {
     pattern_matching_failure_construction pm_failure(function_name);
     pattern_matching_failure_callback(pm_failure);
+  }
+
+  void function_exit(uint64_t ordinal, bool is_tail) override {
+    function_exit_construction function_exit(ordinal, is_tail);
+    function_exit_callback(function_exit);
   }
 
   void configuration(block *config, bool is_initial) override {

@@ -16,8 +16,12 @@ hook result: kore[\dv{SortInt{}}("2")]
 function: Lblproject'Coln'KItem{} (0:0)
 rule: 195 1
   VarK = kore[\dv{SortInt{}}("2")]
+function exit: 195 notail
+function exit: 152 notail
 function: LblinitGeneratedCounterCell{} (1)
 rule: 150 0
+function exit: 150 notail
+function exit: 151 notail
 config: kore[Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(\dv{SortInt{}}("2"),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))]
 side condition entry: 116 1
   VarI = kore[\dv{SortInt{}}("2")]

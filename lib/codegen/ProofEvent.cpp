@@ -304,6 +304,27 @@ llvm::CallInst *proof_event::emit_write_pattern_matching_failure(
   return b.CreateCall(func, {proof_writer, var_function_name});
 }
 
+llvm::CallInst *proof_event::emit_write_function_exit(
+    llvm::Value *proof_writer, uint64_t ordinal, bool is_tail,
+    llvm::BasicBlock *insert_at_end) {
+  auto b = llvm::IRBuilder(insert_at_end);
+
+  auto *void_ty = llvm::Type::getVoidTy(ctx_);
+  auto *i8_ptr_ty = llvm::PointerType::getUnqual(ctx_);
+  auto *i64_ty = llvm::Type::getInt64Ty(ctx_);
+  auto *i8_ty = llvm::Type::getInt64Ty(ctx_);
+
+  auto *func_ty
+      = llvm::FunctionType::get(void_ty, {i8_ptr_ty, i64_ty, i8_ty}, false);
+
+  auto *func = get_or_insert_function(
+      module_, "write_function_exit_to_proof_trace", func_ty);
+
+  auto *var_ordinal = llvm::ConstantInt::get(i64_ty, ordinal);
+  auto *var_is_tail = llvm::ConstantInt::get(i8_ty, is_tail);
+  return b.CreateCall(func, {proof_writer, var_ordinal, var_is_tail});
+}
+
 llvm::CallInst *proof_event::emit_start_new_chunk(
     llvm::Value *proof_writer, llvm::BasicBlock *insert_at_end) {
   auto b = llvm::IRBuilder(insert_at_end);
@@ -349,34 +370,6 @@ proof_event::emit_get_proof_chunk_size(llvm::BasicBlock *insert_at_end) {
       = module_->getOrInsertGlobal("proof_chunk_size", i64_ty);
   return new llvm::LoadInst(
       i64_ty, proof_chunk_size_pointer, "proof_chunk_size", insert_at_end);
-}
-
-std::pair<llvm::BasicBlock *, llvm::BasicBlock *> proof_event::proof_branch(
-    std::string const &label, llvm::BasicBlock *insert_at_end) {
-  auto *i1_ty = llvm::Type::getInt1Ty(ctx_);
-
-  auto *proof_output_flag = module_->getOrInsertGlobal("proof_output", i1_ty);
-  auto *proof_output = new llvm::LoadInst(
-      i1_ty, proof_output_flag, "proof_output", insert_at_end);
-
-  auto *f = insert_at_end->getParent();
-  auto *true_block
-      = llvm::BasicBlock::Create(ctx_, fmt::format("if_{}", label), f);
-  auto *merge_block
-      = llvm::BasicBlock::Create(ctx_, fmt::format("tail_{}", label), f);
-
-  emit_no_op(merge_block);
-
-  llvm::BranchInst::Create(
-      true_block, merge_block, proof_output, insert_at_end);
-  return {true_block, merge_block};
-}
-
-std::tuple<llvm::BasicBlock *, llvm::BasicBlock *, llvm::Value *>
-proof_event::event_prelude(
-    std::string const &label, llvm::BasicBlock *insert_at_end) {
-  auto [true_block, merge_block] = proof_branch(label, insert_at_end);
-  return {true_block, merge_block, emit_get_proof_trace_writer(true_block)};
 }
 
 llvm::BasicBlock *proof_event::check_for_emit_new_chunk(
@@ -693,6 +686,46 @@ llvm::BasicBlock *proof_event::pattern_matching_failure(
   llvm::BranchInst::Create(merge_block, true_block);
 
   return merge_block;
+}
+
+//===----------------------------------------------------------------------===//
+// Method template specializations
+//===----------------------------------------------------------------------===//
+
+template <>
+llvm::Function *kllvm::proof_event::get_parent_function<llvm::Instruction>(
+    llvm::Instruction *loc) {
+  return loc->getParent()->getParent();
+}
+
+template <>
+llvm::Function *kllvm::proof_event::get_parent_function<llvm::BasicBlock>(
+    llvm::BasicBlock *loc) {
+  return loc->getParent();
+}
+
+template <>
+llvm::BasicBlock *kllvm::proof_event::get_parent_block<llvm::Instruction>(
+    llvm::Instruction *loc) {
+  return loc->getParent();
+}
+
+template <>
+llvm::BasicBlock *
+kllvm::proof_event::get_parent_block<llvm::BasicBlock>(llvm::BasicBlock *loc) {
+  return loc;
+}
+
+template <>
+void kllvm::proof_event::fix_insert_loc<llvm::Instruction>(
+    llvm::Instruction *loc, llvm::BasicBlock *merge_block) {
+  loc->moveBefore(*merge_block, merge_block->begin());
+}
+
+template <>
+void kllvm::proof_event::fix_insert_loc<llvm::BasicBlock>(
+    llvm::BasicBlock *loc, llvm::BasicBlock *merge_block) {
+  emit_no_op(merge_block);
 }
 
 } // namespace kllvm

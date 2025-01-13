@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <utility>
 
@@ -18,8 +19,13 @@ size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
 class arena {
 public:
   arena(char id)
-      : allocation_semispace_id(id) {
-    initialize_semispace();
+      : allocation_semispace_id(id) { }
+
+  ~arena() {
+    if (current_addr_ptr)
+      munmap(current_addr_ptr, HYPERBLOCK_SIZE);
+    if (collection_addr_ptr)
+      munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
   }
 
   char *evacuate(char *scan_ptr);
@@ -104,11 +110,12 @@ private:
   //
   //	Current semispace where allocations are being made.
   //
-  char *current_addr_ptr; // pointer to start of current address space
-  char *allocation_ptr; // next available location in current semispace
-  char *tripwire; // allocating past this triggers slow allocation
-  mutable size_t
-      num_blocks; // notional number of BLOCK_SIZE blocks in current semispace
+  char *current_addr_ptr = nullptr; // pointer to start of current address space
+  char *allocation_ptr
+      = nullptr; // next available location in current semispace
+  char *tripwire = nullptr; // allocating past this triggers slow allocation
+  mutable size_t num_blocks
+      = 0; // notional number of BLOCK_SIZE blocks in current semispace
   char allocation_semispace_id; // id of current semispace
   //
   //	Semispace where allocations will be made during and after garbage collect.
@@ -148,18 +155,25 @@ extern thread_local bool time_for_collection;
 size_t get_gc_threshold();
 
 inline void *arena::kore_arena_alloc(size_t requested) {
-  if (allocation_ptr + requested >= tripwire) {
+  if (tripwire == nullptr) {
     //
-    //	We got close to or past the last location accessed in this address range so far,
-    //	depending on the requested size and tripwire setting. This triggers a garbage
-    //	collect when allowed.
+    //	Semispace not yet initialized.
     //
-    time_for_collection = true;
-    //
-    //	We move the tripwire to 1 past the end of our hyperblock so that we have
-    //	a well defined comparison that will always be false until the next arena swap.
-    //
-    tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
+    initialize_semispace();
+  } else if (allocation_ptr + requested >= tripwire) {
+    {
+      //
+      //	We got close to or past the last location accessed in this address range so far,
+      //	depending on the requested size and tripwire setting. This triggers a garbage
+      //	collect when allowed.
+      //
+      time_for_collection = true;
+      //
+      //	We move the tripwire to 1 past the end of our hyperblock so that we have
+      //	a well defined comparison that will always be false until the next arena swap.
+      //
+      tripwire = current_addr_ptr + HYPERBLOCK_SIZE;
+    }
   }
   void *result = allocation_ptr;
   allocation_ptr += requested;
