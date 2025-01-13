@@ -173,12 +173,12 @@ llvm::Value *get_block_header(
           llvm::Type::getInt64Ty(module->getContext()), header_val));
 }
 
-static llvm::Value *addrspaceCast(
+static llvm::Value *addrspace_cast(
     llvm::Module *module, llvm::Value *val, llvm::BasicBlock *block, int from,
     int to) {
   std::string name
       = "addrspace_" + std::to_string(from) + "_to_" + std::to_string(to);
-  auto addrspace = llvm::CallInst::Create(
+  auto *addrspace = llvm::CallInst::Create(
       get_or_insert_function(
           module, name, llvm::PointerType::get(module->getContext(), to),
           llvm::PointerType::get(module->getContext(), from)),
@@ -188,7 +188,7 @@ static llvm::Value *addrspaceCast(
 
 llvm::Value *addrspace_cast0_to0(
     llvm::Module *module, llvm::Value *val, llvm::BasicBlock *block) {
-  return addrspaceCast(module, val, block, 0, 0);
+  return addrspace_cast(module, val, block, 0, 0);
 }
 
 template <typename T>
