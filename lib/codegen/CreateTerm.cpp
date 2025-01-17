@@ -64,7 +64,8 @@ llvm::Type *get_param_type(value_type sort, llvm::Module *module) {
   case sort_category::RangeMap:
   case sort_category::List:
   case sort_category::Set:
-    type = llvm::PointerType::getUnqual(module->getContext());
+    type = use_gcstrategy ? llvm::PointerType::get(module->getContext(), 0)
+                          : llvm::PointerType::getUnqual(module->getContext());
     break;
   default: break;
   }
@@ -94,6 +95,9 @@ llvm::Type *getvalue_type(value_type sort, llvm::Module *module) {
   case sort_category::StringBuffer:
   case sort_category::Symbol:
   case sort_category::Variable:
+    if (use_gcstrategy) {
+      return llvm::PointerType::get(module->getContext(), 0);
+    }
     return llvm::PointerType::getUnqual(module->getContext());
   case sort_category::MapIter:
   case sort_category::SetIter:
@@ -167,6 +171,24 @@ llvm::Value *get_block_header(
       block_header_type,
       llvm::ConstantInt::get(
           llvm::Type::getInt64Ty(module->getContext()), header_val));
+}
+
+static llvm::Value *addrspace_cast(
+    llvm::Module *module, llvm::Value *val, llvm::BasicBlock *block, int from,
+    int to) {
+  std::string name
+      = "addrspace_" + std::to_string(from) + "_to_" + std::to_string(to);
+  auto *addrspace = llvm::CallInst::Create(
+      get_or_insert_function(
+          module, name, llvm::PointerType::get(module->getContext(), to),
+          llvm::PointerType::get(module->getContext(), from)),
+      {val}, "", block);
+  return addrspace;
+}
+
+llvm::Value *addrspace_cast0_to0(
+    llvm::Module *module, llvm::Value *val, llvm::BasicBlock *block) {
+  return addrspace_cast(module, val, block, 0, 0);
 }
 
 template <typename T>
@@ -910,12 +932,17 @@ llvm::Value *create_term::create_function_call(
     alloc_sret = allocate_term(
         return_type, current_block_, get_collection_alloc_fn(return_cat.cat),
         true);
+    auto *alloc_sret_cast
+        = use_gcstrategy
+              ? addrspace_cast0_to0(module_, alloc_sret, current_block_)
+              : alloc_sret;
     sret_type = return_type;
-    real_args.insert(real_args.begin(), alloc_sret);
-    types.insert(types.begin(), alloc_sret->getType());
+    real_args.insert(real_args.begin(), alloc_sret_cast);
+    types.insert(types.begin(), alloc_sret_cast->getType());
     return_type = llvm::Type::getVoidTy(ctx_);
   } else if (collection) {
-    return_type = llvm::PointerType::getUnqual(ctx_);
+    return_type = use_gcstrategy ? llvm::PointerType::get(ctx_, 0)
+                                 : llvm::PointerType::getUnqual(ctx_);
   }
 
   llvm::FunctionType *func_type
@@ -1003,15 +1030,20 @@ llvm::Value *create_term::not_injection_case(
     new llvm::StoreInst(child_value, child_ptr, current_block_);
   }
 
-  auto *block_ptr = llvm::PointerType::getUnqual(module_->getContext());
+  auto *block_ptr = use_gcstrategy
+                        ? llvm::PointerType::get(module_->getContext(), 0)
+                        : llvm::PointerType::getUnqual(module_->getContext());
+  auto *block_cast = use_gcstrategy
+                         ? addrspace_cast0_to0(module_, block, current_block_)
+                         : block;
   if (symbol_decl->attributes().contains(attribute_set::key::Binder)) {
     auto *call = llvm::CallInst::Create(
         get_or_insert_function(module_, "debruijnize", block_ptr, block_ptr),
-        block, "withIndices", current_block_);
+        block_cast, "withIndices", current_block_);
     set_debug_loc(call);
     return call;
   }
-  return block;
+  return block_cast;
 }
 
 // returns a value and a boolean indicating whether that value could be an
@@ -1190,7 +1222,9 @@ bool make_function(
   std::vector<llvm::Type *> param_types;
   std::vector<std::string> param_names;
   std::vector<llvm::Metadata *> debug_args;
-  auto *ptr_ty = llvm::PointerType::getUnqual(module->getContext());
+  auto *ptr_ty = use_gcstrategy
+                     ? llvm::PointerType::get(module->getContext(), 0)
+                     : llvm::PointerType::getUnqual(module->getContext());
   for (auto &entry : vars) {
     auto *sort
         = dynamic_cast<kore_composite_sort *>(entry.second->get_sort().get());
@@ -1359,7 +1393,9 @@ std::string make_apply_rule_function(
     case sort_category::RangeMap:
     case sort_category::List:
     case sort_category::Set:
-      param_type = llvm::PointerType::getUnqual(module->getContext());
+      param_type = use_gcstrategy
+                       ? llvm::PointerType::get(module->getContext(), 0)
+                       : llvm::PointerType::getUnqual(module->getContext());
       break;
     default: break;
     }
@@ -1415,8 +1451,11 @@ std::string make_apply_rule_function(
         auto *ptr = allocate_term(
             arg->getType(), creator.get_current_block(),
             get_collection_alloc_fn(cat.cat), true);
-        new llvm::StoreInst(arg, ptr, creator.get_current_block());
-        arg = ptr;
+        auto *ptr_cast = use_gcstrategy ? addrspace_cast0_to0(
+                             module, ptr, creator.get_current_block())
+                                        : ptr;
+        new llvm::StoreInst(arg, ptr_cast, creator.get_current_block());
+        arg = ptr_cast;
       }
       break;
     default: break;
