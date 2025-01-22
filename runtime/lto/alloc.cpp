@@ -11,16 +11,26 @@
 
 extern "C" {
 
-REGISTER_ARENA(youngspace, YOUNGSPACE_ID);
-REGISTER_ARENA(oldspace, OLDSPACE_ID);
-REGISTER_ARENA(alwaysgcspace, ALWAYSGCSPACE_ID);
+// class arena supports ID from  0 to 127
+
+// New data in allocated in the youngspace, which requests a
+// collection when is gets too full.
+thread_local arena youngspace(YOUNGSPACE_ID, true);
+
+// Data that is old enough is migrated to the oldspace. The
+// migrated data is always live at this point so it never
+// requests a collection.
+thread_local arena oldspace(OLDSPACE_ID, false);
+
+// Temporary data is doesn't use the garbage collector.
+thread_local arena alwaysgcspace(ALWAYSGCSPACE_ID, false);
 
 char *youngspace_ptr() {
-  return youngspace.arena_start_ptr();
+  return youngspace.start_ptr();
 }
 
 char *oldspace_ptr() {
-  return oldspace.arena_start_ptr();
+  return oldspace.start_ptr();
 }
 
 char youngspace_collection_id() {
@@ -73,7 +83,7 @@ kore_resize_last_alloc(void *oldptr, size_t newrequest, size_t last_size) {
   newrequest = (newrequest + 7) & ~7;
   last_size = (last_size + 7) & ~7;
 
-  if (oldptr != youngspace.arena_end_ptr() - last_size) {
+  if (oldptr != youngspace.end_ptr() - last_size) {
     MEM_LOG(
         "May only reallocate last allocation. Tried to reallocate %p to %zd\n",
         oldptr, newrequest);
