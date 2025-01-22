@@ -255,7 +255,7 @@ char *arena::evacuate(char *scan_ptr) {
       migrate_child(curr_block, layout_data->args, i, false);
     }
   }
-  return move_ptr(scan_ptr, get_size(hdr, layout_int), arena_end_ptr());
+  return move_ptr(scan_ptr, get_size(hdr, layout_int), end_ptr());
 }
 
 // Contains the decision logic for collecting the old generation.
@@ -295,7 +295,7 @@ void kore_collect(
   if (!last_alloc_ptr) {
     last_alloc_ptr = youngspace_ptr();
   }
-  char *current_alloc_ptr = youngspace.arena_end_ptr();
+  char *current_alloc_ptr = youngspace.end_ptr();
 #endif
   kore_alloc_swap(collect_old);
 #ifdef GC_DBG
@@ -303,13 +303,13 @@ void kore_collect(
     numBytesLiveAtCollection[i] = 0;
   }
 #endif
-  char *previous_oldspace_alloc_ptr = oldspace.arena_end_ptr();
+  char *previous_oldspace_alloc_ptr = oldspace.end_ptr();
   for (int i = 0; i < nroots; i++) {
     migrate_root(roots, type_info, i);
   }
   migrate_static_roots();
   char *scan_ptr = youngspace_ptr();
-  if (scan_ptr != youngspace.arena_end_ptr()) {
+  if (scan_ptr != youngspace.end_ptr()) {
     MEM_LOG("Evacuating young generation\n");
     while (scan_ptr) {
       scan_ptr = youngspace.evacuate(scan_ptr);
@@ -320,7 +320,7 @@ void kore_collect(
   } else {
     scan_ptr = previous_oldspace_alloc_ptr;
   }
-  if (scan_ptr != oldspace.arena_end_ptr()) {
+  if (scan_ptr != oldspace.end_ptr()) {
     MEM_LOG("Evacuating old generation\n");
     while (scan_ptr) {
       scan_ptr = oldspace.evacuate(scan_ptr);
@@ -331,12 +331,13 @@ void kore_collect(
       = arena::ptr_diff(current_alloc_ptr, last_alloc_ptr);
   assert(numBytesAllocedSinceLastCollection >= 0);
   fwrite(&numBytesAllocedSinceLastCollection, sizeof(ssize_t), 1, stderr);
-  last_alloc_ptr = youngspace.arena_end_ptr();
+  last_alloc_ptr = youngspace.end_ptr();
   fwrite(
       numBytesLiveAtCollection, sizeof(numBytesLiveAtCollection[0]),
       sizeof(numBytesLiveAtCollection) / sizeof(numBytesLiveAtCollection[0]),
       stderr);
 #endif
+  youngspace.update_tripwire();
   MEM_LOG("Finishing garbage collection\n");
   is_gc = false;
 }

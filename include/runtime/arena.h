@@ -14,12 +14,22 @@ extern "C" {
 
 size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
 
+// After a garbage collect we change the tripwire to the amount of non-garbage times
+// this factor, so we do a decent amount of allocations between collections even
+// when there is very little garbage
+size_t const EXPAND_FACTOR = 2;
+
+// We don't consider collecting garbage until at least this amount of space has
+// been allocated, to avoid collections near startup when there is little garbage.
+size_t const MIN_SPACE = 1024 * 1024;
+
 // An arena can be used to allocate objects that can then be deallocated all at
 // once.
 class arena {
 public:
-  arena(char id)
-      : allocation_semispace_id(id) { }
+  arena(char id, bool trigger_collection)
+      : allocation_semispace_id(id)
+      , trigger_collection(trigger_collection) { }
 
   ~arena() {
     if (current_addr_ptr)
@@ -36,17 +46,17 @@ public:
 
   // Returns the address of the first byte that belongs in the given arena.
   // Returns nullptr if nothing has been allocated ever in that arena.
-  char *arena_start_ptr() const { return current_addr_ptr; }
+  char *start_ptr() const { return current_addr_ptr; }
 
   // Returns a pointer to a location holding the address of last allocated
   // byte in the given arena plus 1.
   // This address is nullptr if nothing has been allocated ever in that arena.
-  char *arena_end_ptr() { return allocation_ptr; }
+  char *end_ptr() { return allocation_ptr; }
 
   // Clears the current allocation space by setting its start back to its first
   // block. It is used during garbage collection to effectively collect all of the
-  // arena. Resets the tripwire.
-  void arena_clear();
+  // arena.
+  void arena_clear() { allocation_ptr = current_addr_ptr; }
 
   // Resizes the last allocation.
   // Returns the address of the byte following the last newly allocated byte.
@@ -66,6 +76,14 @@ public:
   // current allocation semispace by setting its start back to its first block.
   // It is used before garbage collection.
   void arena_swap_and_clear();
+
+  // Decide how much space to use in arena before setting the flag for a collection.
+  // If an arena is going to request collections, updating this at the end of a
+  // collection is mandatory.
+  void update_tripwire() {
+    size_t space = EXPAND_FACTOR * (allocation_ptr - current_addr_ptr);
+    tripwire = current_addr_ptr + ((space < MIN_SPACE) ? MIN_SPACE : space);
+  }
 
   // Given two pointers to objects allocated in the same arena, return the number
   // of bytes they are apart. Undefined behavior will result if the pointers
@@ -92,20 +110,6 @@ public:
   static char get_arena_semispace_id_of_object(void *ptr);
 
 private:
-  //
-  //	We update the number of 1MB blocks actually written to, only when we need this value,
-  //	or before a garbage collection rather than trying to determine when we write to a fresh block.
-  //
-  void update_num_blocks() const {
-    //
-    //	Calculate how many 1M blocks of the current arena we used.
-    //
-    size_t num_used_blocks
-        = (allocation_ptr - current_addr_ptr - 1) / BLOCK_SIZE + 1;
-    if (num_used_blocks > num_blocks)
-      num_blocks = num_used_blocks;
-  }
-
   void initialize_semispace();
   //
   //	Current semispace where allocations are being made.
@@ -114,16 +118,13 @@ private:
   char *allocation_ptr
       = nullptr; // next available location in current semispace
   char *tripwire = nullptr; // allocating past this triggers slow allocation
-  mutable size_t num_blocks
-      = 0; // notional number of BLOCK_SIZE blocks in current semispace
   char allocation_semispace_id; // id of current semispace
+  bool const trigger_collection; // request collections?
   //
   //	Semispace where allocations will be made during and after garbage collect.
   //
   char *collection_addr_ptr
       = nullptr; // pointer to start of collection address space
-  size_t num_collection_blocks
-      = 0; // notional number of BLOCK_SIZE blocks in collection semispace
 };
 
 inline char arena::get_arena_semispace_id_of_object(void *ptr) {
@@ -138,10 +139,6 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
       = reinterpret_cast<uintptr_t>(ptr) | (HYPERBLOCK_SIZE - 1);
   return *reinterpret_cast<char *>(end_address);
 }
-
-// Macro to define a new arena with the given ID. Supports IDs ranging from 0 to
-// 127.
-#define REGISTER_ARENA(name, id) thread_local arena name(id)
 
 #ifdef __MACH__
 //
@@ -183,32 +180,12 @@ inline void *arena::kore_arena_alloc(size_t requested) {
   return result;
 }
 
-inline void arena::arena_clear() {
-  //
-  //	We set the allocation pointer to the first available address.
-  //
-  allocation_ptr = arena_start_ptr();
-  //
-  //	If the number of blocks we've touched is >= threshold, we want to trigger
-  //	a garbage collection if we get within 1 block of the end of this area.
-  //	Otherwise we only want to generate a garbage collect if we allocate off the
-  //	end of this area.
-  //
-  tripwire = current_addr_ptr
-             + (num_blocks - (num_blocks >= get_gc_threshold())) * BLOCK_SIZE;
-}
-
 inline void arena::arena_swap_and_clear() {
-  update_num_blocks(); // so we save the correct number of touched blocks
   std::swap(current_addr_ptr, collection_addr_ptr);
-  std::swap(num_blocks, num_collection_blocks);
   allocation_semispace_id = ~allocation_semispace_id;
-  if (current_addr_ptr == nullptr) {
-    //
-    //	The other semispace hasn't be initialized yet.
-    //
-    initialize_semispace();
-  } else
+  if (current_addr_ptr == nullptr)
+    initialize_semispace(); // not yet initialized
+  else
     arena_clear();
 }
 }
