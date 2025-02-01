@@ -250,6 +250,15 @@ protected:
     std::vector<kore_term_construction> arguments;
     std::optional<kore_term_construction> result;
 
+    void initialize(char const *h_name, char const *s_name, char const *loc) {
+      hook_name = h_name;
+      symbol_name = s_name;
+      location = loc;
+      arguments.clear();
+      result.reset();
+    }
+	
+    /*
     call_event_construction(
         char const *hook_name, char const *symbol_name, char const *location)
         : hook_name(hook_name)
@@ -260,6 +269,7 @@ protected:
         : hook_name(nullptr)
         , symbol_name(symbol_name)
         , location(location) { }
+    */
   };
 
   struct rewrite_event_construction {
@@ -271,19 +281,30 @@ protected:
     size_t pos;
     subst_t substitution;
 
+    void initialize(uint64_t ord, uint64_t arty) {
+      ordinal = ord;
+      arity = arty;
+      pos = 0;
+      substitution.resize(arity);
+    }
+
+    /*
     rewrite_event_construction(uint64_t ordinal, uint64_t arity)
         : ordinal(ordinal)
         , arity(arity)
         , pos(0) {
       substitution.resize(arity);
     }
+    */
   };
 
 private:
-  std::optional<call_event_construction> current_call_event_;
+  //std::optional<call_event_construction> current_call_event_;
+  call_event_construction current_call_event_;
 
-  std::optional<rewrite_event_construction> current_rewrite_event_{
-      std::nullopt};
+  //std::optional<rewrite_event_construction> current_rewrite_event_{
+  //    std::nullopt};
+  rewrite_event_construction current_rewrite_event_;
 
   bool rewrite_callback_pending_;
 
@@ -315,25 +336,31 @@ public:
   void hook_event_pre(
       char const *name, char const *pattern,
       char const *location_stack) override {
-    current_call_event_.reset();
-    current_call_event_.emplace(name, pattern, location_stack);
+    //current_call_event_.reset();
+    //current_call_event_.emplace(name, pattern, location_stack);
+    current_call_event_.initialize(name, pattern, location_stack);
   }
 
   void hook_event_post(
       void *hook_result, uint64_t block_header, uint64_t bits) override {
-    current_call_event_->result.emplace(hook_result, block_header, bits);
-    hook_event_callback(current_call_event_.value());
+    //current_call_event_->result.emplace(hook_result, block_header, bits);
+    current_call_event_.result.emplace(hook_result, block_header, bits);
+    //hook_event_callback(current_call_event_.value());
+    hook_event_callback(current_call_event_);
   }
 
   void argument(void *arg, uint64_t block_header, uint64_t bits) override {
-    current_call_event_->arguments.emplace_back(arg, block_header, bits);
+    //current_call_event_->arguments.emplace_back(arg, block_header, bits);
+    current_call_event_.arguments.emplace_back(arg, block_header, bits);
   }
 
   void rewrite_event_pre(uint64_t ordinal, uint64_t arity) override {
-    current_rewrite_event_.reset();
-    current_rewrite_event_.emplace(ordinal, arity);
+    //current_rewrite_event_.reset();
+    //current_rewrite_event_.emplace(ordinal, arity);
+    current_rewrite_event_.initialize(ordinal, arity);
     if (arity == 0) {
-      rewrite_event_callback(current_rewrite_event_.value());
+      //rewrite_event_callback(current_rewrite_event_.value());
+      rewrite_event_callback(current_rewrite_event_);
     } else {
       rewrite_callback_pending_ = true;
     }
@@ -342,18 +369,23 @@ public:
   void variable(
       char const *name, void *var, uint64_t block_header,
       uint64_t bits) override {
-    auto &p = current_rewrite_event_->substitution[current_rewrite_event_->pos];
+    //auto &p = current_rewrite_event_->substitution[current_rewrite_event_->pos];
+    auto &p = current_rewrite_event_.substitution[current_rewrite_event_.pos];
     p.first = name;
     p.second.subject = var;
     p.second.block_header = block_header;
     p.second.bits = bits;
-    size_t new_pos = ++current_rewrite_event_->pos;
-    if (new_pos == current_rewrite_event_->arity) {
+    //size_t new_pos = ++current_rewrite_event_->pos;
+    size_t new_pos = ++current_rewrite_event_.pos;
+    //if (new_pos == current_rewrite_event_->arity) {
+    if (new_pos == current_rewrite_event_.arity) {
       if (rewrite_callback_pending_) {
-        rewrite_event_callback(current_rewrite_event_.value());
+	//rewrite_event_callback(current_rewrite_event_.value());
+        rewrite_event_callback(current_rewrite_event_);
         rewrite_callback_pending_ = false;
       } else {
-        side_condition_event_callback(current_rewrite_event_.value());
+        //side_condition_event_callback(current_rewrite_event_.value());
+	side_condition_event_callback(current_rewrite_event_);
       }
     }
   }
@@ -366,19 +398,23 @@ public:
 
   void
   function_event_pre(char const *name, char const *location_stack) override {
-    current_call_event_.reset();
-    current_call_event_.emplace(name, location_stack);
+    //current_call_event_.reset();
+    //current_call_event_.emplace(name, location_stack);
+    current_call_event_.initialize(nullptr, name, location_stack);
   }
 
   void function_event_post() override {
-    function_event_callback(current_call_event_.value());
+    //function_event_callback(current_call_event_.value());
+    function_event_callback(current_call_event_);
   }
 
   void side_condition_event_pre(uint64_t ordinal, uint64_t arity) override {
-    current_rewrite_event_.reset();
-    current_rewrite_event_.emplace(ordinal, arity);
+    //current_rewrite_event_.reset();
+    //current_rewrite_event_.emplace(ordinal, arity);
+    current_rewrite_event_.initialize(ordinal, arity);
     if (arity == 0) {
-      side_condition_event_callback(current_rewrite_event_.value());
+      //side_condition_event_callback(current_rewrite_event_.value());
+      side_condition_event_callback(current_rewrite_event_);
     }
   }
 
