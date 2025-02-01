@@ -257,7 +257,7 @@ protected:
       arguments.clear();
       result.reset();
     }
-	
+
     /*
     call_event_construction(
         char const *hook_name, char const *symbol_name, char const *location)
@@ -380,12 +380,12 @@ public:
     //if (new_pos == current_rewrite_event_->arity) {
     if (new_pos == current_rewrite_event_.arity) {
       if (rewrite_callback_pending_) {
-	//rewrite_event_callback(current_rewrite_event_.value());
+        //rewrite_event_callback(current_rewrite_event_.value());
         rewrite_event_callback(current_rewrite_event_);
         rewrite_callback_pending_ = false;
       } else {
         //side_condition_event_callback(current_rewrite_event_.value());
-	side_condition_event_callback(current_rewrite_event_);
+        side_condition_event_callback(current_rewrite_event_);
       }
     }
   }
