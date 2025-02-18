@@ -25,6 +25,8 @@ else()
   set(HDR_MASK -16888498602639361) # 0xffc3ffffffffffff
 endif()
 
+set(HYPERBLOCK_SIZE_MULTIPLIER 512)
+
 set(MAP_LAYOUT          1)
 set(LIST_LAYOUT         2)
 set(SET_LAYOUT          3)

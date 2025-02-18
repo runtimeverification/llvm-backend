@@ -8,11 +8,13 @@
 #include <sys/types.h>
 #include <utility>
 
+#include "config/macros.h"
 #include "runtime/alloc.h"
 
 extern "C" {
 
-size_t const HYPERBLOCK_SIZE = (size_t)BLOCK_SIZE * 1024 * 1024;
+size_t const HYPERBLOCK_SIZE
+    = (size_t)BLOCK_SIZE * HYPERBLOCK_SIZE_MULTIPLIER * 1024;
 
 // After a garbage collect we change the tripwire to the amount of non-garbage times
 // this factor, so we do a decent amount of allocations between collections even
