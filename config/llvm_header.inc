@@ -251,6 +251,16 @@ entry:
   ret i64 %steps
 }
 
+define i1 @hook_MINT_eq_8(i8 %0, i8 %1) {
+  %ret = icmp eq i8 %0, %1
+  ret i1 %ret
+}
+
+define i1 @hook_MINT_eq_16(i16 %0, i16 %1) {
+  %ret = icmp eq i16 %0, %1
+  ret i1 %ret
+}
+
 define i1 @hook_MINT_eq_32(i32 %0, i32 %1) {
   %ret = icmp eq i32 %0, %1
   ret i1 %ret
@@ -258,6 +268,11 @@ define i1 @hook_MINT_eq_32(i32 %0, i32 %1) {
 
 define i1 @hook_MINT_eq_64(i64 %0, i64 %1) {
   %ret = icmp eq i64 %0, %1
+  ret i1 %ret
+}
+
+define i1 @hook_MINT_eq_128(i128 %0, i128 %1) {
+  %ret = icmp eq i128 %0, %1
   ret i1 %ret
 }
 
