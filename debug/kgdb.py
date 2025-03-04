@@ -647,10 +647,16 @@ class termPrinter:
                 self.result += "\\dv{" + sort + "}(\"" + string + "\")"
             elif cat == @STRINGBUFFER_LAYOUT@:
                 self.appendStringBuffer(arg.cast(self.stringbuffer_ptr_ptr).dereference(), sort)
+            elif cat == @MINT_LAYOUT@ + 8:
+                self.appendMInt(arg, 1, sort)
+            elif cat == @MINT_LAYOUT@ + 16:
+                self.appendMInt(arg, 2, sort)
             elif cat == @MINT_LAYOUT@ + 32:
                 self.appendMInt(arg, 4, sort)
             elif cat == @MINT_LAYOUT@ + 64:
                 self.appendMInt(arg, 8, sort)
+            elif cat == @MINT_LAYOUT@ + 128:
+                self.appendMInt(arg, 16, sort)
             elif cat == @MINT_LAYOUT@ + 160:
                 self.appendMInt(arg, 20, sort)
             elif cat == @MINT_LAYOUT@ + 256:
