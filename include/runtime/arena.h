@@ -111,6 +111,20 @@ public:
   // allocated within an arena.
   static char get_arena_semispace_id_of_object(void *ptr);
 
+  // Unmaps the current and collection address spaces and resets them and the tripwire.
+  // This is needed when the client switches thread contexts without properly deallocating
+  // them. This is not a common use case and shoul be used carefully.
+  void munmap_arena_and_reset() {
+    if (current_addr_ptr)
+      munmap(current_addr_ptr, HYPERBLOCK_SIZE);
+    if (collection_addr_ptr)
+      munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
+
+    current_addr_ptr = nullptr;
+    collection_addr_ptr = nullptr;
+    tripwire = nullptr;
+  }
+
 private:
   void initialize_semispace();
   //
