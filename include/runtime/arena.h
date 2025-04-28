@@ -122,6 +122,7 @@ public:
 
     current_addr_ptr = nullptr;
     collection_addr_ptr = nullptr;
+    allocation_ptr = nullptr;
     tripwire = nullptr;
   }
 
