@@ -33,13 +33,6 @@ public:
       : allocation_semispace_id(id)
       , trigger_collection(trigger_collection) { }
 
-  ~arena() {
-    if (current_addr_ptr)
-      munmap(current_addr_ptr, HYPERBLOCK_SIZE);
-    if (collection_addr_ptr)
-      munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
-  }
-
   char *evacuate(char *scan_ptr);
 
   // Allocates the requested number of bytes as a contiguous region and returns a
