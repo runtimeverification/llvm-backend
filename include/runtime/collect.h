@@ -26,8 +26,8 @@ using set_node = set::iterator::node_t;
 using set_impl = set::iterator::tree_t;
 
 extern "C" {
-extern thread_local size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
-extern thread_local bool collect_old;
+extern thread_local constinit size_t numBytesLiveAtCollection[1 << AGE_WIDTH];
+extern thread_local constinit bool collect_old;
 size_t get_size(uint64_t, uint16_t);
 void migrate_static_roots(void);
 void migrate(block **block_ptr);
