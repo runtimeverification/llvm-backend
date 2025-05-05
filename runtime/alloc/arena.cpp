@@ -19,8 +19,8 @@ extern size_t const VAR_BLOCK_SIZE = BLOCK_SIZE;
 bool time_for_collection = false;
 bool gc_enabled = true;
 #else
-thread_local bool time_for_collection = false;
-thread_local bool gc_enabled = true;
+thread_local constinit bool time_for_collection = false;
+thread_local constinit bool gc_enabled = true;
 #endif
 
 void arena::initialize_semispace() {

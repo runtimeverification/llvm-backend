@@ -374,7 +374,7 @@ void int_hash(mpz_t i, void *hasher) {
 }
 
 thread_local gmp_randstate_t kllvm_rand_state;
-thread_local bool kllvm_rand_state_initialized = false;
+thread_local constinit bool kllvm_rand_state_initialized = false;
 
 SortK hook_INT_srand(SortInt seed) {
   if (!kllvm_rand_state_initialized) {

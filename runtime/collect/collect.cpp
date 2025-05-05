@@ -10,22 +10,22 @@
 #include <cstring>
 
 extern "C" {
-extern thread_local arena youngspace;
-extern thread_local arena oldspace;
-extern thread_local arena alwaysgcspace;
+extern thread_local constinit arena youngspace;
+extern thread_local constinit arena oldspace;
+extern thread_local constinit arena alwaysgcspace;
 
 char *youngspace_ptr(void);
 char *oldspace_ptr(void);
 
 static thread_local bool is_gc = false;
-bool thread_local collect_old = false;
+bool thread_local constinit collect_old = false;
 #ifndef GC_DBG
 static thread_local uint8_t num_collection_only_young = 0;
 #else
 static thread_local char *last_alloc_ptr;
 #endif
 
-size_t thread_local numBytesLiveAtCollection[1 << AGE_WIDTH];
+size_t thread_local constinit numBytesLiveAtCollection[1 << AGE_WIDTH];
 
 bool during_gc() {
   return is_gc;

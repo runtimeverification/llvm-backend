@@ -15,15 +15,15 @@ extern "C" {
 
 // New data in allocated in the youngspace, which requests a
 // collection when is gets too full.
-thread_local arena youngspace(YOUNGSPACE_ID, true);
+thread_local constinit arena youngspace(YOUNGSPACE_ID, true);
 
 // Data that is old enough is migrated to the oldspace. The
 // migrated data is always live at this point so it never
 // requests a collection.
-thread_local arena oldspace(OLDSPACE_ID, false);
+thread_local constinit arena oldspace(OLDSPACE_ID, false);
 
 // Temporary data is doesn't use the garbage collector.
-thread_local arena alwaysgcspace(ALWAYSGCSPACE_ID, false);
+thread_local constinit arena alwaysgcspace(ALWAYSGCSPACE_ID, false);
 
 char *youngspace_ptr() {
   return youngspace.start_ptr();

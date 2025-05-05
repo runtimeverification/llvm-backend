@@ -68,7 +68,7 @@ block *DUMMY1 = &D1;
 //
 bool gc_enabled;
 #else
-thread_local bool gc_enabled;
+thread_local constinit bool gc_enabled;
 #endif
 
 size_t get_gc_threshold() {

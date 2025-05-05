@@ -53,7 +53,7 @@ void hash_exit(void);
 //
 extern bool gc_enabled;
 #else
-extern thread_local bool gc_enabled;
+extern thread_local constinit bool gc_enabled;
 #endif
 }
 
