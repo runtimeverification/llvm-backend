@@ -5,7 +5,7 @@
 extern thread_local std::vector<BlockEnumerator> block_enumerators;
 
 extern thread_local gmp_randstate_t kllvm_rand_state;
-extern thread_local bool kllvm_rand_state_initialized;
+extern thread_local constinit bool kllvm_rand_state_initialized;
 
 extern "C" {
 
