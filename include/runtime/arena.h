@@ -29,16 +29,9 @@ size_t const MIN_SPACE = 1024 * 1024;
 // once.
 class arena {
 public:
-  arena(char id, bool trigger_collection)
+  constexpr arena(char id, bool trigger_collection)
       : allocation_semispace_id(id)
       , trigger_collection(trigger_collection) { }
-
-  ~arena() {
-    if (current_addr_ptr)
-      munmap(current_addr_ptr, HYPERBLOCK_SIZE);
-    if (collection_addr_ptr)
-      munmap(collection_addr_ptr, HYPERBLOCK_SIZE);
-  }
 
   char *evacuate(char *scan_ptr);
 
@@ -163,7 +156,7 @@ inline char arena::get_arena_semispace_id_of_object(void *ptr) {
 //
 extern bool time_for_collection;
 #else
-extern thread_local bool time_for_collection;
+extern thread_local constinit bool time_for_collection;
 #endif
 
 size_t get_gc_threshold();

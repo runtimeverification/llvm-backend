@@ -50,7 +50,7 @@ infer_library_name() {
   fi
 }
 
-clangpp_args=("--std=c++17")
+clangpp_args=("--std=c++20")
 while [[ $# -gt 0 ]]; do
   if $output; then
     output=false
