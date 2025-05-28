@@ -346,8 +346,5 @@ void kore_collect(
 void free_all_kore_mem() {
   kore_collect(nullptr, 0, nullptr, true);
   kore_clear();
-  youngspace.munmap_arena_and_reset();
-  oldspace.munmap_arena_and_reset();
-  alwaysgcspace.munmap_arena_and_reset();
 }
 }
