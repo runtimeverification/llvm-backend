@@ -168,6 +168,14 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   return ret;
 }
 
+uint64_t hook_BYTES_get64(SortBytes b, uint64_t off) {
+  if (off >= len(b)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Buffer overflow on get: off={}, len={}", off, len(b));
+  }
+  return b->data[off];
+}
+
 SortInt hook_BYTES_get(SortBytes b, SortInt off) {
   unsigned long off_long = GET_UI(off);
   if (off_long >= len(b)) {
