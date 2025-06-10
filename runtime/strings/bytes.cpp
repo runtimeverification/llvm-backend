@@ -121,6 +121,29 @@ SortBytes hook_BYTES_string2bytes(SortString s) {
   return hook_BYTES_bytes2string(s);
 }
 
+SortBytes hook_BYTES_substr64(SortBytes input, uint64_t start, uint64_t end) {
+  if (end < start) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Invalid string slice: Requested start index {} is greater than "
+        "requested end index {}.",
+        start, end);
+  }
+  uint64_t input_len = len(input);
+  if (end > input_len) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Invalid string slice for string: Requested end index {} is greater "
+        "than string length {}",
+        end, input_len);
+  }
+  uint64_t len = end - start;
+  auto *ret = static_cast<string *>(
+      kore_alloc_token(sizeof(string) + sizeof(KCHAR) * len));
+  init_with_len(ret, len);
+  memcpy(&(ret->data), &(input->data[start]), len * sizeof(KCHAR));
+  return ret;
+}
+
+
 SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   uint64_t ustart = GET_UI(start);
   uint64_t uend = GET_UI(end);
@@ -173,6 +196,19 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
   return b;
 }
 
+SortBytes hook_BYTES_replaceAt64(
+    SortBytes b, uint64_t start, SortBytes b2) {
+  copy_if_needed(b);
+
+  if (start + len(b2) > len(b)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Buffer overflow on replaceAt: start={}, dest_len={}, src_len={}",
+        start, len(b), len(b2));
+  }
+  memcpy(b->data + start, b2->data, len(b2));
+  return b;
+}
+
 SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
   copy_if_needed(b);
 
@@ -215,10 +251,28 @@ hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
   return b;
 }
 
+uint64_t hook_BYTES_length64(SortBytes a) {
+  return len(a);
+}
+
 SortInt hook_BYTES_length(SortBytes a) {
   mpz_t result;
   mpz_init_set_ui(result, len(a));
   return move_int(result);
+}
+
+SortBytes hook_BYTES_padRight64(SortBytes b, uint64_t length, uint64_t v) {
+  if (length <= len(b)) {
+    return b;
+  }
+  if (v > 255) {
+    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
+  }
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + length));
+  init_with_len(result, length);
+  memcpy(result->data, b->data, len(b));
+  memset(result->data + len(b), v, length - len(b));
+  return result;
 }
 
 SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
@@ -234,6 +288,21 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
   init_with_len(result, ulen);
   memcpy(result->data, b->data, len(b));
   memset(result->data + len(b), uv, ulen - len(b));
+  return result;
+}
+
+SortBytes hook_BYTES_padLeft64(SortBytes b, uint64_t length, uint64_t v) {
+  unsigned long ulen = length;
+  if (ulen <= len(b)) {
+    return b;
+  }
+  if (v > 255) {
+    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
+  }
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + ulen));
+  init_with_len(result, ulen);
+  memset(result->data, v, ulen - len(b));
+  memcpy(result->data + ulen - len(b), b->data, len(b));
   return result;
 }
 
