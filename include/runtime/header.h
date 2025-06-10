@@ -314,6 +314,7 @@ string *hook_BUFFER_toString(stringbuffer *buf);
 size_t hook_SET_size_long(set *);
 
 mpz_ptr hook_MINT_import(size_t *i, uint64_t bits, bool is_signed);
+SortBytes hook_BYTES_empty();
 
 block *debruijnize(block *);
 block *increment_debruijn(block *);
