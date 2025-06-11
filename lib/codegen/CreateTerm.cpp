@@ -618,7 +618,7 @@ llvm::Value *create_term::create_hardcoded_hook(
     }
     return new llvm::TruncInst(in, type_out, "trunc", current_block_);
   }
-  if (name == "MINT.spow") {
+  if (name == "MINT.pow") {
     // Prepare the argument to call the hook_MINT_pow hook.
     llvm::Value *base = alloc_arg(pattern, 0, location_stack);
     args.push_back(base);
@@ -626,11 +626,11 @@ llvm::Value *create_term::create_hardcoded_hook(
     args.push_back(exponent);
     // Call the hook_MINT_pow hook.
     auto *pow_func = get_or_insert_function(
-        module_, "hook_MINT_spow",
+        module_, "hook_MINT_pow",
         getvalue_type({sort_category::Int, 0}, module_), ptr_ty,
         llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt64Ty(ctx_));
     auto *pow_call = llvm::CallInst::Create(
-        pow_func, {base, exponent}, "hook_MINT_spow", current_block_);
+        pow_func, {base, exponent}, "hook_MINT_pow", current_block_);
     set_debug_loc(pow_call);
     return pow_call;
   }

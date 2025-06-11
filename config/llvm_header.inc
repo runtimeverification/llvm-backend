@@ -245,7 +245,7 @@ define void @take_search_step(ptr %subject) {
   ret void
 }
 
-define i256 @hook_MINT_spow(i256 %base, i256 %exp) {
+define i256 @hook_MINT_pow(i256 %base, i256 %exp) {
 entry:
   ; Special cases: if exp == 0 return 1, if base == 0 return 0
   %exp_is_zero = icmp eq i256 %exp, 0
