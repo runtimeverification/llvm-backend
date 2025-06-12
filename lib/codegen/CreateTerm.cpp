@@ -634,6 +634,30 @@ llvm::Value *create_term::create_hardcoded_hook(
     set_debug_loc(pow_call);
     return pow_call;
   }
+  // syntax Bytes ::= MInt2Bytes(MInt{256})
+  // Call the llvm function ptr @hook_MINT_MInt2Bytes(ptr %mint)
+  if (name == "MINT.mint2bytes") {
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
+    auto *func = get_or_insert_function(
+        module_, "hook_MINT_MInt2Bytes", ptr_ty,
+        getvalue_type({sort_category::Int, 0}, module_));
+    auto *call = llvm::CallInst::Create(
+        func, {in}, "hook_MINT_MInt2Bytes", current_block_);
+    set_debug_loc(call);
+    return call;
+  }
+  if (name == "MINT.bytes2mint") {
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
+    auto *func = get_or_insert_function(
+        module_, "hook_MINT_Bytes2MInt", ptr_ty,
+        in->getType());
+    auto *call = llvm::CallInst::Create(
+        func, {in}, "hook_MINT_Bytes2MInt", current_block_);
+    set_debug_loc(call);
+    return call;
+  }
   if (name == "MINT.sext") {
     llvm::Value *in = alloc_arg(pattern, 0, location_stack);
     args.push_back(in);
