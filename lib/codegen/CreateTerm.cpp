@@ -1,5 +1,5 @@
-#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/CreateStaticTerm.h"
+#include "kllvm/codegen/CreateTerm.h"
 #include "kllvm/codegen/Debug.h"
 #include "kllvm/codegen/Options.h"
 #include "kllvm/codegen/ProofEvent.h"
@@ -651,8 +651,7 @@ llvm::Value *create_term::create_hardcoded_hook(
     llvm::Value *in = alloc_arg(pattern, 0, location_stack);
     args.push_back(in);
     auto *func = get_or_insert_function(
-        module_, "hook_MINT_Bytes2MInt", ptr_ty,
-        in->getType());
+        module_, "hook_MINT_Bytes2MInt", ptr_ty, in->getType());
     auto *call = llvm::CallInst::Create(
         func, {in}, "hook_MINT_Bytes2MInt", current_block_);
     set_debug_loc(call);

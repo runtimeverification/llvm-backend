@@ -247,59 +247,55 @@ define void @take_search_step(ptr %subject) {
   ret void
 }
 
-define %string* @hook_MINT_MInt2Bytes(ptr %mint) {
+define ptr @hook_MINT_MInt2Bytes(i256 %mint) {
 entry:
-  ; Allocate a string of 32 bytes + 8 bytes for the header
-  %alloc = call noalias ptr @kore_alloc(i64 40)
-  %header_ptr = getelementptr %string, ptr %alloc, i64 0, i32 0
-  %bytes_ptr = getelementptr %string, ptr %alloc, i64 0, i32 1
+  %alloc = call ptr @kore_alloc(i64 40) ; 8 bytes for header, 32 bytes for MInt
 
-  ; Initialize the header setting the length of our MInt (32 bytes)
-  store i64 32, ptr %header_ptr
+  ; store 32 as lenght of the MInt in the fist 8 bytes
+  %bytes_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 0
+  store i64 32, ptr %bytes_ptr
 
-  ; Copy the MInt bytes into the string ptr
-  call void @memcpy(ptr %bytes_ptr, ptr %mint, i64 32)
-  
-  ; Convert to big-endian
-  ; Here I decided use shufflevector to swap the bytes in the MInt to avoid a loop
+  ; store the MInt in the next 32 bytes
+  %mint_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 8
+  %mint_vector = bitcast i256 %mint to <32 x i8>
+  %reversed_mint = shufflevector <32 x i8> %mint_vector, <32 x i8> undef, <32 x i32> 
+    <i32 31, i32 30, i32 29, i32 28, i32 27, i32 26, i32 25, i32 24,
+     i32 23, i32 22, i32 21, i32 20, i32 19, i32 18, i32 17, i32 16,
+     i32 15, i32 14, i32 13, i32 12, i32 11, i32 10, i32 9,  i32 8,
+     i32 7,  i32 6,  i32 5,  i32 4,  i32 3,  i32 2,  i32 1,  i32 0>
 
-  ; Create a vector of 32 bytes from the MInt from bytes %bytes_ptr
-  %bytes_vec_ptr = getelementptr [32 x i8], ptr %bytes_ptr, i64 0, i64 0
-    %bytes_vec = load <32 x i8>, ptr %bytes_vec_ptr
+  ; Store the reversed MInt bytes in the allocated memory
+  %reversed_mint_ptr = alloca <32 x i8>
+  store <32 x i8> %reversed_mint, ptr %reversed_mint_ptr
+  call void @memcpy(ptr %mint_ptr, ptr %reversed_mint_ptr, i64 32)
 
-  ; Perform byte swap using shufflevector
-  %swapped_vec = shufflevector <32 x i8> %bytes_vec,
-                              <32 x i8> undef, 
-                              <32 x i32> <i32 31, i32 30, i32 29, i32 28, i32 27, i32 26,
-                                          i32 25, i32 24, i32 23, i32 22, i32 21, i32 20,
-                                          i32 19, i32 18, i32 17, i32 16, i32 15, i32 14,
-                                          i32 13, i32 12, i32 11, i32 10, i32 9,  i32 8, 
-                                          i32 7, i32 6, i32 5, i32 4, i32 3, i32 2, i32 1, i32 0>
-  store <32 x i8> %swapped_vec, ptr %bytes_vec_ptr
-  %swapped_bytes = load [32 x i8], ptr %bytes_vec_ptr
-  %result = getelementptr %string, ptr %alloc, i64 0, i32 1
-  store [32 x i8] %swapped_bytes, ptr %result
-  %result_ptr = bitcast ptr %alloc to ptr
-  ret ptr %result_ptr
+  ; Return the pointer to the bytes
+  ret ptr %alloc
 }
-
-
-
 
 define i256 @hook_MINT_Bytes2MInt(ptr %bytes) {
 entry:
   %alloc = alloca [32 x i8]
   %bytes_ptr = getelementptr [32 x i8], ptr %alloc, i64 0, i64 0
-  call void @memcpy(ptr %bytes_ptr, ptr %bytes, i64 32)
-  %result0 = load i256, ptr %bytes_ptr
 
-  %bytes1 = bitcast i256 %result0 to <32 x i8>
-  %reversed = shufflevector <32 x i8> %bytes1, <32 x i8> undef, <32 x i32> 
+  ; The first 8 bytes are the used by the header, so we skip them as
+  ; we assume we will always have a 256-bit MInt
+  %bytes_contents = getelementptr i8, ptr %bytes, i64 8
+  call void @memcpy(ptr %bytes_ptr, ptr %bytes_contents, i64 32)
+
+  ; Convert the bytes to a 256-bit integer
+  %mint = load i256, ptr %bytes_ptr
+
+  ; Reverse the byte order to convert from little-endian to big-endian
+  %mint_vector = bitcast i256 %mint to <32 x i8>
+  %reversed_mint = shufflevector <32 x i8> %mint_vector, <32 x i8> undef, <32 x i32> 
     <i32 31, i32 30, i32 29, i32 28, i32 27, i32 26, i32 25, i32 24,
      i32 23, i32 22, i32 21, i32 20, i32 19, i32 18, i32 17, i32 16,
      i32 15, i32 14, i32 13, i32 12, i32 11, i32 10, i32 9,  i32 8,
      i32 7,  i32 6,  i32 5,  i32 4,  i32 3,  i32 2,  i32 1,  i32 0>
-  %result = bitcast <32 x i8> %reversed to i256
+
+  ; Convert the reversed vector back to i256
+  %result = bitcast <32 x i8> %reversed_mint to i256
   ret i256 %result
 }
 
