@@ -176,6 +176,16 @@ uint64_t hook_BYTES_get64(SortBytes b, uint64_t off) {
   return b->data[off];
 }
 
+SortInt hook_BYTES_get64_(SortBytes b, uint64_t off) {
+  if (off >= len(b)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Buffer overflow on get: off={}, len={}", off, len(b));
+  }
+  mpz_t result;
+  mpz_init_set_ui(result, (unsigned char)b->data[off]);
+  return move_int(result);
+}
+
 SortInt hook_BYTES_get(SortBytes b, SortInt off) {
   unsigned long off_long = GET_UI(off);
   if (off_long >= len(b)) {
@@ -185,6 +195,22 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
   mpz_t result;
   mpz_init_set_ui(result, (unsigned char)b->data[off_long]);
   return move_int(result);
+}
+
+SortBytes hook_BYTES_update64(SortBytes b, uint64_t off, SortInt val) {
+  copy_if_needed(b);
+
+  if (off >= len(b)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Buffer overflow on update: off={}, len={}", off, len(b));
+  }
+  unsigned long val_long = GET_UI(val);
+  if (val_long >= 256) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Not a valid value for a byte in update: {}", val_long);
+  }
+  b->data[off] = (unsigned char)val_long;
+  return b;
 }
 
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
