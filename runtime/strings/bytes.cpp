@@ -197,19 +197,18 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
   return move_int(result);
 }
 
-SortBytes hook_BYTES_update64(SortBytes b, uint64_t off, SortInt val) {
+SortBytes hook_BYTES_update64(SortBytes b, uint64_t off, uint64_t val) {
   copy_if_needed(b);
 
   if (off >= len(b)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
         "Buffer overflow on update: off={}, len={}", off, len(b));
   }
-  unsigned long val_long = GET_UI(val);
-  if (val_long >= 256) {
+  if (val >= 256) {
     KLLVM_HOOK_INVALID_ARGUMENT(
-        "Not a valid value for a byte in update: {}", val_long);
+        "Not a valid value for a byte in update: {}", val);
   }
-  b->data[off] = (unsigned char)val_long;
+  b->data[off] = (unsigned char)val;
   return b;
 }
 
