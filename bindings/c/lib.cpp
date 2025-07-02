@@ -69,6 +69,7 @@ auto managed(kore_symbol *ptr) {
 extern "C" {
 void free_all_kore_mem();
 bool hook_BYTES_mutableBytesEnabled();
+void reset_munmap_all_arenas();
 }
 
 extern "C" {
@@ -428,6 +429,10 @@ void kllvm_init(void) {
 
 void kllvm_free_all_memory(void) {
   free_all_kore_mem();
+}
+
+void kllvm_reset_munmap_all_arenas(void) {
+  reset_munmap_all_arenas();
 }
 
 bool kllvm_mutable_bytes_enabled(void) {
