@@ -42,6 +42,7 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, raw_ptr<T>, true);
 extern "C" {
 void init_static_objects(void);
 void free_all_kore_mem(void);
+void reset_munmap_all_arenas(void);
 block *take_steps(int64_t, block *);
 void *construct_initial_configuration(kore_pattern const *initial);
 }
@@ -61,6 +62,7 @@ void bind_runtime(py::module_ &m) {
 
   m.def("init_static_objects", init_static_objects);
   m.def("free_all_gc_memory", free_all_kore_mem);
+  m.def("reset_munmap_all_arenas", reset_munmap_all_arenas);
 
   // This class can't be used directly from Python; the mutability semantics
   // that we get from the Pybind wrappers make it really easy to break things.
