@@ -446,6 +446,38 @@ llvm::Value *create_term::create_hardcoded_hook(
     current_block_ = merge_block;
     return phi;
   }
+  if (name == "LIST.sizeMInt") {
+    llvm::Value *list = alloc_arg(pattern, 0, location_stack);
+    args.push_back(list);
+    auto *expected_sort = dynamic_cast<kore_composite_sort *>(
+        pattern->get_constructor()->get_sort().get());
+    unsigned expected_bits = expected_sort->get_category(definition_).bits;
+    llvm::CallInst *result = nullptr;
+    switch (expected_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_size64", llvm::Type::getInt64Ty(ctx_),
+              list->getType()),
+          {list}, "hook_LIST_size64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_size256", llvm::IntegerType::get(ctx_, 256),
+              list->getType()),
+          {list}, "hook_LIST_size256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("LIST.sizeMInt: unsupported size {}", expected_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
   if (name == "BYTES.updateMInt") {
     assert(pattern->get_arguments().size() == 3);
     llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);

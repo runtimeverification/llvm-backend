@@ -281,6 +281,16 @@ define void @take_search_step(ptr %subject) {
   ret void
 }
 
+; MInt Functions
+
+define i256 @hook_LIST_size256(ptr %l) {
+entry:
+  %len_ptr = getelementptr %list, ptr %l, i64 0, i32 0
+  %len = load i64, ptr %len_ptr
+  %len_256 = zext i64 %len to i256
+  ret i256 %len_256
+}
+
 define i256 @hook_BYTES_get256(ptr %b, i256 %off) {
 entry:
   ; Check for buffer overflow

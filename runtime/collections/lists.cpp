@@ -111,6 +111,10 @@ size_t hook_LIST_size_long(SortList list) {
   return list->size();
 }
 
+uint64_t hook_LIST_size64(SortList list) {
+  return static_cast<uint64_t>(list->size());
+}
+
 SortInt hook_LIST_size(SortList list) {
   mpz_t size;
   mpz_init_set_ui(size, list->size());
