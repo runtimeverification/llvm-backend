@@ -245,6 +245,46 @@ define void @take_search_step(ptr %subject) {
   ret void
 }
 
+define i256 @hook_MINT_pow256(i256 %base, i256 %exp) {
+entry:
+  ; Special cases: if exp == 0 return 1, if base == 0 return 0
+  %exp_is_zero = icmp eq i256 %exp, 0
+  br i1 %exp_is_zero, label %exp_zero, label %check_base
+
+exp_zero:
+  ret i256 1
+
+check_base:
+  %base_is_zero = icmp eq i256 %base, 0
+  br i1 %base_is_zero, label %base_zero, label %loop
+
+base_zero:
+  ret i256 0
+
+; Initialize result = 1, current_base = base, current_exp = exp
+loop:
+  %result = phi i256 [1, %check_base], [%next_result, %loop_body]
+  %curr_base = phi i256 [%base, %check_base], [%next_base, %loop_body]
+  %curr_exp = phi i256 [%exp, %check_base], [%next_exp, %loop_body]
+  %exp_done = icmp eq i256 %curr_exp, 0
+  br i1 %exp_done, label %done, label %loop_body
+
+loop_body:
+  ; if (curr_exp & 1) result *= curr_base
+  %exp_and_1 = and i256 %curr_exp, 1
+  %is_odd = icmp ne i256 %exp_and_1, 0
+  %mul_result = mul i256 %result, %curr_base
+  %next_result = select i1 %is_odd, i256 %mul_result, i256 %result
+  ; curr_base *= curr_base
+  %next_base = mul i256 %curr_base, %curr_base
+  ; curr_exp >>= 1
+  %next_exp = lshr i256 %curr_exp, 1
+  br label %loop
+
+done:
+  ret i256 %result
+}
+
 define i64 @get_steps() {
 entry:
   %steps = load i64, ptr @steps

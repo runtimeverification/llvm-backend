@@ -618,6 +618,49 @@ llvm::Value *create_term::create_hardcoded_hook(
     }
     return new llvm::TruncInst(in, type_out, "trunc", current_block_);
   }
+  if (name == "MINT.pow") {
+    llvm::Value *base = alloc_arg(pattern, 0, location_stack);
+    args.push_back(base);
+    llvm::Value *exponent = alloc_arg(pattern, 1, location_stack);
+    args.push_back(exponent);
+    auto *expected_sort = dynamic_cast<kore_composite_sort *>(
+        pattern->get_constructor()->get_sort().get());
+    unsigned expected_bits = expected_sort->get_category(definition_).bits;
+    auto *base_type = llvm::dyn_cast<llvm::IntegerType>(base->getType());
+    auto *exponent_type
+        = llvm::dyn_cast<llvm::IntegerType>(exponent->getType());
+    if (!base_type || !exponent_type) {
+      throw std::invalid_argument("MINT.pow: base and/or exponent argument is "
+                                  "not a machine integer type");
+    }
+    llvm::CallInst *pow_call = nullptr;
+    switch (expected_bits) {
+    case 64: {
+      pow_call = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_MINT_pow64", ptr_ty,
+              getvalue_type({sort_category::Int, 0}, module_),
+              llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt64Ty(ctx_)),
+          {base, exponent}, "hook_MINT_pow64", current_block_);
+      break;
+    }
+    case 256: {
+      pow_call = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_MINT_pow256", ptr_ty,
+              getvalue_type({sort_category::Int, 0}, module_),
+              llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt64Ty(ctx_)),
+          {base, exponent}, "hook_MINT_pow256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("MINT.pow: unsupported size {}", expected_bits));
+    }
+    }
+    set_debug_loc(pow_call);
+    return pow_call;
+  }
   if (name == "MINT.sext") {
     llvm::Value *in = alloc_arg(pattern, 0, location_stack);
     args.push_back(in);
