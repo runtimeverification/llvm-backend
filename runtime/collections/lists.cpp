@@ -140,6 +140,16 @@ list hook_LIST_make(SortInt len, SortKItem value) {
   return {length, value};
 }
 
+list hook_LIST_updateMInt(SortList list, uint64_t idx, SortKItem value) {
+  if (idx >= list->size()) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Index out of range for update64: index={}, size={}", idx,
+        list->size());
+  }
+
+  return list->set(idx, value);
+}
+
 list hook_LIST_update_long(SortList list, size_t idx, SortKItem value) {
   if (idx >= list->size()) {
     KLLVM_HOOK_INVALID_ARGUMENT(
