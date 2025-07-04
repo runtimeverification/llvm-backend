@@ -271,6 +271,33 @@ entry:
   ret ptr %alloc
 }
 
+define i256 @hook_MINT_Bytes2MInt(ptr %bytes) {
+entry:
+  %alloc = alloca [32 x i8]
+  %bytes_ptr = getelementptr [32 x i8], ptr %alloc, i64 0, i64 0
+
+  ; The first 8 bytes are the used by the header, so we skip them as
+  ; we assume we will always have a 256-bit MInt
+  %bytes_contents = getelementptr i8, ptr %bytes, i64 8
+  call void @memcpy(ptr %bytes_ptr, ptr %bytes_contents, i64 32)
+
+  ; Convert the bytes to a 256-bit integer
+  %mint = load i256, ptr %bytes_ptr
+
+  ; Reverse the byte order to convert from little-endian to big-endian
+  %mint_vector = bitcast i256 %mint to <32 x i8>
+  %reversed_mint = shufflevector <32 x i8> %mint_vector, <32 x i8> undef, <32 x i32> 
+    <i32 31, i32 30, i32 29, i32 28, i32 27, i32 26, i32 25, i32 24,
+     i32 23, i32 22, i32 21, i32 20, i32 19, i32 18, i32 17, i32 16,
+     i32 15, i32 14, i32 13, i32 12, i32 11, i32 10, i32 9,  i32 8,
+     i32 7,  i32 6,  i32 5,  i32 4,  i32 3,  i32 2,  i32 1,  i32 0>
+
+  ; Convert the reversed vector back to i256
+  %result = bitcast <32 x i8> %reversed_mint to i256
+  ret i256 %result
+}
+
+
 define i256 @hook_MINT_pow256(i256 %base, i256 %exp) {
 entry:
   ; Special cases: if exp == 0 return 1, if base == 0 return 0

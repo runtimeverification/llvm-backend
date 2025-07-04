@@ -682,6 +682,24 @@ llvm::Value *create_term::create_hardcoded_hook(
     set_debug_loc(call);
     return call;
   }
+  if (name == "MINT.bytes2MInt") {
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
+    auto *expected_sort = dynamic_cast<kore_composite_sort *>(
+        pattern->get_constructor()->get_sort().get());
+    unsigned bits = expected_sort->get_category(definition_).bits;
+    if (bits != 256) {
+      throw std::invalid_argument(
+          fmt::format("MINT.bytes2MInt: unsupported size {}", bits));
+    }
+
+    auto *func = get_or_insert_function(
+        module_, "hook_MINT_Bytes2MInt", ptr_ty, in->getType());
+    auto *call = llvm::CallInst::Create(
+        func, {in}, "hook_MINT_Bytes2MInt", current_block_);
+    set_debug_loc(call);
+    return call;
+  }
   if (name == "MINT.sext") {
     llvm::Value *in = alloc_arg(pattern, 0, location_stack);
     args.push_back(in);
