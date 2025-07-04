@@ -245,6 +245,32 @@ define void @take_search_step(ptr %subject) {
   ret void
 }
 
+define ptr @hook_MINT_MInt2Bytes(i256 %mint) {
+entry:
+  %alloc = call ptr @kore_alloc(i64 40) ; 8 bytes for header, 32 bytes for MInt
+
+  ; store 32 as lenght of the MInt in the fist 8 bytes
+  %bytes_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 0
+  store i64 32, ptr %bytes_ptr
+
+  ; store the MInt in the next 32 bytes
+  %mint_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 8
+  %mint_vector = bitcast i256 %mint to <32 x i8>
+  %reversed_mint = shufflevector <32 x i8> %mint_vector, <32 x i8> undef, <32 x i32> 
+    <i32 31, i32 30, i32 29, i32 28, i32 27, i32 26, i32 25, i32 24,
+     i32 23, i32 22, i32 21, i32 20, i32 19, i32 18, i32 17, i32 16,
+     i32 15, i32 14, i32 13, i32 12, i32 11, i32 10, i32 9,  i32 8,
+     i32 7,  i32 6,  i32 5,  i32 4,  i32 3,  i32 2,  i32 1,  i32 0>
+
+  ; Store the reversed MInt bytes in the allocated memory
+  %reversed_mint_ptr = alloca <32 x i8>
+  store <32 x i8> %reversed_mint, ptr %reversed_mint_ptr
+  call void @memcpy(ptr %mint_ptr, ptr %reversed_mint_ptr, i64 32)
+
+  ; Return the pointer to the bytes
+  ret ptr %alloc
+}
+
 define i256 @hook_MINT_pow256(i256 %base, i256 %exp) {
 entry:
   ; Special cases: if exp == 0 return 1, if base == 0 return 0

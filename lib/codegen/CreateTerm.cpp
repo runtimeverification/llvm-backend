@@ -661,6 +661,27 @@ llvm::Value *create_term::create_hardcoded_hook(
     set_debug_loc(pow_call);
     return pow_call;
   }
+  if (name == "MINT.MInt2bytes") {
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
+    auto *in_type = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    if (!in_type) {
+      throw std::invalid_argument(
+          "MINT.MInt2bytes: input argument is not a machine integer type");
+    }
+    unsigned int_bits = in_type->getBitWidth();
+    if (int_bits != 256) {
+      throw std::invalid_argument(
+          fmt::format("MINT.mint2bytes: unsupported size {}", int_bits));
+    }
+    auto *func = get_or_insert_function(
+        module_, "hook_MINT_MInt2Bytes", ptr_ty,
+        getvalue_type({sort_category::Int, 0}, module_));
+    auto *call = llvm::CallInst::Create(
+        func, {in}, "hook_MINT_MInt2Bytes", current_block_);
+    set_debug_loc(call);
+    return call;
+  }
   if (name == "MINT.sext") {
     llvm::Value *in = alloc_arg(pattern, 0, location_stack);
     args.push_back(in);
