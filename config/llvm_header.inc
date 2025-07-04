@@ -88,6 +88,8 @@ declare void @error_on_start_substr(i64, i64)
 declare void @error_on_end_substr(ptr, i64)
 declare void @interger_overflow(i64)
 declare void @buffer_overflow_replace_at(i64, i64, i64)
+declare void @buffer_overflow_update(i64, i64)
+declare void @error_on_update(i64)
 declare i1 @hook_BYTES_mutableBytesEnabled()
 
 define ptr @copy_if_needed_in_llvm(ptr %b) {
@@ -520,6 +522,43 @@ entry:
   ; Convert the reversed vector back to i256
   %result = bitcast <32 x i8> %reversed_mint to i256
   ret i256 %result
+}
+
+define ptr @hook_BYTES_update256(ptr %b, i256 %index, i256 %value) {
+entry:
+  call ptr @copy_if_needed_in_llvm(ptr %b)
+
+  %hdr = load i64, ptr %b
+  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len_256 = zext i64 %len to i256
+
+  %index_uge_len = icmp uge i256 %index, %len_256
+  br i1 %index_uge_len, label %error, label %update_value
+
+error:
+  %index_trunc = trunc i256 %index to i64
+  %len_trunc = trunc i256 %len_256 to i64
+  call void @buffer_overflow_update(i64 %index_trunc, i64 %len_trunc)
+  unreachable
+
+update_value:
+  %value_ge_255 = icmp ugt i256 %value, 255
+  br i1 %value_ge_255, label %error_value, label %set_value
+
+error_value:
+  %value_trunc = trunc i256 %value to i64
+  call void @error_on_update(i64 %value_trunc)
+  unreachable
+
+set_value:
+  %data_ptr = getelementptr i8, ptr %b, i64 8
+  %index_i64 = trunc i256 %index to i64
+  %byte_ptr = getelementptr i8, ptr %data_ptr, i64 %index_i64
+  %value_i8 = trunc i256 %value to i8
+  store i8 %value_i8, ptr %byte_ptr
+
+  ; Return the modified buffer
+  ret ptr %b
 }
 
 

@@ -74,6 +74,15 @@ void buffer_overflow_replace_at(
       dest_len, src_len);
 }
 
+void buffer_overflow_update(uint64_t len, uint64_t off) {
+  KLLVM_HOOK_INVALID_ARGUMENT(
+      "Buffer overflow on update: off={}, len={}", off, len);
+}
+
+void error_on_update(uint64_t val) {
+  KLLVM_HOOK_INVALID_ARGUMENT(
+      "Not a valid value for a byte in update: {}", val);
+}
 
 // syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness)
 SortInt hook_BYTES_bytes2int(
@@ -205,19 +214,31 @@ uint64_t hook_BYTES_get64(SortBytes b, uint64_t off) {
   return (unsigned char)b->data[off];
 }
 
+SortBytes hook_BYTES_update64(SortBytes b, uint64_t off, uint64_t val) {
+  copy_if_needed(b);
+
+  if (off >= len(b)) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Buffer overflow on update: off={}, len={}", off, len(b));
+  }
+  if (val >= 256) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Not a valid value for a byte in update: {}", val);
+  }
+  b->data[off] = (unsigned char)val;
+  return b;
+}
 
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
   copy_if_needed(b);
 
   unsigned long off_long = GET_UI(off);
   if (off_long >= len(b)) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Buffer overflow on update: off={}, len={}", off_long, len(b));
+    buffer_overflow_update(off_long, len(b));
   }
   unsigned long val_long = GET_UI(val);
   if (val_long >= 256) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Not a valid value for a byte in update: {}", val_long);
+    error_on_update(val_long);
   }
   b->data[off_long] = (unsigned char)val_long;
   return b;

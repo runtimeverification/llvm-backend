@@ -446,6 +446,47 @@ llvm::Value *create_term::create_hardcoded_hook(
     current_block_ = merge_block;
     return phi;
   }
+  if (name == "BYTES.updateMInt") {
+    assert(pattern->get_arguments().size() == 3);
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(index);
+    llvm::Value *value = alloc_arg(pattern, 2, location_stack);
+    args.push_back(value);
+    auto *index_type = llvm::dyn_cast<llvm::IntegerType>(index->getType());
+    auto *value_type = llvm::dyn_cast<llvm::IntegerType>(value->getType());
+    if (!index_type || !value_type) {
+      throw std::invalid_argument("BYTES.updateMInt: index and/or value "
+                                  "argument is not a machine integer type");
+    }
+    unsigned index_bits = index_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (index_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_update64", ptr_ty, bytes->getType(),
+              index_type, value_type),
+          {bytes, index, value}, "hook_BYTES_update64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_update256", ptr_ty, bytes->getType(),
+              index_type, value_type),
+          {bytes, index, value}, "hook_BYTES_update256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.updateMInt: unsupported size {}", index_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
   if (name == "BYTES.replaceAtMInt") {
     llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
     args.push_back(bytes);
