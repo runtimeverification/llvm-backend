@@ -446,6 +446,48 @@ llvm::Value *create_term::create_hardcoded_hook(
     current_block_ = merge_block;
     return phi;
   }
+
+  if (name == "LIST.getMInt") {
+    llvm::Value *list = alloc_arg(pattern, 0, location_stack);
+    args.push_back(list);
+    llvm::Value *index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(index);
+    auto *index_type = llvm::dyn_cast<llvm::IntegerType>(index->getType());
+    if (!index_type) {
+      throw std::invalid_argument(
+          "LIST.getMInt: index argument is not a machine integer type");
+    }
+    unsigned index_bits = index_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (index_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_get64", ptr_ty, list->getType(), index_type),
+          {list, index}, "hook_LIST_get64", current_block_);
+      break;
+    }
+    case 256: {
+      // As immer does not support 256-bit integers, we need to truncate
+      // the index to 64 bits.
+      auto *truncated_index = llvm::CastInst::CreateTruncOrBitCast(
+          index, llvm::Type::getInt64Ty(ctx_), "truncated_index",
+          current_block_);
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_get64", ptr_ty, list->getType(),
+              llvm::Type::getInt64Ty(ctx_)),
+          {list, truncated_index}, "hook_LIST_get64", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("LIST.getMInt: unsupported size {}", index_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
   if (name == "LIST.sizeMInt") {
     llvm::Value *list = alloc_arg(pattern, 0, location_stack);
     args.push_back(list);
