@@ -81,6 +81,36 @@ declare void @print_configuration(ptr, ptr)
 ; finish_rewriting.ll
 
 declare i64 @__gmpz_get_ui(ptr)
+declare ptr @kore_alloc(i64)
+declare void @memcpy(ptr, ptr, i64)
+declare void @interger_overflow(i64)
+declare void @buffer_overflow_replace_at(i64, i64, i64)
+declare i1 @hook_BYTES_mutableBytesEnabled()
+
+define ptr @copy_if_needed_in_llvm(ptr %b) {
+entry:
+  %mutable_bytes_enabled = call i1 @hook_BYTES_mutableBytesEnabled()
+  br i1 %mutable_bytes_enabled, label %return_b, label %copy_needed
+
+return_b:
+  ret ptr %b
+
+copy_needed:
+  %hdr = load i64, ptr %b
+  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len_bytes = mul i64 %len, 8 ; 8 bytes per byte
+  %alloc_size = add i64 %len_bytes, 40 ; 8 bytes for header, rest for data
+  %alloc = call ptr @kore_alloc(i64 %alloc_size)
+
+  store i64 %len, ptr %alloc
+
+  %data_ptr = getelementptr i8, ptr %alloc, i64 8
+  %b_data_ptr = getelementptr i8, ptr %b, i64 8
+
+  call void @memcpy(ptr %data_ptr, ptr %b_data_ptr, i64 %len_bytes)
+
+  ret ptr %data_ptr
+}
 
 @exit_int_0 = constant %mpz { i32 0, i32 0, ptr getelementptr inbounds ([0 x i64], ptr @exit_int_0_limbs, i32 0, i32 0) }
 @exit_int_0_limbs = constant [0 x i64] zeroinitializer
@@ -177,7 +207,8 @@ declare noalias ptr @kore_alloc_integer(i64)
 
 ; string_equal.ll
 
-declare i32 @memcmp(ptr, ptr, i64);
+declare i32 @memcmp(ptr, ptr, i64)
+declare void @llvm.memset.p0.i64(ptr, i8, i64, i1)
 
 define i1 @string_equal(ptr %str1, ptr %str2, i64 %len1, i64 %len2) {
   %len_eq = icmp eq i64 %len1, %len2
@@ -337,6 +368,40 @@ allocate:
   ret ptr %result
 }
 
+define ptr @hook_BYTES_replaceAt256(ptr %dest, i256 %index, ptr %src) {
+entry:
+  call ptr @copy_if_needed_in_llvm(ptr %dest)
+ 
+  %dest_hdr = load i64, ptr %dest
+  %dest_len = and i64 %dest_hdr, 1099511627775 ; @LENGTH_MASK@
+  %dest_len_256 = zext i64 %dest_len to i256
+
+  %src_hdr = load i64, ptr %src
+  %src_len = and i64 %src_hdr, 1099511627775 ; @LENGTH_MASK@
+  %src_len_256 = zext i64 %src_len to i256
+
+  %index_sum_dest_src = add i256 %index, %src_len_256
+  %index_gt_dest_len = icmp ugt i256 %index_sum_dest_src, %dest_len_256
+  
+  br i1 %index_gt_dest_len, label %error, label %copy_data
+
+error:
+  %index_trunc = trunc i256 %index to i64
+  %dest_len_trunc = trunc i256 %dest_len_256 to i64
+  %src_len_trunc = trunc i256 %src_len_256 to i64
+  call void @buffer_overflow_replace_at(i64 %index_trunc, i64 %dest_len_trunc, i64 %src_len_trunc)
+  unreachable
+
+copy_data:
+  %data_ptr = getelementptr i8, ptr %dest, i64 8
+  %src_data_ptr = getelementptr i8, ptr %src, i64 8
+  %index_i64 = trunc i256 %index to i64
+  %dest_offset_ptr = getelementptr i8, ptr %data_ptr, i64 %index_i64
+  call void @memcpy(ptr %dest_offset_ptr, ptr %src_data_ptr, i64 %src_len)
+
+  ; Return the modified destination
+  ret ptr %dest
+}
 
 define ptr @hook_MINT_MInt2Bytes(i256 %mint) {
 entry:

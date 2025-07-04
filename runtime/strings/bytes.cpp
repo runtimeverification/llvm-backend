@@ -43,6 +43,18 @@ uint64_t tag_unsigned() {
   return tag;
 }
 
+void interger_overflow(uint64_t v) {
+  KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
+}
+
+void buffer_overflow_replace_at(
+    uint64_t start, uint64_t dest_len, uint64_t src_len) {
+  KLLVM_HOOK_INVALID_ARGUMENT(
+      "Buffer overflow on replaceAt: start={}, dest_len={}, src_len={}", start,
+      dest_len, src_len);
+}
+
+
 // syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness)
 SortInt hook_BYTES_bytes2int(
     SortBytes b, SortEndianness endianness_ptr, SortSignedness signedness_ptr) {
@@ -170,6 +182,16 @@ SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
         "Not a valid value for a byte in update: {}", val_long);
   }
   b->data[off_long] = (unsigned char)val_long;
+  return b;
+}
+
+SortBytes hook_BYTES_replaceAt64(SortBytes b, uint64_t start, SortBytes b2) {
+  copy_if_needed(b);
+
+  if (start + len(b2) > len(b)) {
+    buffer_overflow_replace_at(start, len(b), len(b2));
+  }
+  memcpy(b->data + start, b2->data, len(b2));
   return b;
 }
 

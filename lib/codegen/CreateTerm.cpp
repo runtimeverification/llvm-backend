@@ -446,6 +446,45 @@ llvm::Value *create_term::create_hardcoded_hook(
     current_block_ = merge_block;
     return phi;
   }
+  if (name == "BYTES.replaceAtMInt") {
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(index);
+    llvm::Value *value = alloc_arg(pattern, 2, location_stack);
+    args.push_back(value);
+    auto *index_type = llvm::dyn_cast<llvm::IntegerType>(index->getType());
+    if (!index_type) {
+      throw std::invalid_argument(
+          "BYTES.replaceAtMInt: index argument is not a machine integer type");
+    }
+    unsigned index_bits = index_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (index_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_replaceAt64", ptr_ty, bytes->getType(),
+              index_type, value->getType()),
+          {bytes, index, value}, "hook_BYTES_replaceAt64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_replaceAt256", ptr_ty, bytes->getType(),
+              index_type, value->getType()),
+          {bytes, index, value}, "hook_BYTES_replaceAt256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.replaceAtMInt: unsupported size {}", index_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
   if (name == "BYTES.padRightMInt") {
     assert(pattern->get_arguments().size() == 3);
     llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
