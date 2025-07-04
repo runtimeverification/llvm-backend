@@ -43,6 +43,20 @@ uint64_t tag_unsigned() {
   return tag;
 }
 
+void error_on_start_substr(uint64_t start, uint64_t end) {
+  KLLVM_HOOK_INVALID_ARGUMENT(
+      "Invalid string slice: Requested start index {} is greater than "
+      "requested end index {}.",
+      start, end);
+}
+
+void error_on_end_substr(SortBytes b, uint64_t end) {
+  KLLVM_HOOK_INVALID_ARGUMENT(
+      "Invalid string slice: Requested end index {} is greater "
+      "than string length {}",
+      end, len(b));
+}
+
 void interger_overflow(uint64_t v) {
   KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
 }
@@ -137,23 +151,33 @@ SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   uint64_t ustart = GET_UI(start);
   uint64_t uend = GET_UI(end);
   if (uend < ustart) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Invalid string slice: Requested start index {} is greater than "
-        "requested end index {}.",
-        ustart, uend);
+    error_on_start_substr(ustart, uend);
   }
   uint64_t input_len = len(input);
   if (uend > input_len) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Invalid string slice for string: Requested end index {} is greater "
-        "than string length {}",
-        uend, input_len);
+    error_on_end_substr(input, input_len);
   }
   uint64_t len = uend - ustart;
   auto *ret = static_cast<string *>(
       kore_alloc_token(sizeof(string) + sizeof(KCHAR) * len));
   init_with_len(ret, len);
   memcpy(&(ret->data), &(input->data[ustart]), len * sizeof(KCHAR));
+  return ret;
+}
+
+SortBytes hook_BYTES_substr64(SortBytes input, uint64_t start, uint64_t end) {
+  if (end < start) {
+    error_on_start_substr(start, end);
+  }
+  uint64_t input_len = len(input);
+  if (end > input_len) {
+    error_on_end_substr(input, end);
+  }
+  uint64_t len = end - start;
+  auto *ret = static_cast<string *>(
+      kore_alloc_token(sizeof(string) + sizeof(KCHAR) * len));
+  init_with_len(ret, len);
+  memcpy(&(ret->data), &(input->data[start]), len * sizeof(KCHAR));
   return ret;
 }
 

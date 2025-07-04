@@ -599,6 +599,50 @@ llvm::Value *create_term::create_hardcoded_hook(
     set_debug_loc(result);
     return result;
   }
+  if (name == "BYTES.substrMInt") {
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *start_index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(start_index);
+    llvm::Value *end_index = alloc_arg(pattern, 2, location_stack);
+    args.push_back(end_index);
+    auto *start_type
+        = llvm::dyn_cast<llvm::IntegerType>(start_index->getType());
+    auto *end_type = llvm::dyn_cast<llvm::IntegerType>(end_index->getType());
+    if (!start_type || !end_type) {
+      throw std::invalid_argument(
+          "BYTES.substrMInt: startIndex and/or endIndex argument is "
+          "not a machine integer type");
+    }
+    unsigned start_bits = start_type->getBitWidth();
+    llvm::CallInst *ret = nullptr;
+    switch (start_bits) {
+    case 64: {
+      auto *func = get_or_insert_function(
+          module_, "hook_BYTES_substr64", ptr_ty, bytes->getType(),
+          llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt64Ty(ctx_));
+      ret = llvm::CallInst::Create(
+          func, {bytes, start_index, end_index}, "hook_BYTES_substr64",
+          current_block_);
+      break;
+    }
+    case 256: {
+      auto *func = get_or_insert_function(
+          module_, "hook_BYTES_substr256", ptr_ty, bytes->getType(), start_type,
+          end_type);
+      ret = llvm::CallInst::Create(
+          func, {bytes, start_index, end_index}, "hook_BYTES_substr256",
+          current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.substrMInt: unsupported size {}", start_bits));
+    }
+    }
+    set_debug_loc(ret);
+    return ret;
+  }
   if (name == "MINT.uvalue") {
     llvm::Value *mint = alloc_arg(pattern, 0, location_stack);
     args.push_back(mint);

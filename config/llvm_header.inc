@@ -83,6 +83,8 @@ declare void @print_configuration(ptr, ptr)
 declare i64 @__gmpz_get_ui(ptr)
 declare ptr @kore_alloc(i64)
 declare void @memcpy(ptr, ptr, i64)
+declare void @error_on_start_substr(i64, i64)
+declare void @error_on_end_substr(ptr, i64)
 declare void @interger_overflow(i64)
 declare void @buffer_overflow_replace_at(i64, i64, i64)
 declare i1 @hook_BYTES_mutableBytesEnabled()
@@ -274,6 +276,46 @@ define void @take_search_step(ptr %subject) {
   store i64 -1, ptr @depth
   call tailcc void @step_all(ptr %subject)
   ret void
+}
+define ptr @hook_BYTES_substr256(ptr %input, i256 %start, i256 %end) {
+entry:
+  %end_lt_start = icmp ult i256 %end, %start
+  br i1 %end_lt_start, label %error, label %check_length
+error:
+  %end_trunc = trunc i256 %end to i64
+  %start_trunc = trunc i256 %start to i64
+  call void @error_on_start_substr(i64 %start_trunc, i64 %end_trunc)
+  unreachable
+check_length:
+  %input_hdr = load i64, ptr %input
+  %input_len = and i64 %input_hdr, 1099511627775 ; @LENGTH_MASK@
+  %input_len_256 = zext i64 %input_len to i256
+  %end_gt_input_len = icmp ugt i256 %end, %input_len_256
+  br i1 %end_gt_input_len, label %error_length, label %calculate_length
+error_length:
+  %end_trunc2 = trunc i256 %end to i64
+  call void @error_on_end_substr(ptr %input, i64 %end_trunc2)
+  unreachable
+calculate_length:
+  %len = sub i256 %end, %start
+  
+  %bytes_len = mul i256 %len, 8
+  %alloc_size = add i256 40, %bytes_len
+  %alloc_size_i64 = trunc i256 %alloc_size to i64
+  %alloc = call ptr @kore_alloc(i64 %alloc_size_i64)
+
+  %len_i64 = trunc i256 %len to i64
+  %bytes_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 0
+  store i64 %len_i64, ptr %bytes_ptr
+
+  %data_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 8
+  %input_data_ptr = getelementptr %string, ptr %input, i256 0, i32 1, i256 0
+  %start_ptr = getelementptr i8, ptr %input_data_ptr, i256 %start
+  %end_ptr = getelementptr i8, ptr %input_data_ptr, i256 %end
+  call void @memcpy(ptr %data_ptr, ptr %start_ptr, i64 %len_i64)
+
+  %result = bitcast ptr %alloc to ptr
+  ret ptr %result
 }
 
 define i256 @hook_BYTES_length256(ptr %b) {
