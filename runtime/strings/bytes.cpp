@@ -43,6 +43,12 @@ uint64_t tag_unsigned() {
   return tag;
 }
 
+// Error handling for get functions defined in llvm_header.inc
+void error_on_get(uint64_t off, uint64_t len_b) {
+  KLLVM_HOOK_INVALID_ARGUMENT(
+      "Buffer overflow on get: off={}, len={}", off, len_b);
+}
+
 void error_on_start_substr(uint64_t start, uint64_t end) {
   KLLVM_HOOK_INVALID_ARGUMENT(
       "Invalid string slice: Requested start index {} is greater than "
@@ -191,6 +197,14 @@ SortInt hook_BYTES_get(SortBytes b, SortInt off) {
   mpz_init_set_ui(result, (unsigned char)b->data[off_long]);
   return move_int(result);
 }
+
+uint64_t hook_BYTES_get64(SortBytes b, uint64_t off) {
+  if (off >= len(b)) {
+    error_on_get(off, len(b));
+  }
+  return (unsigned char)b->data[off];
+}
+
 
 SortBytes hook_BYTES_update(SortBytes b, SortInt off, SortInt val) {
   copy_if_needed(b);

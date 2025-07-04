@@ -643,6 +643,43 @@ llvm::Value *create_term::create_hardcoded_hook(
     set_debug_loc(ret);
     return ret;
   }
+  if (name == "BYTES.getMInt") {
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *off = alloc_arg(pattern, 1, location_stack);
+    args.push_back(off);
+    auto *off_type = llvm::dyn_cast<llvm::IntegerType>(off->getType());
+    if (!off_type) {
+      throw std::invalid_argument(
+          "BYTES.getMInt: offset argument is not a machine integer type");
+    }
+    unsigned off_bits = off_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (off_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_get64", llvm::IntegerType::get(ctx_, 64),
+              bytes->getType(), llvm::Type::getInt64Ty(ctx_)),
+          {bytes, off}, "hook_BYTES_get64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_get256", llvm::IntegerType::get(ctx_, 256),
+              bytes->getType(), llvm::IntegerType::get(ctx_, 256)),
+          {bytes, off}, "hook_BYTES_get256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.getMInt: unsupported size {}", off_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
   if (name == "MINT.uvalue") {
     llvm::Value *mint = alloc_arg(pattern, 0, location_stack);
     args.push_back(mint);

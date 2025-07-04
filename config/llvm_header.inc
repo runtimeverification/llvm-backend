@@ -83,6 +83,7 @@ declare void @print_configuration(ptr, ptr)
 declare i64 @__gmpz_get_ui(ptr)
 declare ptr @kore_alloc(i64)
 declare void @memcpy(ptr, ptr, i64)
+declare void @error_on_get(i64, i64)
 declare void @error_on_start_substr(i64, i64)
 declare void @error_on_end_substr(ptr, i64)
 declare void @interger_overflow(i64)
@@ -277,6 +278,30 @@ define void @take_search_step(ptr %subject) {
   call tailcc void @step_all(ptr %subject)
   ret void
 }
+
+define i256 @hook_BYTES_get256(ptr %b, i256 %off) {
+entry:
+  ; Check for buffer overflow
+  %hdr = load i64, ptr %b
+  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len_256 = zext i64 %len to i256
+  %off_lt_len = icmp ult i256 %off, %len_256
+  br i1 %off_lt_len, label %valid_off, label %overflow
+overflow:
+  %off_trunc = trunc i256 %off to i64
+  call void @error_on_get(i64 %off_trunc, i64 %len)
+  unreachable
+valid_off:
+  ; Load the byte at the specified offset
+  %data_ptr = getelementptr %string, ptr %b, i256 0, i32 1, i256 0
+  %byte_ptr = getelementptr i8, ptr %data_ptr, i256 %off
+  %byte_value = load i8, ptr %byte_ptr
+
+  ; Return the byte value as an i256
+  %result = zext i8 %byte_value to i256
+  ret i256 %result
+}
+
 define ptr @hook_BYTES_substr256(ptr %input, i256 %start, i256 %end) {
 entry:
   %end_lt_start = icmp ult i256 %end, %start
