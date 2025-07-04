@@ -256,6 +256,21 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
   return result;
 }
 
+SortBytes hook_BYTES_padLeft64(SortBytes b, uint64_t length, uint64_t v) {
+  unsigned long ulen = length;
+  if (ulen <= len(b)) {
+    return b;
+  }
+  if (v > 255) {
+    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
+  }
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + ulen));
+  init_with_len(result, ulen);
+  memset(result->data, v, ulen - len(b));
+  memcpy(result->data + ulen - len(b), b->data, len(b));
+  return result;
+}
+
 SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
   unsigned long ulen = GET_UI(length);
   if (ulen <= len(b)) {

@@ -487,6 +487,47 @@ llvm::Value *create_term::create_hardcoded_hook(
     set_debug_loc(result);
     return result;
   }
+  if (name == "BYTES.padLeftMInt") {
+    assert(pattern->get_arguments().size() == 3);
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *length = alloc_arg(pattern, 1, location_stack);
+    args.push_back(length);
+    llvm::Value *value = alloc_arg(pattern, 2, location_stack);
+    args.push_back(value);
+    auto *length_type = llvm::dyn_cast<llvm::IntegerType>(length->getType());
+    auto *value_type = llvm::dyn_cast<llvm::IntegerType>(value->getType());
+    if (!length_type || !value_type) {
+      throw std::invalid_argument("BYTES.padLeftMInt: length and/or value "
+                                  "argument is not a machine integer type");
+    }
+    unsigned value_bits = value_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (value_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_padLeft64", ptr_ty, bytes->getType(),
+              length_type, value_type),
+          {bytes, length, value}, "hook_BYTES_padLeft64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_padLeft256", ptr_ty, bytes->getType(),
+              length_type, value_type),
+          {bytes, length, value}, "hook_BYTES_padLeft256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.padLeftMInt: unsupported size {}", value_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
   if (name == "BYTES.lengthMInt") {
     llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
     args.push_back(bytes);

@@ -295,6 +295,48 @@ allocate:
   ret ptr %result
 }
 
+define ptr @hook_BYTES_padLeft256(ptr %b, i256 %length, i256 %v) {
+entry:
+  %hdr = load i64, ptr %b
+  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len_256 = zext i64 %len to i256
+  %length_gt_len = icmp ugt i256 %length, %len_256
+  br i1 %length_gt_len, label %pad, label %return_b
+
+return_b:
+  ret ptr %b
+
+pad:
+  %v_gt_255 = icmp ugt i256 %v, 255
+  br i1 %v_gt_255, label %error, label %allocate
+
+error:
+  %v_trunc = trunc i256 %v to i64
+  call void @interger_overflow(i64 %v_trunc)
+  unreachable
+
+allocate:
+  %bytes_len = mul i256 %length, 8
+  %alloc_size = add i256 %bytes_len, 40 ; 8 bytes for header, rest for data
+  %alloc_size_i64 = trunc i256 %alloc_size to i64
+  %alloc = call ptr @kore_alloc(i64 %alloc_size_i64)
+
+  %length_i64 = trunc i256 %length to i64
+  store i64 %length_i64, ptr %alloc
+  %data_ptr = getelementptr i8, ptr %alloc, i64 8
+  %b_data_ptr = getelementptr i8, ptr %b, i64 8
+  %remaining_bytes = sub i64 %length_i64, %len
+  %fill_ptr = getelementptr i8, ptr %data_ptr, i64 0
+  %v_i8 = trunc i256 %v to i8
+  call void @llvm.memset.p0.i64(ptr %fill_ptr, i8 %v_i8, i64 %remaining_bytes, i1 false)
+
+  %b_data_end_ptr = getelementptr i8, ptr %data_ptr, i64 %remaining_bytes
+  call void @memcpy(ptr %b_data_end_ptr, ptr %b_data_ptr, i64 %len)
+
+  %result = bitcast ptr %alloc to ptr
+  ret ptr %result
+}
+
 
 define ptr @hook_MINT_MInt2Bytes(i256 %mint) {
 entry:
