@@ -215,6 +215,10 @@ hook_BYTES_memset(SortBytes b, SortInt start, SortInt count, SortInt value) {
   return b;
 }
 
+uint64_t hook_BYTES_length64(SortBytes a) {
+  return len(a);
+}
+
 SortInt hook_BYTES_length(SortBytes a) {
   mpz_t result;
   mpz_init_set_ui(result, len(a));

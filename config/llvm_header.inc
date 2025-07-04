@@ -245,6 +245,15 @@ define void @take_search_step(ptr %subject) {
   ret void
 }
 
+define i256 @hook_BYTES_length256(ptr %b) {
+entry:
+  %hdr = load i64, ptr %b
+  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len_256 = zext i64 %len to i256
+  ret i256 %len_256
+}
+
+
 define ptr @hook_MINT_MInt2Bytes(i256 %mint) {
 entry:
   %alloc = call ptr @kore_alloc(i64 40) ; 8 bytes for header, 32 bytes for MInt
