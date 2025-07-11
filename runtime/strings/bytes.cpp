@@ -63,7 +63,7 @@ void error_on_end_substr(SortBytes b, uint64_t end) {
       end, len(b));
 }
 
-void interger_overflow(uint64_t v) {
+void integer_overflow(uint64_t v) {
   KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
 }
 
@@ -311,7 +311,7 @@ SortBytes hook_BYTES_padRight64(SortBytes b, uint64_t length, uint64_t v) {
     return b;
   }
   if (v > 255) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
+    integer_overflow(v);
   }
   auto *result
       = static_cast<string *>(kore_alloc_token(sizeof(string) + length));
@@ -328,7 +328,7 @@ SortBytes hook_BYTES_padRight(SortBytes b, SortInt length, SortInt v) {
   }
   unsigned long uv = GET_UI(v);
   if (uv > 255) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
+    integer_overflow(uv);
   }
   auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + ulen));
   init_with_len(result, ulen);
@@ -343,7 +343,7 @@ SortBytes hook_BYTES_padLeft64(SortBytes b, uint64_t length, uint64_t v) {
     return b;
   }
   if (v > 255) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", v);
+    integer_overflow(v);
   }
   auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + ulen));
   init_with_len(result, ulen);
@@ -359,7 +359,7 @@ SortBytes hook_BYTES_padLeft(SortBytes b, SortInt length, SortInt v) {
   }
   unsigned long uv = GET_UI(v);
   if (uv > 255) {
-    KLLVM_HOOK_INVALID_ARGUMENT("Integer overflow on value: {}", uv);
+    integer_overflow(uv);
   }
   auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + ulen));
   init_with_len(result, ulen);

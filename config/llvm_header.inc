@@ -86,7 +86,7 @@ declare void @memcpy(ptr, ptr, i64)
 declare void @error_on_get(i64, i64)
 declare void @error_on_start_substr(i64, i64)
 declare void @error_on_end_substr(ptr, i64)
-declare void @interger_overflow(i64)
+declare void @integer_overflow(i64)
 declare void @buffer_overflow_replace_at(i64, i64, i64)
 declare void @buffer_overflow_update(i64, i64)
 declare void @error_on_update(i64)
@@ -380,7 +380,7 @@ pad:
 
 error:
   %v_trunc = trunc i256 %v to i64
-  call void @interger_overflow(i64 %v_trunc)
+  call void @integer_overflow(i64 %v_trunc)
   unreachable
   
 allocate:
@@ -422,7 +422,7 @@ pad:
 
 error:
   %v_trunc = trunc i256 %v to i64
-  call void @interger_overflow(i64 %v_trunc)
+  call void @integer_overflow(i64 %v_trunc)
   unreachable
 
 allocate:
