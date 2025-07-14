@@ -446,6 +446,355 @@ llvm::Value *create_term::create_hardcoded_hook(
     current_block_ = merge_block;
     return phi;
   }
+
+  if (name == "LIST.getMInt") {
+    llvm::Value *list = alloc_arg(pattern, 0, location_stack);
+    args.push_back(list);
+    llvm::Value *index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(index);
+    auto *index_type = llvm::dyn_cast<llvm::IntegerType>(index->getType());
+    if (!index_type) {
+      throw std::invalid_argument(
+          "LIST.getMInt: index argument is not a machine integer type");
+    }
+    unsigned index_bits = index_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (index_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_get64", ptr_ty, list->getType(), index_type),
+          {list, index}, "hook_LIST_get64", current_block_);
+      break;
+    }
+    case 256: {
+      // As immer does not support 256-bit integers, we need to truncate
+      // the index to 64 bits.
+      auto *truncated_index = llvm::CastInst::CreateTruncOrBitCast(
+          index, llvm::Type::getInt64Ty(ctx_), "truncated_index",
+          current_block_);
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_get64", ptr_ty, list->getType(),
+              llvm::Type::getInt64Ty(ctx_)),
+          {list, truncated_index}, "hook_LIST_get64", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("LIST.getMInt: unsupported size {}", index_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
+  if (name == "LIST.sizeMInt") {
+    llvm::Value *list = alloc_arg(pattern, 0, location_stack);
+    args.push_back(list);
+    auto *expected_sort = dynamic_cast<kore_composite_sort *>(
+        pattern->get_constructor()->get_sort().get());
+    unsigned expected_bits = expected_sort->get_category(definition_).bits;
+    llvm::CallInst *result = nullptr;
+    switch (expected_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_size64", llvm::Type::getInt64Ty(ctx_),
+              list->getType()),
+          {list}, "hook_LIST_size64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_LIST_size256", llvm::IntegerType::get(ctx_, 256),
+              list->getType()),
+          {list}, "hook_LIST_size256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("LIST.sizeMInt: unsupported size {}", expected_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
+  if (name == "BYTES.updateMInt") {
+    assert(pattern->get_arguments().size() == 3);
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(index);
+    llvm::Value *value = alloc_arg(pattern, 2, location_stack);
+    args.push_back(value);
+    auto *index_type = llvm::dyn_cast<llvm::IntegerType>(index->getType());
+    auto *value_type = llvm::dyn_cast<llvm::IntegerType>(value->getType());
+    if (!index_type || !value_type) {
+      throw std::invalid_argument("BYTES.updateMInt: index and/or value "
+                                  "argument is not a machine integer type");
+    }
+    unsigned index_bits = index_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (index_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_update64", ptr_ty, bytes->getType(),
+              index_type, value_type),
+          {bytes, index, value}, "hook_BYTES_update64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_update256", ptr_ty, bytes->getType(),
+              index_type, value_type),
+          {bytes, index, value}, "hook_BYTES_update256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.updateMInt: unsupported size {}", index_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
+  if (name == "BYTES.replaceAtMInt") {
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(index);
+    llvm::Value *value = alloc_arg(pattern, 2, location_stack);
+    args.push_back(value);
+    auto *index_type = llvm::dyn_cast<llvm::IntegerType>(index->getType());
+    if (!index_type) {
+      throw std::invalid_argument(
+          "BYTES.replaceAtMInt: index argument is not a machine integer type");
+    }
+    unsigned index_bits = index_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (index_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_replaceAt64", ptr_ty, bytes->getType(),
+              index_type, value->getType()),
+          {bytes, index, value}, "hook_BYTES_replaceAt64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_replaceAt256", ptr_ty, bytes->getType(),
+              index_type, value->getType()),
+          {bytes, index, value}, "hook_BYTES_replaceAt256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.replaceAtMInt: unsupported size {}", index_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
+  if (name == "BYTES.padRightMInt") {
+    assert(pattern->get_arguments().size() == 3);
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *length = alloc_arg(pattern, 1, location_stack);
+    args.push_back(length);
+    llvm::Value *value = alloc_arg(pattern, 2, location_stack);
+    args.push_back(value);
+    auto *length_type = llvm::dyn_cast<llvm::IntegerType>(length->getType());
+    auto *value_type = llvm::dyn_cast<llvm::IntegerType>(value->getType());
+    if (!length_type || !value_type) {
+      throw std::invalid_argument("BYTES.padRightMInt: length and/or value "
+                                  "argument is not a machine integer type");
+    }
+    unsigned value_bits = value_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (value_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_padRight64", ptr_ty, bytes->getType(),
+              length_type, value_type),
+          {bytes, length, value}, "hook_BYTES_padRight64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_padRight256", ptr_ty, bytes->getType(),
+              length_type, value_type),
+          {bytes, length, value}, "hook_BYTES_padRight256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.padRightMInt: unsupported size {}", value_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
+  if (name == "BYTES.padLeftMInt") {
+    assert(pattern->get_arguments().size() == 3);
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *length = alloc_arg(pattern, 1, location_stack);
+    args.push_back(length);
+    llvm::Value *value = alloc_arg(pattern, 2, location_stack);
+    args.push_back(value);
+    auto *length_type = llvm::dyn_cast<llvm::IntegerType>(length->getType());
+    auto *value_type = llvm::dyn_cast<llvm::IntegerType>(value->getType());
+    if (!length_type || !value_type) {
+      throw std::invalid_argument("BYTES.padLeftMInt: length and/or value "
+                                  "argument is not a machine integer type");
+    }
+    unsigned value_bits = value_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (value_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_padLeft64", ptr_ty, bytes->getType(),
+              length_type, value_type),
+          {bytes, length, value}, "hook_BYTES_padLeft64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_padLeft256", ptr_ty, bytes->getType(),
+              length_type, value_type),
+          {bytes, length, value}, "hook_BYTES_padLeft256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.padLeftMInt: unsupported size {}", value_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
+  if (name == "BYTES.lengthMInt") {
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    auto *expected_sort = dynamic_cast<kore_composite_sort *>(
+        pattern->get_constructor()->get_sort().get());
+    unsigned expected_bits = expected_sort->get_category(definition_).bits;
+    llvm::CallInst *result = nullptr;
+    switch (expected_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_length64", llvm::Type::getInt64Ty(ctx_),
+              bytes->getType()),
+          {bytes}, "hook_BYTES_length64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_length256",
+              llvm::IntegerType::get(ctx_, 256), bytes->getType()),
+          {bytes}, "hook_BYTES_length256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.lengthMInt: unsupported size {}", expected_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
+  if (name == "BYTES.substrMInt") {
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *start_index = alloc_arg(pattern, 1, location_stack);
+    args.push_back(start_index);
+    llvm::Value *end_index = alloc_arg(pattern, 2, location_stack);
+    args.push_back(end_index);
+    auto *start_type
+        = llvm::dyn_cast<llvm::IntegerType>(start_index->getType());
+    auto *end_type = llvm::dyn_cast<llvm::IntegerType>(end_index->getType());
+    if (!start_type || !end_type) {
+      throw std::invalid_argument(
+          "BYTES.substrMInt: startIndex and/or endIndex argument is "
+          "not a machine integer type");
+    }
+    unsigned start_bits = start_type->getBitWidth();
+    llvm::CallInst *ret = nullptr;
+    switch (start_bits) {
+    case 64: {
+      auto *func = get_or_insert_function(
+          module_, "hook_BYTES_substr64", ptr_ty, bytes->getType(),
+          llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt64Ty(ctx_));
+      ret = llvm::CallInst::Create(
+          func, {bytes, start_index, end_index}, "hook_BYTES_substr64",
+          current_block_);
+      break;
+    }
+    case 256: {
+      auto *func = get_or_insert_function(
+          module_, "hook_BYTES_substr256", ptr_ty, bytes->getType(), start_type,
+          end_type);
+      ret = llvm::CallInst::Create(
+          func, {bytes, start_index, end_index}, "hook_BYTES_substr256",
+          current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.substrMInt: unsupported size {}", start_bits));
+    }
+    }
+    set_debug_loc(ret);
+    return ret;
+  }
+  if (name == "BYTES.getMInt") {
+    llvm::Value *bytes = alloc_arg(pattern, 0, location_stack);
+    args.push_back(bytes);
+    llvm::Value *off = alloc_arg(pattern, 1, location_stack);
+    args.push_back(off);
+    auto *off_type = llvm::dyn_cast<llvm::IntegerType>(off->getType());
+    if (!off_type) {
+      throw std::invalid_argument(
+          "BYTES.getMInt: offset argument is not a machine integer type");
+    }
+    unsigned off_bits = off_type->getBitWidth();
+    llvm::CallInst *result = nullptr;
+    switch (off_bits) {
+    case 64: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_get64", llvm::IntegerType::get(ctx_, 64),
+              bytes->getType(), llvm::Type::getInt64Ty(ctx_)),
+          {bytes, off}, "hook_BYTES_get64", current_block_);
+      break;
+    }
+    case 256: {
+      result = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_BYTES_get256", llvm::IntegerType::get(ctx_, 256),
+              bytes->getType(), llvm::IntegerType::get(ctx_, 256)),
+          {bytes, off}, "hook_BYTES_get256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("BYTES.getMInt: unsupported size {}", off_bits));
+    }
+    }
+    set_debug_loc(result);
+    return result;
+  }
   if (name == "MINT.uvalue") {
     llvm::Value *mint = alloc_arg(pattern, 0, location_stack);
     args.push_back(mint);
@@ -617,6 +966,88 @@ llvm::Value *create_term::create_hardcoded_hook(
       return new llvm::ZExtInst(in, type_out, "zext", current_block_);
     }
     return new llvm::TruncInst(in, type_out, "trunc", current_block_);
+  }
+  if (name == "MINT.pow") {
+    llvm::Value *base = alloc_arg(pattern, 0, location_stack);
+    args.push_back(base);
+    llvm::Value *exponent = alloc_arg(pattern, 1, location_stack);
+    args.push_back(exponent);
+    auto *expected_sort = dynamic_cast<kore_composite_sort *>(
+        pattern->get_constructor()->get_sort().get());
+    unsigned expected_bits = expected_sort->get_category(definition_).bits;
+    auto *base_type = llvm::dyn_cast<llvm::IntegerType>(base->getType());
+    auto *exponent_type
+        = llvm::dyn_cast<llvm::IntegerType>(exponent->getType());
+    if (!base_type || !exponent_type) {
+      throw std::invalid_argument("MINT.pow: base and/or exponent argument is "
+                                  "not a machine integer type");
+    }
+    llvm::CallInst *pow_call = nullptr;
+    switch (expected_bits) {
+    case 64: {
+      pow_call = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_MINT_pow64", ptr_ty,
+              getvalue_type({sort_category::Int, 0}, module_),
+              llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt64Ty(ctx_)),
+          {base, exponent}, "hook_MINT_pow64", current_block_);
+      break;
+    }
+    case 256: {
+      pow_call = llvm::CallInst::Create(
+          get_or_insert_function(
+              module_, "hook_MINT_pow256", ptr_ty,
+              getvalue_type({sort_category::Int, 0}, module_),
+              llvm::Type::getInt64Ty(ctx_), llvm::Type::getInt64Ty(ctx_)),
+          {base, exponent}, "hook_MINT_pow256", current_block_);
+      break;
+    }
+    default: {
+      throw std::invalid_argument(
+          fmt::format("MINT.pow: unsupported size {}", expected_bits));
+    }
+    }
+    set_debug_loc(pow_call);
+    return pow_call;
+  }
+  if (name == "MINT.MInt2bytes") {
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
+    auto *in_type = llvm::dyn_cast<llvm::IntegerType>(in->getType());
+    if (!in_type) {
+      throw std::invalid_argument(
+          "MINT.MInt2bytes: input argument is not a machine integer type");
+    }
+    unsigned int_bits = in_type->getBitWidth();
+    if (int_bits != 256) {
+      throw std::invalid_argument(
+          fmt::format("MINT.mint2bytes: unsupported size {}", int_bits));
+    }
+    auto *func = get_or_insert_function(
+        module_, "hook_MINT_MInt2Bytes", ptr_ty,
+        getvalue_type({sort_category::Int, 0}, module_));
+    auto *call = llvm::CallInst::Create(
+        func, {in}, "hook_MINT_MInt2Bytes", current_block_);
+    set_debug_loc(call);
+    return call;
+  }
+  if (name == "MINT.bytes2MInt") {
+    llvm::Value *in = alloc_arg(pattern, 0, location_stack);
+    args.push_back(in);
+    auto *expected_sort = dynamic_cast<kore_composite_sort *>(
+        pattern->get_constructor()->get_sort().get());
+    unsigned bits = expected_sort->get_category(definition_).bits;
+    if (bits != 256) {
+      throw std::invalid_argument(
+          fmt::format("MINT.bytes2MInt: unsupported size {}", bits));
+    }
+
+    auto *func = get_or_insert_function(
+        module_, "hook_MINT_Bytes2MInt", ptr_ty, in->getType());
+    auto *call = llvm::CallInst::Create(
+        func, {in}, "hook_MINT_Bytes2MInt", current_block_);
+    set_debug_loc(call);
+    return call;
   }
   if (name == "MINT.sext") {
     llvm::Value *in = alloc_arg(pattern, 0, location_stack);

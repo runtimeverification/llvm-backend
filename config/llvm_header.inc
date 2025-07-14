@@ -81,6 +81,41 @@ declare void @print_configuration(ptr, ptr)
 ; finish_rewriting.ll
 
 declare i64 @__gmpz_get_ui(ptr)
+declare ptr @kore_alloc(i64)
+declare void @memcpy(ptr, ptr, i64)
+declare void @error_on_get(i64, i64)
+declare void @error_on_start_substr(i64, i64)
+declare void @error_on_end_substr(ptr, i64)
+declare void @integer_overflow(i64)
+declare void @buffer_overflow_replace_at(i64, i64, i64)
+declare void @buffer_overflow_update(i64, i64)
+declare void @error_on_update(i64)
+declare i1 @hook_BYTES_mutableBytesEnabled()
+declare i64 @hook_BYTES_length64(ptr)
+
+define ptr @copy_if_needed_in_llvm(ptr %b) {
+entry:
+  %mutable_bytes_enabled = call i1 @hook_BYTES_mutableBytesEnabled()
+  br i1 %mutable_bytes_enabled, label %return_b, label %copy_needed
+
+return_b:
+  ret ptr %b
+
+copy_needed:
+  %len = call i64 @hook_BYTES_length64(ptr %b)
+  %len_bytes = mul i64 %len, 8 ; 8 bytes per byte
+  %alloc_size = add i64 %len_bytes, 40 ; 8 bytes for header, rest for data
+  %alloc = call ptr @kore_alloc(i64 %alloc_size)
+
+  store i64 %len, ptr %alloc
+
+  %data_ptr = getelementptr i8, ptr %alloc, i64 8
+  %b_data_ptr = getelementptr i8, ptr %b, i64 8
+
+  call void @memcpy(ptr %data_ptr, ptr %b_data_ptr, i64 %len_bytes)
+
+  ret ptr %data_ptr
+}
 
 @exit_int_0 = constant %mpz { i32 0, i32 0, ptr getelementptr inbounds ([0 x i64], ptr @exit_int_0_limbs, i32 0, i32 0) }
 @exit_int_0_limbs = constant [0 x i64] zeroinitializer
@@ -177,7 +212,8 @@ declare noalias ptr @kore_alloc_integer(i64)
 
 ; string_equal.ll
 
-declare i32 @memcmp(ptr, ptr, i64);
+declare i32 @memcmp(ptr, ptr, i64)
+declare void @llvm.memset.p0.i64(ptr, i8, i64, i1)
 
 define i1 @string_equal(ptr %str1, ptr %str2, i64 %len1, i64 %len2) {
   %len_eq = icmp eq i64 %len1, %len2
@@ -243,6 +279,329 @@ define void @take_search_step(ptr %subject) {
   store i64 -1, ptr @depth
   call tailcc void @step_all(ptr %subject)
   ret void
+}
+
+; MInt Functions
+
+define i256 @hook_LIST_size256(ptr %l) {
+entry:
+  %len_ptr = getelementptr %list, ptr %l, i64 0, i32 0
+  %len = load i64, ptr %len_ptr
+  %len_256 = zext i64 %len to i256
+  ret i256 %len_256
+}
+
+define i256 @hook_BYTES_get256(ptr %b, i256 %off) {
+entry:
+  ; Check for buffer overflow
+  %len = call i64 @hook_BYTES_length64(ptr %b)
+  %len_256 = zext i64 %len to i256
+  %off_lt_len = icmp ult i256 %off, %len_256
+  br i1 %off_lt_len, label %valid_off, label %overflow
+overflow:
+  %off_trunc = trunc i256 %off to i64
+  call void @error_on_get(i64 %off_trunc, i64 %len)
+  unreachable
+valid_off:
+  ; Load the byte at the specified offset
+  %data_ptr = getelementptr %string, ptr %b, i256 0, i32 1, i256 0
+  %byte_ptr = getelementptr i8, ptr %data_ptr, i256 %off
+  %byte_value = load i8, ptr %byte_ptr
+
+  ; Return the byte value as an i256
+  %result = zext i8 %byte_value to i256
+  ret i256 %result
+}
+
+define ptr @hook_BYTES_substr256(ptr %input, i256 %start, i256 %end) {
+entry:
+  %end_lt_start = icmp ult i256 %end, %start
+  br i1 %end_lt_start, label %error, label %check_length
+error:
+  %end_trunc = trunc i256 %end to i64
+  %start_trunc = trunc i256 %start to i64
+  call void @error_on_start_substr(i64 %start_trunc, i64 %end_trunc)
+  unreachable
+check_length:
+  %input_len = call i64 @hook_BYTES_length64(ptr %input)
+  %input_len_256 = zext i64 %input_len to i256
+  %end_gt_input_len = icmp ugt i256 %end, %input_len_256
+  br i1 %end_gt_input_len, label %error_length, label %calculate_length
+error_length:
+  %end_trunc2 = trunc i256 %end to i64
+  call void @error_on_end_substr(ptr %input, i64 %end_trunc2)
+  unreachable
+calculate_length:
+  %len = sub i256 %end, %start
+  
+  %bytes_len = mul i256 %len, 8
+  %alloc_size = add i256 40, %bytes_len
+  %alloc_size_i64 = trunc i256 %alloc_size to i64
+  %alloc = call ptr @kore_alloc(i64 %alloc_size_i64)
+
+  %len_i64 = trunc i256 %len to i64
+  %bytes_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 0
+  store i64 %len_i64, ptr %bytes_ptr
+
+  %data_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 8
+  %input_data_ptr = getelementptr %string, ptr %input, i256 0, i32 1, i256 0
+  %start_ptr = getelementptr i8, ptr %input_data_ptr, i256 %start
+  %end_ptr = getelementptr i8, ptr %input_data_ptr, i256 %end
+  call void @memcpy(ptr %data_ptr, ptr %start_ptr, i64 %len_i64)
+
+  %result = bitcast ptr %alloc to ptr
+  ret ptr %result
+}
+
+define i256 @hook_BYTES_length256(ptr %b) {
+entry:
+  %len = call i64 @hook_BYTES_length64(ptr %b)
+  %len_256 = zext i64 %len to i256
+  ret i256 %len_256
+}
+
+define ptr @hook_BYTES_padRight256(ptr %b, i256 %length, i256 %v) {
+entry:
+  %len = call i64 @hook_BYTES_length64(ptr %b)
+  %len_256 = zext i64 %len to i256
+  %length_gt_len = icmp ugt i256 %length, %len_256
+  br i1 %length_gt_len, label %pad, label %return_b
+
+return_b:
+  ret ptr %b
+
+pad:
+  %v_gt_255 = icmp ugt i256 %v, 255
+  br i1 %v_gt_255, label %error, label %allocate
+
+error:
+  %v_trunc = trunc i256 %v to i64
+  call void @integer_overflow(i64 %v_trunc)
+  unreachable
+  
+allocate:
+  %bytes_len = mul i256 %length, 8
+  %alloc_size = add i256 %bytes_len, 40 ; 8 bytes for header, rest for data
+  %alloc_size_i64 = trunc i256 %alloc_size to i64
+  %alloc = call ptr @kore_alloc(i64 %alloc_size_i64)
+
+  %length_i64 = trunc i256 %length to i64
+  store i64 %length_i64, ptr %alloc
+
+  %data_ptr = getelementptr i8, ptr %alloc, i64 8
+  %b_data_ptr = getelementptr i8, ptr %b, i64 8
+  call void @memcpy(ptr %data_ptr, ptr %b_data_ptr, i64 %len)
+
+  %remaining_bytes = sub i64 %length_i64, %len
+  %fill_ptr = getelementptr i8, ptr %data_ptr, i64 %len
+  %v_i8 = trunc i256 %v to i8
+  call void @llvm.memset.p0.i64(ptr %fill_ptr, i8 %v_i8, i64 %remaining_bytes, i1 false)
+
+  %result = bitcast ptr %alloc to ptr
+  ret ptr %result
+}
+
+define ptr @hook_BYTES_padLeft256(ptr %b, i256 %length, i256 %v) {
+entry:
+  %len = call i64 @hook_BYTES_length64(ptr %b)
+  %len_256 = zext i64 %len to i256
+  %length_gt_len = icmp ugt i256 %length, %len_256
+  br i1 %length_gt_len, label %pad, label %return_b
+
+return_b:
+  ret ptr %b
+
+pad:
+  %v_gt_255 = icmp ugt i256 %v, 255
+  br i1 %v_gt_255, label %error, label %allocate
+
+error:
+  %v_trunc = trunc i256 %v to i64
+  call void @integer_overflow(i64 %v_trunc)
+  unreachable
+
+allocate:
+  %bytes_len = mul i256 %length, 8
+  %alloc_size = add i256 %bytes_len, 40 ; 8 bytes for header, rest for data
+  %alloc_size_i64 = trunc i256 %alloc_size to i64
+  %alloc = call ptr @kore_alloc(i64 %alloc_size_i64)
+
+  %length_i64 = trunc i256 %length to i64
+  store i64 %length_i64, ptr %alloc
+  %data_ptr = getelementptr i8, ptr %alloc, i64 8
+  %b_data_ptr = getelementptr i8, ptr %b, i64 8
+  %remaining_bytes = sub i64 %length_i64, %len
+  %fill_ptr = getelementptr i8, ptr %data_ptr, i64 0
+  %v_i8 = trunc i256 %v to i8
+  call void @llvm.memset.p0.i64(ptr %fill_ptr, i8 %v_i8, i64 %remaining_bytes, i1 false)
+
+  %b_data_end_ptr = getelementptr i8, ptr %data_ptr, i64 %remaining_bytes
+  call void @memcpy(ptr %b_data_end_ptr, ptr %b_data_ptr, i64 %len)
+
+  %result = bitcast ptr %alloc to ptr
+  ret ptr %result
+}
+
+define ptr @hook_BYTES_replaceAt256(ptr %dest, i256 %index, ptr %src) {
+entry:
+  call ptr @copy_if_needed_in_llvm(ptr %dest)
+ 
+  %dest_len = call i64 @hook_BYTES_length64(ptr %dest)
+  %dest_len_256 = zext i64 %dest_len to i256
+
+  %src_len = call i64 @hook_BYTES_length64(ptr %src)
+  %src_len_256 = zext i64 %src_len to i256
+
+  %index_sum_dest_src = add i256 %index, %src_len_256
+  %index_gt_dest_len = icmp ugt i256 %index_sum_dest_src, %dest_len_256
+  
+  br i1 %index_gt_dest_len, label %error, label %copy_data
+
+error:
+  %index_trunc = trunc i256 %index to i64
+  %dest_len_trunc = trunc i256 %dest_len_256 to i64
+  %src_len_trunc = trunc i256 %src_len_256 to i64
+  call void @buffer_overflow_replace_at(i64 %index_trunc, i64 %dest_len_trunc, i64 %src_len_trunc)
+  unreachable
+
+copy_data:
+  %data_ptr = getelementptr i8, ptr %dest, i64 8
+  %src_data_ptr = getelementptr i8, ptr %src, i64 8
+  %index_i64 = trunc i256 %index to i64
+  %dest_offset_ptr = getelementptr i8, ptr %data_ptr, i64 %index_i64
+  call void @memcpy(ptr %dest_offset_ptr, ptr %src_data_ptr, i64 %src_len)
+
+  ; Return the modified destination
+  ret ptr %dest
+}
+
+define ptr @hook_MINT_MInt2Bytes(i256 %mint) {
+entry:
+  %alloc = call ptr @kore_alloc(i64 40) ; 8 bytes for header, 32 bytes for MInt
+
+  ; store 32 as lenght of the MInt in the fist 8 bytes
+  %bytes_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 0
+  store i64 32, ptr %bytes_ptr
+
+  ; store the MInt in the next 32 bytes
+  %mint_ptr = getelementptr [40 x i8], ptr %alloc, i64 0, i64 8
+  %mint_vector = bitcast i256 %mint to <32 x i8>
+  %reversed_mint = shufflevector <32 x i8> %mint_vector, <32 x i8> undef, <32 x i32> 
+    <i32 31, i32 30, i32 29, i32 28, i32 27, i32 26, i32 25, i32 24,
+     i32 23, i32 22, i32 21, i32 20, i32 19, i32 18, i32 17, i32 16,
+     i32 15, i32 14, i32 13, i32 12, i32 11, i32 10, i32 9,  i32 8,
+     i32 7,  i32 6,  i32 5,  i32 4,  i32 3,  i32 2,  i32 1,  i32 0>
+
+  ; Store the reversed MInt bytes in the allocated memory
+  %reversed_mint_ptr = alloca <32 x i8>
+  store <32 x i8> %reversed_mint, ptr %reversed_mint_ptr
+  call void @memcpy(ptr %mint_ptr, ptr %reversed_mint_ptr, i64 32)
+
+  ; Return the pointer to the bytes
+  ret ptr %alloc
+}
+
+define i256 @hook_MINT_Bytes2MInt(ptr %bytes) {
+entry:
+  %alloc = alloca [32 x i8]
+  %bytes_ptr = getelementptr [32 x i8], ptr %alloc, i64 0, i64 0
+
+  ; The first 8 bytes are the used by the header, so we skip them as
+  ; we assume we will always have a 256-bit MInt
+  %bytes_contents = getelementptr i8, ptr %bytes, i64 8
+  call void @memcpy(ptr %bytes_ptr, ptr %bytes_contents, i64 32)
+
+  ; Convert the bytes to a 256-bit integer
+  %mint = load i256, ptr %bytes_ptr
+
+  ; Reverse the byte order to convert from little-endian to big-endian
+  %mint_vector = bitcast i256 %mint to <32 x i8>
+  %reversed_mint = shufflevector <32 x i8> %mint_vector, <32 x i8> undef, <32 x i32> 
+    <i32 31, i32 30, i32 29, i32 28, i32 27, i32 26, i32 25, i32 24,
+     i32 23, i32 22, i32 21, i32 20, i32 19, i32 18, i32 17, i32 16,
+     i32 15, i32 14, i32 13, i32 12, i32 11, i32 10, i32 9,  i32 8,
+     i32 7,  i32 6,  i32 5,  i32 4,  i32 3,  i32 2,  i32 1,  i32 0>
+
+  ; Convert the reversed vector back to i256
+  %result = bitcast <32 x i8> %reversed_mint to i256
+  ret i256 %result
+}
+
+define ptr @hook_BYTES_update256(ptr %b, i256 %index, i256 %value) {
+entry:
+  call ptr @copy_if_needed_in_llvm(ptr %b)
+
+  %len = call i64 @hook_BYTES_length64(ptr %b)
+  %len_256 = zext i64 %len to i256
+
+  %index_uge_len = icmp uge i256 %index, %len_256
+  br i1 %index_uge_len, label %error, label %update_value
+
+error:
+  %index_trunc = trunc i256 %index to i64
+  %len_trunc = trunc i256 %len_256 to i64
+  call void @buffer_overflow_update(i64 %index_trunc, i64 %len_trunc)
+  unreachable
+
+update_value:
+  %value_ge_255 = icmp ugt i256 %value, 255
+  br i1 %value_ge_255, label %error_value, label %set_value
+
+error_value:
+  %value_trunc = trunc i256 %value to i64
+  call void @error_on_update(i64 %value_trunc)
+  unreachable
+
+set_value:
+  %data_ptr = getelementptr i8, ptr %b, i64 8
+  %index_i64 = trunc i256 %index to i64
+  %byte_ptr = getelementptr i8, ptr %data_ptr, i64 %index_i64
+  %value_i8 = trunc i256 %value to i8
+  store i8 %value_i8, ptr %byte_ptr
+
+  ; Return the modified buffer
+  ret ptr %b
+}
+
+
+define i256 @hook_MINT_pow256(i256 %base, i256 %exp) {
+entry:
+  ; Special cases: if exp == 0 return 1, if base == 0 return 0
+  %exp_is_zero = icmp eq i256 %exp, 0
+  br i1 %exp_is_zero, label %exp_zero, label %check_base
+
+exp_zero:
+  ret i256 1
+
+check_base:
+  %base_is_zero = icmp eq i256 %base, 0
+  br i1 %base_is_zero, label %base_zero, label %loop
+
+base_zero:
+  ret i256 0
+
+; Initialize result = 1, current_base = base, current_exp = exp
+loop:
+  %result = phi i256 [1, %check_base], [%next_result, %loop_body]
+  %curr_base = phi i256 [%base, %check_base], [%next_base, %loop_body]
+  %curr_exp = phi i256 [%exp, %check_base], [%next_exp, %loop_body]
+  %exp_done = icmp eq i256 %curr_exp, 0
+  br i1 %exp_done, label %done, label %loop_body
+
+loop_body:
+  ; if (curr_exp & 1) result *= curr_base
+  %exp_and_1 = and i256 %curr_exp, 1
+  %is_odd = icmp ne i256 %exp_and_1, 0
+  %mul_result = mul i256 %result, %curr_base
+  %next_result = select i1 %is_odd, i256 %mul_result, i256 %result
+  ; curr_base *= curr_base
+  %next_base = mul i256 %curr_base, %curr_base
+  ; curr_exp >>= 1
+  %next_exp = lshr i256 %curr_exp, 1
+  br label %loop
+
+done:
+  ret i256 %result
 }
 
 define i64 @get_steps() {
