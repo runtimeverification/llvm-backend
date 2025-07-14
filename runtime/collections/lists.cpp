@@ -66,6 +66,15 @@ SortKItem hook_LIST_get_null(SortList list, SortInt index) {
   return list->at(abs_idx);
 }
 
+SortKItem hook_LIST_get64(SortList list, ssize_t index) {
+  if (index < INT64_MIN || index > INT64_MAX) {
+    KLLVM_HOOK_INVALID_ARGUMENT("Index is too large for get: {}", index);
+  }
+  size_t size = list->size();
+  size_t abs_index = index < 0 ? (long)size + index : index;
+  return list->at(abs_index);
+}
+
 SortKItem hook_LIST_get(SortList list, SortInt index) {
   if (!mpz_fits_slong_p(index)) {
     KLLVM_HOOK_INVALID_ARGUMENT(
@@ -111,6 +120,10 @@ size_t hook_LIST_size_long(SortList list) {
   return list->size();
 }
 
+uint64_t hook_LIST_size64(SortList list) {
+  return static_cast<uint64_t>(list->size());
+}
+
 SortInt hook_LIST_size(SortList list) {
   mpz_t size;
   mpz_init_set_ui(size, list->size());
@@ -125,6 +138,16 @@ list hook_LIST_make(SortInt len, SortKItem value) {
 
   size_t length = mpz_get_ui(len);
   return {length, value};
+}
+
+list hook_LIST_updateMInt(SortList list, uint64_t idx, SortKItem value) {
+  if (idx >= list->size()) {
+    KLLVM_HOOK_INVALID_ARGUMENT(
+        "Index out of range for update64: index={}, size={}", idx,
+        list->size());
+  }
+
+  return list->set(idx, value);
 }
 
 list hook_LIST_update_long(SortList list, size_t idx, SortKItem value) {

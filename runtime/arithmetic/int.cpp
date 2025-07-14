@@ -398,6 +398,26 @@ SortInt hook_INT_rand(SortInt upper_bound) {
   return move_int(result);
 }
 
+uint64_t hook_MINT_pow64(uint64_t base, uint64_t exp) {
+  if (exp == 0) {
+    return 1;
+  }
+  if (base == 0) {
+    return 0;
+  }
+  uint64_t result = 1;
+  uint64_t current_base = base;
+  uint64_t current_exp = exp;
+  while (current_exp > 0) {
+    if (current_exp & 1) {
+      result *= current_base;
+    }
+    current_base *= current_base;
+    current_exp >>= 1;
+  }
+  return result;
+}
+
 size_t *hook_MINT_export(mpz_t in, uint64_t bits) {
   uint64_t nwords = (bits + 63) / 64;
   mpz_t twos;
