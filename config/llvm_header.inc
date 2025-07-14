@@ -91,6 +91,7 @@ declare void @buffer_overflow_replace_at(i64, i64, i64)
 declare void @buffer_overflow_update(i64, i64)
 declare void @error_on_update(i64)
 declare i1 @hook_BYTES_mutableBytesEnabled()
+declare i64 @hook_BYTES_length64(ptr)
 
 define ptr @copy_if_needed_in_llvm(ptr %b) {
 entry:
@@ -101,8 +102,7 @@ return_b:
   ret ptr %b
 
 copy_needed:
-  %hdr = load i64, ptr %b
-  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len = call i64 @hook_BYTES_length64(ptr %b)
   %len_bytes = mul i64 %len, 8 ; 8 bytes per byte
   %alloc_size = add i64 %len_bytes, 40 ; 8 bytes for header, rest for data
   %alloc = call ptr @kore_alloc(i64 %alloc_size)
@@ -294,8 +294,7 @@ entry:
 define i256 @hook_BYTES_get256(ptr %b, i256 %off) {
 entry:
   ; Check for buffer overflow
-  %hdr = load i64, ptr %b
-  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len = call i64 @hook_BYTES_length64(ptr %b)
   %len_256 = zext i64 %len to i256
   %off_lt_len = icmp ult i256 %off, %len_256
   br i1 %off_lt_len, label %valid_off, label %overflow
@@ -324,8 +323,7 @@ error:
   call void @error_on_start_substr(i64 %start_trunc, i64 %end_trunc)
   unreachable
 check_length:
-  %input_hdr = load i64, ptr %input
-  %input_len = and i64 %input_hdr, 1099511627775 ; @LENGTH_MASK@
+  %input_len = call i64 @hook_BYTES_length64(ptr %input)
   %input_len_256 = zext i64 %input_len to i256
   %end_gt_input_len = icmp ugt i256 %end, %input_len_256
   br i1 %end_gt_input_len, label %error_length, label %calculate_length
@@ -357,16 +355,14 @@ calculate_length:
 
 define i256 @hook_BYTES_length256(ptr %b) {
 entry:
-  %hdr = load i64, ptr %b
-  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len = call i64 @hook_BYTES_length64(ptr %b)
   %len_256 = zext i64 %len to i256
   ret i256 %len_256
 }
 
 define ptr @hook_BYTES_padRight256(ptr %b, i256 %length, i256 %v) {
 entry:
-  %hdr = load i64, ptr %b
-  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len = call i64 @hook_BYTES_length64(ptr %b)
   %len_256 = zext i64 %len to i256
   %length_gt_len = icmp ugt i256 %length, %len_256
   br i1 %length_gt_len, label %pad, label %return_b
@@ -407,8 +403,7 @@ allocate:
 
 define ptr @hook_BYTES_padLeft256(ptr %b, i256 %length, i256 %v) {
 entry:
-  %hdr = load i64, ptr %b
-  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len = call i64 @hook_BYTES_length64(ptr %b)
   %len_256 = zext i64 %len to i256
   %length_gt_len = icmp ugt i256 %length, %len_256
   br i1 %length_gt_len, label %pad, label %return_b
@@ -451,12 +446,10 @@ define ptr @hook_BYTES_replaceAt256(ptr %dest, i256 %index, ptr %src) {
 entry:
   call ptr @copy_if_needed_in_llvm(ptr %dest)
  
-  %dest_hdr = load i64, ptr %dest
-  %dest_len = and i64 %dest_hdr, 1099511627775 ; @LENGTH_MASK@
+  %dest_len = call i64 @hook_BYTES_length64(ptr %dest)
   %dest_len_256 = zext i64 %dest_len to i256
 
-  %src_hdr = load i64, ptr %src
-  %src_len = and i64 %src_hdr, 1099511627775 ; @LENGTH_MASK@
+  %src_len = call i64 @hook_BYTES_length64(ptr %src)
   %src_len_256 = zext i64 %src_len to i256
 
   %index_sum_dest_src = add i256 %index, %src_len_256
@@ -538,8 +531,7 @@ define ptr @hook_BYTES_update256(ptr %b, i256 %index, i256 %value) {
 entry:
   call ptr @copy_if_needed_in_llvm(ptr %b)
 
-  %hdr = load i64, ptr %b
-  %len = and i64 %hdr, 1099511627775 ; @LENGTH_MASK@
+  %len = call i64 @hook_BYTES_length64(ptr %b)
   %len_256 = zext i64 %len to i256
 
   %index_uge_len = icmp uge i256 %index, %len_256
