@@ -199,8 +199,7 @@ SortBytes hook_BYTES_substr64(SortBytes input, uint64_t start, uint64_t end) {
 SortInt hook_BYTES_get(SortBytes b, SortInt off) {
   unsigned long off_long = GET_UI(off);
   if (off_long >= len(b)) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Buffer overflow on get: off={}, len={}", off_long, len(b));
+    error_on_get(off_long, len(b));
   }
   mpz_t result;
   mpz_init_set_ui(result, (unsigned char)b->data[off_long]);
@@ -218,12 +217,10 @@ SortBytes hook_BYTES_update64(SortBytes b, uint64_t off, uint64_t val) {
   copy_if_needed(b);
 
   if (off >= len(b)) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Buffer overflow on update: off={}, len={}", off, len(b));
+    buffer_overflow_update(off, len(b));
   }
   if (val >= 256) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Not a valid value for a byte in update: {}", val);
+    error_on_update(val);
   }
   b->data[off] = (unsigned char)val;
   return b;
@@ -259,9 +256,7 @@ SortBytes hook_BYTES_replaceAt(SortBytes b, SortInt start, SortBytes b2) {
 
   unsigned long start_long = GET_UI(start);
   if (start_long + len(b2) > len(b)) {
-    KLLVM_HOOK_INVALID_ARGUMENT(
-        "Buffer overflow on replaceAt: start={}, dest_len={}, src_len={}",
-        start_long, len(b), len(b2));
+    buffer_overflow_replace_at(start_long, len(b), len(b2));
   }
   memcpy(b->data + start_long, b2->data, len(b2));
   return b;
