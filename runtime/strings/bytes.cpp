@@ -162,6 +162,21 @@ SortBytes hook_BYTES_string2bytes(SortString s) {
   return hook_BYTES_bytes2string(s);
 }
 
+string *bytes2hexstring(string *b, size_t len) {
+  static const char hexchars[] = "0123456789abcdef";
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + len * 2));
+  for (size_t i = 0; i < len; i++) {
+    result->data[i * 2] = hexchars[(b->data[i] >> 4) & 0xf];
+    result->data[i * 2 + 1] = hexchars[b->data[i] & 0xf];
+  }
+  init_with_len(result, len * 2);
+  return result;
+}
+
+SortString hook_BYTES_bytes2hexstring(SortBytes b) {
+  return bytes2hexstring(b, len(b));
+}
+
 SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {
   uint64_t ustart = GET_UI(start);
   uint64_t uend = GET_UI(end);
