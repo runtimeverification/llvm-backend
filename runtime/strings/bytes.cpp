@@ -5,6 +5,7 @@
 #include <gmp.h>
 #include <stdexcept>
 #include <unordered_set>
+#include <array> // Add this include for std::array
 
 #include "runtime/alloc.h"
 #include "runtime/header.h"
@@ -163,12 +164,12 @@ SortBytes hook_BYTES_string2bytes(SortString s) {
 }
 
 string *bytes2hexstring(string *b, size_t len) {
-  static char const hexchars[] = "0123456789abcdef";
-  auto *result
-      = static_cast<string *>(kore_alloc_token(sizeof(string) + len * 2));
+  static const std::array<char, 16> hexchars = {'0', '1', '2', '3', '4', '5', '6', '7',
+                                                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + len * 2));
   for (size_t i = 0; i < len; i++) {
-    result->data[i * 2] = hexchars[(*(b->data + i) >> 4) & 0xf];
-    result->data[i * 2 + 1] = hexchars[(*(b->data + i)) & 0xf];
+    result->data[i * 2] = hexchars.at((b->data[i] >> 4) & 0xf);
+    result->data[i * 2 + 1] = hexchars.at(b->data[i] & 0xf);
   }
   init_with_len(result, len * 2);
   return result;
