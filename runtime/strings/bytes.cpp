@@ -148,37 +148,34 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
   return result;
 }
 
-string *bytes2string(string *b, size_t len) {
-  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + len));
-  memcpy(result->data, b->data, len);
-  init_with_len(result, len);
-  return result;
-}
-
 SortString hook_BYTES_bytes2string(SortBytes b) {
-  return bytes2string(b, len(b));
+  auto len_b = len(b);
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + len_b));
+  memcpy(result->data, b->data, len_b);
+  init_with_len(result, len_b);
+  return result;
 }
 
 SortBytes hook_BYTES_string2bytes(SortString s) {
   return hook_BYTES_bytes2string(s);
 }
 
-string *bytes2hexstring(string *b, size_t len) {
+// Convert a bytes array to its hexadecimal string representation
+// For example, the bytes array b'\x01\xef' becomes the string "01ef"
+// syntax String ::= Bytes2Hex( Bytes )
+SortString hook_BYTES_bytes2hex(SortBytes b) {
   static const std::array<char, 16> hexchars
       = {'0', '1', '2', '3', '4', '5', '6', '7',
          '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+  auto len_b = len(b);
   auto *result
-      = static_cast<string *>(kore_alloc_token(sizeof(string) + len * 2));
-  for (size_t i = 0; i < len; i++) {
+      = static_cast<string *>(kore_alloc_token(sizeof(string) + len_b * 2));
+  for (size_t i = 0; i < len_b; i++) {
     result->data[i * 2] = hexchars.at((b->data[i] >> 4) & 0xf);
     result->data[i * 2 + 1] = hexchars.at(b->data[i] & 0xf);
   }
-  init_with_len(result, len * 2);
+  init_with_len(result, len_b * 2);
   return result;
-}
-
-SortString hook_BYTES_bytes2hexstring(SortBytes b) {
-  return bytes2hexstring(b, len(b));
 }
 
 SortBytes hook_BYTES_substr(SortBytes input, SortInt start, SortInt end) {

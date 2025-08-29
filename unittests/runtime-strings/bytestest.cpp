@@ -20,7 +20,7 @@ mpz_ptr
 hook_BYTES_bytes2int(string *b, uint64_t endianness, uint64_t signedness);
 string *hook_BYTES_int2bytes(mpz_t len, mpz_t i, uint64_t endianness);
 string *hook_BYTES_bytes2string(string *b);
-string *hook_BYTES_bytes2hexstring(string *b);
+string *hook_BYTES_bytes2hex(string *b);
 string *hook_BYTES_string2bytes(string *s);
 string *hook_BYTES_substr(string *b, mpz_t start, mpz_t end);
 string *hook_BYTES_replaceAt(string *b, mpz_t start, string *b2);
@@ -172,17 +172,17 @@ BOOST_AUTO_TEST_CASE(bytes2string) {
   BOOST_CHECK_EQUAL(0, memcmp(_1234->data, "1234", 4));
 }
 
-BOOST_AUTO_TEST_CASE(bytes2hexstring) {
+BOOST_AUTO_TEST_CASE(bytes2hex) {
   auto empty = make_string("");
-  auto res = hook_BYTES_bytes2hexstring(empty);
+  auto res = hook_BYTES_bytes2hex(empty);
   BOOST_CHECK(res != empty);
   BOOST_CHECK_EQUAL(len(res), 0);
 
-  auto _00ff = make_string("\x00\xff", 2);
-  res = hook_BYTES_bytes2hexstring(_00ff);
-  BOOST_CHECK(res != _00ff);
+  auto _01ef = make_string("\x01\xef", 2);
+  res = hook_BYTES_bytes2hex(_01ef);
+  BOOST_CHECK(res != _01ef);
   BOOST_CHECK_EQUAL(len(res), 4);
-  BOOST_CHECK_EQUAL(0, memcmp(res->data, "00ff", 4));
+  BOOST_CHECK_EQUAL(0, memcmp(res->data, "01ef", 4));
 }
 
 BOOST_AUTO_TEST_CASE(string2bytes) {
