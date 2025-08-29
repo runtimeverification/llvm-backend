@@ -148,13 +148,15 @@ hook_BYTES_int2bytes(SortInt len, SortInt i, SortEndianness endianness_ptr) {
   return result;
 }
 
-SortString hook_BYTES_bytes2string(SortBytes b) {
-  auto len_b = len(b);
-  auto *result
-      = static_cast<string *>(kore_alloc_token(sizeof(string) + len_b));
-  memcpy(result->data, b->data, len_b);
-  init_with_len(result, len_b);
+string *bytes2string(string *b, size_t len) {
+  auto *result = static_cast<string *>(kore_alloc_token(sizeof(string) + len));
+  memcpy(result->data, b->data, len);
+  init_with_len(result, len);
   return result;
+}
+
+SortString hook_BYTES_bytes2string(SortBytes b) {
+  return bytes2string(b, len(b));
 }
 
 SortBytes hook_BYTES_string2bytes(SortString s) {
