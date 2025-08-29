@@ -9,7 +9,8 @@ expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 parser_file="$(mktemp tmp.parse.XXXXXXXXXX)"
 temp_inputs=()
 
-cleanup () { # shellcheck disable=SC2329
+# shellcheck disable=SC2329
+cleanup () {
   # shellcheck disable=SC2317
   rm -rf "$input_file" "$expanded_input_file" "$output_file" "$parser_file" "${temp_inputs[@]}"
 }
