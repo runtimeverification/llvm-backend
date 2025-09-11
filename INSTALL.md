@@ -5,7 +5,7 @@
 ```shell
 sudo apt update
 sudo apt install      \
-  clang-15            \
+  clang-17            \
   cmake               \
   curl                \
   flex                \
@@ -18,8 +18,8 @@ sudo apt install      \
   libmpfr-dev         \
   libunwind-dev       \
   libyaml-dev         \
-  lld-15              \
-  llvm-15-tools       \
+  lld-17              \
+  llvm-17-tools       \
   maven               \
   openjdk-17-jdk      \
   pkg-config          \
@@ -44,7 +44,7 @@ brew install  \
   jemalloc    \
   libffi
   libyaml     \
-  llvm@15     \
+  llvm@17     \
   maven       \
   mpfr        \
   pkg-config  \
@@ -81,20 +81,20 @@ add it your `env` (`.zshrc`, `.bashrc`, etc.), so that the Homebrew
 installation of LLVM gets picked up correctly. We recommend adding it to
 your shell profile.
 ```shell
-export LLVM_DIR=$($(brew --prefix llvm@15)/bin/llvm-config --cmakedir)
+export LLVM_DIR=$($(brew --prefix llvm@17)/bin/llvm-config --cmakedir)
 ```
 
 If you don't usually use the `clang` from your Homebrew installation as
 your default compiler, you can set the following CMake flg to use these
 `clang` and `clang++`:
 ```shell
--DCMAKE_C_COMPILER="$(brew --prefix llvm@15)/bin/clang" \
--DCMAKE_CXX_COMPILER="$(brew --prefix llvm@15)/bin/clang++"
+-DCMAKE_C_COMPILER="$(brew --prefix llvm@17)/bin/clang" \
+-DCMAKE_CXX_COMPILER="$(brew --prefix llvm@17)/bin/clang++"
 ```
 Once again, we recommend adding them and other llvm binaries to your
 `PATH` in your shell profile:
 ```shell
-export PATH="$(brew --prefix llvm@15)/bin:$PATH"
+export PATH="$(brew --prefix llvm@17)/bin:$PATH"
 ```
 
 Some tests rely on GNU Grep options, which are not available on macOS by
