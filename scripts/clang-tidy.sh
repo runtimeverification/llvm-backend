@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-LLVM_VERSION=15
+LLVM_VERSION=17
 BUILD_DIR=build
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
