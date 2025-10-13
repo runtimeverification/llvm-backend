@@ -36,8 +36,8 @@ llvm::Constant *create_static_term::not_injection_case(
 
   std::stringstream kore_string;
   constructor->print(kore_string);
-  llvm::Constant *block
-      = module_->getOrInsertGlobal("const_" + escape(kore_string.str()), block_type);
+  llvm::Constant *block = module_->getOrInsertGlobal(
+      "const_" + escape(kore_string.str()), block_type);
   auto *global_var = llvm::dyn_cast<llvm::GlobalVariable>(block);
   // this is technically not a constant because functions which return fresh constants
   // will mutate a block in this circumstance. Probably best not to rely on this actually
