@@ -266,14 +266,14 @@ block *kore_pattern_construct(kore_pattern const *pat) {
 }
 
 char *kore_block_dump(block *term) {
-  auto *hooked_str = print_configuration_to_string(term)->data;
-  auto len = std::strlen(hooked_str);
+  auto *orig_str = print_configuration_to_string(term);
+  auto orig_len = len(orig_str);
 
-  auto *new_str = static_cast<char *>(malloc(len + 1));
-  std::strncpy(new_str, hooked_str, len);
-  new_str[len] = '\0';
+  auto *c_str = static_cast<char *>(malloc(orig_len + 1));
+  std::memcpy(c_str, orig_str->data, orig_len);
+  c_str[orig_len] = '\0';
 
-  return new_str;
+  return c_str;
 }
 
 kore_pattern *kore_pattern_from_block(block *term) {
