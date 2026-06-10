@@ -62,7 +62,18 @@ __attribute__((always_inline)) void *kore_alloc(size_t requested) {
 
 __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return youngspace.kore_arena_alloc(size < 16 ? 16 : size);
+  if (size < 16) {
+    size = 16;
+  }
+  // A token whose total size exceeds a block is flagged NOT_YOUNG by init_with_len (it cannot
+  // participate in the young semispace's block model). Such tokens must be allocated directly in
+  // the old generation: the young from-space is reclaimed on every collection, and the collector
+  // never migrates a NOT_YOUNG object out of it, so a large token left in the young space would
+  // dangle. This matches the existing large-buffer handling in hook_BUFFER_concat_raw.
+  if (size > BLOCK_SIZE) {
+    return oldspace.kore_arena_alloc(size);
+  }
+  return youngspace.kore_arena_alloc(size);
 }
 
 __attribute__((always_inline)) void *kore_alloc_old(size_t requested) {
