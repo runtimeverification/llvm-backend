@@ -96,7 +96,15 @@ __attribute__((always_inline)) constexpr uint64_t len(T const *s) {
 
 template <typename T>
 __attribute__((always_inline)) constexpr void init_with_len(T *s, uint64_t l) {
-  s->h.hdr = l | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
+  // A token larger than a block cannot live in the young semispace's per-block model, so it is
+  // marked NOT_YOUNG and (see kore_alloc_token) allocated directly in the old generation. It
+  // must also carry the AGE bit so that is_in_old_gen_hdr() recognises it as a live heap block;
+  // otherwise the collector treats it as a non-heap/static block, never migrates it, and the
+  // young from-space it was (incorrectly) placed in gets reclaimed, dangling the reference.
+  s->h.hdr
+      = l
+        | (l > BLOCK_SIZE - sizeof(char *) ? (NOT_YOUNG_OBJECT_BIT | AGE_MASK)
+                                           : 0);
 }
 
 __attribute__((always_inline)) constexpr uint64_t size_hdr(uint64_t hdr) {
