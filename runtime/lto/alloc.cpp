@@ -73,11 +73,7 @@ __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   if (size < 16) {
     size = 16;
   }
-  // A token whose total size exceeds a block is flagged NOT_YOUNG by init_with_len (it cannot
-  // participate in the young semispace's block model). Such tokens must be allocated directly in
-  // the old generation: the young from-space is reclaimed on every collection, and the collector
-  // never migrates a NOT_YOUNG object out of it, so a large token left in the young space would
-  // dangle. This matches the existing large-buffer handling in hook_BUFFER_concat_raw.
+  // AGE_MASK marks oversized (old-gen) tokens as live heap blocks, not static.
   if (__builtin_expect(size > BLOCK_SIZE, 0)) {
     return kore_alloc_token_oldspace(size);
   }
