@@ -60,24 +60,14 @@ __attribute__((always_inline)) void *kore_alloc(size_t requested) {
   return youngspace.kore_arena_alloc(requested);
 }
 
-// Cold, out-of-line path for the rare oversized token (see kore_alloc_token). Kept out of the
-// always_inline hot path so the common small-token case is not bloated at every call site.
-namespace {
-__attribute__((noinline)) void *kore_alloc_token_oldspace(size_t size) {
-  return oldspace.kore_arena_alloc(size);
-}
-} // namespace
-
 __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   size_t size = (requested + 7) & ~7;
   if (size < 16) {
     size = 16;
   }
-  // AGE_MASK marks oversized (old-gen) tokens as live heap blocks, not static.
-  if (__builtin_expect(size > BLOCK_SIZE, 0)) {
-    return kore_alloc_token_oldspace(size);
-  }
-  return youngspace.kore_arena_alloc(size);
+  // Tokens too big for the young semispace's block model go to the old generation.
+  arena &a = __builtin_expect(size > BLOCK_SIZE, 0) ? oldspace : youngspace;
+  return a.kore_arena_alloc(size);
 }
 
 __attribute__((always_inline)) void *kore_alloc_old(size_t requested) {
