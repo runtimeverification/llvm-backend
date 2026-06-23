@@ -62,7 +62,12 @@ __attribute__((always_inline)) void *kore_alloc(size_t requested) {
 
 __attribute__((always_inline)) void *kore_alloc_token(size_t requested) {
   size_t size = (requested + 7) & ~7;
-  return youngspace.kore_arena_alloc(size < 16 ? 16 : size);
+  if (size < 16) {
+    size = 16;
+  }
+  // Tokens too big for the young semispace's block model go to the old generation.
+  arena &a = __builtin_expect(size > BLOCK_SIZE, 0) ? oldspace : youngspace;
+  return a.kore_arena_alloc(size);
 }
 
 __attribute__((always_inline)) void *kore_alloc_old(size_t requested) {
