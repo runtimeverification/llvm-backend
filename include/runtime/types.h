@@ -96,7 +96,11 @@ __attribute__((always_inline)) constexpr uint64_t len(T const *s) {
 
 template <typename T>
 __attribute__((always_inline)) constexpr void init_with_len(T *s, uint64_t l) {
-  s->h.hdr = l | (l > BLOCK_SIZE - sizeof(char *) ? NOT_YOUNG_OBJECT_BIT : 0);
+  // Allocations bigger than a block go to the old generation.
+  s->h.hdr
+      = l
+        | (l > BLOCK_SIZE - sizeof(char *) ? (NOT_YOUNG_OBJECT_BIT | AGE_MASK)
+                                           : 0);
 }
 
 __attribute__((always_inline)) constexpr uint64_t size_hdr(uint64_t hdr) {
