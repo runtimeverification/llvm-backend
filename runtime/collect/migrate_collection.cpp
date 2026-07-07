@@ -3,6 +3,31 @@
 #include "runtime/header.h"
 
 #include <cstring>
+#include <type_traits>
+
+namespace {
+// Immer stamps every node created during a transient operation with the
+// transient's ownership token so that later operations by the same transient
+// may mutate the node in place (gc_transience_policy). A token is the address
+// of a small kore-heap allocation, and the young-generation bump allocator
+// restarts at its semispace base on every collection, so token addresses are
+// recycled once their owning transient is gone. If a stamp survived a
+// collection, a future transient whose freshly allocated token landed on the
+// recycled address would pass the can_mutate check on a node it does not own
+// and mutate it in place, corrupting every other collection value aliasing
+// that node.
+//
+// No transient is live during a collection (transients never escape a hook,
+// and collections only run between rewrite steps), so the stamps carry no
+// information worth preserving: clearing them merely restores copy-on-write
+// the next time the node is touched. We clear the stamp of every node we
+// migrate or traverse, so no stamp survives the collection that recycles its
+// token address.
+template <typename NodeT, typename T>
+void clear_transience_stamp(T *node) {
+  NodeT::ownee(node) = typename NodeT::edit_t{nullptr};
+}
+} // namespace
 
 void migrate_collection_node(void **node_ptr) {
   string *curr_block = STRUCT_BASE(string, data, *node_ptr);
@@ -41,18 +66,23 @@ struct migrate_visitor : immer::detail::rbts::visitor_base<migrate_visitor> {
 
   template <typename Pos>
   static void visit_inner(Pos &&pos) {
+    using node_t = std::remove_pointer_t<decltype(pos.node())>;
+    clear_transience_stamp<node_t>(pos.node());
     for (size_t i = 0; i < pos.count(); i++) {
       void **node = (void **)pos.node()->inner() + i;
       migrate_collection_node(node);
     }
     if (auto &relaxed = pos.node()->impl.d.data.inner.relaxed) {
       migrate_collection_node((void **)&relaxed);
+      clear_transience_stamp<node_t>(relaxed);
     }
     pos.each(this_t{});
   }
 
   template <typename Pos>
   static void visit_leaf(Pos &&pos) {
+    using node_t = std::remove_pointer_t<decltype(pos.node())>;
+    clear_transience_stamp<node_t>(pos.node());
     for (size_t i = 0; i < pos.count(); i++) {
       block **element = (block **)pos.node()->leaf() + i;
       migrate_once(element);
@@ -73,10 +103,12 @@ void migrate_list(void *l) {
 template <typename Fn, typename NodeT>
 void migrate_champ_traversal(
     NodeT *node, immer::detail::hamts::count_t depth, Fn &&fn) {
+  clear_transience_stamp<NodeT>(node);
   if (depth < immer::detail::hamts::max_depth<immer::default_bits>) {
     auto datamap = node->datamap();
     if (datamap) {
       migrate_collection_node((void **)&node->impl.d.data.inner.values);
+      clear_transience_stamp<NodeT>(node->impl.d.data.inner.values);
       fn(node->values(),
          node->values() + immer::detail::hamts::popcount(datamap));
     }
