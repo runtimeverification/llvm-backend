@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# Install a built package into a clean Ubuntu image, as root.
+#
+# Separate from build-deb for a reason worth stating: the test MUST NOT run in
+# the build environment. That image already has every build dependency
+# installed, so a package with a missing or wrong entry in debian/control would
+# install cleanly there and fail only for a user. It also ends with a non-root
+# USER, and apt-get needs root.
+#
+# So this uses a bare ubuntu:<distro> -- nothing but the base image and the deb.
+#
+# Usage:  package/build-env/test-deb <distro> [package.deb]
+#
+# Runnable from any directory, after build-deb.
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+# shellcheck source=package/build-env/common.sh
+. package/build-env/common.sh
+
+distro="${1:-}"
+require_distro "${distro}"
+pkg_name="${2:-$(default_pkg_name "${distro}")}"
+
+if [ ! -f "${pkg_name}" ]; then
+    echo "test-deb: ${pkg_name} not found -- run 'package/build-env/build-deb ${distro}' first" >&2
+    exit 1
+fi
+
+engine=$(container_engine)
+
+echo "--- Installing ${pkg_name} into a clean ubuntu:${distro} ---"
+"${engine}" run --rm \
+    --volume "${PWD}:/opt/workspace/source" \
+    --workdir /opt/workspace/source \
+    "docker.io/library/ubuntu:${distro}" \
+    package/debian/test-package "${pkg_name}"
+
+echo "--- ${pkg_name} installs cleanly ---"

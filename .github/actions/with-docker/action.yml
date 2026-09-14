@@ -25,7 +25,7 @@ inputs:
   dockerfile:
     description: 'Hardcode the path of the dockerfile to use.'
     required: false
-    default: .github/workflows/Dockerfile
+    default: package/build-env/Dockerfile
 runs:
   using: 'composite'
   steps:
@@ -42,9 +42,10 @@ runs:
     run: |
       set -euxo pipefail
 
-      USER=$(id -un)
+      # Ids only, deliberately: the Dockerfile names the account itself.
+      # Passing the runner's account NAME through collides with whatever the
+      # base image already ships -- see the comment on the ARGs it feeds.
       USER_ID=$(id -u)
-      GROUP=$(id -gn)
       GROUP_ID=$(id -g)
 
       docker build ${SUBDIR} --file ${SUBDIR}${DOCKERFILE}            \
@@ -53,14 +54,14 @@ runs:
           --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
           --build-arg LLVM_VERSION=${LLVM_VERSION}                    \
           --build-arg JDK_VERSION=${JDK_VERSION}                      \
-          --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
-          --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID}
+          --build-arg USER_ID=${USER_ID}                              \
+          --build-arg GROUP_ID=${GROUP_ID}
 
       docker run                             \
           --name ${TAG_NAME}                 \
           --rm -it                           \
           --detach                           \
           --workdir /opt/workspace/${SUBDIR} \
-          --user ${USER}:${GROUP}            \
+          --user ${USER_ID}:${GROUP_ID}      \
           -v "$(pwd):/opt/workspace"         \
           runtimeverification/${TAG_NAME}

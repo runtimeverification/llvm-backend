@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+# Build the k-llvm-backend Debian package for one Ubuntu release.
+#
+# WHY THIS EXISTS
+#
+# The build RECIPE (package/debian/build-package) has always lived under
+# package/, versioned with the source it builds. The build ENVIRONMENT did not:
+# it was .github/workflows/Dockerfile, reachable only from a GitHub workflow.
+# And the knowledge of how to DRIVE it -- which LLVM version pairs with which
+# Ubuntu release, which build args the Dockerfile needs, how to map the calling
+# user into the container, where to mount the checkout -- was written down
+# nowhere executable, only spread across two composite actions.
+#
+# Moving CI to the internal forge deletes .github/ outright. This is the durable
+# replacement: one entry point that owns the environment, callable from a forge
+# workflow, from the release repository, or from a developer's shell.
+#
+# Usage:  package/build-env/build-deb <distro> [output.deb]
+#
+# Runnable from any directory. The deb is left at the root of the checkout.
+# Note that package/debian/build-package MOVES files out of package/debian/, so
+# a second run needs a clean tree.
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+# shellcheck source=package/build-env/common.sh
+. package/build-env/common.sh
+
+distro="${1:-}"
+require_distro "${distro}"
+pkg_name="${2:-$(default_pkg_name "${distro}")}"
+
+llvm_version=$(llvm_version_for "${distro}")
+
+# The Dockerfile declares JDK_VERSION with NO default, so omitting it installs
+# the package `openjdk--jdk` and the image build fails several minutes in with
+# an apt error that does not mention the build arg.
+jdk_version="${JDK_VERSION:-17}"
+
+engine=$(container_engine)
+tag="llvm-backend-build:${distro}"
+
+echo "--- Build environment: ${distro}, llvm-${llvm_version}, jdk-${jdk_version} ---"
+"${engine}" build . \
+    --file package/build-env/Dockerfile \
+    --build-arg 'BASE_OS=ubuntu' \
+    --build-arg "BASE_DISTRO=${distro}" \
+    --build-arg "LLVM_VERSION=${llvm_version}" \
+    --build-arg "JDK_VERSION=${jdk_version}" \
+    --build-arg "USER_ID=$(id -u)" \
+    --build-arg "GROUP_ID=$(id -g)" \
+    --tag "${tag}"
+
+# Rootless podman maps the calling uid to a different uid inside the container
+# by default, which leaves the bind mount unwritable by the image's user.
+# keep-id maps it through. Docker has no equivalent and takes --user instead.
+run_args=()
+case "${engine##*/}" in
+    podman) run_args+=(--userns=keep-id) ;;
+    *)      run_args+=(--user "$(id -u):$(id -g)") ;;
+esac
+
+# Mount at /opt/workspace/SOURCE, not at /opt/workspace. dpkg-buildpackage
+# writes the .deb to the parent of the directory it builds in, and build-package
+# then moves it back; with the checkout mounted at /opt/workspace that parent is
+# `/`, which the build user cannot write. The Dockerfile creates /opt/workspace
+# owned by the build user for exactly this.
+echo "--- Building ${pkg_name} ---"
+"${engine}" run --rm "${run_args[@]}" \
+    --volume "${PWD}:/opt/workspace/source" \
+    --workdir /opt/workspace/source \
+    "${tag}" \
+    package/debian/build-package "${distro}" "${pkg_name}"
+
+echo "--- Built ${pkg_name} ---"
