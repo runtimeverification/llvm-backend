@@ -1,0 +1,21 @@
+// RUN: %interpreter
+// RUN: %check-diff
+[]
+
+module TEST
+  sort SortK{} []
+  sort SortKItem{} []
+  sort SortParameter{} []
+  symbol inj{From,To}(From) : To [sortInjection{}()]
+  axiom{A,B,C,R} \equals{C,R}(inj{B,C}(inj{A,B}(X:A)), inj{A,C}(X:A))
+    [simplification{}()]
+  symbol Lblconstant{S}() : S [constructor{}()]
+  symbol Lblwrapper{S}(S) : SortKItem{} [constructor{}()]
+
+  // Register the concrete instantiations with the backend.
+  axiom{R} \exists{R}(V:SortKItem{},
+    \equals{SortKItem{},R}(V:SortKItem{},
+      Lblwrapper{SortKItem{}}(
+        inj{SortParameter{},SortKItem{}}(Lblconstant{SortParameter{}}()))))
+    [functional{}()]
+endmodule []

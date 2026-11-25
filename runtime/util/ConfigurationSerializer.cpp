@@ -432,6 +432,30 @@ cached_symbol_sort_list(std::string const &symbol) {
   return cache.at(symbol);
 }
 
+static void
+emit_tagged_symbol(serializer &instance, uint32_t tag, char const *sort) {
+  auto const *symbol = get_symbol_name_for_tag(tag);
+  auto arity = get_symbol_arity(tag);
+  if (!symbol_is_instantiation(tag)) {
+    emit_symbol(instance, symbol, arity);
+    return;
+  }
+
+  auto [name, sorts] = cached_symbol_sort_list(symbol);
+  if (name == "inj{}") {
+    // Use the contextual destination sort for runtime injections.
+    assert(sorts.size() == 2 && "Malformed injection when serializing");
+    sorts[0]->serialize_to(instance);
+    emit_constant_sort(instance, drop_back(sort, 2).c_str());
+  } else {
+    for (auto const &s : sorts) {
+      s->serialize_to(instance);
+    }
+  }
+
+  emit_symbol(instance, name.c_str(), arity, sorts.size());
+}
+
 void serialize_configuration_internal(
     writer *file, block *subject, char const *sort, bool is_var,
     void *state_ptr) {
@@ -450,7 +474,7 @@ void serialize_configuration_internal(
       return;
     }
 
-    emit_symbol(state.instance, get_symbol_name_for_tag(tag));
+    emit_tagged_symbol(state.instance, tag, sort);
     return;
   }
 
@@ -500,31 +524,7 @@ void serialize_configuration_internal(
 
   visit_children(subject, file, &callbacks, state_ptr);
 
-  auto const *symbol = get_symbol_name_for_tag(tag);
-
-  if (symbol_is_instantiation(tag)) {
-    auto [name, sorts] = cached_symbol_sort_list(symbol);
-
-    if (name == "inj{}") {
-      // Injections need to be special cased; the sort being injected _into_
-      // will be different at runtime to what's in the definition. We therefore
-      // use the contextual sort from the serialization process instead of the
-      // second formal argument.
-      assert(sorts.size() == 2 && "Malformed injection when serializing");
-
-      sorts[0]->serialize_to(state.instance);
-      emit_constant_sort(state.instance, drop_back(sort, 2).c_str());
-    } else {
-      for (auto const &s : sorts) {
-        s->serialize_to(state.instance);
-      }
-    }
-
-    emit_symbol(
-        state.instance, name.c_str(), get_symbol_arity(tag), sorts.size());
-  } else {
-    emit_symbol(state.instance, symbol, get_symbol_arity(tag));
-  }
+  emit_tagged_symbol(state.instance, tag, sort);
 
   if (is_binder) {
     state.bound_variables.pop_back();
